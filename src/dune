@@ -1,0 +1,9 @@
+;(ocamllex lexer)
+;(ocamlyacc parser)
+
+(library
+ (name cfn)
+ (libraries
+   str unix
+   yojson
+   llvm))

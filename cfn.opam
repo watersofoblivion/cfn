@@ -1,0 +1,24 @@
+opam-version: "2.0"
+name: "cfn++"
+version: "0.1"
+synopsis: "Object-oriented syntax for AWS::Serverless"
+description: """
+An object-oriented syntax and compiler for the AWS::Serverless framework.
+"""
+maintainer: "Jonathan Bryant <watersofmemory@gmail.com>"
+authors: "Jonathan Bryant <watersofmemory@gmail.com>"
+license: "MIT"
+homepage: "http://github.com/watersofoblivion/cfn"
+bug-reports: "http://github.com/watersofoblivion/cfn/issues"
+dev-repo: "git+http://github.com/watersofoblivion/cfn"
+build: [
+  ["dune" "subst"]
+  ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs]
+]
+depends: [
+  "yojson"
+  "cmdliner"
+  "ounit2"
+  "llvm"
+]

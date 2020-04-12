@@ -1,0 +1,8 @@
+(executable
+ (public_name cfnpp)
+ (libraries cmdliner cfn)
+ (modules cfnpp))
+
+(install
+  (section bin)
+  (files (cfnpp.exe as cfn++)))
