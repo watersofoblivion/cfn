@@ -1,2 +1,4 @@
-(lang dune 1.1)
+(lang dune 2.0)
+(using menhir 2.0)
+
 (name cfn)

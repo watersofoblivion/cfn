@@ -1,0 +1,9 @@
+type project = {
+  import_path: string;
+  ~deps <ocaml default="[]">: dependency list;
+}
+
+type dependency = {
+  import_path: string;
+  version: string;
+}

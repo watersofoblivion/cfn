@@ -4,46 +4,65 @@ CFN++
 CFN++ is a native-code compiler for AWS::Serverless.
 
 * [Install](#install)
-* [Crash Course](#crash-course)
+* [Quickstart](#quickstart)
+* [Developing](#developing)
 
 Install
 ===
 
-Currently, the only way to install CFN++ is to build from source.  The build will produce a `cfn++` command-line tool a la the `go` tool.
+Currently, the only way to install CFN++ is to build from source.  The compiler is written in OCaml and uses LLVM to generate code.  A successful build will produce a `cfn++` command-line tool a la the `go` tool.
 
-Dependencies
+External Dependencies
 ---
 
-The CFN++ compiler is written in OCaml and builds code with LLVM.  You can install the necessary toolchain with Homebrew on OSX:
+First, install the core dependencies needed to build the compiler itself: the [OCaml](https://ocaml.org/) compiler and the [Opam](https://opam.ocaml.org/) package manager.
 
 ```bash
-# Install OCaml and the build tool
-brew install ocaml dune
+brew install ocaml opam
+```
 
-# Install LLVM (after OCaml, so that the OCaml bindings are generated)
+CFN++ generates code with [LLVM](https://llvm.org).  This needs to be installed after OCaml so that the OCaml language bindings are generated correctly.
+
+```bash
 brew install llvm
 ```
 
-CFN++
----
-
-To build CFN++, download the source and build with Dune:
+Next, initialize Opam and bring it up to date.
 
 ```bash
-# Download the source code
-git clone https://github.com/watersofoblivion/cfn
-cd cfn++
-
-# Recommended: Run tests
-dune runtest
-
-# Build
-dune build
+opam init
+opam update
 ```
 
-If all goes well, the command-line tool will be located at `_build/install/default/bin/cfn++` relative to the source directory.  Run `cfn++ help` for a full listing of command-line options.
+Clone the CFN++ source from [GitHub](https://github.com/watersofoblivion/cfn):
 
-Crash Course
+```bash
+git clone https://github.com/watersofoblivion/cfn
+cd cfn
+```
+
+You can then install CFN++ using the `opam` tool.  This will install all of the dependencies and build the compiler.  This will take a little while as Opam builds all dependencies from source.
+
+```bash
+opam install .
+```
+
+Quickstart
 ===
 
 TODO
+
+Developing
+===
+
+Useful Commands
+---
+
+### Opam
+
+* `opam install .` in the project directory installs the dependencies for the project
+* `opam update .` in the project directory updates the dependencies for the project.  (Does not process uncomitted changes.)
+
+### Dune
+
+* `dune runtest -w` runs test continuously

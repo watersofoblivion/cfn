@@ -4,5 +4,6 @@
  (modules cfnpp))
 
 (install
-  (section bin)
-  (files (cfnpp.exe as cfn++)))
+ (section bin)
+ (files
+  (cfnpp.exe as cfn++)))

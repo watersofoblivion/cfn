@@ -1,3 +1,5 @@
 (test
-  (name testMain)
-  (libraries ounit llvm cfn))
+ (name testMain)
+ (libraries
+    ounit
+    cfn))

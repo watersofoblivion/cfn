@@ -17,6 +17,11 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs]
 ]
 depends: [
+  "ocamlformat"
+  "dune"
+  "menhir"
+  "odoc"
+  "atdgen"
   "yojson"
   "cmdliner"
   "ounit2"

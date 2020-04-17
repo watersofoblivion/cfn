@@ -1,9 +1,37 @@
-;(ocamllex lexer)
-;(ocamlyacc parser)
+; Atdgen JSON
 
+(rule
+ (targets prj_j.ml prj_j.mli)
+ (deps    prj.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets prj_t.ml prj_t.mli)
+ (deps    prj.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets prj_v.ml prj_v.mli)
+ (deps    prj.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Main parser
+(ocamllex lexer)
+(menhir
+ (modules parser)
+ (flags --strict --explain --dump))
+
+; Main library
 (library
  (name cfn)
+ (public_name cfn)
  (libraries
-   str unix
+   atdgen
+   str
+   unix
+   cmdliner
    yojson
    llvm))

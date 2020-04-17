@@ -1,11 +1,17 @@
 EXCLUDE_QUERY_DIR
+B /Users/jonathan/.opam/default/lib/atdgen
+B /Users/jonathan/.opam/default/lib/atdgen-runtime
 B /Users/jonathan/.opam/default/lib/biniou
+B /Users/jonathan/.opam/default/lib/cmdliner
 B /Users/jonathan/.opam/default/lib/easy-format
 B /Users/jonathan/.opam/default/lib/llvm
 B /Users/jonathan/.opam/default/lib/yojson
 B /usr/local/lib/ocaml
 B ../_build/default/src/.cfn.objs/byte
+S /Users/jonathan/.opam/default/lib/atdgen
+S /Users/jonathan/.opam/default/lib/atdgen-runtime
 S /Users/jonathan/.opam/default/lib/biniou
+S /Users/jonathan/.opam/default/lib/cmdliner
 S /Users/jonathan/.opam/default/lib/easy-format
 S /Users/jonathan/.opam/default/lib/llvm
 S /Users/jonathan/.opam/default/lib/yojson
