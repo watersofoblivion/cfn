@@ -1,0 +1,5 @@
+(library
+ (name cliTest)
+ (libraries
+    ounit2
+    cli))

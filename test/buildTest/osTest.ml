@@ -1,79 +1,15 @@
 open Format
+
 open OUnit2
-open Cfn
+
+open Build
 
 (* Test Initialization *)
-
-let _ =
-  try
-    Sys.getenv "CFNROOT"
-  with Not_found ->
-    Unix.putenv "CFNROOT" "";
-    ""
 
 let _ = Random.self_init ()
 
-(* Helpers *)
-
-let with_env k v f x =
-  let old =
-    try Unix.getenv k
-    with Not_found -> ""
-  in
-  Unix.putenv k v;
-
-  try
-    let res = f x in
-    Unix.putenv k old;
-    res
-  with exn ->
-    Unix.putenv k old;
-    raise exn
-
-
 (* Useful globals *)
 let cwd = Sys.getcwd ()
-
-(* Test Initialization *)
-let test_test_init =
-  let test_cfn_root _ =
-    try
-      let _ = Sys.getenv "CFNROOT" in
-      ()
-    with Not_found ->
-      assert_failure "${CFNROOT} not set.  Tests will fail."
-  in
-  "Test Initialization" >::: [
-    "${CFNROOT} Environment Variable" >:: test_cfn_root
-  ]
-
-(* Test Helpers *)
-let test_test_helpers =
-  let var_name = "__TEST_VARIABLE__" in
-  let external_value = "external-value" in
-  let internal_value = "internal-value" in
-
-  Unix.putenv var_name external_value;
-
-  let test_with_env ctxt =
-    let fn internal_value =
-      try
-        let actual = Sys.getenv var_name in
-        assert_equal ~ctxt internal_value actual
-      with Not_found ->
-        assert_failure (sprintf "${%s} not set" var_name)
-    in
-    with_env var_name internal_value fn internal_value;
-
-    try
-      let actual = Sys.getenv var_name in
-      assert_equal ~ctxt external_value actual
-    with Not_found ->
-      assert_failure (sprintf "${%s} not set" var_name)
-  in
-  "Test Helpers" >::: [
-    "With Environment Variable" >:: test_with_env
-  ]
 
 (* Filesystem Helpers *)
 let test_fs_helpers =
@@ -309,108 +245,13 @@ let test_fs_helpers =
       "Normal Flow Control" >:: test_normal;
       "Exception"           >:: test_exn
     ]
-  in
-  "Filesystem Helpers" >::: [
+
+(* Test Suite *)
+let suite =
+  "Operating System" >::: [
     test_mkpath;
     test_mkdir_p;
     test_in_dir;
     test_rm_rf;
     test_in_temp_dir
-  ]
-
-(* Contexts *)
-let test_ctx =
-  let test_empty_ctx ctxt =
-    let ctx = Build.empty_ctx in
-
-    assert_equal ~ctxt "" ctx.Build.clang;
-    assert_equal ~ctxt "" ctx.stdlib;
-    assert_equal ~ctxt "" ctx.home;
-    assert_equal ~ctxt "" ctx.root
-  in
-  let test_ctx_with_clang ctxt =
-    let clang_exe = Filename.temp_file "" "" in
-    Unix.chmod clang_exe 0o755;
-
-    let ctx = Build.empty_ctx |> Build.ctx_with_clang clang_exe in
-    assert_equal ~ctxt clang_exe ctx.Build.clang;
-
-    Sys.remove clang_exe
-  in
-  let test_ctx_with_stdlib ctxt =
-    let ctx = Build.empty_ctx |> Build.ctx_with_stdlib cwd in
-    assert_equal ~ctxt cwd ctx.Build.stdlib
-  in
-  let test_ctx_with_home ctxt =
-    let ctx = Build.empty_ctx |> Build.ctx_with_home cwd in
-    assert_equal ~ctxt cwd ctx.Build.home
-  in
-  let test_ctx_with_root ctxt =
-    let ctx = Build.empty_ctx |> Build.ctx_with_root cwd in
-    assert_equal ~ctxt cwd ctx.Build.root
-  in
-  let test_ctx_from_env ctxt =
-    (* Create mock /usr/bin and /usr/local/bin and the ${PATH} environment variable. *)
-    let usr_bin = Build.mkdir_p (Build.mkpath [cwd; "usr"; "bin"]) in
-    let usr_local_bin =
-      Build.mkdir_p (Build.mkpath [cwd; "usr"; "local"; "bin"])
-    in
-    let path = String.concat ":" [usr_bin; usr_local_bin] in
-
-    (* Create a mock clang executable in /usr/local/bin *)
-    let clang_exe = Build.mkpath [usr_local_bin; "clang"] in
-    let oc = open_out clang_exe in
-    close_out oc;
-    Unix.chmod clang_exe 0o755;
-
-    (* Create a mock stdlib dir *)
-    let stdlib_dir = Build.mkdir_p (Build.mkpath [cwd; "stdlib"]) in
-
-    (* Create a mock home directory *)
-    let home_dir = Build.mkdir_p (Build.mkpath [cwd; "home"; "username"]) in
-
-    (* Create a mock project *)
-    let project_dir =
-      Build.mkdir_p (Build.mkpath [home_dir; "projects"; "test-project"])
-    in
-    let project_file = Build.mkpath [project_dir; "project.json"] in
-    let oc = open_out project_file in
-    close_out oc;
-
-    (* The test proper *)
-    let test ctxt =
-      let ctx = Build.empty_ctx |> Build.ctx_from_env in
-      assert_equal ~ctxt clang_exe   ctx.Build.clang;
-      assert_equal ~ctxt home_dir    ctx.home;
-      assert_equal ~ctxt stdlib_dir  ctx.stdlib;
-      assert_equal ~ctxt project_dir ctx.root
-    in
-
-    (* Set some temporary environment variables and CWD *)
-    let test = test
-            |> with_env "PATH" path
-            |> with_env "HOME" home_dir
-            |> with_env "CFNROOT" stdlib_dir
-            |> Build.in_dir project_dir
-    in
-
-    (* Run the test proper *)
-    test ctxt
-  in
-  "Context" >::: [
-    "Empty"                           >:: test_empty_ctx;
-    "With Clang Executable"           >:: test_ctx_with_clang;
-    "With Standard Library Directory" >:: test_ctx_with_stdlib;
-    "With Home Directory"             >:: test_ctx_with_home;
-    "With Project Root"               >:: test_ctx_with_root;
-    "From Environment"                >:: (test_ctx_from_env |> Build.in_temp_dir)
-  ]
-
-(* Test Suite *)
-let suite =
-  "Build" >::: [
-    test_test_init;
-    test_test_helpers;
-    test_fs_helpers;
-    test_ctx
   ]

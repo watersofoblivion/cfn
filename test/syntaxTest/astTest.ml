@@ -1,5 +1,6 @@
 open OUnit2
-open Cfn
+
+open Syntax
 
 (* Package statement *)
 let test_package_stmt =

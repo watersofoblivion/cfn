@@ -1,0 +1,5 @@
+(library
+ (name syntaxTest)
+ (libraries
+    ounit2
+    syntax))

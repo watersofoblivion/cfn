@@ -1,0 +1,10 @@
+(ocamllex lexer)
+(menhir
+ (modules parser)
+ (flags --strict --explain --dump))
+
+(library
+  (name syntax)
+  (libraries
+    unix
+    str))

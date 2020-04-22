@@ -1,5 +1,7 @@
 (test
- (name testMain)
+ (name runner)
  (libraries
-    ounit
-    cfn))
+    ounit2
+    syntaxTest
+    buildTest
+    cliTest))

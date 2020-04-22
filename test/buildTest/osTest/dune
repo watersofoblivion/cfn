@@ -1,0 +1,7 @@
+(library
+ (name osTest)
+ (libraries
+    ounit2
+    unix
+    str
+    os))
