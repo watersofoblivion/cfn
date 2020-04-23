@@ -8,3 +8,5 @@ let get_opt var =
   with Not_found -> None
 
 let set var value = Unix.putenv var value
+
+let path_var = var

@@ -2,5 +2,4 @@
  (name buildTest)
  (libraries
     ounit2
-    osTest
     build))
