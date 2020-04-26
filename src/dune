@@ -1,6 +1,8 @@
 (library
  (name cfn)
  (libraries
+   syntax
+   ir
+   codegen
    build
-   cli
-   syntax))
+   cli))

@@ -1,0 +1,5 @@
+(library
+ (name irTest)
+ (libraries
+    ounit2
+    ir))

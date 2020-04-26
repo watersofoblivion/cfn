@@ -2,6 +2,9 @@
  (name runner)
  (libraries
     ounit2
+    coreTest
     syntaxTest
+    irTest
+    codegenTest
     buildTest
     cliTest))

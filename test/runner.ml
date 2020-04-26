@@ -2,7 +2,13 @@ open OUnit2
 
 open SyntaxTest
 open BuildTest
-open CliTest
+(* open CliTest *)
+
+let test_core =
+  "Core" >::: [
+    TypeTest.suite;
+    FmtTest.suite
+  ]
 
 let test_syntax =
   "Syntax" >::: [
@@ -11,6 +17,21 @@ let test_syntax =
     FmtTest.suite;
     LexerTest.suite;
     ParserTest.suite
+  ]
+
+let test_ir =
+  "Intermediate Representation" >::: [
+    AnfTest.suite;
+    PkgTest.suite;
+    FmtTest.suite
+  ]
+
+let test_codegen =
+  "Code Generation" >::: [
+    GcTest.suite;
+    HttpTest.suite;
+    JsonTest.suite;
+    TmplTest.suite
   ]
 
 let test_build =
@@ -29,7 +50,10 @@ let test_cli =
 
 let suite =
   "CFN++" >::: [
+    test_core;
     test_syntax;
+    test_ir;
+    test_codegen;
     test_build;
     test_cli
   ]

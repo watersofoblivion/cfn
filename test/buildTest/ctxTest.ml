@@ -108,9 +108,9 @@ let test_with_root ctxt =
 
 let test_from_env ctxt =
   (* Create mock /usr/bin and /usr/local/bin and the ${PATH} environment variable. *)
-  let usr_bin = Os.mkdir_p (Os.mkpath [cwd; "usr"; "bin"]) in
+  let usr_bin = Os.mkdir (Os.mkpath [cwd; "usr"; "bin"]) in
   let usr_local_bin =
-    Os.mkdir_p (Os.mkpath [cwd; "usr"; "local"; "bin"])
+    Os.mkdir (Os.mkpath [cwd; "usr"; "local"; "bin"])
   in
   let path = String.concat ":" [usr_bin; usr_local_bin] in
 
@@ -121,16 +121,16 @@ let test_from_env ctxt =
   Unix.chmod clang_exe 0o755;
 
   (* Create a mock stdlib dir *)
-  let stdlib_dir = Os.mkdir_p (Os.mkpath [cwd; "stdlib"]) in
+  let stdlib_dir = Os.mkdir (Os.mkpath [cwd; "stdlib"]) in
 
   (* Create a mock home directory *)
-  let home_dir = Os.mkdir_p (Os.mkpath [cwd; "home"; "username"]) in
+  let home_dir = Os.mkdir (Os.mkpath [cwd; "home"; "username"]) in
 
   (* Create a mock project *)
   let project_dir =
-    Os.mkdir_p (Os.mkpath [home_dir; "projects"; "test-project"])
+    Os.mkdir (Os.mkpath [home_dir; "projects"; "test-project"])
   in
-  let subdir = Os.mkdir_p (Os.mkpath [project_dir; "subdir"]) in
+  let subdir = Os.mkdir (Os.mkpath [project_dir; "subdir"]) in
   let project_file = Os.mkpath [project_dir; "project.json"] in
   let oc = open_out project_file in
   close_out oc;
