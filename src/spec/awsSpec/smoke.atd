@@ -1,0 +1,11 @@
+type json <ocaml module="Yojson.Safe" t="t"> = abstract
+
+type test_case =
+  { operation_name <json name="operationName">: string;
+    input: (string * json) list <json repr="object">;
+    error_expected_from_service <json name="errorExpectedFromService">: bool; }
+
+type t =
+  { version: int;
+    default_region <json name="defaultRegion">: string;
+    test_cases <json name="testCases">: test_case list; }

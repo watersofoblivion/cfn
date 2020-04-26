@@ -1,0 +1,12 @@
+type update <ocaml from="Update" t="t"> = abstract
+type primitive <ocaml from="Primitive" t="t"> = abstract
+
+type spec =
+  { ?documentation <json name="Documentation">: string option;
+    ?duplicates_allowed <json name="DuplicatesAllowed">: bool option;
+    ?item_type <json name="ItemType">: string option;
+    ?primitive_item_type <json name="PrimitiveItemType">: primitive option;
+    ?primitive_item <json name="PrimitiveItem">: primitive option;
+    ?required <json name="Required">: bool option;
+    ?typ <json name="Type">: string option;
+    ?update_type <json name="UpdateType">: update option; }

@@ -1,0 +1,104 @@
+;;;;;;;;;;;
+; ATD Gen ;
+;;;;;;;;;;;
+
+; CFN
+(rule
+ (targets cfn_j.ml cfn_j.mli)
+ (deps    cfn.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets cfn_t.ml cfn_t.mli)
+ (deps    cfn.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets cfn_v.ml cfn_v.mli)
+ (deps    cfn.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Primitive
+(rule
+ (targets primitive_j.ml primitive_j.mli)
+ (deps    primitive.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets primitive_t.ml primitive_t.mli)
+ (deps    primitive.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets primitive_v.ml primitive_v.mli)
+ (deps    primitive.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Property
+(rule
+ (targets property_j.ml property_j.mli)
+ (deps    property.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets property_t.ml property_t.mli)
+ (deps    property.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets property_v.ml property_v.mli)
+ (deps    property.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Resource
+(rule
+ (targets resource_j.ml resource_j.mli)
+ (deps    resource.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets resource_t.ml resource_t.mli)
+ (deps    resource.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets resource_v.ml resource_v.mli)
+ (deps    resource.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Update
+(rule
+ (targets update_j.ml update_j.mli)
+ (deps    update.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets update_t.ml update_t.mli)
+ (deps    update.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets update_v.ml update_v.mli)
+ (deps    update.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+(library
+  (name cfnSpec)
+  (libraries
+    atdgen
+    yojson))

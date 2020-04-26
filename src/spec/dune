@@ -1,0 +1,5 @@
+(library
+  (name spec)
+  (libraries
+    awsSpec
+    cfnSpec))

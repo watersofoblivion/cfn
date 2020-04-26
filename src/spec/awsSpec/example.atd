@@ -1,0 +1,17 @@
+type json <ocaml module="Yojson.Safe" t="t"> = abstract
+
+type comments =
+  { input: (string * string) list <json repr="object">;
+    output: (string * string) list <json repr="object">; }
+
+type t =
+  { input: json;
+    output: json;
+    ?comments: comments option;
+    ?description: string option;
+    ?id: string option;
+    ?title: string option; }
+
+type s =
+  { version: int;
+    examples: (string * t list) list <json repr="object">; }

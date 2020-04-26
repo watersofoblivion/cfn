@@ -1,0 +1,11 @@
+type t =
+  [ Boolean
+  | Integer
+  | Long
+  | Double
+  | String
+  | Json
+  | Timestamp
+  | List
+  | Map ]
+<ocaml repr="classic">

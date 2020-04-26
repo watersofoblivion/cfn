@@ -1,0 +1,11 @@
+type path = string wrap <ocaml t="Path.t" wrap="Doc.parse_path" unwrap="Doc.print_path">
+
+type t =
+  { ?base: string option;
+    refs: (string * string option) list <json repr="object">; }
+
+type s =
+  { ?version: string option;
+    ?service: string option;
+    operations: (string * string option) list <json repr="object">;
+    shapes: (path * t) list <json repr="object">; }

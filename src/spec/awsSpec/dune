@@ -1,0 +1,142 @@
+;;;;;;;;;;;
+; ATD Gen ;
+;;;;;;;;;;;
+
+; API
+(rule
+ (targets api_j.ml api_j.mli)
+ (deps    api.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets api_t.ml api_t.mli)
+ (deps    api.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets api_v.ml api_v.mli)
+ (deps    api.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Doc
+(rule
+ (targets doc_j.ml doc_j.mli)
+ (deps    doc.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets doc_t.ml doc_t.mli)
+ (deps    doc.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets doc_v.ml doc_v.mli)
+ (deps    doc.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Example
+(rule
+ (targets example_j.ml example_j.mli)
+ (deps    example.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets example_t.ml example_t.mli)
+ (deps    example.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets example_v.ml example_v.mli)
+ (deps    example.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Paginator
+(rule
+ (targets paginator_j.ml paginator_j.mli)
+ (deps    paginator.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets paginator_t.ml paginator_t.mli)
+ (deps    paginator.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets paginator_v.ml paginator_v.mli)
+ (deps    paginator.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Smoke
+(rule
+ (targets smoke_j.ml smoke_j.mli)
+ (deps    smoke.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets smoke_t.ml smoke_t.mli)
+ (deps    smoke.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets smoke_v.ml smoke_v.mli)
+ (deps    smoke.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Version
+(rule
+ (targets version_j.ml version_j.mli)
+ (deps    version.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets version_t.ml version_t.mli)
+ (deps    version.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets version_v.ml version_v.mli)
+ (deps    version.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+; Waiter
+(rule
+ (targets waiter_j.ml waiter_j.mli)
+ (deps    waiter.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets waiter_t.ml waiter_t.mli)
+ (deps    waiter.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+(rule
+ (targets waiter_v.ml waiter_v.mli)
+ (deps    waiter.atd)
+ (action
+  (run atdgen -v %{deps})))
+
+(library
+  (name awsSpec)
+  (libraries
+    atdgen
+    yojson))

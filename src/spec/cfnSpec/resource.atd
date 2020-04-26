@@ -1,0 +1,13 @@
+type primitive <ocaml from="Primitive" t="t"> = abstract
+type property_spec <ocaml from="Property" t="spec"> = abstract
+
+type attr =
+  { ?item_type <json name="ItemType">: string option;
+    ?primitive_item_type <json name="PrimitveItemType">: primitive option;
+    ?primitive_type <json name="PrimitiveType">: primitive option;
+    ?typ <json name="Type">: string option; }
+
+type spec =
+  { ?attributes <json name="Attributes">: (string * attr) list option <json repr="object">;
+    documentation <json name="Documentation">: string;
+    ~properties <json name="Properties">: (string * property_spec) list <json repr="object">; }
