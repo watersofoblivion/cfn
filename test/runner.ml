@@ -28,6 +28,10 @@ let test_ir =
     IrTest.FmtTest.suite
   ]
 
+let test_opt =
+  "Optimizer" >::: [
+  ]
+
 let test_codegen =
   "Code Generation" >::: [
     CodegenTest.GcTest.suite;
@@ -53,8 +57,10 @@ let test_cli =
 let suite =
   "CFN++" >::: [
     test_core;
+    test_spec;
     test_syntax;
     test_ir;
+    test_opt;
     test_codegen;
     test_build;
     test_cli
