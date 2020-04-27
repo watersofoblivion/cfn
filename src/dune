@@ -1,10 +1,10 @@
 (library
  (name cfnpp)
  (libraries
-   core
    spec
    syntax
    ir
+   opt
    codegen
    build
    cli))

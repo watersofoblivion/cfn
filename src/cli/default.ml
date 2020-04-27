@@ -7,6 +7,6 @@ let cmd =
   let man = [`S Manpage.s_description] in
 
   let term = Term.(ret (const (fun _ -> `Help (`Pager, None)) $ const ())) in
-  let info = Term.info "cfn++" ~doc ~sdocs ~exits ~man in
+  let info = Term.info "cfn++" ~doc ~sdocs ~exits:Common.exits ~man in
 
   (term, info)

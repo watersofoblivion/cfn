@@ -10,9 +10,9 @@ let cmd =
     ()
   in
 
-  let term = Term.(const pkg $ import_path) in
+  let term = Term.(const pkg $ Common.import_path) in
   let info =
-    Term.info "pkg" ~doc ~sdocs:Manpage.s_common_options ~exits ~man
+    Term.info "pkg" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man
   in
 
   (term, info)

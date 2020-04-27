@@ -1,7 +1,5 @@
 open OUnit2
 
-open
-
 let suite =
   "CloudFormation" >::: [
     CfnTest.CfnTest.suite;

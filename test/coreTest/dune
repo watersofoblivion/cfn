@@ -1,5 +1,0 @@
-(library
- (name coreTest)
- (libraries
-    ounit2
-    core))

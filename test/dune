@@ -3,9 +3,9 @@
  (libraries
     ounit2
     specTest
-    coreTest
     syntaxTest
     irTest
+    optTest
     codegenTest
     buildTest
     cliTest))

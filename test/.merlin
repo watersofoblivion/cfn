@@ -14,8 +14,8 @@ B /usr/local/lib/ocaml
 B ../_build/default/src/build/.build.objs/byte
 B ../_build/default/src/cli/.cli.objs/byte
 B ../_build/default/src/codegen/.codegen.objs/byte
-B ../_build/default/src/core/.core.objs/byte
 B ../_build/default/src/ir/.ir.objs/byte
+B ../_build/default/src/opt/.opt.objs/byte
 B ../_build/default/src/spec/.spec.objs/byte
 B ../_build/default/src/spec/aws/.aws.objs/byte
 B ../_build/default/src/spec/cfn/.cfn.objs/byte
@@ -24,8 +24,8 @@ B ../_build/default/test/.runner.eobjs/byte
 B ../_build/default/test/buildTest/.buildTest.objs/byte
 B ../_build/default/test/cliTest/.cliTest.objs/byte
 B ../_build/default/test/codegenTest/.codegenTest.objs/byte
-B ../_build/default/test/coreTest/.coreTest.objs/byte
 B ../_build/default/test/irTest/.irTest.objs/byte
+B ../_build/default/test/optTest/.optTest.objs/byte
 B ../_build/default/test/specTest/.specTest.objs/byte
 B ../_build/default/test/syntaxTest/.syntaxTest.objs/byte
 S /Users/jonathan/.opam/default/lib/atdgen
@@ -43,7 +43,6 @@ S /usr/local/lib/ocaml
 S ../src/build
 S ../src/cli
 S ../src/codegen
-S ../src/core
 S ../src/ir
 S ../src/spec/aws
 S ../src/spec/cfn
@@ -51,7 +50,6 @@ S ../src/syntax
 S .
 S buildTest
 S codegenTest
-S coreTest
 S irTest
 S specTest
 S syntaxTest

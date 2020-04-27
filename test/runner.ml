@@ -6,15 +6,10 @@ let test_spec =
     SpecTest.CfnTest.suite;
   ]
 
-let test_core =
-  "Core" >::: [
-    CoreTest.TypeTest.suite;
-    CoreTest.FmtTest.suite
-  ]
-
 let test_syntax =
   "Syntax" >::: [
     SyntaxTest.LocTest.suite;
+    SyntaxTest.TypeTest.suite;
     SyntaxTest.AstTest.suite;
     SyntaxTest.FmtTest.suite;
     SyntaxTest.LexerTest.suite;
@@ -23,6 +18,7 @@ let test_syntax =
 
 let test_ir =
   "Intermediate Representation" >::: [
+    IrTest.TypeTest.suite;
     IrTest.AnfTest.suite;
     IrTest.PkgTest.suite;
     IrTest.FmtTest.suite
@@ -56,7 +52,6 @@ let test_cli =
 
 let suite =
   "CFN++" >::: [
-    test_core;
     test_spec;
     test_syntax;
     test_ir;

@@ -10,9 +10,9 @@ let cmd =
     ()
   in
 
-  let term = Term.(const deploy $ import_path) in
+  let term = Term.(const deploy $ Common.import_path) in
   let info =
-    Term.info "deploy" ~doc ~sdocs:Manpage.s_common_options ~exits ~man
+    Term.info "deploy" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man
   in
 
   (term, info)

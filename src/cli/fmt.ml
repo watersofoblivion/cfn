@@ -10,7 +10,7 @@ let cmd =
     ()
   in
 
-  let term = Term.(const fmt $ import_path) in
-  let info = Term.info "fmt" ~doc ~sdocs:Manpage.s_common_options ~exits ~man in
+  let term = Term.(const fmt $ Common.import_path) in
+  let info = Term.info "fmt" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man in
 
   (term, info)
