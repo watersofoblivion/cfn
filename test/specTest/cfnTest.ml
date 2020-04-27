@@ -4,9 +4,9 @@ open
 
 let suite =
   "CloudFormation" >::: [
-    CfnSpecTest.CfnTest.suite;
-    CfnSpecTest.PrimitiveTest.suite;
-    CfnSpecTest.PropertyTest.suite;
-    CfnSpecTest.ResourceTest.suite;
-    CfnSpecTest.UpdateTest.suite
+    CfnTest.CfnTest.suite;
+    CfnTest.PrimitiveTest.suite;
+    CfnTest.PropertyTest.suite;
+    CfnTest.ResourceTest.suite;
+    CfnTest.UpdateTest.suite
   ]

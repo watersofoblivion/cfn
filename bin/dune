@@ -1,6 +1,6 @@
 (executable
  (public_name cfnpp)
- (libraries cmdliner cfn)
+ (libraries cmdliner cfnpp)
  (modules cfnpp))
 
 (install

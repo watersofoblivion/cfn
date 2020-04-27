@@ -2,11 +2,11 @@ open OUnit2
 
 let suite =
   "AWS API" >::: [
-    AwsSpecTest.ApiTest.suite;
-    AwsSpecTest.DocTest.suite;
-    AwsSpecTest.ExampleTest.suite;
-    AwsSpecTest.PaginatorTest.suite;
-    AwsSpecTest.SmokeTest.suite;
-    AwsSpecTest.VersionTest.suite;
-    AwsSpecTest.WaiterTest.suite
+    AwsTest.ApiTest.suite;
+    AwsTest.DocTest.suite;
+    AwsTest.ExampleTest.suite;
+    AwsTest.PaginatorTest.suite;
+    AwsTest.SmokeTest.suite;
+    AwsTest.VersionTest.suite;
+    AwsTest.WaiterTest.suite
   ]

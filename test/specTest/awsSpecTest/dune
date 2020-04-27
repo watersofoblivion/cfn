@@ -1,5 +1,0 @@
-(library
- (name awsSpecTest)
- (libraries
-    ounit2
-    awsSpec))

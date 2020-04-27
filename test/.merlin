@@ -17,8 +17,8 @@ B ../_build/default/src/codegen/.codegen.objs/byte
 B ../_build/default/src/core/.core.objs/byte
 B ../_build/default/src/ir/.ir.objs/byte
 B ../_build/default/src/spec/.spec.objs/byte
-B ../_build/default/src/spec/awsSpec/.awsSpec.objs/byte
-B ../_build/default/src/spec/cfnSpec/.cfnSpec.objs/byte
+B ../_build/default/src/spec/aws/.aws.objs/byte
+B ../_build/default/src/spec/cfn/.cfn.objs/byte
 B ../_build/default/src/syntax/.syntax.objs/byte
 B ../_build/default/test/.runner.eobjs/byte
 B ../_build/default/test/buildTest/.buildTest.objs/byte
@@ -45,8 +45,8 @@ S ../src/cli
 S ../src/codegen
 S ../src/core
 S ../src/ir
-S ../src/spec/awsSpec
-S ../src/spec/cfnSpec
+S ../src/spec/aws
+S ../src/spec/cfn
 S ../src/syntax
 S .
 S buildTest

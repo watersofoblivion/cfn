@@ -1,0 +1,5 @@
+(library
+ (name cfnTest)
+ (libraries
+    ounit2
+    cfn))

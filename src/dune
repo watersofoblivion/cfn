@@ -1,6 +1,8 @@
 (library
- (name cfn)
+ (name cfnpp)
  (libraries
+   core
+   spec
    syntax
    ir
    codegen

@@ -136,7 +136,7 @@
   (run atdgen -v %{deps})))
 
 (library
-  (name awsSpec)
+  (name aws)
   (libraries
     atdgen
     yojson))

@@ -1,0 +1,5 @@
+(library
+ (name awsTest)
+ (libraries
+    ounit2
+    aws))
