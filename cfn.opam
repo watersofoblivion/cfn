@@ -1,9 +1,11 @@
 opam-version: "2.0"
 name: "cfn++"
 version: "0.1"
-synopsis: "Object-oriented syntax for AWS::Serverless"
+synopsis: "A native-code compiler for AWS::Serverless"
 description: """
-An object-oriented syntax and compiler for the AWS::Serverless framework.
+CFN++ is a cloud-native language targeted at AWS::Serverless.  It provides an
+object-oriented syntax for CloudFormation and native-code compiler for AWS
+Lambda, combined into one unified language.
 """
 maintainer: "Jonathan Bryant <watersofmemory@gmail.com>"
 authors: "Jonathan Bryant <watersofmemory@gmail.com>"
@@ -17,7 +19,6 @@ build: [
   ["dune" "runtest" "-p" name "-j" jobs]
 ]
 depends: [
-  "ocamlformat"
   "dune"
   "menhir"
   "odoc"
