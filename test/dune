@@ -2,7 +2,9 @@
  (name runner)
  (libraries
     ounit2
-    specTest
+    extTest
+    awsSpecTest
+    cfnSpecTest
     syntaxTest
     irTest
     optTest

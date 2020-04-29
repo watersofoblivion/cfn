@@ -1,9 +1,24 @@
 open OUnit2
 
 let test_spec =
-  "Specifications" >::: [
-    SpecTest.AwsTest.suite;
-    SpecTest.CfnTest.suite;
+  "External" >::: [
+    ExtTest.ParseTest.suite;
+    "AWS API Specification" >::: [
+      AwsSpecTest.ApiTest.suite;
+      AwsSpecTest.DocTest.suite;
+      AwsSpecTest.ExampleTest.suite;
+      AwsSpecTest.PaginatorTest.suite;
+      AwsSpecTest.SmokeTest.suite;
+      AwsSpecTest.VersionTest.suite;
+      AwsSpecTest.WaiterTest.suite
+    ];
+    "CloudFormation Specification" >::: [
+      CfnSpecTest.CfnTest.suite;
+      CfnSpecTest.PrimitiveTest.suite;
+      CfnSpecTest.PropertyTest.suite;
+      CfnSpecTest.ResourceTest.suite;
+      CfnSpecTest.UpdateTest.suite
+    ]
   ]
 
 let test_syntax =

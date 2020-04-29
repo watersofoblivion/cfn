@@ -1,5 +1,0 @@
-(library
- (name specTest)
- (libraries
-    ounit2
-    spec))

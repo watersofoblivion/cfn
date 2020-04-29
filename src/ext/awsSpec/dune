@@ -97,25 +97,6 @@
  (action
   (run atdgen -v %{deps})))
 
-; Version
-(rule
- (targets version_j.ml version_j.mli)
- (deps    version.atd)
- (action
-  (run atdgen -j -j-std %{deps})))
-
-(rule
- (targets version_t.ml version_t.mli)
- (deps    version.atd)
- (action
-  (run atdgen -t %{deps})))
-
-(rule
- (targets version_v.ml version_v.mli)
- (deps    version.atd)
- (action
-  (run atdgen -v %{deps})))
-
 ; Waiter
 (rule
  (targets waiter_j.ml waiter_j.mli)
@@ -136,7 +117,8 @@
   (run atdgen -v %{deps})))
 
 (library
-  (name aws)
+  (name awsSpec)
   (libraries
+    ext
     atdgen
     yojson))

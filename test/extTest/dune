@@ -1,5 +1,5 @@
 (library
- (name awsTest)
+ (name extTest)
  (libraries
     ounit2
-    aws))
+    ext))

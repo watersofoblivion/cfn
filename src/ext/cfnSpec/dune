@@ -98,7 +98,8 @@
   (run atdgen -v %{deps})))
 
 (library
-  (name cfn)
+  (name cfnSpec)
   (libraries
+    ext
     atdgen
     yojson))

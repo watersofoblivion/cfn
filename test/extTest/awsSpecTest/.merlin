@@ -9,10 +9,9 @@ B /Users/jonathan/.opam/default/lib/ounit2/advanced
 B /Users/jonathan/.opam/default/lib/stdlib-shims
 B /Users/jonathan/.opam/default/lib/yojson
 B /usr/local/lib/ocaml
-B ../../_build/default/src/spec/.spec.objs/byte
-B ../../_build/default/src/spec/aws/.aws.objs/byte
-B ../../_build/default/src/spec/cfn/.cfn.objs/byte
-B ../../_build/default/test/specTest/.specTest.objs/byte
+B ../../../_build/default/src/ext/.ext.objs/byte
+B ../../../_build/default/src/ext/awsSpec/.awsSpec.objs/byte
+B ../../../_build/default/test/extTest/awsSpecTest/.awsSpecTest.objs/byte
 S /Users/jonathan/.opam/default/lib/atdgen
 S /Users/jonathan/.opam/default/lib/atdgen-runtime
 S /Users/jonathan/.opam/default/lib/biniou
@@ -23,7 +22,7 @@ S /Users/jonathan/.opam/default/lib/ounit2/advanced
 S /Users/jonathan/.opam/default/lib/stdlib-shims
 S /Users/jonathan/.opam/default/lib/yojson
 S /usr/local/lib/ocaml
-S ../../src/spec/aws
-S ../../src/spec/cfn
+S ../../../src/ext
+S ../../../src/ext/awsSpec
 S .
-FLG -open SpecTest -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs
+FLG -open AwsSpecTest -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs

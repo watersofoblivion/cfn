@@ -245,13 +245,17 @@ let test_fs_helpers =
       "Normal Flow Control" >:: test_normal;
       "Exception"           >:: test_exn
     ]
-
-(* Test Suite *)
-let suite =
-  "Operating System" >::: [
+  in
+  "Filesystem Helpers" >::: [
     test_mkpath;
     test_mkdir_p;
     test_in_dir;
     test_rm_rf;
-    test_in_temp_dir
+    test_in_temp_dir;
+  ]
+
+(* Test Suite *)
+let suite =
+  "Operating System" >::: [
+    test_fs_helpers
   ]
