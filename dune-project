@@ -1,4 +1,7 @@
 (lang dune 2.0)
 (using menhir 2.0)
 
-(name cfn++)
+(package
+  (name "cfn++"))
+
+(name "cfn++")
