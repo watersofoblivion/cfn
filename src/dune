@@ -1,7 +1,9 @@
 (library
  (name cfnpp)
  (libraries
-   spec
+   ext
+   awsSpec
+   cfnSpec
    syntax
    ir
    opt
