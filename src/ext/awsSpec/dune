@@ -15,12 +15,6 @@
  (action
   (run atdgen -t %{deps})))
 
-(rule
- (targets api_v.ml api_v.mli)
- (deps    api.atd)
- (action
-  (run atdgen -v %{deps})))
-
 ; Doc
 (rule
  (targets doc_j.ml doc_j.mli)
@@ -33,12 +27,6 @@
  (deps    doc.atd)
  (action
   (run atdgen -t %{deps})))
-
-(rule
- (targets doc_v.ml doc_v.mli)
- (deps    doc.atd)
- (action
-  (run atdgen -v %{deps})))
 
 ; Example
 (rule
@@ -53,12 +41,6 @@
  (action
   (run atdgen -t %{deps})))
 
-(rule
- (targets example_v.ml example_v.mli)
- (deps    example.atd)
- (action
-  (run atdgen -v %{deps})))
-
 ; Paginator
 (rule
  (targets paginator_j.ml paginator_j.mli)
@@ -71,12 +53,6 @@
  (deps    paginator.atd)
  (action
   (run atdgen -t %{deps})))
-
-(rule
- (targets paginator_v.ml paginator_v.mli)
- (deps    paginator.atd)
- (action
-  (run atdgen -v %{deps})))
 
 ; Smoke
 (rule
@@ -91,12 +67,6 @@
  (action
   (run atdgen -t %{deps})))
 
-(rule
- (targets smoke_v.ml smoke_v.mli)
- (deps    smoke.atd)
- (action
-  (run atdgen -v %{deps})))
-
 ; Waiter
 (rule
  (targets waiter_j.ml waiter_j.mli)
@@ -110,11 +80,18 @@
  (action
   (run atdgen -t %{deps})))
 
-(rule
- (targets waiter_v.ml waiter_v.mli)
- (deps    waiter.atd)
- (action
-  (run atdgen -v %{deps})))
+;;;;;;;;;;;;;;;;
+; Path Parsing ;
+;;;;;;;;;;;;;;;;
+
+(ocamllex lexer)
+(menhir
+ (modules parser)
+ (flags --strict --explain --dump))
+
+;;;;;;;;;;;
+; Library ;
+;;;;;;;;;;;
 
 (library
   (name awsSpec)

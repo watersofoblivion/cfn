@@ -75,93 +75,118 @@ let test_test_helpers =
 
 
 (* Constructor *)
-let test_ctx ctxt =
-  let ctx = Ctx.ctx in
+let test_ctx =
+  let test_ctx ctxt =
+    let ctx = Ctx.ctx in
 
-  assert_equal ~ctxt "" ctx.Ctx.clang;
-  assert_equal ~ctxt "" ctx.stdlib;
-  assert_equal ~ctxt "" ctx.home;
-  assert_equal ~ctxt "" ctx.root
-
-(* Builders *)
-
-let test_with_clang ctxt =
-  let clang_exe = Filename.temp_file "" "" in
-  Unix.chmod clang_exe 0o755;
-
-  let ctx = Ctx.ctx |> Ctx.with_clang clang_exe in
-  assert_equal ~ctxt clang_exe ctx.Ctx.clang;
-
-  Sys.remove clang_exe
-
-let test_with_stdlib ctxt =
-  let ctx = Ctx.ctx |> Ctx.with_stdlib cwd in
-  assert_equal ~ctxt cwd ctx.Ctx.stdlib
-
-let test_with_home ctxt =
-  let ctx = Ctx.ctx |> Ctx.with_home cwd in
-  assert_equal ~ctxt cwd ctx.Ctx.home
-
-let test_with_root ctxt =
-  let ctx = Ctx.ctx |> Ctx.with_root cwd in
-  assert_equal ~ctxt cwd ctx.Ctx.root
-
-let test_from_env ctxt =
-  (* Create mock /usr/bin and /usr/local/bin and the ${PATH} environment variable. *)
-  let usr_bin = Os.mkdir (Os.mkpath [cwd; "usr"; "bin"]) in
-  let usr_local_bin =
-    Os.mkdir (Os.mkpath [cwd; "usr"; "local"; "bin"])
+    assert_equal ~ctxt "" ctx.Ctx.clang;
+    assert_equal ~ctxt "" ctx.stdlib;
+    assert_equal ~ctxt "" ctx.home;
+    assert_equal ~ctxt "" ctx.root
   in
-  let path = String.concat ":" [usr_bin; usr_local_bin] in
+  let test_builders =
+    let test_with_clang ctxt =
+      let clang_exe = Filename.temp_file "" "" in
+      Unix.chmod clang_exe 0o755;
 
-  (* Create a mock clang executable in /usr/local/bin *)
-  let clang_exe = Os.mkpath [usr_local_bin; "clang"] in
-  let oc = open_out clang_exe in
-  close_out oc;
-  Unix.chmod clang_exe 0o755;
+      let ctx = Ctx.ctx |> Ctx.with_clang clang_exe in
+      assert_equal ~ctxt clang_exe ctx.Ctx.clang;
 
-  (* Create a mock stdlib dir *)
-  let stdlib_dir = Os.mkdir (Os.mkpath [cwd; "stdlib"]) in
+      Sys.remove clang_exe
+    in
+    let test_with_stdlib ctxt =
+      let ctx = Ctx.ctx |> Ctx.with_stdlib cwd in
+      assert_equal ~ctxt cwd ctx.Ctx.stdlib
+    in
+    let test_with_home ctxt =
+      let ctx = Ctx.ctx |> Ctx.with_home cwd in
+      assert_equal ~ctxt cwd ctx.Ctx.home
+    in
+    let test_with_root ctxt =
+      let ctx = Ctx.ctx |> Ctx.with_root cwd in
+      assert_equal ~ctxt cwd ctx.Ctx.root
+    in
+    let test_from_env ctxt =
+      (* Create mock /usr/bin and /usr/local/bin and the ${PATH} environment variable. *)
+      let usr_bin = "bin"
+                 |> Filename.concat "usr"
+                 |> Filename.concat cwd
+      in
+      Os.mkdir usr_bin;
+      let usr_local_bin = "bin"
+                       |> Filename.concat "local"
+                       |> Filename.concat "usr"
+                       |> Filename.concat cwd
+      in
+      Os.mkdir usr_local_bin;
+      let path = String.concat ":" [usr_bin; usr_local_bin] in
 
-  (* Create a mock home directory *)
-  let home_dir = Os.mkdir (Os.mkpath [cwd; "home"; "username"]) in
+      (* Create a mock clang executable in /usr/local/bin *)
+      let clang_exe = Filename.concat usr_local_bin "clang" in
+      let oc = open_out clang_exe in
+      close_out oc;
+      Unix.chmod clang_exe 0o755;
 
-  (* Create a mock project *)
-  let project_dir =
-    Os.mkdir (Os.mkpath [home_dir; "projects"; "test-project"])
+      (* Create a mock stdlib dir *)
+      let stdlib_dir = Filename.concat cwd "stdlib" in
+      Os.mkdir stdlib_dir;
+
+      (* Create a mock home directory *)
+      let home_dir = "username"
+                  |> Filename.concat "home"
+                  |> Filename.concat cwd
+      in
+      Os.mkdir home_dir;
+
+      (* Create a mock project *)
+      let project_dir = "test-project"
+                     |> Filename.concat "projects"
+                     |> Filename.concat home_dir
+      in
+      Os.mkdir project_dir;
+      let subdir = Filename.concat project_dir "subdir" in
+      Os.mkdir subdir;
+      let project_file = Filename.concat project_dir "project.json" in
+      let oc = open_out project_file in
+      close_out oc;
+
+      (* The test proper *)
+      let test ctxt =
+        let ctx = Ctx.ctx |> Ctx.from_env in
+        assert_equal ~ctxt clang_exe   ctx.Ctx.clang;
+        assert_equal ~ctxt home_dir    ctx.home;
+        assert_equal ~ctxt stdlib_dir  ctx.stdlib;
+        assert_equal ~ctxt project_dir ctx.root
+      in
+
+      (* Set some temporary environment variables and CWD *)
+      let test = test
+              |> with_env "PATH" path
+              |> with_env "HOME" home_dir
+              |> with_env "CFNROOT" stdlib_dir
+              |> Os.in_dir subdir
+      in
+
+      (* Run the test proper *)
+      test ctxt
+    in
+    "Builders" >::: [
+      "With Clang Executable"           >:: test_with_clang;
+      "With Standard Library Directory" >:: test_with_stdlib;
+      "With Home Directory"             >:: test_with_home;
+      "With Project Root"               >:: test_with_root;
+      "From Environment"                >:: (test_from_env |> Os.in_temp_dir)
+    ]
   in
-  let subdir = Os.mkdir (Os.mkpath [project_dir; "subdir"]) in
-  let project_file = Os.mkpath [project_dir; "project.json"] in
-  let oc = open_out project_file in
-  close_out oc;
-
-  (* The test proper *)
-  let test ctxt =
-    let ctx = Ctx.ctx |> Ctx.from_env in
-    assert_equal ~ctxt clang_exe   ctx.Ctx.clang;
-    assert_equal ~ctxt home_dir    ctx.home;
-    assert_equal ~ctxt stdlib_dir  ctx.stdlib;
-    assert_equal ~ctxt project_dir ctx.root
-  in
-
-  (* Set some temporary environment variables and CWD *)
-  let test = test
-          |> with_env "PATH" path
-          |> with_env "HOME" home_dir
-          |> with_env "CFNROOT" stdlib_dir
-          |> Os.in_dir subdir
-  in
-
-  (* Run the test proper *)
-  test ctxt
+  "Context" >::: [
+    "Constructor" >:: test_ctx;
+    test_builders
+  ]
 
 (* Test Suite *)
 let suite =
   "Context" >::: [
-    "Empty"                           >:: test_ctx;
-    "With Clang Executable"           >:: test_with_clang;
-    "With Standard Library Directory" >:: test_with_stdlib;
-    "With Home Directory"             >:: test_with_home;
-    "With Project Root"               >:: test_with_root;
-    "From Environment"                >:: (test_from_env |> Os.in_temp_dir)
+    test_test_init;
+    test_test_helpers;
+    test_ctx
   ]

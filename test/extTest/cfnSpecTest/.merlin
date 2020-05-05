@@ -9,6 +9,7 @@ B /Users/jonathan/.opam/default/lib/ounit2/advanced
 B /Users/jonathan/.opam/default/lib/stdlib-shims
 B /Users/jonathan/.opam/default/lib/yojson
 B /usr/local/lib/ocaml
+B ../../../_build/default/src/build/.build.objs/byte
 B ../../../_build/default/src/ext/.ext.objs/byte
 B ../../../_build/default/src/ext/cfnSpec/.cfnSpec.objs/byte
 B ../../../_build/default/test/extTest/cfnSpecTest/.cfnSpecTest.objs/byte
@@ -22,6 +23,7 @@ S /Users/jonathan/.opam/default/lib/ounit2/advanced
 S /Users/jonathan/.opam/default/lib/stdlib-shims
 S /Users/jonathan/.opam/default/lib/yojson
 S /usr/local/lib/ocaml
+S ../../../src/build
 S ../../../src/ext
 S ../../../src/ext/cfnSpec
 S .

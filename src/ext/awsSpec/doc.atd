@@ -1,4 +1,4 @@
-type path = string wrap <ocaml t="Path.t" wrap="Doc.parse_path" unwrap="Doc.print_path">
+type path = string wrap <ocaml t="Path.t" wrap="Lexer.shape_path" unwrap="Path.to_string">
 
 type t =
   { ?base: string option;

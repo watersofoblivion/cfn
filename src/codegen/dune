@@ -1,4 +1,5 @@
 (library
   (name codegen)
   (libraries
+    yojson
     llvm))

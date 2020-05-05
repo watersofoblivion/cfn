@@ -19,5 +19,6 @@
 (library
   (name build)
   (libraries
+    str
     atdgen
     yojson))

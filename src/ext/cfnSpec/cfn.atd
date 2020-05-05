@@ -1,7 +1,43 @@
-type property_spec <ocaml from="Property" t="spec"> = abstract
-type resource_spec <ocaml from="Resource" t="spec"> = abstract
+type primitive =
+  [ Boolean
+  | Integer
+  | Long
+  | Double
+  | String
+  | Json
+  | Timestamp
+  | List
+  | Map ]
+<ocaml repr="classic">
+
+type update =
+  [ Mutable
+  | Immutable
+  | Conditional ]
+<ocaml repr="classic">
+
+type property_spec =
+  { ?documentation <json name="Documentation">: string option;
+    ?duplicates_allowed <json name="DuplicatesAllowed">: bool option;
+    ?item_type <json name="ItemType">: string option;
+    ?primitive_item_type <json name="PrimitiveItemType">: primitive option;
+    ?primitive_item <json name="PrimitiveItem">: primitive option;
+    ?required <json name="Required">: bool option;
+    ?typ <json name="Type">: string option;
+    ?update_type <json name="UpdateType">: update option; }
+
+type attr =
+  { ?item_type <json name="ItemType">: string option;
+    ?primitive_item_type <json name="PrimitveItemType">: primitive option;
+    ?primitive_type <json name="PrimitiveType">: primitive option;
+    ?typ <json name="Type">: string option; }
+
+type resource_spec =
+  { ?attributes <json name="Attributes">: (string * attr) list option <json repr="object">;
+    documentation <json name="Documentation">: string;
+    ~properties <json name="Properties">: (string * property_spec) list <json repr="object">; }
 
 type t =
   { ?property_types <json name="PropertyTypes">: (string * property_spec) list option <json repr="object">;
-    resource_specification_version <json name="ResourceSpecificationVersion">: (int * int * int);
+    resource_specification_version <json name="ResourceSpecificationVersion">: string wrap <ocaml t="Build.Semver.t" wrap="Build.Semver.of_string" unwrap="Build.Semver.to_string">;
     ~resource_types <json name="ResourceTypes">: (string * resource_spec) list <json repr="object">; }
