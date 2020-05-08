@@ -28,10 +28,14 @@ let with_root path ctx =
   { ctx with root = path }
 
 let from_env ctx =
+  let cwd = Sys.getcwd () in
+  let project_file = Os.find_in_path "project.json" cwd in
+  let root = Filename.dirname project_file in
+
   ctx |> with_stdlib (Sys.getenv "CFNROOT")
       |> with_home (Sys.getenv "HOME")
       |> with_clang (Os.which "clang")
-      |> with_root (Os.find_in_path "project.json" "" (Sys.getcwd ()))
+      |> with_root root
 
 (* Path Helpers *)
 

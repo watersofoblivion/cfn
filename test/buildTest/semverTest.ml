@@ -89,11 +89,11 @@ let test_semver =
 
       let test_pre_release _ =
         assert_invalid_segment "pre-release" invalid_numeric_segment [invalid_numeric_segment] [];
-        assert_invalid_segment "build_info" invalid_alpha_segment [invalid_alpha_segment] []
+        assert_invalid_segment "pre-release" invalid_alpha_segment [invalid_alpha_segment] []
       in
       let test_build_info _ =
-        assert_invalid_segment "pre-release" invalid_numeric_segment [] [invalid_numeric_segment];
-        assert_invalid_segment "build_info" invalid_alpha_segment [] [invalid_alpha_segment]
+        assert_invalid_segment "build info" invalid_numeric_segment [] [invalid_numeric_segment];
+        assert_invalid_segment "build info" invalid_alpha_segment [] [invalid_alpha_segment]
       in
       "Metadata" >::: [
         "Pre-Release" >:: test_pre_release;
@@ -359,15 +359,24 @@ let test_compatibility_groups ctxt =
     let actual = Semver.major cgrp in
     assert_equal ~ctxt major actual;
 
-    let fn expected actual =
-      let actual = Semver.compare expected actual in
-      assert_equal ~ctxt 0 actual
+    let fn actual =
+      let fn expected =
+        let actual = Semver.compare expected actual in
+        actual = 0
+      in
+      if List.exists fn versions
+      then ()
+      else
+        let actual = Semver.to_string actual in
+        let versions = versions |> List.map Semver.to_string |> String.concat ", " in
+        let msg = sprintf "Version %s is not in [%s]" actual versions in
+        assert_failure msg
     in
-    let actual = Semver.versions cgrp in
 
+    let actual = Semver.versions cgrp in
     let _ =
       try
-        List.iter2 fn versions actual
+        List.iter fn actual
       with Invalid_argument _ ->
         let expected = List.length versions in
         let actual = List.length actual in
@@ -380,8 +389,8 @@ let test_compatibility_groups ctxt =
   in
   match cgrps with
     | hd::tl::[] ->
-      assert_cgrp major [fixture; compatible_minor; compatible_patch] compatible_minor hd;
-      assert_cgrp (major + 1) [incompatible_major] incompatible_major tl;
+      assert_cgrp (major + 1) [incompatible_major] incompatible_major hd;
+      assert_cgrp major [fixture; compatible_minor; compatible_patch] compatible_minor tl;
     | _ -> assert_failure "Un-possible!"
 
 (* Test Suite *)

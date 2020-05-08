@@ -53,6 +53,7 @@ let test_codegen =
 
 let test_build =
   "Build" >::: [
+    BuildTest.TestUtil.suite;
     BuildTest.OsTest.suite;
     BuildTest.SemverTest.suite;
     BuildTest.ImportPathTest.suite;

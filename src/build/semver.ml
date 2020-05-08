@@ -10,20 +10,20 @@ let solo_re pattern =
 let num_pattern = "0\\|[1-9][0-9]*"
 let num_re = solo_re num_pattern
 
-let segment_pattern = "[1-9][0-9]*\\|[0-9a-zA-Z-]*[a-zA-Z-][0-9a-zA-Z-]*"
+let segment_pattern = "[1-9][0-9]*\\|[0-9a-zA-Z-]*[a-zA-Z][0-9a-zA-Z-]*"
 let segment_re = solo_re segment_pattern
 
 let semver_re =
   let ver_pattern = sprintf "\\(%s\\)\\.\\(%s\\)\\.\\(%s\\)" num_pattern num_pattern num_pattern in
-  let meta_pattern = sprintf "\\(%s\\(\\.%s\\)*\\)" segment_pattern segment_pattern in
-  let semver_pattern = sprintf "^%s\\(-%s\\)?\\(\\+%s\\)?$" ver_pattern meta_pattern meta_pattern in
-  regexp semver_pattern
+  let meta_pattern = sprintf "\\(%s\\(\\.\\(%s\\)\\)*\\)" segment_pattern segment_pattern in
+  let semver_pattern = sprintf "%s\\(-%s\\)?\\(\\+%s\\)?" ver_pattern meta_pattern meta_pattern in
+  solo_re semver_pattern
 
 let major_group = 1
 let minor_group = 2
 let patch_group = 3
 let pre_release_group = 5
-let build_info_group = 8
+let build_info_group = 9
 
 (* Metadata segments *)
 

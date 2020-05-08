@@ -4,22 +4,25 @@ let rec mkdir dir =
   try
     if Sys.is_directory dir
     then ()
-    else Unix.mkdir dir 0o755
+    else
+      let msg = sprintf "%s is a file" dir in
+      let exn = Invalid_argument msg in
+      raise exn
   with Sys_error _ ->
     let parent = Filename.dirname dir in
-    mkdir parent
+    mkdir parent;
+    Unix.mkdir dir 0o755
 
 let rec rmdir dir =
-  let names = Sys.readdir dir in
   let remove_or_recurse name =
     let path = Filename.concat dir name in
-    let _ =
-      if Sys.is_directory path
-      then rmdir path
-    in
-    Sys.remove name
+    if Sys.is_directory path
+    then rmdir path
+    else Sys.remove path
   in
-  Array.iter remove_or_recurse names
+  let names = Sys.readdir dir in
+  Array.iter remove_or_recurse names;
+  Unix.rmdir dir
 
 let files dir =
   Sys.readdir dir
@@ -40,24 +43,22 @@ let in_dir dir fn x =
   in
   Fun.protect ~finally fn
 
-let rec temp_dir prefix =
-  let id = Random.int 1000000 |> string_of_int in
-  let prefix =
-    if prefix = ""
-    then "tmp"
-    else prefix
-  in
+let rec temp_dir _ =
+  let dir_name = Random.int 1000000 |> string_of_int in
   let tmp_dir = Filename.get_temp_dir_name () in
-  let dir_name = prefix ^ "-" ^ id in
   let dir = Filename.concat tmp_dir dir_name in
   try
     Unix.mkdir dir 0o755;
     dir
-  with Unix.Unix_error _ -> temp_dir prefix
+  with Unix.Unix_error _ -> temp_dir ()
 
 let in_temp_dir fn x =
-  let dir = temp_dir "" in
-  in_dir dir fn x
+  let dir = temp_dir () in
+  let finally _ = rmdir dir in
+  let fn _ =
+    in_dir dir fn x
+  in
+  Fun.protect ~finally fn
 
 let temp_file_flags = [Open_binary; Open_wronly; Open_trunc; Open_append; Open_creat; Open_excl]
 let with_temp_file write process =
@@ -108,7 +109,10 @@ let overwrite = write_gen [Open_binary; Open_trunc; Open_append; Open_excl; Open
 
 let which exe =
   let rec search_path = function
-    | [] -> failwith (sprintf "%S not found in ${PATH}" exe)
+    | [] ->
+      let msg = sprintf "%S not found in ${PATH}" exe in
+      let exn = Invalid_argument msg in
+      raise exn
     | path :: paths ->
         let path = Filename.concat path exe in
         if Sys.file_exists path
@@ -118,10 +122,13 @@ let which exe =
   Sys.getenv "PATH" |> String.split_on_char ':'
                     |> search_path
 
-let rec find_in_path root filename path =
-  let path = filename |> Filename.concat path |> Filename.concat root in
-  if Sys.file_exists path
-  then path
-  else match path with
-    | "" | "/" -> failwith (sprintf "%S not found within %S" filename root)
-    | _ -> find_in_path root filename (Filename.dirname path)
+let rec find_in_path filename path =
+  let file = Filename.concat path filename in
+  if Sys.file_exists file
+  then file
+  else
+    match path with
+    | "" | "/" -> raise Not_found
+    | _ ->
+      let path = Filename.dirname path in
+      find_in_path filename path

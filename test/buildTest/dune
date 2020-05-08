@@ -1,6 +1,5 @@
 (library
  (name buildTest)
  (libraries
-    str
     ounit2
     build))
