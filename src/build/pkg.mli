@@ -12,8 +12,8 @@ type pkg = private {
 }
 (** A package within a project *)
 
-val pkg : Ctx.t -> ImportPath.t -> string -> pkg
+val pkg : Ctx.t -> Path.t -> string -> pkg
 (**  *)
 
-val pkg_imports : Ctx.t -> ImportPath.t -> string -> (string * string list) list
+val pkg_imports : Ctx.t -> Path.t -> string -> (string * string list) list
 (**  *)

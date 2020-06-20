@@ -56,10 +56,10 @@ let test_build =
     BuildTest.TestUtil.suite;
     BuildTest.OsTest.suite;
     BuildTest.SemverTest.suite;
-    BuildTest.ImportPathTest.suite;
+    BuildTest.PathTest.suite;
     BuildTest.CtxTest.suite;
-    BuildTest.PackageTest.suite;
-    BuildTest.ProjectTest.suite
+    BuildTest.PkgTest.suite;
+    BuildTest.PrjTest.suite
   ]
 
 let test_cli =

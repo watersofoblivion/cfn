@@ -67,14 +67,14 @@ val build_dir : t -> string
 (** [build_dir ctx] returns the directory containing all of the build artifacts
     for the current project.  This path is [<project_root>/.cfn++]. *)
 
-val src_dir : t -> ImportPath.t -> string
-(** [src_dir ctx import_path] returns the directory containing the source files
-    of [import_path].  This path is [<build_dir>/src/<import_path>]. *)
+val src_dir : t -> Path.t -> string
+(** [src_dir ctx path] returns the directory containing the source files of
+    [path].  This path is [<build_dir>/src/<path>]. *)
 
-val lib_dir : t -> ImportPath.t -> string
-(** [lib_dir ctx import_path] returns the directory containing the compiled
-    intermediary files of [import_path].  This path is
-    [<build_dir>/lib/<import_path>]. *)
+val lib_dir : t -> Path.t -> string
+(** [lib_dir ctx path] returns the directory containing the compiled
+    intermediary files of [path].  This path is
+    [<build_dir>/lib/<path>]. *)
 
 val pkg_dir : t -> string
 (** [pkg_dir ctx] returns the directoy containing the compiled output package of
