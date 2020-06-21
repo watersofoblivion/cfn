@@ -1,2 +1,4 @@
 (library
-  (name ir))
+  (name ir)
+;  (bisect_ppx)
+  )

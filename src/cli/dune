@@ -1,4 +1,5 @@
 (library
  (name cli)
+; (bisect_ppx)
  (libraries
    cmdliner))

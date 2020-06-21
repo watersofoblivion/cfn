@@ -1,5 +1,6 @@
 (library
   (name codegen)
+;  (bisect_ppx)
   (libraries
     yojson
     llvm))

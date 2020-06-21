@@ -1,5 +1,6 @@
 (library
  (name cfnpp)
+; (bisect_ppx)
  (libraries
    ext
    awsSpec

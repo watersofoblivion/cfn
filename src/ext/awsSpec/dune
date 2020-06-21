@@ -95,6 +95,7 @@
 
 (library
   (name awsSpec)
+;  (bisect_ppx)
   (libraries
     ext
     atdgen

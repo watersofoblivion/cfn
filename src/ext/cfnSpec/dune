@@ -21,6 +21,7 @@
 
 (library
   (name cfnSpec)
+;  (bisect_ppx)
   (libraries
     build
     ext

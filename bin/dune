@@ -1,6 +1,7 @@
 (executable
  (public_name cfnpp)
  (modules cfnpp)
+; (bisect_ppx)
  (libraries
    cfnpp
    cmdliner))
