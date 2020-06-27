@@ -43,9 +43,10 @@ let assert_lexes ~ctxt lex str expected =
     fprintf fmt "Expected:\n%a\nActual:\n%a" print_tok expected print_tok actual
   in
 
-  let lexbuf = Lexing.from_string str in
-  let actual = lex lexbuf in
-  assert_equal ~ctxt ~cmp ~pp_diff expected actual
+  str
+    |> Lexing.from_string
+    |> lex
+    |> assert_equal ~ctxt ~cmp ~pp_diff expected
 
 (* Lexer *)
 let test_lex =
@@ -54,8 +55,8 @@ let test_lex =
   let test_non_printable =
     let test_eof ctxt =
       let loc = Loc.mock "" (1, 0, 0) (1, 0, 0) in
-      let expected = Parser.EOF loc in
-      assert_lexes ~ctxt "" expected
+      Parser.EOF loc
+        |> assert_lexes ~ctxt ""
     in
     "Non-Printable Tokens" >::: [
       "End of File" >:: test_eof
@@ -64,13 +65,13 @@ let test_lex =
   let test_punctuation =
     let test_pipe ctxt =
       let loc = Loc.mock "" (1, 0, 0) (1, 1, 1) in
-      let expected = Parser.PIPE loc in
-      assert_lexes ~ctxt "|" expected
+      Parser.PIPE loc
+        |> assert_lexes ~ctxt "|"
     in
     let test_arrow ctxt =
       let loc = Loc.mock "" (1, 0, 0) (1, 2, 2) in
-      let expected = Parser.ARROW loc in
-      assert_lexes ~ctxt "->" expected
+      Parser.ARROW loc
+        |> assert_lexes ~ctxt "->"
     in
     "Punctuation" >::: [
       "Pipe"  >:: test_pipe;
@@ -80,18 +81,18 @@ let test_lex =
   let test_keywords =
     let test_package ctxt =
       let loc = Loc.mock "" (1, 0, 0) (1, 7, 7) in
-      let expected = Parser.PACKAGE loc in
-      assert_lexes ~ctxt "package" expected
+      Parser.PACKAGE loc
+        |> assert_lexes ~ctxt "package"
     in
     let test_from ctxt =
       let loc = Loc.mock "" (1, 0, 0) (1, 4, 4) in
-      let expected = Parser.FROM loc in
-      assert_lexes ~ctxt "from" expected
+      Parser.FROM loc
+        |> assert_lexes ~ctxt "from"
     in
     let test_import ctxt =
       let loc = Loc.mock "" (1, 0, 0) (1, 6, 6) in
-      let expected = Parser.IMPORT loc in
-      assert_lexes ~ctxt "import" expected
+      Parser.IMPORT loc
+        |> assert_lexes ~ctxt "import"
     in
     "Keywords" >::: [
       "Package" >:: test_package;
@@ -103,16 +104,16 @@ let test_lex =
     let test_lident ctxt =
       let id = "foo" in
       let loc = Loc.mock "" (1, 0, 0) (1, 3, 3) in
-      let expected = Parser.LIDENT(loc, id) in
-      assert_lexes ~ctxt id expected
+      Parser.LIDENT(loc, id)
+        |> assert_lexes ~ctxt id
     in
     let test_string ctxt =
       let test str =
         let lit = sprintf "%S" str in
         let len = String.length lit in
         let loc = Loc.mock "" (1, 0, 0) (1, len, len) in
-        let expected = Parser.STRING(loc, str) in
-        assert_lexes ~ctxt lit expected
+        Parser.STRING(loc, str)
+          |> assert_lexes ~ctxt lit
       in
       List.iter test ["foo"; "foo\"bar"]
     in

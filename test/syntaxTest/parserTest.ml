@@ -7,14 +7,15 @@ open Syntax
 (* Assertions *)
 
 let assert_parses_gen ~ctxt lexer parser expected lines =
-  let src = String.concat "\n" lines in
-  let lexbuf = Lexer.from_string src in
-  let actual = parser lexer lexbuf |> Ast.deloc_file in
-
   let pp_diff fmt (expected, actual) =
     fprintf fmt "Expected:\n%a\nActual:\n%a\n\n" Fmt.file expected Fmt.file actual
   in
-  assert_equal ~ctxt ~pp_diff expected actual
+  lines
+    |> String.concat "\n"
+    |> Lexer.from_string
+    |> parser lexer
+    |> Ast.deloc_file
+    |> assert_equal ~ctxt ~pp_diff expected
 
 let assert_parses = assert_parses_gen Lexer.lex Parser.file
 let assert_package_only = assert_parses_gen Lexer.lex Parser.package_only
@@ -25,7 +26,7 @@ let assert_imports_only = assert_parses_gen Lexer.lex Parser.imports_only
 let pkg_name = "foo"
 let package_stmt = Ast.package_stmt Loc.dummy Loc.dummy pkg_name
 
-let import_path = "import/path"
+let import_path = "project/path@v42"
 let from_clause = Ast.from_clause Loc.dummy Loc.dummy import_path
 
 let package_path_1 = "package/one"
@@ -63,7 +64,7 @@ let test_package_only =
     assert_package_only ~ctxt expected [
       sprintf "package %s" pkg_name;
               "";
-      sprintf "from \"import/path\" import \"package/path\""
+      sprintf "from \"project/path@v42\" import \"package/path\""
     ]
   in
   let test_stop_at_import ctxt =

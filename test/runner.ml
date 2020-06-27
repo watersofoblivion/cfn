@@ -57,9 +57,7 @@ let test_build =
     BuildTest.OsTest.suite;
     BuildTest.SemverTest.suite;
     BuildTest.PathTest.suite;
-    BuildTest.CtxTest.suite;
-    BuildTest.PkgTest.suite;
-    BuildTest.PrjTest.suite
+    BuildTest.WorkspaceTest.suite
   ]
 
 let test_cli =

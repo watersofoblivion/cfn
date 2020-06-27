@@ -1,210 +1,185 @@
 open Format
 open Str
 
-type src =
+(* Common *)
+
+let legal_chars = "[^]@!/\"#$%&'()*,:;<=>?^[`{|}]+"
+
+(* Project Paths *)
+
+type vcs =
+  | Git
+
+let vcs = function
+  | ".git" -> Some Git
+  | _ -> None
+
+let ext = function
+  | Git -> ".git"
+
+type project =
   | Internal
-  | GitHub of string * string * int
-  | External of string option * string * int option * string option * int
+  | External of Uri.t * vcs * int
 
-let internal = Internal
+exception InternalProject
 
-let github owner repo ver =
-  let invalid s =
-    let msg = sprintf "GitHub %s cannot be blank" s in
+let project_re =
+  let path_pattern =
+    sprintf "^\\(\\.\\|\\(%s\\(:[0-9]+\\)?\\(/\\|\\(/%s\\)*\\)\\)@v\\([0-9]+\\)\\)$"
+      legal_chars
+      legal_chars
+  in
+  regexp path_pattern
+
+let path_group = 1
+let uri_group = 2
+let major_group = 6
+
+let project str =
+  let invalid str =
+    let msg = sprintf "%S is not a valid project path" str in
     let exn = Invalid_argument msg in
     raise exn
   in
-  if ver < 0
-  then
-    let exn = Invalid_argument "major version cannot be negative" in
-    raise exn
-  else
-    match (owner, repo) with
-      | "", "" -> invalid "owner and repo"
-      | "", _ -> invalid "owner"
-      | _, "" -> invalid "repo"
-      | _, _ -> GitHub(owner, repo, ver)
 
-let host_pattern = "\\([^@:/\\.]+\\.\\)+[a-z]+"
-let host_re = regexp host_pattern
-
-let ext proto host port path ver =
-  if ver < 0
+  if string_match project_re str 0
   then
-    let exn = Invalid_argument "major version cannot be negative" in
-    raise exn
-  else
-    match host with
-      | "" ->
-        let exn = Invalid_argument "host cannot be blank" in
-        raise exn
+    match matched_group path_group str with
+      | "." -> Internal
       | _ ->
-        if string_match host_re host 0
-        then External(proto, host, port, path, ver)
-        else
-          let msg = sprintf "%S is not a valid host" host in
-          let exn = Invalid_argument msg in
-          raise exn
+        let uri =
+          str
+            |> matched_group uri_group
+            |> sprintf "//%s"
+            |> Uri.of_string
+        in
+        let (uri, vcs) =
+          match Uri.path uri with
+            | "" -> (uri, Git)
+            | path ->
+              match String.sub path 1 (String.length path - 1) |> vcs with
+                | Some vcs ->
+                  let uri = Uri.with_path uri "" in
+                  (uri, vcs)
+                | None ->
+                  match path |> Filename.extension |> vcs with
+                    | Some vcs ->
+                      let uri =
+                        path
+                          |> Filename.remove_extension
+                          |> Uri.with_path uri
+                      in
+                      (uri, vcs)
+                    | None -> (uri, Git)
+        in
+        let major =
+          str
+            |> matched_group major_group
+            |> int_of_string
+        in
+        External(uri, vcs, major)
+  else invalid str
 
-type t = {
-  source:    src;
-  package:   string;
-  recursive: bool;
-}
+let current = function
+  | Internal -> true
+  | _ -> false
 
-let create src pkg recur =
-  { source    = src;
-    package   = pkg;
-    recursive = recur }
-
-let path_re =
-  let segment_pattern = "[^/%@]+" in
-
-  let source_pattern =
-    let internal_pattern = "\\." in
-    let external_pattern =
-      let github_pattern = sprintf "\\(github\\.com/\\(%s\\)/\\(%s\\)\\(/[^%@]*\\)?\\)" segment_pattern segment_pattern in
-      let external_pattern = sprintf "\\(\\(\\([^:]+\\)://\\)?\\(%s\\)\\(:\\([0-9]+\\)\\)?\\(\\(/%s\\)*\\)\\)" host_pattern segment_pattern in
-      sprintf "\\(%s\\|%s\\)@v\\([0-9]+\\)" github_pattern external_pattern
+let source = function
+  | Internal -> raise InternalProject
+  | External(uri, vcs, _) ->
+    let host = match Uri.host uri with
+      | Some host -> host
+      | None -> ""
     in
-    sprintf "\\(%s\\|%s\\)" internal_pattern external_pattern
-  in
-
-  let package_pattern = sprintf "\\(\\|\\(\\(\\(%s/\\)*\\)\\(\\.\\.\\.\\|%s\\)\\)\\)" segment_pattern segment_pattern in
-  let path_pattern = sprintf "^%s:%s$" source_pattern package_pattern in
-
-  regexp path_pattern
-
-(* let fn path n =
-  let _ = string_match path_re path 0 in
-  let rec fn = function
-    | 0 -> ()
-    | n ->
-      fn (n - 1);
-      printf "Group %d: %s\n"
-        n
-        (try
-          let s = matched_group n path in
-          sprintf "%S" s
-        with Not_found -> "n/a");
-  in
-  fn n *)
-
-let source_group = 1
-let owner_group = 4
-let repo_group = 5
-let extra_group = 6
-let proto_group = 9
-let host_group = 10
-let port_group = 13
-let path_group = 14
-let version_group = 16
-let pkg_group = 17
-let pkg_path_group = 19
-let rec_group = 21
-
-let of_string str =
-  let string_group grp = matched_group grp str in
-  let opt_string grp =
-    try Some (string_group grp)
-    with Not_found -> None
-  in
-  let int_group grp = int_of_string (string_group grp) in
-  let opt_int grp = match opt_string grp with
-    | Some s -> Some (int_of_string s)
-    | None -> None
-  in
-
-  if string_match path_re str 0
-  then
-    let src =
-      if string_group source_group = "."
-      then internal
-      else
-        let version = int_group version_group in
-
-        try
-          let owner = string_group owner_group in
-          let repo = string_group repo_group in
-          let _ =
-            try
-              let extra = string_group extra_group in
-              let msg = sprintf "GitHub source contains extra path segments %S" extra in
-              let exn = Invalid_argument msg in
-              raise exn
-            with Not_found -> ()
-          in
-          github owner repo version
-        with Not_found ->
-          let proto = opt_string proto_group in
-          let host = string_group host_group in
-          let port = opt_int port_group in
-          let path = match string_group path_group with
-            | "" -> None
-            | path -> Some (String.sub path 1 (String.length path - 1))
-          in
-          ext proto host port path version
+    let port = match Uri.port uri with
+      | Some port -> sprintf ":%d" port
+      | None -> ""
     in
-    let (pkg, recur) =
-      try begin
-        match string_group pkg_group with
-          | "" -> ("", false)
-          | _ ->
-            begin
-              let pkg_path =
-                try string_group pkg_path_group
-                with Not_found -> ""
-              in
-              try begin
-                match string_group rec_group with
-                  | "..." -> (pkg_path, true)
-                  | tl -> (pkg_path ^ tl, false)
-              end
-              with Invalid_argument _ -> (pkg_path, false)
-            end
-      end
-      with Invalid_argument _ ->
-        ("", false)
+    let path = match Uri.path uri with
+      | "" -> "/"
+      | path -> path
     in
-    let pkg = match pkg with
-      | "" -> pkg
-      | pkg ->
-        if pkg.[String.length pkg - 1] = '/'
-        then String.sub pkg 0 (String.length pkg - 1)
-        else pkg
-    in
-    create src pkg recur
-  else
+    let vcs = ext vcs in
+    String.concat "" [host; port; path; vcs]
+
+let major = function
+  | Internal -> raise InternalProject
+  | External(_, _, major) -> major
+
+(* Package Paths *)
+
+type package = string
+
+let package_pattern =
+  sprintf "^\\(\\|\\(%s\\(/%s\\)*\\)\\)$"
+    legal_chars
+    legal_chars
+let package_re =
+  regexp package_pattern
+
+let package str =
+  let invalid str =
     let msg = sprintf "%S is not a valid package path" str in
     let exn = Invalid_argument msg in
     raise exn
-
-let format fmt path =
-    let _ = match path.source with
-    | Internal -> fprintf fmt "."
-    | GitHub(owner, repo, ver) -> fprintf fmt "github.com/%s/%s@v%d" owner repo ver
-    | External(proto, host, port, path, ver) ->
-      let _ = match proto with
-        | Some proto -> fprintf fmt "%s://" proto
-        | None -> ()
-      in
-      let _ = fprintf fmt "%s" host in
-      let _ = match port with
-        | Some port -> fprintf fmt ":%d" port
-        | None -> ()
-      in
-      let _ = match path with
-        | Some path -> fprintf fmt "/%s" path
-        | None -> ()
-      in
-      fprintf fmt "@v%d" ver
   in
-  let _ = fprintf fmt ":" in
-  match (path.package, path.recursive) with
-    | "", true -> fprintf fmt "..."
-    | pkg, true -> fprintf fmt "%s/..." pkg
-    | pkg, false -> fprintf fmt "%s" pkg
 
-let to_string path =
-  format str_formatter path;
-  flush_str_formatter ()
+  let rec parse acc segments = match segments with
+    | [] -> acc
+    | "." :: segments -> parse acc segments
+    | ".." :: segments ->
+      let acc = Filename.dirname acc in
+      parse acc segments
+    | segment :: segments ->
+      let acc = Filename.concat acc segment in
+      parse acc segments
+  in
+
+  if string_match package_re str 0
+  then
+    str
+      |> String.split_on_char '/'
+      |> parse ""
+  else
+    invalid str
+
+let path pkg = pkg
+
+(* Import Paths *)
+
+type import = {
+  project:   project;
+  package:   package;
+  recursive: bool;
+}
+
+let import str =
+  match String.rindex_opt str ':' with
+    | Some idx ->
+      let prj = String.sub str 0 idx in
+      let (pkg, recur) =
+        let str = String.sub str (idx + 1) (String.length str - idx - 1) in
+        let (pkg, last) = match String.rindex_opt str '/' with
+          | None -> ("", str)
+          | Some idx ->
+            let pkg = String.sub str 0 idx in
+            let last = String.sub str (idx + 1) (String.length str - idx - 1) in
+            (pkg, last)
+        in
+        match last with
+          | "..." -> (pkg, true)
+          | _ ->
+            let pkg = Filename.concat pkg last in
+            (pkg, false)
+      in
+      { project   = project prj;
+        package   = package pkg;
+        recursive = recur }
+    | None ->
+      let msg = sprintf "%S is not a valid import path" str in
+      let exn = Invalid_argument msg in
+      raise exn
+
+let recursive impt = impt.recursive
+let prj impt = impt.project
+let pkg impt = impt.package

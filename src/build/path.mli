@@ -1,50 +1,64 @@
-open Format
-
 (**
  * {1 Paths}
- *
- * External: SOURCE-PATH[@VERSION]:PACKAGE-PATH (prj/path@vX:pkg/path, prj/path@vX:..., prj/path@vX:pkg/path/...)
- * Internal: .:[PACKAGE-PATH] (.:pkg/path, .:..., .:pkg/path/...)
- * Stdlib: PACKAGE-PATH (pkg/path)
  *)
 
-type src = private
-  | Internal
-  | GitHub of string * string * int
-  | External of string option * string * int option * string option * int
+(**
+ * {2 Projects}
+ *)
 
-val internal : src
-(** [internal] returns the current project as a source. *)
+type project
+(** A project path. *)
 
-val github : string -> string -> int -> src
-(** [github owner repo] constructs a GitHub project source pointing to the repo
-    [github.com/<owner>/<repo>] at major version [ver].  Raises
-    {!Invalid_argument} if either [owner] or [repo] are blank, or if the version
-    number is negative. *)
+exception InternalProject
+(** Raised when an unsupported operation is performed on an internal project. *)
 
-val ext : string option -> string -> int option -> string option -> int -> src
-(** [external proto host port path ver] constructs an external project source
-    pointing to the URI [proto]://[host]:[port]/[path] at major version [ver].
-    Raises {!Invalid_argument} if [host] is blank or does not end with
-    [.\[a-z\]+], if [path] is not a relative path (or blank), or if the version
-    number is negative. *)
+val project : string -> project
+(** [project str] parses [str] into a project path.  Raises
+    {!InvalidProjectPath} if [str] is not a valid project path. *)
 
-type t = private {
-  source:    src;    (** Source path *)
-  package:   string; (** The package within the project *)
-  recursive: bool;   (** Whether or not this path is recursive *)
-}
+val current : project -> bool
+(** [current prj] returns [true] if [prj] points to the current project, or
+    [false] otherwise. *)
 
-val create : src -> string -> bool -> t
-(** [create src pkg recur] construct a project path with source [src] pointing
-    to package [pkg] and all nested packages if [recur] is true. *)
+val source : project -> string
+(** [source prj] returns the source for the project.  Raises {!InternalProject}
+    if [prj] points to the current project. *)
 
-val of_string : string -> t
-(** [of_string str] parses [str] into a project path. Raises {!Invalid_argument}
-    if [str] cannot be parsed. *)
+val major : project -> int
+(** [major prj] returns the major version of the project.  Raises
+    {!InternalProject} if [prj] points to the current project. *)
 
-val format : formatter -> t -> unit
-(** [format fmt path] formats [path] to [fmt]. *)
+(**
+ * {2 Packages}
+ *)
 
-val to_string : t -> string
-(** [to_string path] formats the project path [path] as a string. *)
+type package
+(** A package path *)
+
+val package : string -> package
+(** [package str] parses [str] into a package path.  Raises {!Invalid_argument}
+    if [str] is not a valid package path. *)
+
+val path : package -> string
+(** [path pkg] returns the path of [pkg].  Can be blank. *)
+
+(**
+ * {2 Import}
+ *)
+
+type import
+(** An import path *)
+
+val import : string -> import
+(** [import str] parses [str] into an import path.  Raises {!Invalid_argument}
+    if [str] is not a valid import path. *)
+
+val prj : import -> project
+(** [prj impt] returns the project path portion of [impt]. *)
+
+val pkg : import -> package
+(** [pkg impt] returns the package path portion of [impt]. *)
+
+val recursive : import -> bool
+(** [recursive impt] returns [true] if [impt] is recursive, or [false]
+    otherwise. *)

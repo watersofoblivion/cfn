@@ -7,12 +7,12 @@ open Syntax
 (* Assertions *)
 
 let assert_pp ~ctxt pp v lines =
-  pp str_formatter v;
-  let actual = flush_str_formatter () in
-  let expected = String.concat "\n" lines in
-
   let printer s = sprintf "\n\"%s\"\n" s in
-  assert_equal ~ctxt ~printer expected actual
+
+  pp str_formatter v;
+  let expected = String.concat "\n" lines in
+  flush_str_formatter ()
+    |> assert_equal ~ctxt ~printer expected
 
 (* Package Statement *)
 let test_package ctxt =

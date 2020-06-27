@@ -53,21 +53,24 @@ let test_mock_loc ctxt =
 (* Location constructor *)
 let test_loc ctxt =
   let fname = "test-filename.cfn" in
-  let lexbuf = mock_lexbuf fname (1, 10, 15) (1, 10, 20) in
-
-  let loc = Loc.loc lexbuf in
+  let loc =
+    mock_lexbuf fname (1, 10, 15) (1, 10, 20)
+      |> Loc.loc
+  in
   assert_loc ~ctxt loc fname (1, 5, 15) (1, 10, 20) 5
 
 (* Location spanning *)
 let test_span =
   let test_span ctxt =
     let fname = "test-filename.cfn" in
-
-    let lexbuf = mock_lexbuf fname (1, 10, 15) (1, 10, 20) in
-    let start_loc = Loc.loc lexbuf in
-
-    let lexbuf = mock_lexbuf fname (1, 10, 15) (3, 100, 105) in
-    let end_loc = Loc.loc lexbuf in
+    let start_loc =
+      mock_lexbuf fname (1, 10, 15) (1, 10, 20)
+        |> Loc.loc
+    in
+    let end_loc =
+      mock_lexbuf fname (1, 10, 15) (3, 100, 105)
+        |> Loc.loc
+    in
 
     let loc = Loc.span start_loc end_loc in
     assert_loc ~ctxt loc fname (1, 5, 15) (3, 5, 105) 90
@@ -95,12 +98,16 @@ let test_span =
   in
   let test_mismatched_filenames _ =
     let fname_1 = "file-1.cfn" in
-    let lexbuf = mock_lexbuf fname_1 (1, 10, 15) (1, 10, 20) in
-    let start_loc = Loc.loc lexbuf in
+    let start_loc =
+      mock_lexbuf fname_1 (1, 10, 15) (1, 10, 20)
+        |> Loc.loc
+    in
 
     let fname_2 = "file-2.cfn" in
-    let lexbuf = mock_lexbuf fname_2 (1, 10, 15) (1, 10, 20) in
-    let end_loc = Loc.loc lexbuf in
+    let end_loc =
+      mock_lexbuf fname_2 (1, 10, 15) (1, 10, 20)
+        |> Loc.loc
+    in
 
     let msg =
       sprintf "Locations are from different files: %S and %S" fname_1 fname_2
