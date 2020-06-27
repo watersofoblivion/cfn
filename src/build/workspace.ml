@@ -2,17 +2,7 @@ open Format
 
 (* Types *)
 
-module StringMap = Map.Make(struct
-  type t = string
-  let compare = compare
-end)
-
-module IntMap = Map.Make(struct
-  type t = int
-  let compare = compare
-end)
-
-type ctx = {
+type t = {
   docker: string;
   home:   string;
   root:   string;
@@ -68,7 +58,7 @@ let assert_executable path =
 
 (* Workspace *)
 
-let ctx =
+let from_env =
   let docker =
     try Os.which "docker"
     with Not_found -> ""

@@ -344,54 +344,79 @@ let test_to_string =
   ]
 
 (* Compatibility Groups *)
-let test_compatibility_groups ctxt =
+let test_compatibility_groups =
   let incompatible_major = Semver.semver (major + 1) minor patch [] [] in
   let compatible_minor = Semver.semver major (minor + 1) patch [] [] in
+  let compatible_minor_prerelease = Semver.semver major (minor + 1) patch ["alpha"] [] in
   let compatible_patch = Semver.semver major minor (patch + 1) [] [] in
-  let versions = [fixture; incompatible_major; compatible_minor; compatible_patch] in
+  (* let versions = [fixture; incompatible_major; compatible_minor; compatible_minor_prerelease; compatible_patch] in *)
 
-  let cgrps = Semver.compatibility_groups versions in
-
-  let length = List.length cgrps in
-  assert_equal ~ctxt 2 length;
-
-  let assert_cgrp major versions newest cgrp =
-    let actual = Semver.major cgrp in
-    assert_equal ~ctxt major actual;
-
-    let fn actual =
-      let fn expected =
-        let actual = Semver.compare expected actual in
-        actual = 0
-      in
-      if List.exists fn versions
-      then ()
-      else
-        let actual = Semver.to_string actual in
-        let versions = versions |> List.map Semver.to_string |> String.concat ", " in
-        let msg = sprintf "Version %s is not in [%s]" actual versions in
-        assert_failure msg
+  let test_latest =
+    let test_empty _ =
+      let grp = List.fold_right Semver.add [incompatible_major] Semver.empty in
+      let fn _ = Semver.latest major grp in
+      assert_raises Not_found fn
     in
-
-    let actual = Semver.versions cgrp in
-    let _ =
-      try
-        List.iter fn actual
-      with Invalid_argument _ ->
-        let expected = List.length versions in
-        let actual = List.length actual in
-        let msg = sprintf "Expected %d versions, got %d" expected actual in
-        assert_failure msg
+    let test_only_prerelease _ =
+      let grp = List.fold_right Semver.add [incompatible_major; compatible_minor_prerelease] Semver.empty in
+      let fn _ = Semver.latest major grp in
+      assert_raises Not_found fn
     in
-
-    let actual = Semver.newest cgrp in
-    assert_equal ~ctxt newest actual
+    let test_only ctxt =
+      let grp = List.fold_right Semver.add [incompatible_major; compatible_minor] Semver.empty in
+      Semver.latest major grp
+        |> assert_equal ~ctxt compatible_minor
+    in
+    let test_newest ctxt =
+      let grp = List.fold_right Semver.add [incompatible_major; compatible_minor; compatible_patch] Semver.empty in
+      Semver.latest major grp
+        |> assert_equal ~ctxt compatible_minor
+    in
+    let test_ignores_prerelease ctxt =
+      let grp = List.fold_right Semver.add [incompatible_major; compatible_minor_prerelease; compatible_patch] Semver.empty in
+      Semver.latest major grp
+        |> assert_equal ~ctxt compatible_patch
+    in
+    "Latest (Released)" >::: [
+      "Empty"                >:: test_empty;
+      "Only Pre-release"     >:: test_only_prerelease;
+      "Only Version"         >:: test_only;
+      "Newest Version"       >:: test_newest;
+      "Ignores Pre-releases" >:: test_ignores_prerelease
+    ]
   in
-  match cgrps with
-    | hd::tl::[] ->
-      assert_cgrp (major + 1) [incompatible_major] incompatible_major hd;
-      assert_cgrp major [fixture; compatible_minor; compatible_patch] compatible_minor tl;
-    | _ -> assert_failure "Un-possible!"
+  let test_latest_prerelease =
+    let test_empty _ =
+      let grp = List.fold_right Semver.add [incompatible_major] Semver.empty in
+      let fn _ = Semver.latest_prerelease major grp in
+      assert_raises Not_found fn
+    in
+    let test_only ctxt =
+      let grp = List.fold_right Semver.add [incompatible_major; compatible_minor_prerelease] Semver.empty in
+      Semver.latest_prerelease major grp
+        |> assert_equal ~ctxt compatible_minor_prerelease
+    in
+    let test_newest ctxt =
+      let grp = List.fold_right Semver.add [incompatible_major; compatible_minor; compatible_minor_prerelease; compatible_patch] Semver.empty in
+      Semver.latest_prerelease major grp
+        |> assert_equal ~ctxt compatible_minor
+    in
+    let test_includes_prerelease ctxt =
+      let grp = List.fold_right Semver.add [incompatible_major; compatible_minor_prerelease; compatible_patch] Semver.empty in
+      Semver.latest_prerelease major grp
+        |> assert_equal ~ctxt compatible_minor_prerelease
+    in
+    "Latest Prerelease" >::: [
+      "Empty"                 >:: test_empty;
+      "Only Version"          >:: test_only;
+      "Newest Version"        >:: test_newest;
+      "Includes Pre-releases" >:: test_includes_prerelease
+    ]
+  in
+  "Compatibility Groups" >::: [
+    test_latest;
+    test_latest_prerelease
+  ]
 
 (* Test Suite *)
 let suite =
@@ -401,5 +426,5 @@ let suite =
     test_compare;
     test_format;
     test_to_string;
-    "Compatibility Groups" >:: test_compatibility_groups
+    test_compatibility_groups
   ]

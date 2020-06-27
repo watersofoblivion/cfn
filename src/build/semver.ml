@@ -149,35 +149,40 @@ let to_string semver =
 
 (* Compatibility Groups *)
 
-type cg = int * t list
+module MajorMap = Map.Make(struct
+  type t = int
+  let compare = Stdlib.compare
+end)
 
-module Groups = Map.Make (struct type t = int let compare = Stdlib.compare end)
-let compatibility_groups semvers =
-  let fn groups semver =
-    let add_version = function
-      | None -> Some [semver]
-      | Some versions -> Some (semver :: versions)
-    in
-    Groups.update semver.major add_version groups
+type alias = t
+module SemverSet = Set.Make(struct
+  type t = alias
+  let compare = compare
+end)
+
+type cg = SemverSet.t MajorMap.t
+
+let empty = MajorMap.empty
+
+let add semver grp =
+  let set =
+    try MajorMap.find semver.major grp
+    with Not_found -> SemverSet.empty
   in
-  let groups = List.fold_left fn Groups.empty semvers in
-  let fn k v acc = (k, v) :: acc in
-  Groups.fold fn groups []
+  let set = SemverSet.add semver set in
+  MajorMap.add semver.major set grp
 
-let major (major, _) = major
-let versions (_, versions) = versions
-
-let min =
-  { major       = -1;
-    minor       = -1;
-    patch       = -1;
-    pre_release = [];
-    build_info  = [] }
-
-let newest (_, versions) =
-  let fn acc version =
-    if compare version acc > 0
-    then version
-    else acc
+let latest major grp =
+  let released semver = match semver.pre_release, semver.build_info with
+    | [], [] -> true
+    | _ -> false
   in
-  List.fold_left fn min versions
+  grp
+    |> MajorMap.find major
+    |> SemverSet.filter released
+    |> SemverSet.max_elt
+
+let latest_prerelease major grp =
+  grp
+    |> MajorMap.find major
+    |> SemverSet.max_elt

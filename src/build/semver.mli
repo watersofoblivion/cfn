@@ -39,16 +39,19 @@ val to_string : t -> string
 type cg
 (** A group of compatible versions *)
 
-val compatibility_groups : t list -> cg list
-(** [compatability_groups semvers] groups [semvers] by their compatibility.
-     Groups are returned in order of increasing major versions. *)
+val empty : cg
+(** [empty] returns an empty compatibility group. *)
 
-val major : cg -> int
-(** [major cg] returns the common major version number of all of the versions in
-    [cg]. *)
+val add : t -> cg -> cg
+(** [add semver grp] adds the version [semver] to the compatibility group [cg].
+    Duplicate versions are ignored. *)
 
-val versions : cg -> t list
-(** [versions cg] returns all of the individual versions in [cg]. *)
+val latest : int -> cg -> t
+(** [latest major grp] returns the latest released version in [grp] with major
+    version [major].  Raises {!Not_found} if [grp] contains no released version
+    with major version [major]. *)
 
-val newest : cg -> t
-(** [newest cg] returns the newest version in [cg]. *)
+val latest_prerelease : int -> cg -> t
+(** [latest_prerelease int grp] returns the latest version in [grp] with major
+    version [major], including pre-releases.  Raises {!Not_found} if [grp]
+    contains no version with major version [major]. *)

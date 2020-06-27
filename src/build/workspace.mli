@@ -8,8 +8,8 @@
  * {2 Types}
  *)
 
-type ctx
-(** The context describing a workspace. *)
+type t
+(** A workspace. *)
 
 type project
 (** A project in a workspace, either the current project or a dependency. *)
@@ -25,21 +25,21 @@ type lockfile
  * {2 Workspaces}
  *)
 
-val ctx : ctx
-(** [ctx] returns a context set with values from the environment. *)
+val from_env : t
+(** [from_env] returns a workspace with values set from the environment. *)
 
-val docker : ctx -> string list -> unit
-(** [docker ctx args] runs the Docker executable with command-line arguments
+val docker : t -> string list -> unit
+(** [docker t args] runs the Docker executable with command-line arguments
     [args].  Raises {!Not_found} if the executable is not set or
     {!Invalid_argument} if the path is not set to a valid executable. *)
 
-val dockerfile : ctx -> string
-(** [dockerfile ctx] returns the path to the build Dockerfile in the CFN++ home
+val dockerfile : t -> string
+(** [dockerfile t] returns the path to the build Dockerfile in the CFN++ home
     directory.  Raises {!Not_found} if the CFN++ home directory is not set or
     {!Invalid_argument} if the path is not set to a valid file. *)
 
-val stdlib : ctx -> Path.package -> package
-(** [stdlib ctx path] returns the standard library package pointed to by [path].
+val stdlib : t -> Path.package -> package
+(** [stdlib t path] returns the standard library package pointed to by [path].
     Raises {!Not_found} if the CFN++ home directory is not set or if the package
     does not exist, or {!Invalid_argument} if the path is not set to a valid
     directory. *)
@@ -48,7 +48,7 @@ val stdlib : ctx -> Path.package -> package
  * {2 Projects}
  *)
 
-val project : ctx -> Path.project -> project
+val project : t -> Path.project -> project
 (** [project ws path] constructs a project in [ws] with path [path]. *)
 
 val fetch : project -> project
@@ -109,5 +109,5 @@ val anf : package -> unit
  * {2 Lock File}
  *)
 
-val lockfile : ctx -> lockfile
+val lockfile : t -> lockfile
 (** [lockfile ws] ... . *)
