@@ -2,7 +2,7 @@
 
 open OUnit2
 
-(* open Pipeline *)
+(* open Artifact *)
 
 (* Test Initialization *)
 

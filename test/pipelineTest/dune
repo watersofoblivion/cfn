@@ -1,5 +1,0 @@
-(library
- (name pipelineTest)
- (libraries
-    ounit2
-    pipeline))

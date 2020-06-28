@@ -20,9 +20,10 @@ let cmd =
     let doc = "Allow pre-release packages" in
     Arg.(value & flag & info ["p"; "pre-release"] ~doc)
   in
+
   let import_paths =
     let doc = "Import path(s) to fetch" in
-    Arg.(required & pos 0 (some string) None & info [] ~docv:"IMPORT_PATH" ~doc)
+    Arg.(value & pos_all string [] & info [] ~docv:"IMPORT-PATHS" ~doc)
   in
 
   let term = Term.(const get $ update $ prerelease $ import_paths) in

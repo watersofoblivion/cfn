@@ -9,5 +9,5 @@
    ir
    opt
    codegen
-   pipeline
+   artifact
    cli))

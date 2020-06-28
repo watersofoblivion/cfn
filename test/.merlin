@@ -75,6 +75,7 @@ B /Users/jonathan/.opam/default/lib/uri/services
 B /Users/jonathan/.opam/default/lib/yojson
 B /usr/local/lib/ocaml
 B /usr/local/lib/ocaml/threads
+B ../_build/default/src/artifact/.artifact.objs/byte
 B ../_build/default/src/cli/.cli.objs/byte
 B ../_build/default/src/codegen/.codegen.objs/byte
 B ../_build/default/src/ext/.ext.objs/byte
@@ -82,7 +83,6 @@ B ../_build/default/src/ext/awsSpec/.awsSpec.objs/byte
 B ../_build/default/src/ext/cfnSpec/.cfnSpec.objs/byte
 B ../_build/default/src/ir/.ir.objs/byte
 B ../_build/default/src/opt/.opt.objs/byte
-B ../_build/default/src/pipeline/.pipeline.objs/byte
 B ../_build/default/src/syntax/.syntax.objs/byte
 B ../_build/default/test/.runner.eobjs/byte
 B ../_build/default/test/cliTest/.cliTest.objs/byte
@@ -92,7 +92,7 @@ B ../_build/default/test/extTest/awsSpecTest/.awsSpecTest.objs/byte
 B ../_build/default/test/extTest/cfnSpecTest/.cfnSpecTest.objs/byte
 B ../_build/default/test/irTest/.irTest.objs/byte
 B ../_build/default/test/optTest/.optTest.objs/byte
-B ../_build/default/test/pipelineTest/.pipelineTest.objs/byte
+B ../_build/default/test/pipelineTest/.artifactTest.objs/byte
 B ../_build/default/test/syntaxTest/.syntaxTest.objs/byte
 S /Users/jonathan/.opam/default/lib/angstrom
 S /Users/jonathan/.opam/default/lib/astring
@@ -170,13 +170,13 @@ S /Users/jonathan/.opam/default/lib/uri/services
 S /Users/jonathan/.opam/default/lib/yojson
 S /usr/local/lib/ocaml
 S /usr/local/lib/ocaml/threads
+S ../src/artifact
 S ../src/cli
 S ../src/codegen
 S ../src/ext
 S ../src/ext/awsSpec
 S ../src/ext/cfnSpec
 S ../src/ir
-S ../src/pipeline
 S ../src/syntax
 S .
 S codegenTest

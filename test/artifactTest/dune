@@ -1,0 +1,5 @@
+(library
+ (name artifactTest)
+ (libraries
+    ounit2
+    artifact))

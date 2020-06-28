@@ -17,7 +17,7 @@
 ;  (run atdgen -v %{deps})))
 
 (library
-  (name pipeline)
+  (name artifact)
 ;  (bisect_ppx)
   (libraries
     str

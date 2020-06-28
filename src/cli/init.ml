@@ -1,6 +1,6 @@
 open Cmdliner
 
-open Pipeline
+open Artifact
 
 (* 'init' -- Initialize a new project *)
 let cmd =
@@ -22,7 +22,7 @@ let cmd =
 
   let id =
     let doc = "Project ID" in
-    Arg.(required & pos 0 (some string) None & info [] ~docv:"ID" ~doc)
+    Arg.(required & pos 0 (some string) None & info [] ~docv:"PROJECT-ID" ~doc)
   in
   let dir =
     let doc = "Project directory" in

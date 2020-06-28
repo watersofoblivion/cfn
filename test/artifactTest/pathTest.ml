@@ -2,7 +2,7 @@ open Format
 
 open OUnit2
 
-open Pipeline
+open Artifact
 
 let assert_invalid parse typ path =
   let msg = sprintf "%S is not a valid %s" path typ in

@@ -23,7 +23,7 @@
   (name cfnSpec)
 ;  (bisect_ppx)
   (libraries
-    pipeline
+    artifact
     ext
     atdgen
     yojson))
