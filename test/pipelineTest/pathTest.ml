@@ -5,14 +5,78 @@ open OUnit2
 open Pipeline
 
 let assert_invalid parse typ path =
-  let msg = sprintf "%S is not a valid %s path" path typ in
+  let msg = sprintf "%S is not a valid %s" path typ in
   let exn = Invalid_argument msg in
   let fn _ = parse path in
   assert_raises exn fn
 
-let assert_invalid_project = assert_invalid Path.project "project"
-let assert_invalid_package = assert_invalid Path.package "package"
-let assert_invalid_import = assert_invalid Path.import "import"
+let assert_invalid_name = assert_invalid Path.id "project id"
+let assert_invalid_project = assert_invalid Path.project "project path"
+let assert_invalid_package = assert_invalid Path.package "package path"
+let assert_invalid_import = assert_invalid Path.import "import path"
+
+let test_name =
+  let host = "example.com" in
+  let path = "/foo/bar" in
+  let vcs = Path.Git in
+  let ext = Path.vcs_ext vcs in
+
+  let test_valid =
+    let assert_valid ~ctxt expected path =
+      let expected = Path.id expected in
+      path
+        |> Path.id
+        |> assert_equal ~ctxt expected
+    in
+
+    let expected = sprintf "%s%s" host path in
+
+    let test_host ctxt =
+      host
+        |> assert_valid ~ctxt host
+    in
+    let test_host_path ctxt =
+      sprintf "%s%s" host path
+        |> assert_valid ~ctxt expected
+    in
+    let test_vcs_ext ctxt =
+      sprintf "%s%s%s" host path ext
+        |> assert_valid ~ctxt expected
+    in
+    "Valid" >::: [
+      "Host Only"     >:: test_host;
+      "Host and Path" >:: test_host_path;
+      "VCS Extension" >:: test_vcs_ext
+    ]
+  in
+  let test_invalid =
+    let test_port _ =
+      sprintf "%s:1234%s" host path
+        |> assert_invalid_name
+    in
+    let test_major _ =
+      sprintf "%s%s@v42" host path
+        |> assert_invalid_name
+    in
+    let test_illegal_char _ =
+      sprintf "foo!bar%s" path
+        |> assert_invalid_name
+    in
+    let test_trailing_slash _ =
+      sprintf "%s%s/" host path
+        |> assert_invalid_name
+    in
+    "Invalid" >::: [
+      "Port"              >:: test_port;
+      "Major Version"     >:: test_major;
+      "Illegal Character" >:: test_illegal_char;
+      "Trailing Slash"    >:: test_trailing_slash;
+    ]
+  in
+  "Names" >::: [
+    test_valid;
+    test_invalid
+  ]
 
 let test_project =
   let host = "example.com" in
@@ -492,6 +556,7 @@ let test_import =
 (* Test Suite *)
 let suite =
   "Paths" >::: [
+    test_name;
     test_project;
     test_package;
     test_import

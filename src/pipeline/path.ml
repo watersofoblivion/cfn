@@ -1,11 +1,7 @@
 open Format
 open Str
 
-(* Common *)
-
-let legal_chars = "[^]@!/\"#$%&'()*,:;<=>?^[`{|}]+"
-
-(* Project Paths *)
+(* Version Control Systems *)
 
 type vcs =
   | Git
@@ -16,6 +12,63 @@ let vcs_of_ext = function
 
 let vcs_ext = function
   | Git -> ".git"
+
+(* Common *)
+
+let legal_chars = "[^]@!/\"#$%&'()*,:;<=>?^[`{|}]+"
+
+(* Names *)
+
+type id = string
+
+let id_re =
+  let id_pattern =
+    sprintf "^\\(%s\\(/\\|\\(/%s\\)*\\)\\)$"
+      legal_chars
+      legal_chars
+  in
+  regexp id_pattern
+
+let id str =
+  let invalid str =
+    let msg = sprintf "%S is not a valid project id" str in
+    let exn = Invalid_argument msg in
+    raise exn
+  in
+
+  let strip_vcs_ext uri = match Uri.path uri with
+    | "" -> uri
+    | path ->
+      match String.sub path 1 (String.length path - 1) |> vcs_of_ext with
+        | Some _ -> Uri.with_path uri ""
+        | None ->
+          match path |> Filename.extension |> vcs_of_ext with
+            | Some _ ->
+                path
+                  |> Filename.remove_extension
+                  |> Uri.with_path uri
+            | None -> uri
+  in
+
+  if string_match id_re str 0
+  then
+    let uri =
+      str
+        |> sprintf "//%s"
+        |> Uri.of_string
+        |> strip_vcs_ext
+    in
+    let host = match Uri.host uri with
+      | Some host -> host
+      | None -> ""
+    in
+    let path = Uri.path uri in
+    sprintf "%s%s" host path
+  else invalid str
+
+let name id = id
+
+(* Project Paths *)
 
 type project =
   | Internal

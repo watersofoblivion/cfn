@@ -45,7 +45,7 @@ type t = {
   docker:       string;
   home:         string;
   root:         string;
-  project:      Path.project;
+  id:           Path.id;
   current:      package PackageMap.t;
   dependencies: project ProjectMap.t
 }
@@ -122,7 +122,7 @@ let from_env _ =
   { docker       = docker;
     home         = home;
     root         = "";
-    project      = Path.project ".";
+    id           = Path.id "from-env";
     current      = PackageMap.empty;
     dependencies = ProjectMap.empty }
 
@@ -143,7 +143,7 @@ let current _ =
 
 let write_project_file ws =
   let project_file =
-    { Files_t.name = Path.source ws.project }
+    { Files_t.name = Path.name ws.id }
   in
   let write oc =
     project_file
@@ -181,7 +181,7 @@ let write_lockfile ws =
     |> Filename.concat ws.root
     |> Os.overwrite write 0o644
 
-let create prj dir =
+let create id dir =
   let _ =
     dir
       |> assert_absolute
@@ -189,8 +189,8 @@ let create prj dir =
   in
   let ws =
     let ws = from_env () in
-    { ws with root    = dir;
-              project = prj }
+    { ws with root = dir;
+              id   = id }
   in
   let _ = Os.mkdir dir in
   let _ = write_project_file ws in

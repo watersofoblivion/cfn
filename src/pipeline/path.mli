@@ -3,11 +3,11 @@
  *)
 
 (**
- * {2 Projects}
+ * {2 Version Control Systems}
  *)
 
 type vcs =
-  | Git
+ | Git
 
 val vcs_of_ext : string -> vcs option
 (** [vcs_of_ext ext] returns a the version control system indicated by [ext], or
@@ -15,6 +15,25 @@ val vcs_of_ext : string -> vcs option
 
 val vcs_ext : vcs -> string
 (** [vcs_ext vcs] returns the extension matching [vcs]. *)
+
+(**
+ * {2 Names}
+ *)
+
+type id
+(** A project name *)
+
+val id : string -> id
+(** [id str] parses [str] into a bare project name, suitable for initializing a
+    project.  Raises {!Invalid_argument} if [str] is not a valid project
+    name. *)
+
+val name : id -> string
+(** [name id] returns [id] as a string. *)
+
+(**
+ * {2 Projects}
+ *)
 
 type project
 (** A project path. *)

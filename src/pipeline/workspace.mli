@@ -51,9 +51,9 @@ val current : unit -> t
 (** [current _] returns the workspace for the current project.  Values set from
     the environment. *)
 
-val create : Path.project -> string -> t
-(** [create prj dir] creates a new workspace for project [prj] in directory
-    [dir].  Initializes a Git repository and performs an initial commit. *)
+val create : Path.id -> string -> t
+(** [create id dir] creates a new workspace for project [id] in directory [dir].
+    Writes out the project file and lockfile. *)
 
 (*
 val fetch : Path.project -> t -> t
