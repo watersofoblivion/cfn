@@ -1,0 +1,22 @@
+EXCLUDE_QUERY_DIR
+B /Users/jonathan/.opam/default/lib/biniou
+B /Users/jonathan/.opam/default/lib/bytes
+B /Users/jonathan/.opam/default/lib/easy-format
+B /Users/jonathan/.opam/default/lib/ounit2
+B /Users/jonathan/.opam/default/lib/ounit2/advanced
+B /Users/jonathan/.opam/default/lib/stdlib-shims
+B /Users/jonathan/.opam/default/lib/yojson
+B /usr/local/lib/ocaml
+B ../../_build/default/src/ext/.ext.objs/byte
+B ../../_build/default/test/extTest/.extTest.objs/byte
+S /Users/jonathan/.opam/default/lib/biniou
+S /Users/jonathan/.opam/default/lib/bytes
+S /Users/jonathan/.opam/default/lib/easy-format
+S /Users/jonathan/.opam/default/lib/ounit2
+S /Users/jonathan/.opam/default/lib/ounit2/advanced
+S /Users/jonathan/.opam/default/lib/stdlib-shims
+S /Users/jonathan/.opam/default/lib/yojson
+S /usr/local/lib/ocaml
+S ../../src/ext
+S .
+FLG -open ExtTest -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs
