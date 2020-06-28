@@ -2,7 +2,7 @@ open Format
 
 open OUnit2
 
-open Build
+open Pipeline
 
 let assert_invalid parse typ path =
   let msg = sprintf "%S is not a valid %s path" path typ in
@@ -18,15 +18,55 @@ let test_project =
   let host = "example.com" in
   let port = 8080 in
   let path = "/foo/bar" in
-  let vcs = "git" in
+  let vcs = Path.Git in
+  let ext = Path.vcs_ext vcs in
   let major = 42 in
+
+  let test_vcs =
+    let test_vcs_of_ext =
+      let test_git ctxt =
+        ".git"
+          |> Path.vcs_of_ext
+          |> assert_equal ~ctxt (Some Path.Git)
+      in
+      let test_unrecognized ctxt =
+        ".unrecognized"
+          |> Path.vcs_of_ext
+          |> assert_equal ~ctxt None
+      in
+      let test_blank ctxt =
+        ""
+          |> Path.vcs_of_ext
+          |> assert_equal ~ctxt None
+      in
+      "By Extension" >::: [
+        "Git"          >:: test_git;
+        "Unrecognized" >:: test_unrecognized;
+        "Blank"        >:: test_blank
+      ]
+    in
+    let test_vcs_ext =
+      let test_git ctxt =
+        Path.Git
+          |> Path.vcs_ext
+          |> assert_equal ~ctxt ".git"
+      in
+      "Extension" >::: [
+        "Git" >:: test_git
+      ]
+    in
+    "Version Control System" >::: [
+      test_vcs_of_ext;
+      test_vcs_ext;
+    ]
+  in
 
   let internal =
     "."
       |> Path.project
   in
   let extern =
-    sprintf "%s:%d%s.%s@v%d" host port path vcs major
+    sprintf "%s:%d%s%s@v%d" host port path ext major
       |> Path.project
   in
 
@@ -40,50 +80,53 @@ let test_project =
     let test_external =
       let test_valid =
         let assert_valid ~ctxt expected path =
-          let str_print s = s in
-          let int_print i = string_of_int i in
           let prj =
             path
               |> Path.project
           in
           prj
             |> Path.source
-            |> assert_equal ~ctxt ~printer:str_print expected;
+            |> assert_equal ~ctxt expected;
           prj
             |> Path.major
-            |> assert_equal ~ctxt ~printer:int_print major
+            |> assert_equal ~ctxt major
         in
         let test_none ctxt =
-          let expected = sprintf "%s/.%s" host vcs in
-          let path = sprintf "%s@v%d" host major in
-          assert_valid ~ctxt expected path
+          let expected = sprintf "%s/" host in
+          sprintf "%s@v%d" host major
+            |> assert_valid ~ctxt expected
         in
         let test_path ctxt =
-          let expected = sprintf "%s%s.%s" host path vcs in
-          let path = sprintf "%s%s@v%d" host path major in
-          assert_valid ~ctxt expected path
+          let expected = sprintf "%s%s" host path in
+          sprintf "%s%s@v%d" host path major
+            |> assert_valid ~ctxt expected
         in
         let test_port ctxt =
-          let expected = sprintf "%s:%d/.%s" host port vcs in
-          let path = sprintf "%s:%d@v%d" host port major in
-          assert_valid ~ctxt expected path
+          let expected = sprintf "%s:%d/" host port in
+          sprintf "%s:%d@v%d" host port major
+            |> assert_valid ~ctxt expected
         in
         let test_vcs ctxt =
-          let expected = sprintf "%s:%d/.%s" host port vcs in
-          let path = sprintf "%s:%d/.%s@v%d" host port vcs major in
-          assert_valid ~ctxt expected path
+          let expected = sprintf "%s/foo" host in
+          let path = sprintf "%s/foo%s@v%d" host ext major in
+          path
+            |> assert_valid ~ctxt expected;
+          path
+            |> Path.project
+            |> Path.vcs
+            |> assert_equal ~ctxt vcs
         in
         let test_all ctxt =
-          let expected = sprintf "%s:%d%s.%s" host port path vcs in
-          let path = sprintf "%s:%d%s.%s@v%d" host port path vcs major in
-          assert_valid ~ctxt expected path
+          let expected = sprintf "%s:%d%s" host port path in
+          sprintf "%s:%d%s%s@v%d" host port path ext major
+            |> assert_valid ~ctxt expected
         in
         "Valid" >::: [
-          "None"                   >:: test_none;
-          "Path"                   >:: test_path;
-          "Port"                   >:: test_port;
-          "Version Control System" >:: test_vcs;
-          "All"                    >:: test_all
+          "None" >:: test_none;
+          "Path" >:: test_path;
+          "Port" >:: test_port;
+          "VCS"  >:: test_vcs;
+          "All"  >:: test_all
         ]
       in
       let test_invalid =
@@ -148,10 +191,13 @@ let test_project =
       assert_raises Path.InternalProject fn
     in
     let test_external ctxt =
-      let expected = sprintf "%s:%d%s.%s" host port path vcs in
+      let expected = sprintf "%s:%d%s" host port path in
       extern
         |> Path.source
-        |> assert_equal ~ctxt expected
+        |> assert_equal ~ctxt expected;
+      extern
+        |> Path.vcs
+        |> assert_equal ~ctxt vcs
     in
     "Source" >::: [
       "Internal" >:: test_internal;
@@ -176,11 +222,72 @@ let test_project =
       "External" >:: test_external
     ]
   in
+  let test_compare =
+    let test_internal_internal ctxt =
+      let prj = Path.project "." in
+      let prj' = Path.project "." in
+      Path.compare_project prj prj'
+        |> assert_equal ~ctxt 0
+    in
+    let test_internal_external ctxt =
+      let prj = Path.project "." in
+      let prj' = Path.project "foo.com/bar@v42" in
+      Path.compare_project prj prj'
+        |> assert_equal ~ctxt (-1)
+    in
+    let test_external_internal ctxt =
+      let prj = Path.project "foo.com/bar@v42" in
+      let prj' = Path.project "." in
+      Path.compare_project prj prj'
+        |> assert_equal ~ctxt 1
+    in
+    let test_external_external =
+      let test_equal ctxt =
+        let prj = Path.project "foo.com/bar@v42" in
+        Path.compare_project prj prj
+          |> assert_equal ~ctxt 0
+      in
+      let test_source ctxt =
+        let prj = Path.project "bar.com/foo@v42" in
+        let prj' = Path.project "baz.com/foo@v42" in
+        let prj'' = Path.project "bar.com/foo@v41" in
+
+        Path.compare_project prj prj'
+          |> assert_equal ~ctxt (-1);
+        Path.compare_project prj' prj
+          |> assert_equal ~ctxt 1;
+        Path.compare_project prj' prj''
+          |> assert_equal ~ctxt 1
+      in
+      let test_major ctxt =
+        let prj = Path.project "foo.com/bar@v1" in
+        let prj' = Path.project "foo.com/bar@v2" in
+
+        Path.compare_project prj prj'
+          |> assert_equal ~ctxt (-1);
+        Path.compare_project prj' prj
+          |> assert_equal ~ctxt 1
+      in
+      "Externals" >::: [
+        "Equal"  >:: test_equal;
+        "Source" >:: test_source;
+        "Major"  >:: test_major
+      ]
+    in
+    "Compare" >::: [
+      "Internal are Equal"                >:: test_internal_internal;
+      "Internal is less than External"    >:: test_internal_external;
+      "External is greater than Internal" >:: test_external_internal;
+      test_external_external
+    ]
+  in
   "Project" >::: [
+    test_vcs;
     test_project;
     test_current;
     test_source;
-    test_major
+    test_major;
+    test_compare
   ]
 
 let test_package =
@@ -242,9 +349,33 @@ let test_package =
       "Trailing Slash"    >:: test_trailing_slash
     ]
   in
+  let test_compare =
+    let test_lexographically ctxt =
+      let path = Path.package "bar/baz" in
+      let path' = Path.package "bar/quux" in
+      let path'' = Path.package "baz/bar" in
+
+      Path.compare_package path path'
+        |> assert_equal ~ctxt (-1);
+      Path.compare_package path' path
+        |> assert_equal ~ctxt 1;
+      Path.compare_package path path''
+        |> assert_equal ~ctxt (-1);
+      Path.compare_package path' path''
+        |> assert_equal ~ctxt (-1);
+      Path.compare_package path'' path
+        |> assert_equal ~ctxt 1;
+      Path.compare_package path'' path
+        |> assert_equal ~ctxt 1;
+    in
+    "Compare" >::: [
+      "Lexographically" >:: test_lexographically
+    ]
+  in
   "Package" >::: [
     test_valid;
-    test_invalid
+    test_invalid;
+    test_compare
   ]
 
 let test_import =
@@ -266,10 +397,12 @@ let test_import =
         |> assert_equal ~ctxt dir
     in
     let test_external ctxt =
-      let src = "example.com/foo/bar.git" in
+      let src = "example.com/foo/bar" in
+      let vcs = Path.Git in
+      let ext = Path.vcs_ext vcs in
       let major = 42 in
       let path =
-        sprintf "%s@v%d:%s" src major dir
+        sprintf "%s%s@v%d:%s" src ext major dir
           |> Path.import
       in
       let prj = Path.prj path in
@@ -280,6 +413,9 @@ let test_import =
       prj
         |> Path.source
         |> assert_equal ~ctxt src;
+      prj
+        |> Path.vcs
+        |> assert_equal ~ctxt vcs;
       prj
         |> Path.major
         |> assert_equal ~ctxt major

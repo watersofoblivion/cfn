@@ -1,0 +1,27 @@
+(rule
+ (targets files_j.ml files_j.mli)
+ (deps    files.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets files_t.ml files_t.mli)
+ (deps    files.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+;(rule
+; (targets files_v.ml files_v.mli)
+; (deps    files.atd)
+; (action
+;  (run atdgen -v %{deps})))
+
+(library
+  (name pipeline)
+;  (bisect_ppx)
+  (libraries
+    str
+    atdgen
+    yojson
+    git
+    git-unix))

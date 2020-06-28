@@ -10,7 +10,12 @@ let cmd =
     ()
   in
 
-  let term = Term.(const build $ Common.import_path) in
+  let import_path =
+    let doc = "Import path to deploy" in
+    Arg.(required & pos 0 (some string) None & info [] ~docv:"IMPORT_PATH" ~doc)
+  in
+
+  let term = Term.(const build $ import_path) in
   let info =
     Term.info "build" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man
   in

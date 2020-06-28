@@ -51,13 +51,13 @@ let test_codegen =
     CodegenTest.TmplTest.suite
   ]
 
-let test_build =
-  "Build" >::: [
-    BuildTest.TestUtil.suite;
-    BuildTest.OsTest.suite;
-    BuildTest.SemverTest.suite;
-    BuildTest.PathTest.suite;
-    BuildTest.WorkspaceTest.suite
+let test_pipeline =
+  "Pipeline" >::: [
+    PipelineTest.TestUtil.suite;
+    PipelineTest.OsTest.suite;
+    PipelineTest.SemverTest.suite;
+    PipelineTest.PathTest.suite;
+    PipelineTest.WorkspaceTest.suite
   ]
 
 let test_cli =
@@ -71,7 +71,7 @@ let suite =
     test_ir;
     test_opt;
     test_codegen;
-    test_build;
+    test_pipeline;
     test_cli
   ]
 

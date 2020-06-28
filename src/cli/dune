@@ -2,4 +2,5 @@
  (name cli)
 ; (bisect_ppx)
  (libraries
+   pipeline
    cmdliner))

@@ -9,5 +9,5 @@
     irTest
     optTest
     codegenTest
-    buildTest
+    pipelineTest
     cliTest))

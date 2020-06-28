@@ -10,11 +10,11 @@ let legal_chars = "[^]@!/\"#$%&'()*,:;<=>?^[`{|}]+"
 type vcs =
   | Git
 
-let vcs = function
+let vcs_of_ext = function
   | ".git" -> Some Git
   | _ -> None
 
-let ext = function
+let vcs_ext = function
   | Git -> ".git"
 
 type project =
@@ -57,12 +57,12 @@ let project str =
           match Uri.path uri with
             | "" -> (uri, Git)
             | path ->
-              match String.sub path 1 (String.length path - 1) |> vcs with
+              match String.sub path 1 (String.length path - 1) |> vcs_of_ext with
                 | Some vcs ->
                   let uri = Uri.with_path uri "" in
                   (uri, vcs)
                 | None ->
-                  match path |> Filename.extension |> vcs with
+                  match path |> Filename.extension |> vcs_of_ext with
                     | Some vcs ->
                       let uri =
                         path
@@ -86,7 +86,7 @@ let current = function
 
 let source = function
   | Internal -> raise InternalProject
-  | External(uri, vcs, _) ->
+  | External(uri, _, _) ->
     let host = match Uri.host uri with
       | Some host -> host
       | None -> ""
@@ -99,12 +99,25 @@ let source = function
       | "" -> "/"
       | path -> path
     in
-    let vcs = ext vcs in
-    String.concat "" [host; port; path; vcs]
+    String.concat "" [host; port; path]
+
+let vcs = function
+  | Internal -> raise InternalProject
+  | External(_, vcs, _) -> vcs
 
 let major = function
   | Internal -> raise InternalProject
   | External(_, _, major) -> major
+
+let compare_project prj prj' =
+  match (prj, prj') with
+    | Internal, Internal -> 0
+    | Internal, External _ -> -1
+    | External _, Internal -> 1
+    | _ ->
+      match Stdlib.compare (source prj) (source prj') with
+        | 0 -> Stdlib.compare (major prj) (major prj')
+        | res -> res
 
 (* Package Paths *)
 
@@ -144,6 +157,7 @@ let package str =
     invalid str
 
 let path pkg = pkg
+let compare_package = Stdlib.compare
 
 (* Import Paths *)
 

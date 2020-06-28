@@ -1,5 +1,0 @@
-(library
- (name buildTest)
- (libraries
-    ounit2
-    build))

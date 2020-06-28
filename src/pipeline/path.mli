@@ -6,6 +6,16 @@
  * {2 Projects}
  *)
 
+type vcs =
+  | Git
+
+val vcs_of_ext : string -> vcs option
+(** [vcs_of_ext ext] returns a the version control system indicated by [ext], or
+    [None] if the extension is not a recognized version control system. *)
+
+val vcs_ext : vcs -> string
+(** [vcs_ext vcs] returns the extension matching [vcs]. *)
+
 type project
 (** A project path. *)
 
@@ -24,9 +34,18 @@ val source : project -> string
 (** [source prj] returns the source for the project.  Raises {!InternalProject}
     if [prj] points to the current project. *)
 
+val vcs : project -> vcs
+(** [vcs prj] returns the version control system used by [prj].  Raises
+    {!InternalProject} if [prj] points to the current project. *)
+
 val major : project -> int
 (** [major prj] returns the major version of the project.  Raises
     {!InternalProject} if [prj] points to the current project. *)
+
+val compare_project : project -> project -> int
+(** [compare_project prj prj'] compares [prj] and [prj'] and returns [-1] if
+    [prj] is less than [prj'], [1] if [prj] is greater than [prj'], or [0]
+    otherwise. *)
 
 (**
  * {2 Packages}
@@ -41,6 +60,11 @@ val package : string -> package
 
 val path : package -> string
 (** [path pkg] returns the path of [pkg].  Can be blank. *)
+
+val compare_package : package -> package -> int
+(** [compare_package pkg pkg'] compares [pkg] and [pkg'] and returns a negative
+    number if [pkg] is less than [pkg'], a positive number if [pkg] is greater
+    than [pkg'], or [0] otherwise. *)
 
 (**
  * {2 Import}

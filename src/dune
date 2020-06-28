@@ -9,5 +9,5 @@
    ir
    opt
    codegen
-   build
+   pipeline
    cli))
