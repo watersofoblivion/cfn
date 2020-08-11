@@ -27,8 +27,5 @@ depends: [
   "cmdliner"
   "ounit2"
   "llvm"
-  "git"
-  "git-unix"
-  "cohttp"
-  "lwt"
+  "zarith"
 ]

@@ -21,12 +21,12 @@ let legal_chars = "[^]@!/\"#$%&'()*,:;<=>?^[`{|}]+"
 
 type id = string
 
+let id_pattern =
+  sprintf "\\(%s\\(/\\|\\(/%s\\)*\\)\\)"
+    legal_chars
+    legal_chars
 let id_re =
-  let id_pattern =
-    sprintf "^\\(%s\\(/\\|\\(/%s\\)*\\)\\)$"
-      legal_chars
-      legal_chars
-  in
+  let id_pattern = sprintf "^%s$" id_pattern in
   regexp id_pattern
 
 let id str =
@@ -77,16 +77,12 @@ type project =
 exception InternalProject
 
 let project_re =
-  let path_pattern =
-    sprintf "^\\(\\.\\|\\(%s\\(:[0-9]+\\)?\\(/\\|\\(/%s\\)*\\)\\)@v\\([0-9]+\\)\\)$"
-      legal_chars
-      legal_chars
-  in
+  let path_pattern = sprintf "^\\(\\.\\|%s@v\\([0-9]+\\)\\)$" id_pattern in
   regexp path_pattern
 
 let path_group = 1
 let uri_group = 2
-let major_group = 6
+let major_group = 5
 
 let project str =
   let invalid str =
@@ -138,21 +134,17 @@ let current = function
   | _ -> false
 
 let source = function
-  | Internal -> raise InternalProject
+  | Internal -> "."
   | External(uri, _, _) ->
     let host = match Uri.host uri with
       | Some host -> host
-      | None -> ""
-    in
-    let port = match Uri.port uri with
-      | Some port -> sprintf ":%d" port
       | None -> ""
     in
     let path = match Uri.path uri with
       | "" -> "/"
       | path -> path
     in
-    String.concat "" [host; port; path]
+    String.concat "" [host; path]
 
 let vcs = function
   | Internal -> raise InternalProject

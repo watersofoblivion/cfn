@@ -57,6 +57,7 @@ let test_artifact =
     ArtifactTest.OsTest.suite;
     ArtifactTest.SemverTest.suite;
     ArtifactTest.PathTest.suite;
+    ArtifactTest.GitTest.suite;
     ArtifactTest.WorkspaceTest.suite
   ]
 

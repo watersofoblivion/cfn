@@ -1,7 +1,7 @@
 (* Project File *)
 
 type project_file =
-  { name: string }
+  { id: string }
 
 (* Lock File *)
 

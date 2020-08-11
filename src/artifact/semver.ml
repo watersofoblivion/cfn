@@ -160,29 +160,40 @@ module SemverSet = Set.Make(struct
   let compare = compare
 end)
 
-type cg = SemverSet.t MajorMap.t
+module SemverMap = Map.Make(struct
+  type t = alias
+  let compare = compare
+end)
 
-let empty = MajorMap.empty
+type 'a cg = SemverSet.t MajorMap.t * 'a SemverMap.t
 
-let add semver grp =
+let empty = (MajorMap.empty, SemverMap.empty)
+
+let add semver v (majors, values) =
   let set =
-    try MajorMap.find semver.major grp
+    try MajorMap.find semver.major majors
     with Not_found -> SemverSet.empty
   in
-  let set = SemverSet.add semver set in
-  MajorMap.add semver.major set grp
+  let majors =
+    let set = SemverSet.add semver set in
+    MajorMap.add semver.major set majors
+  in
+  let values = SemverMap.add semver v values in
+  (majors, values)
 
-let latest major grp =
+let find semver (_, values) = SemverMap.find semver values
+
+let latest major (majors, _) =
   let released semver = match semver.pre_release, semver.build_info with
     | [], [] -> true
     | _ -> false
   in
-  grp
+  majors
     |> MajorMap.find major
     |> SemverSet.filter released
     |> SemverSet.max_elt
 
-let latest_prerelease major grp =
-  grp
+let latest_prerelease major (majors, _) =
+  majors
     |> MajorMap.find major
     |> SemverSet.max_elt

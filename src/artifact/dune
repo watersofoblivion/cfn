@@ -24,4 +24,5 @@
     atdgen
     yojson
     git
-    git-unix))
+    git-unix
+    syntax))

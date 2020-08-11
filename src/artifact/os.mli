@@ -19,9 +19,13 @@ val files : string -> string list
 (** [files dir] returns a list of all the file names within [dir].  Returned
     names do not include the directory. *)
 
+val dirs : string -> string list
+(** [dirs dir] returns a list of all of the subdirectory names (non-recursive)
+    within [dir].  Returned names do not include the directory. *)
+
 val subdirs : string -> string list
-(** [subdirs dir] returns a list of all of the subdirectory names
-    (non-recursive) within [dir].  Returned names do not include the directory. *)
+(** [dirs dir] returns a list of all of the subdirectory names (recursive)
+    within [dir].  Returned names do not include the directory. *)
 
 val in_dir : string -> ('a -> 'b) -> 'a -> 'b
 (** [in_dir dir fn x] changes to the directory [dir], applies [fn] to [x], and
@@ -72,3 +76,41 @@ val find_in_path : string -> string -> string
 (** [find_in_path filename from] searches for a file named [filename] in the
     directory [from] and working upwards.  Returns the path to the file if it is
     found, or raises {!Not_found} otherwise. *)
+
+(**
+ * {2 Process Control}
+ *)
+
+type output
+(** The output from a process *)
+
+val of_stdout : bytes -> output
+(** [of_stdout bs] constructs output from standard output. *)
+
+val of_stderr : bytes -> output
+(** [of_stderr bs] constructs output from standard error. *)
+
+val stdout : output list -> bytes
+(** [stdout output] returns just the process output to standard output. *)
+
+val stderr : output list -> bytes
+(** [stdout output] returns just the process output to standard error. *)
+
+val combined : output list -> bytes
+(** [combined output] returns the combined process output to standard output and
+    standard error. *)
+
+val dump : out_channel -> out_channel -> output list -> unit
+(** [dump stdout stderr process_output] prints [process_output] as it was
+    received, treating [stdout] and [stderr] as standard output and standard
+    error, respectively. *)
+
+exception NonZero of int * output list
+(** Raised when a process exits with a non-zero status code *)
+
+val run : string -> string list -> bytes
+(** [run cmd args] runs [cmd] with command-line arguments [args].  [cmd] is
+    passed as the 0th argument and is used to find an executable in the path.
+    On success (a zero exit status), the standard output is returned.  Raises
+    {!Not_found} if no executable can be found and {!NonZero} if the process
+    terminates with a non-zero exit status. *)

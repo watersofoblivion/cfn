@@ -1,0 +1,83 @@
+package foo
+
+import
+  | "bar/baz" -> localname
+  | "quux"
+  | "aws/context"
+  | "aws/svc/apigateway"
+
+from "github.com/some/project@v42" import
+  | "remote/pkg" -> remote
+  | "something/else"
+
+// Comes from "bar/baz" in the standard library
+val w = localname.SomeFunction 4 2
+
+// Comes from "quux" in the standard library
+val x = quux.AnotherFunction 42 "fourty-two"
+
+// Comes from "some/pkg" in "github.com/some/project@v42"
+val y = remote.YetAnotherFunction "foo"
+
+// Comes from "something/else" in "github.com/some/project@v42"
+val z = else.SupriseSupriseAnotherFunction ["some", "arguments", "here"] -3.14159 true
+
+/**
+ * A template
+ ***
+ * @Type T {
+ *   @Description "A variable type"
+ * }
+ * @Parameter bucketName {
+ *   @Description "The name of the bucket"
+ * }
+ * @Parameter t {
+ *   @Description "A parameter of the variable type"
+ * }
+ */
+template MyTemplate[T](bucketName: String, t: T) {
+  /**
+   * An S3 Bucket
+   ***
+   * @DeletionPolicy Retain
+   */
+  val Bucket = s3.Bucket{
+    Name: bucketName,
+    VersioningConfiguration: {
+      Status: s3.VersioningConfigurationEnabled
+    },
+    BucketEncryption: {
+      ServerSideEncryptionConfiguration: [{
+        ServerSideEncryptionByDefault: {
+          SSEAlgorithm: "aws:kms"
+        }
+      }]
+    }
+  }
+
+  def DoIt(ctx: aws.Context, req: apigateway.ProxyRequest) {
+    let prefix = case req.Params["prefix"] of
+      | "/"    -> ""
+      | prefix -> prefix
+    in
+    try
+      let resp =
+        let req =
+          s3.ListObjectsRequest{
+            Bucket: Bucket,
+            Prefix: prefix,
+          }
+        in
+        s3.ListObjects ctx req
+      in
+      apigateway.ProxyResponse{
+        StatusCode: 200,
+        Headers: {},
+        Body: string.Join "," resp.Paths
+      }
+    with
+      | SomeError    -> apigateway.ProxyResponse{Status: 400}
+      | AnotherError -> apigateway.ProxyResponse{Status: 404}
+      | _            -> apigateway.ProxyResponse{Status: 500}
+    }
+}

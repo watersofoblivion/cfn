@@ -4,8 +4,8 @@ B /Users/jonathan/.opam/default/lib/atdgen-runtime
 B /Users/jonathan/.opam/default/lib/biniou
 B /Users/jonathan/.opam/default/lib/easy-format
 B /Users/jonathan/.opam/default/lib/yojson
-B ../../../_build/default/src/ext/.ext.objs/byte
-B ../../../_build/default/src/ext/awsSpec/.awsSpec.objs/byte
+B ../../../_build/default/src/external/.ext.objs/byte
+B ../../../_build/default/src/external/awsSpec/.awsSpec.objs/byte
 S /Users/jonathan/.opam/default/lib/atdgen
 S /Users/jonathan/.opam/default/lib/atdgen-runtime
 S /Users/jonathan/.opam/default/lib/biniou

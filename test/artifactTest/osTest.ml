@@ -4,6 +4,21 @@ open OUnit2
 
 open Artifact
 
+(* Helpers *)
+
+let read_all ic =
+  let buflen = 1024 in
+  let buf = Buffer.create buflen in
+  let bs = Bytes.create buflen in
+  let rec read _ = match input ic bs 0 buflen with
+    | 0 -> Buffer.to_bytes buf
+    | n ->
+      let bs' = Bytes.sub bs 0 n in
+      Buffer.add_bytes buf bs';
+      read ()
+  in
+  read ()
+
 (* Test Initialization *)
 
 let _ = Random.self_init ()
@@ -170,17 +185,53 @@ let test_dir =
 
       assert_lists_equal expected actual
     in
-    let test_subdirs _ =
+    let test_dirs _ =
       let root = Sys.getcwd () in
       let _ = make_files 3 in
 
       let expected = make_dirs 3 in
-      let actual = Os.subdirs root in
+      let actual = Os.dirs root in
 
       assert_lists_equal expected actual
     in
+    let test_subdirs _ =
+      let root = Sys.getcwd () in
+
+      let created =
+        let map dir =
+          let map subdir = Filename.concat dir subdir in
+          Os.in_dir dir make_dirs 3
+            |> List.map map
+        in
+        let initial = make_dirs 3 in
+        let next =
+          initial
+            |> List.map map
+            |> List.flatten
+        in
+        let final =
+          next
+            |> List.map map
+            |> List.flatten
+        in
+        final
+          |> List.append next
+          |> List.append initial
+      in
+
+      let found = Os.subdirs root in
+
+      let iter dir =
+        let msg = sprintf "expected to find %S" dir in
+        found
+          |> List.mem dir
+          |> assert_bool msg
+      in
+      List.iter iter created
+    in
     "Directory Scanning" >::: [
       "Files"          >:: Os.in_temp_dir test_files;
+      "Directories"    >:: Os.in_temp_dir test_dirs;
       "Subdirectories" >:: Os.in_temp_dir test_subdirs
     ]
   in
@@ -373,18 +424,6 @@ let test_search =
 
 let test_atomic =
   let contents = Bytes.of_string "The file contents" in
-  let read_all ic =
-    let buf = Buffer.create 1024 in
-    let bs = Bytes.create 1024 in
-    let rec read _ = match input ic bs 0 1024 with
-      | 0 -> Buffer.to_bytes buf
-      | n ->
-        let bs' = Bytes.sub bs 0 n in
-        Buffer.add_bytes buf bs';
-        read ()
-    in
-    read ()
-  in
   let write_all data oc =
     let len = Bytes.length data in
     output oc data 0 len
@@ -609,10 +648,145 @@ let test_atomic =
     test_overwrite;
   ]
 
+let test_process =
+  let test_output =
+    let output constr str =
+      sprintf "%s" str
+        |> Bytes.of_string
+        |> constr
+    in
+    let out_one = "STDOUT 1\n" in
+    let out_two = "STDOUT 2\n" in
+    let err_one = "STDERR 1\n" in
+    let err_two = "STDERR 2\n" in
+    let output = [
+      output Os.of_stdout out_one;
+      output Os.of_stderr err_one;
+      output Os.of_stdout out_two;
+      output Os.of_stderr err_two
+    ] in
+
+    let test_stdout ctxt =
+      let expected = Bytes.of_string (out_one ^ out_two) in
+      let actual = Os.stdout output in
+
+      assert_equal ~ctxt ~cmp:Bytes.equal expected actual
+    in
+    let test_stderr ctxt =
+      let expected = Bytes.of_string (err_one ^ err_two) in
+      let actual = Os.stderr output in
+
+      assert_equal ~ctxt ~cmp:Bytes.equal expected actual
+    in
+    let test_combined ctxt =
+      let expected = Bytes.of_string (out_one ^ err_one ^ out_two ^ err_two) in
+      let actual = Os.combined output in
+
+      assert_equal ~ctxt ~cmp:Bytes.equal expected actual
+    in
+    let test_dump ctxt =
+      let temp_dir = Sys.getcwd () in
+
+      let (out_name, out_chan) = Filename.open_temp_file ~temp_dir "" "" in
+      let (err_name, err_chan) = Filename.open_temp_file ~temp_dir "" "" in
+      let finally _ =
+        close_out out_chan;
+        close_out err_chan
+      in
+      let dump _ = Os.dump out_chan err_chan output in
+      Fun.protect ~finally dump;
+
+      let expected = Os.stdout output in
+      let actual = Os.read read_all out_name in
+      assert_equal ~ctxt ~cmp:Bytes.equal expected actual;
+
+      let expected = Os.stderr output in
+      let actual = Os.read read_all err_name in
+      assert_equal ~ctxt ~cmp:Bytes.equal expected actual
+    in
+    "Output" >::: [
+      "Standard Output" >:: test_stdout;
+      "Standard Error"  >:: test_stderr;
+      "Combined"        >:: test_combined;
+      "Dump"            >:: Os.in_temp_dir test_dump
+    ]
+  in
+  let test_run =
+    let test_success =
+      let test_output _ = ()
+      in
+      "Success" >::: [
+        "Output" >:: test_output
+      ]
+    in
+    let test_error =
+      let test_exit_status ctxt =
+        let expected = 1 in
+        try
+          let _ = Os.run "ls" ["--unknown-option"] in
+          let msg = "expected exception" in
+          assert_failure msg
+        with
+          | Os.NonZero(actual, _) ->
+            assert_equal ~ctxt expected actual
+          | _ ->
+            let msg = "expected Os.NonZero" in
+            assert_failure msg
+      in
+      let test_output ctxt =
+        try
+          let _ = Os.run "ls" ["--unknown-option"] in
+          let msg = "expected exception" in
+          assert_failure msg
+        with
+          | Os.NonZero(_, []) ->
+            let msg = "expected output" in
+            assert_failure msg
+          | Os.NonZero(_, output) ->
+            let stdout = Os.stdout output in
+            let stderr = Os.stderr output in
+            let combined = Os.combined output in
+
+            let not_eq x y = not (x = y) in
+
+            assert_equal ~ctxt 0 (Bytes.length stdout);
+            assert_equal ~ctxt ~cmp:not_eq 0 (Bytes.length stderr);
+            assert_equal ~ctxt ~cmp:Bytes.equal stderr combined;
+          | _ ->
+            let msg = "expected Os.NonZero" in
+            assert_failure msg
+      in
+      "Error" >::: [
+        "Exit Status" >:: test_exit_status;
+        "Output"      >:: test_output
+      ]
+    in
+    let test_not_found =
+      let test_not_found _ =
+        let fn _ = Os.run "i-dont-exist" [] in
+        let exn = Not_found in
+        assert_raises exn fn
+      in
+      "Not Found" >::: [
+        "Raises exception" >:: test_not_found
+      ]
+    in
+    "Run" >::: [
+      test_success;
+      test_error;
+      test_not_found
+    ]
+  in
+  "Process Control" >::: [
+    test_output;
+    test_run
+  ]
+
 (* Test Suite *)
 let suite =
   "Operating System" >::: [
     test_dir;
     test_search;
     test_atomic;
+    test_process
   ]

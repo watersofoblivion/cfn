@@ -36,22 +36,26 @@ val to_string : t -> string
  * and provides utilities for working with the groups.
  *)
 
-type cg
+type 'a cg
 (** A group of compatible versions *)
 
-val empty : cg
+val empty : 'a cg
 (** [empty] returns an empty compatibility group. *)
 
-val add : t -> cg -> cg
-(** [add semver grp] adds the version [semver] to the compatibility group [cg].
-    Duplicate versions are ignored. *)
+val add : t -> 'a -> 'a cg -> 'a cg
+(** [add semver v grp] adds the version [semver] to the compatibility group
+    [cg] and associates [v] with it.  Duplicate versions are ignored. *)
 
-val latest : int -> cg -> t
+val find : t -> 'a cg -> 'a
+(** [find semver grp] finds the value associated with [semver] in [grp].  Raises
+    {!Not_found} if no value is associated with [semver] in [grp]. *)
+
+val latest : int -> 'a cg -> t
 (** [latest major grp] returns the latest released version in [grp] with major
     version [major].  Raises {!Not_found} if [grp] contains no released version
     with major version [major]. *)
 
-val latest_prerelease : int -> cg -> t
+val latest_prerelease : int -> 'a cg -> t
 (** [latest_prerelease int grp] returns the latest version in [grp] with major
     version [major], including pre-releases.  Raises {!Not_found} if [grp]
     contains no version with major version [major]. *)

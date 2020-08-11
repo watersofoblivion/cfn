@@ -2,7 +2,7 @@ EXCLUDE_QUERY_DIR
 B /Users/jonathan/.opam/default/lib/biniou
 B /Users/jonathan/.opam/default/lib/easy-format
 B /Users/jonathan/.opam/default/lib/yojson
-B ../../_build/default/src/ext/.ext.objs/byte
+B ../../_build/default/src/external/.ext.objs/byte
 S /Users/jonathan/.opam/default/lib/biniou
 S /Users/jonathan/.opam/default/lib/easy-format
 S /Users/jonathan/.opam/default/lib/yojson

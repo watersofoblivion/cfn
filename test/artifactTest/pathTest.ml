@@ -80,7 +80,6 @@ let test_name =
 
 let test_project =
   let host = "example.com" in
-  let port = 8080 in
   let path = "/foo/bar" in
   let vcs = Path.Git in
   let ext = Path.vcs_ext vcs in
@@ -130,7 +129,7 @@ let test_project =
       |> Path.project
   in
   let extern =
-    sprintf "%s:%d%s%s@v%d" host port path ext major
+    sprintf "%s%s%s@v%d" host path ext major
       |> Path.project
   in
 
@@ -165,11 +164,6 @@ let test_project =
           sprintf "%s%s@v%d" host path major
             |> assert_valid ~ctxt expected
         in
-        let test_port ctxt =
-          let expected = sprintf "%s:%d/" host port in
-          sprintf "%s:%d@v%d" host port major
-            |> assert_valid ~ctxt expected
-        in
         let test_vcs ctxt =
           let expected = sprintf "%s/foo" host in
           let path = sprintf "%s/foo%s@v%d" host ext major in
@@ -181,14 +175,13 @@ let test_project =
             |> assert_equal ~ctxt vcs
         in
         let test_all ctxt =
-          let expected = sprintf "%s:%d%s" host port path in
-          sprintf "%s:%d%s%s@v%d" host port path ext major
+          let expected = sprintf "%s%s" host path in
+          sprintf "%s%s%s@v%d" host path ext major
             |> assert_valid ~ctxt expected
         in
         "Valid" >::: [
           "None" >:: test_none;
           "Path" >:: test_path;
-          "Port" >:: test_port;
           "VCS"  >:: test_vcs;
           "All"  >:: test_all
         ]
@@ -247,15 +240,13 @@ let test_project =
     ]
   in
   let test_source =
-    let test_internal _ =
-      let fn _ =
-        internal
-          |> Path.source
-      in
-      assert_raises Path.InternalProject fn
+    let test_internal ctxt =
+      internal
+        |> Path.source
+        |> assert_equal ~ctxt "."
     in
     let test_external ctxt =
-      let expected = sprintf "%s:%d%s" host port path in
+      let expected = sprintf "%s%s" host path in
       extern
         |> Path.source
         |> assert_equal ~ctxt expected;
