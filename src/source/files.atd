@@ -13,7 +13,7 @@ type dependency =
   { source:  string;
     major:   int;
     vcs:     vcs;
-    version: string wrap <ocaml t="Semver.t" wrap="Semver.of_string" unwrap="Semver.to_string">;
+    version: string wrap <ocaml t="System.Semver.t" wrap="System.Semver.of_string" unwrap="System.Semver.to_string">;
     commit:  string; }
 
 type lock_file =

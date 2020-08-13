@@ -1,6 +1,6 @@
 open Cmdliner
 
-open Artifact
+open Source
 
 let impl id dir =
   let dir =

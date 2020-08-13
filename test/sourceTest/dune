@@ -1,0 +1,5 @@
+(library
+ (name sourceTest)
+ (libraries
+    ounit2
+    source))

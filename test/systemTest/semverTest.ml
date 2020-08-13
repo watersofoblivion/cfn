@@ -2,7 +2,7 @@ open Format
 
 open OUnit2
 
-open Artifact
+open System
 
 (* Fixtures *)
 

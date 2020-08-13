@@ -2,5 +2,6 @@
  (name cli)
 ; (bisect_ppx)
  (libraries
-   artifact
+   source
+   system
    cmdliner))

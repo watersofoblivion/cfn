@@ -9,5 +9,6 @@
     irTest
     optTest
     codegenTest
-    artifactTest
+    sourceTest
+    systemTest
     cliTest))

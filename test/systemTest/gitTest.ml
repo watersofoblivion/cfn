@@ -1,6 +1,6 @@
 open Format
 
-open Artifact
+open System
 
 open OUnit2
 

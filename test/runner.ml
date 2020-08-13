@@ -51,14 +51,18 @@ let test_codegen =
     CodegenTest.TmplTest.suite
   ]
 
-let test_artifact =
-  "Artifact" >::: [
-    ArtifactTest.TestUtil.suite;
-    ArtifactTest.OsTest.suite;
-    ArtifactTest.SemverTest.suite;
-    ArtifactTest.PathTest.suite;
-    ArtifactTest.GitTest.suite;
-    ArtifactTest.WorkspaceTest.suite
+let test_source =
+  "Source" >::: [
+    SourceTest.PathTest.suite;
+    SourceTest.WorkspaceTest.suite
+  ]
+
+let test_system =
+  "System" >::: [
+    SystemTest.TestUtil.suite;
+    SystemTest.OsTest.suite;
+    SystemTest.SemverTest.suite;
+    SystemTest.GitTest.suite;
   ]
 
 let test_cli =
@@ -72,7 +76,8 @@ let suite =
     test_ir;
     test_opt;
     test_codegen;
-    test_artifact;
+    test_source;
+    test_system;
     test_cli
   ]
 

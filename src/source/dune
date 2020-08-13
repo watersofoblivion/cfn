@@ -17,7 +17,7 @@
 ;  (run atdgen -v %{deps})))
 
 (library
-  (name artifact)
+  (name source)
 ;  (bisect_ppx)
   (libraries
     str
@@ -25,4 +25,5 @@
     yojson
     git
     git-unix
+    system
     syntax))

@@ -9,5 +9,6 @@
    ir
    opt
    codegen
-   artifact
+   source
+   system
    cli))

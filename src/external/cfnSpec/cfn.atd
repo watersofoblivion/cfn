@@ -39,5 +39,5 @@ type resource_spec =
 
 type t =
   { ?property_types <json name="PropertyTypes">: (string * property_spec) list option <json repr="object">;
-    resource_specification_version <json name="ResourceSpecificationVersion">: string wrap <ocaml t="Artifact.Semver.t" wrap="Artifact.Semver.of_string" unwrap="Artifact.Semver.to_string">;
+    resource_specification_version <json name="ResourceSpecificationVersion">: string wrap <ocaml t="System.Semver.t" wrap="System.Semver.of_string" unwrap="System.Semver.to_string">;
     ~resource_types <json name="ResourceTypes">: (string * resource_spec) list <json repr="object">; }
