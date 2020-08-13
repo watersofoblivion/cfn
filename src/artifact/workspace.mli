@@ -1,13 +1,13 @@
 (* open Syntax
 
 (**
- * {1 Workspace}
- *
- * The build
+ {1 Workspace}
+
+ The build
  *)
 
 (**
- * {2 Types}
+ {2 Types}
  *)
 
 type t
@@ -36,4 +36,6 @@ val dependencies : t -> Path.project -> Path.package -> (Path.project * Path.pac
     [proj] in [ws] in build order. *)
 
 val parse : t -> Path.project -> Path.package -> Ast.file list
-(** [parse ws proj pkg] parses the sources of [pkg] from [proj] in [ws]. *) *)
+(** [parse ws proj pkg] parses the sources of [pkg] from [proj] in [ws]. *)
+
+*)

@@ -1,5 +1,5 @@
 (**
- * {1 Garbage Collector}
+ {1 Garbage Collector}
  *)
 
  type t = private {

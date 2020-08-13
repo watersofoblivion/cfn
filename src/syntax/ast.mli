@@ -1,8 +1,10 @@
 (**
- * {1 Abstract Syntax}
+ {1 Abstract Syntax}
  *)
 
-(** {2 Package Statement} *)
+(**
+ {2 Package Statement}
+ *)
 
 (** A package statement *)
 type package_stmt = private {
@@ -20,7 +22,9 @@ val deloc_package_stmt : package_stmt -> package_stmt
 (** [deloc_package_stmt package_stmt] strips all location information from
     [package_stmt], replacing it with {!Loc.dummy}. *)
 
-(** {2 Imports} *)
+(**
+ {2 Imports}
+ *)
 
 (** The [from] clause in an import statement. *)
 type from_clause = private {
@@ -98,7 +102,9 @@ val deloc_import_stmt : import_stmt -> import_stmt
 (** [deloc_import_stmt import_stmt] strips all location information from
     [import_stmt], replacing it with {!Loc.dummy}. *)
 
-(** {2 Source File} *)
+(**
+ {2 Source File}
+ *)
 
 (** A source file *)
 type file = private {

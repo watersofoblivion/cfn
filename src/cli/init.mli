@@ -1,7 +1,7 @@
 open Cmdliner
 
 (**
- * {1 Init Command}
+ {1 Init Command}
  *)
 
 val impl : string -> string -> unit

@@ -3,7 +3,7 @@ open Lexing
 open Yojson.Safe
 
 (**
- * {1 Specification Parsing}
+ {1 Specification Parsing}
  *)
 
 val json_file : (lexer_state -> lexbuf -> 'a) -> string -> 'a option

@@ -1,8 +1,8 @@
 (**
- * {1 Hashing}
- *
- * One-at-a-time hashing (taken from
- * {{:https://eternallyconfuzzled.com/hashing-c-introduction-to-hashing}here}.)
+ {1 Hashing}
+
+ One-at-a-time hashing (taken from
+ {{:https://eternallyconfuzzled.com/hashing-c-introduction-to-hashing}here}.)
  *)
 
 type block

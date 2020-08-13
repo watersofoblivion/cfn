@@ -1,9 +1,9 @@
 open Format
 
 (**
- * {1 Semantic Versions}
- *
- * A helper library for handling {{: https://semver.org/} semantic versions}.
+ {1 Semantic Versions}
+
+ A helper library for handling {{: https://semver.org/} semantic versions}.
  *)
 
 type t
@@ -45,10 +45,10 @@ val to_string : t -> string
 (** [to_string semver] returns a string representation of [semver]. *)
 
 (**
- * {2 Compatibility Groups}
- *
- * Groups semantic versions by their compatibility (e.g., major version numbers)
- * and provides utilities for working with the groups.
+ {2 Compatibility Groups}
+
+ Groups semantic versions by their compatibility (e.g., major version numbers)
+ and provides utilities for working with the groups.
  *)
 
 type 'a cg

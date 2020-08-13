@@ -1,7 +1,7 @@
 (**
- * {1 Pretty-Printing}
- *
- * Pretty printing of source files.
+ {1 Pretty-Printing}
+
+ Pretty printing of source files.
  *)
 
 open Format
@@ -11,7 +11,9 @@ open Format
 val package_stmt : formatter -> Ast.package_stmt -> unit
 (** [package_stmt fmt stmt] pretty-prints [stmt] to [fmt]. *)
 
-(** {2 Imports} *)
+(**
+ {2 Imports}
+ *)
 
 val from_clause : formatter -> Ast.from_clause -> unit
 (** [from_clause fmt from] pretty-prints [from] to [fmt]. *)
@@ -28,7 +30,9 @@ val import_clause : formatter -> Ast.import_clause -> unit
 val import_stmt : formatter -> Ast.import_stmt -> unit
 (** [import_stmt fmt stmt] pretty-prints [stmt] to [fmt]. *)
 
-(** {2 Files} *)
+(**
+ {2 Files}
+ *)
 
 val file : formatter -> Ast.file -> unit
 (** [file fmt f] pretty-prints [f] to [fmt]. *)

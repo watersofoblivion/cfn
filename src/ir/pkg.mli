@@ -1,5 +1,5 @@
 (**
- * {1 Top-Level Packages}
+ {1 Top-Level Packages}
  *)
 
 type t

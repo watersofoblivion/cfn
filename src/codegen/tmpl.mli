@@ -1,18 +1,18 @@
 (**
- * {1 Templates}
+ {1 Templates}
  *)
 
 module Value :
   sig
     (**
-     * {1 Types}
+     {1 Types}
      *)
 
     type t
     (** Values *)
 
     (**
-     * {2 Specialized Types}
+     {2 Specialized Types}
      *)
 
     type str = private t
@@ -55,14 +55,14 @@ module Value :
     (** Pseudo Parameters *)
 
     (**
-     * {1 Strings}
+     {1 Strings}
      *)
 
     val str : string -> str
     (** [str s] constructs the string value representing [s]. *)
 
     (**
-     * {1 Numbers}
+     {1 Numbers}
      *)
 
     val int : int -> num
@@ -72,7 +72,7 @@ module Value :
     (** [float f] constructs the number value representing [f] *)
 
     (**
-     * {1 Lists}
+     {1 Lists}
      *)
 
     val lst : lst
@@ -94,7 +94,7 @@ module Value :
         is empty or not a list. *)
 
     (**
-     * {1 Intrinsic Functions}
+     {1 Intrinsic Functions}
      *)
 
     val fn_base64 : t -> intrinsic
@@ -142,7 +142,7 @@ module Value :
     (** [ref value] constructs an intrinsic which references [value]. *)
 
     (**
-     * {2 Join Function}
+     {2 Join Function}
      *)
 
     val fn_join : string -> fn_join
@@ -154,7 +154,7 @@ module Value :
         joined by [join].  Raises {!Invalid_argument} if [join] is not a join. *)
 
     (**
-     * {2 Substitution Function}
+     {2 Substitution Function}
      *)
 
     val fn_sub : string -> fn_sub
@@ -165,7 +165,7 @@ module Value :
         substitution [sub]. *)
 
     (**
-     * {2 Transform Function}
+     {2 Transform Function}
      *)
 
     val fn_transform : string -> fn_transform
@@ -176,7 +176,7 @@ module Value :
         the transform [tr]. *)
 
     (**
-     * {1 Conditionals}
+     {1 Conditionals}
      *)
 
     val fn_equals : t -> t -> cond
@@ -192,7 +192,7 @@ module Value :
         [cond]. *)
 
     (**
-     * {2 Logical AND}
+     {2 Logical AND}
      *)
 
     val fn_and : cond -> cond -> fn_and
@@ -203,7 +203,7 @@ module Value :
         Raises {!Invalid_argument} if [land] is not a logical AND. *)
 
     (**
-     * {2 Logical OR}
+     {2 Logical OR}
      *)
 
     val fn_or : cond -> cond -> fn_or
@@ -214,7 +214,7 @@ module Value :
         Raises {!Invalid_argument} if [lor] is not a logical OR. *)
 
     (**
-     * {1 Pseudo Parameters}
+     {1 Pseudo Parameters}
      *)
 
     val account_id : pseudo
@@ -244,7 +244,7 @@ module Value :
   end
 (*
 (**
- * {2 Metadata}
+ {2 Metadata}
  *)
 
 type wait_time = private
@@ -341,7 +341,7 @@ type metadata = private {
 }
 
 (**
- * {2 Parameters}
+ {2 Parameters}
  *)
 
 type param_type = private
@@ -375,14 +375,14 @@ type param = private {
 }
 
 (**
- * {2 Mappings}
+ {2 Mappings}
  *)
 
 type mapping = private (string * Value.t) list
 type mappings = private (string * mapping) list
 
 (**
- * {2 Resources}
+ {2 Resources}
  *)
 
 type resource = private {
@@ -392,7 +392,7 @@ type resource = private {
 }
 
 (**
- * {2 Outputs}
+ {2 Outputs}
  *)
 
 type output = private {
@@ -402,7 +402,7 @@ type output = private {
 }
 
 (**
- * {2 Templates}
+ {2 Templates}
  *)
 
 type t = private {

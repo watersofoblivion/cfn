@@ -1,21 +1,21 @@
 (**
- * {1 Location Tracking}
+ {1 Location Tracking}
  *)
 
-(** A position in a source file. *)
 type pos = private {
   line: int; (** Line number *)
   col:  int; (** Column number *)
   off:  int  (** Offset into file *)
 }
+(** A position in a source file. *)
 
-(** A location in a source file. *)
 type t = private {
   fname:     string; (** Source File *)
   start_pos: pos;    (** Starting position *)
   end_pos:   pos;    (** Ending position *)
   length:    int     (** Length in characters *)
 }
+(** A location in a source file. *)
 
 val dummy : t
 (** [dummy] is a location guaranteed to be different from any location

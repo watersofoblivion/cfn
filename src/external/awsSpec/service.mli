@@ -1,5 +1,5 @@
 (**
- * {1 Services}
+ {1 Services}
  *)
 
 type t = private {

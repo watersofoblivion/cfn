@@ -1,9 +1,9 @@
 (**
- * {1 Paths}
+ {1 Paths}
  *)
 
 (**
- * {2 Version Control Systems}
+ {2 Version Control Systems}
  *)
 
 type vcs =
@@ -17,7 +17,7 @@ val vcs_ext : vcs -> string
 (** [vcs_ext vcs] returns the extension matching [vcs]. *)
 
 (**
- * {2 Names}
+ {2 Names}
  *)
 
 type id
@@ -32,7 +32,7 @@ val name : id -> string
 (** [name id] returns [id] as a string. *)
 
 (**
- * {2 Projects}
+ {2 Projects}
  *)
 
 type project
@@ -67,7 +67,7 @@ val compare_project : project -> project -> int
     otherwise. *)
 
 (**
- * {2 Packages}
+ {2 Packages}
  *)
 
 type package
@@ -86,7 +86,7 @@ val compare_package : package -> package -> int
     than [pkg'], or [0] otherwise. *)
 
 (**
- * {2 Import}
+ {2 Import}
  *)
 
 type import

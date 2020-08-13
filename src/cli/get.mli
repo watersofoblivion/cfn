@@ -1,7 +1,7 @@
 open Cmdliner
 
 (**
- * {1 Get Command}
+ {1 Get Command}
  *)
 
 val impl : bool -> bool -> string list -> unit

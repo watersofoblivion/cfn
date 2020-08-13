@@ -1,5 +1,5 @@
 (**
- * {1 Lexer}
+ {1 Lexer}
  *)
 
 val json_path : string -> Path.t
