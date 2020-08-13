@@ -198,7 +198,43 @@ let dump stdout stderr process_output =
   in
   List.iter iter process_output
 
-let run cmd args =
+let lines bs =
+  let rec trim_head = function
+    | "" :: lines -> trim_head lines
+    | lines -> lines
+  in
+  let rec trim_tail = function
+    | [] -> []
+    | "" :: lines ->
+      begin
+        match trim_tail lines with
+          | [] -> []
+          | lines -> "" :: lines
+      end
+    | hd :: lines -> hd :: (trim_tail lines)
+  in
+  bs
+    |> Bytes.to_string
+    |> String.split_on_char '\n'
+    |> trim_head
+    |> trim_tail
+
+let first_line bs = match lines bs with
+  | [] ->
+    let exn = Invalid_argument "no output lines" in
+    raise exn
+  | line :: _ -> line
+
+let line bs = match lines bs with
+  | line :: [] -> line
+  | lines ->
+    let msg = sprintf "expected 1 line, found %d" (List.length lines) in
+    let exn = Invalid_argument msg in
+    raise exn
+
+let ignore _ = ()
+
+let run cmd args handler =
   let exe = which cmd in
   let args =
     args
@@ -258,6 +294,7 @@ let run cmd args =
       output
         |> List.filter_map filter_map
         |> Bytes.concat joiner
+        |> handler
     | (_, Unix.WEXITED exit_status) ->
       let exn = NonZero(exit_status, output) in
       raise exn

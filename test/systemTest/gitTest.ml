@@ -22,26 +22,26 @@ let init ?bare:(bare = false) ?branch:(branch = "master") dir =
   Git.repo dir branch
 
 let add_all_and_commit ?message:(message = "") repo =
-  Git.git repo ["add"; "--all"] Git.ignore;
-  Git.git repo ["commit"; "--allow-empty-message"; "-m"; message] Git.ignore
+  Git.git repo ["add"; "--all"] Os.ignore;
+  Git.git repo ["commit"; "--allow-empty-message"; "-m"; message] Os.ignore
 
 let add_remote name uri repo =
-  Git.git repo ["remote"; "add"; name; Uri.to_string uri] Git.ignore
+  Git.git repo ["remote"; "add"; name; Uri.to_string uri] Os.ignore
 
 let current_branch repo =
-  Git.git repo ["branch"; "--show-current"] Git.line
+  Git.git repo ["branch"; "--show-current"] Os.line
 
 let create_branch ?start_point:(start_point = "HEAD") branch_name repo =
-  Git.git repo ["branch"; branch_name; start_point] Git.ignore
+  Git.git repo ["branch"; branch_name; start_point] Os.ignore
 
 let checkout refname repo =
-  Git.git repo ["checkout"; refname] Git.ignore
+  Git.git repo ["checkout"; refname] Os.ignore
 
 let sha repo gitref =
-  Git.git repo ["rev-parse"; gitref] Git.line
+  Git.git repo ["rev-parse"; gitref] Os.line
 
 let timestamp_and_sha repo gitref =
-  let line = Git.git repo ["show"; "--format=%ad %H"; "--date=format:%Y%m%d%H%M%S"; gitref] Git.first_line in
+  let line = Git.git repo ["show"; "--format=%ad %H"; "--date=format:%Y%m%d%H%M%S"; gitref] Os.first_line in
   match String.split_on_char ' ' line with
     | sha :: timestamp :: [] -> (sha, timestamp)
     | _ ->
@@ -50,7 +50,7 @@ let timestamp_and_sha repo gitref =
       raise exn
 
 let create_tag tag repo =
-  Git.git repo ["tag"; tag] Git.lines
+  Git.git repo ["tag"; tag] Os.lines
 
 let repo_info name =
   let cwd = Sys.getcwd () in
@@ -122,143 +122,24 @@ let test_repo =
   ]
 
 let test_command =
-  let test_output =
-    let line_one = "line 1" in
-    let line_two = "line 2" in
+  let cwd = Sys.getcwd () in
+  let repo = Git.repo cwd "" in
 
-    let test_lines =
-      let assert_lines ~ctxt actual =
-        assert_equal ~ctxt 3 (List.length actual);
-        match actual with
-          | one :: "" :: two :: [] ->
-            assert_equal ~ctxt one line_one;
-            assert_equal ~ctxt two line_two
-          | _ -> assert_failure "Unpossible!"
-      in
-
-      let test_split ctxt =
-        let output = line_one ^ "\n\n" ^ line_two in
-        let bs = Bytes.of_string output in
-
-        let actual = Git.lines bs in
-        assert_lines ~ctxt actual
-      in
-      let test_trim_leading ctxt =
-        let output = "\n\n" ^ line_one ^ "\n\n" ^ line_two in
-        let bs = Bytes.of_string output in
-
-        let actual = Git.lines bs in
-        assert_lines ~ctxt actual
-      in
-      let test_trim_trailing ctxt =
-        let output = line_one ^ "\n\n" ^ line_two ^ "\n\n" in
-        let bs = Bytes.of_string output in
-
-        let actual = Git.lines bs in
-        assert_lines ~ctxt actual
-      in
-      let test_trim ctxt =
-        let output = "\n\n" ^ line_one ^ "\n\n" ^ line_two ^ "\n\n" in
-        let bs = Bytes.of_string output in
-
-        let actual = Git.lines bs in
-        assert_lines ~ctxt actual
-      in
-      "Lines" >::: [
-        "Splits Lines"  >:: test_split;
-        "Trim Leading"  >:: test_trim_leading;
-        "Trim Trailing" >:: test_trim_trailing;
-        "Trim"          >:: test_trim
-      ]
-    in
-    let test_first_line =
-      let test_multi_line ctxt =
-        let output = "\n\n" ^ line_one ^ "\n\n" ^ line_two ^ "\n\n" in
-        let bs = Bytes.of_string output in
-
-        let actual = Git.first_line bs in
-        assert_equal ~ctxt line_one actual
-      in
-      let test_single_line ctxt =
-        let output = "\n\n" ^ line_one ^ "\n\n" in
-        let bs = Bytes.of_string output in
-
-        let actual = Git.first_line bs in
-        assert_equal ~ctxt line_one actual
-      in
-      let test_blank _ =
-        let output = "\n\n\n" in
-        let bs = Bytes.of_string output in
-
-        let fn _ = Git.first_line bs in
-        let exn = Invalid_argument "no output lines" in
-        assert_raises exn fn
-      in
-      "First Line" >::: [
-        "Multi-line"  >:: test_multi_line;
-        "Single line" >:: test_single_line;
-        "Blank"       >:: test_blank
-      ]
-    in
-    let test_line =
-      let test_valid ctxt =
-        let output = "\n\n" ^ line_one ^ "\n\n" in
-        let bs = Bytes.of_string output in
-
-        let actual = Git.line bs in
-        assert_equal ~ctxt line_one actual
-      in
-      let test_invalid _ =
-        let output = line_one ^ "\n\n" ^ line_two in
-        let bs = Bytes.of_string output in
-
-        let fn _ = Git.line bs in
-        let exn = Invalid_argument "expected 1 line, found 3" in
-        assert_raises exn fn
-      in
-      "Line" >::: [
-        "Valid"   >:: test_valid;
-        "Invalid" >:: test_invalid
-      ]
-    in
-    let test_ignore ctxt =
-      let bs = Bytes.of_string "the-output" in
-
-      let expected = () in
-      let actual = Git.ignore bs in
-      assert_equal ~ctxt expected actual
-    in
-    "Output Handlers" >::: [
-      test_lines;
-      test_first_line;
-      test_line;
-      "Ignore" >:: test_ignore
-    ]
+  let test_valid _ =
+    match Git.git repo ["--help"] Os.lines with
+      | [] -> assert_failure "expected output"
+      | _ -> ()
   in
-  let test_git =
-    let cwd = Sys.getcwd () in
-    let repo = Git.repo cwd "" in
-
-    let test_valid _ =
-      match Git.git repo ["--help"] Git.lines with
-        | [] -> assert_failure "expected output"
-        | _ -> ()
+  let test_invalid _ =
+    let fn _ =
+      Git.git repo ["invalid-command"] Os.ignore
     in
-    let test_invalid _ =
-      let fn _ =
-        Git.git repo ["invalid-command"] Git.ignore
-      in
-      let exn = Failure "exited with status 1" in
-      assert_raises exn fn
-    in
-    "Execute" >::: [
-      "Valid"   >:: test_valid;
-      "Invalid" >:: test_invalid
-    ]
+    let exn = Failure "exited with status 1" in
+    assert_raises exn fn
   in
   "Command" >::: [
-    test_output;
-    test_git
+    "Valid"   >:: test_valid;
+    "Invalid" >:: test_invalid
   ]
 
 let test_clone =

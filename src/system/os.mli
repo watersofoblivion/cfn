@@ -108,9 +108,25 @@ val dump : out_channel -> out_channel -> output list -> unit
 exception NonZero of int * output list
 (** Raised when a process exits with a non-zero status code *)
 
-val run : string -> string list -> bytes
-(** [run cmd args] runs [cmd] with command-line arguments [args].  [cmd] is
-    passed as the 0th argument and is used to find an executable in the path.
-    On success (a zero exit status), the standard output is returned.  Raises
-    {!Not_found} if no executable can be found and {!NonZero} if the process
-    terminates with a non-zero exit status. *)
+val lines : bytes -> string list
+(** [lines bs] splits [bs] into lines.  Trims any leading or trailing blank
+    lines. *)
+
+val first_line : bytes -> string
+(** [first_line bs] returns just the first line from multi-line output.  Raises
+    {!Invalid_argument} if [bs] contains no non-blank lines. *)
+
+val line : bytes -> string
+(** [line bs] reads one-line output from [bs].  Raises {!Invalid_argument} if
+    [bs] contains more than one line. *)
+
+val ignore : bytes -> unit
+(** [ignore bs] ignores the output [bs]. *)
+
+val run : string -> string list -> (bytes -> 'a) -> 'a
+(** [run cmd args handler] runs [cmd] with command-line arguments [args] and
+    processes the output with [handler].  [cmd] is passed as the 0th argument
+    and is used to find an executable in the path.  On success (a zero exit
+    status), the result of apply [handler] to standard output is returned.
+    Raises {!Not_found} if no executable can be found and {!NonZero} if the
+    process terminates with a non-zero exit status. *)

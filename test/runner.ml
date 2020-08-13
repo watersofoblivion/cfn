@@ -63,6 +63,7 @@ let test_system =
     SystemTest.OsTest.suite;
     SystemTest.SemverTest.suite;
     SystemTest.GitTest.suite;
+    SystemTest.DockerTest.suite
   ]
 
 let test_cli =

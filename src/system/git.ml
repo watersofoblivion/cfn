@@ -2,7 +2,7 @@ open Format
 
 (* Repositories *)
 
-type t = {
+type r = {
   root:           string;
   default_branch: string;
 }
@@ -13,52 +13,11 @@ let repo root default_branch =
 let root repo = repo.root
 let default_branch repo = repo.default_branch
 
-(* Output Parsers *)
-
-let lines bs =
-  let rec trim_head = function
-    | "" :: lines -> trim_head lines
-    | lines -> lines
-  in
-  let rec trim_tail = function
-    | [] -> []
-    | "" :: lines ->
-      begin
-        match trim_tail lines with
-          | [] -> []
-          | lines -> "" :: lines
-      end
-    | hd :: lines -> hd :: (trim_tail lines)
-  in
-  bs
-    |> Bytes.to_string
-    |> String.split_on_char '\n'
-    |> trim_head
-    |> trim_tail
-
-let first_line bs = match lines bs with
-  | [] ->
-    let exn = Invalid_argument "no output lines" in
-    raise exn
-  | line :: _ -> line
-
-let line bs = match lines bs with
-  | line :: [] -> line
-  | lines ->
-    let msg = sprintf "expected 1 line, found %d" (List.length lines) in
-    let exn = Invalid_argument msg in
-    raise exn
-
-let ignore _ = ()
-
 (* Commands *)
 
 let git repo args handler =
   let fn _ =
-    try
-      args
-        |> Os.run "git"
-        |> handler
+    try Os.run "git" args handler
     with Os.NonZero(exit_status, output) ->
       let _ = Os.dump Stdlib.stdout Stdlib.stderr output in
       let msg = sprintf "exited with status %d" exit_status in
@@ -69,21 +28,21 @@ let git repo args handler =
 let clone uri dir =
   let uri_str = Uri.to_string uri in
   let _ =
-    try let _ = Os.run "git" ["clone"; uri_str; dir] in ()
+    try let _ = Os.run "git" ["clone"; uri_str; dir] Os.ignore in ()
     with Os.NonZero(exit_status, output) ->
       let _ = Os.dump Stdlib.stdout Stdlib.stderr output in
       let msg = sprintf "exited with status %d" exit_status in
       failwith msg
   in
   let repo = repo dir "" in
-  let default_branch = git repo ["symbolic-ref"; "HEAD"] line in
+  let default_branch = git repo ["symbolic-ref"; "HEAD"] Os.line in
   { repo with default_branch = default_branch }
 
-let fetch repo = git repo ["fetch"; "--all"] ignore
-let checkout repo gitref = git repo ["checkout"; gitref] ignore
+let fetch repo = git repo ["fetch"; "--all"] Os.ignore
+let checkout repo gitref = git repo ["checkout"; gitref] Os.ignore
 
 let timestamp repo gitref =
-  git repo ["show"; "--format=%ad"; "--date=format:%Y%m%d%H%M%S"; gitref] first_line
+  git repo ["show"; "--format=%ad"; "--date=format:%Y%m%d%H%M%S"; gitref] Os.first_line
 
 let for_each_ref repo refs =
   let args = ["for-each-ref"; "--color=never"; "--format=%(refname:short) %(objectname)"] @ refs in
@@ -91,7 +50,7 @@ let for_each_ref repo refs =
     | refname :: sha :: [] -> (refname, sha)
     | _ -> failwith "Unpossible!"
   in
-  git repo args lines
+  git repo args Os.lines
     |> List.map map
 
 let has_prefix prefix str =
@@ -124,7 +83,7 @@ let tags repo =
 let branches repo =
   let remote_branch_prefixes =
     let map name = name ^ "/" in
-    git repo ["remote"] lines
+    git repo ["remote"] Os.lines
       |> List.map map
   in
   let filter_map (branch, sha) =
@@ -162,7 +121,7 @@ let versions repo =
     let _ = Semver.latest_prerelease 0 versions in
     versions
   with Not_found ->
-    let sha = git repo ["rev-parse"; repo.default_branch] line in
+    let sha = git repo ["rev-parse"; repo.default_branch] Os.line in
     let timestamp = timestamp repo sha in
     let semver = Semver.semver 0 0 0 [timestamp; sha] [] in
     Semver.add semver sha versions

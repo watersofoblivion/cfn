@@ -648,6 +648,119 @@ let test_atomic =
     test_overwrite;
   ]
 
+let test_output =
+  let line_one = "line 1" in
+  let line_two = "line 2" in
+
+  let test_lines =
+    let assert_lines ~ctxt actual =
+      assert_equal ~ctxt 3 (List.length actual);
+      match actual with
+        | one :: "" :: two :: [] ->
+          assert_equal ~ctxt one line_one;
+          assert_equal ~ctxt two line_two
+        | _ -> assert_failure "Unpossible!"
+    in
+
+    let test_split ctxt =
+      let output = line_one ^ "\n\n" ^ line_two in
+      let bs = Bytes.of_string output in
+
+      let actual = Os.lines bs in
+      assert_lines ~ctxt actual
+    in
+    let test_trim_leading ctxt =
+      let output = "\n\n" ^ line_one ^ "\n\n" ^ line_two in
+      let bs = Bytes.of_string output in
+
+      let actual = Os.lines bs in
+      assert_lines ~ctxt actual
+    in
+    let test_trim_trailing ctxt =
+      let output = line_one ^ "\n\n" ^ line_two ^ "\n\n" in
+      let bs = Bytes.of_string output in
+
+      let actual = Os.lines bs in
+      assert_lines ~ctxt actual
+    in
+    let test_trim ctxt =
+      let output = "\n\n" ^ line_one ^ "\n\n" ^ line_two ^ "\n\n" in
+      let bs = Bytes.of_string output in
+
+      let actual = Os.lines bs in
+      assert_lines ~ctxt actual
+    in
+    "Lines" >::: [
+      "Splits Lines"  >:: test_split;
+      "Trim Leading"  >:: test_trim_leading;
+      "Trim Trailing" >:: test_trim_trailing;
+      "Trim"          >:: test_trim
+    ]
+  in
+  let test_first_line =
+    let test_multi_line ctxt =
+      let output = "\n\n" ^ line_one ^ "\n\n" ^ line_two ^ "\n\n" in
+      let bs = Bytes.of_string output in
+
+      let actual = Os.first_line bs in
+      assert_equal ~ctxt line_one actual
+    in
+    let test_single_line ctxt =
+      let output = "\n\n" ^ line_one ^ "\n\n" in
+      let bs = Bytes.of_string output in
+
+      let actual = Os.first_line bs in
+      assert_equal ~ctxt line_one actual
+    in
+    let test_blank _ =
+      let output = "\n\n\n" in
+      let bs = Bytes.of_string output in
+
+      let fn _ = Os.first_line bs in
+      let exn = Invalid_argument "no output lines" in
+      assert_raises exn fn
+    in
+    "First Line" >::: [
+      "Multi-line"  >:: test_multi_line;
+      "Single line" >:: test_single_line;
+      "Blank"       >:: test_blank
+    ]
+  in
+  let test_line =
+    let test_valid ctxt =
+      let output = "\n\n" ^ line_one ^ "\n\n" in
+      let bs = Bytes.of_string output in
+
+      let actual = Os.line bs in
+      assert_equal ~ctxt line_one actual
+    in
+    let test_invalid _ =
+      let output = line_one ^ "\n\n" ^ line_two in
+      let bs = Bytes.of_string output in
+
+      let fn _ = Os.line bs in
+      let exn = Invalid_argument "expected 1 line, found 3" in
+      assert_raises exn fn
+    in
+    "Line" >::: [
+      "Valid"   >:: test_valid;
+      "Invalid" >:: test_invalid
+    ]
+  in
+  let test_ignore ctxt =
+    let bs = Bytes.of_string "the-output" in
+
+    let expected = () in
+    let actual = Os.ignore bs in
+    assert_equal ~ctxt expected actual
+  in
+  "Output Handlers" >::: [
+    test_lines;
+    test_first_line;
+    test_line;
+    "Ignore" >:: test_ignore
+  ]
+
 let test_process =
   let test_output =
     let output constr str =
@@ -723,7 +836,7 @@ let test_process =
       let test_exit_status ctxt =
         let expected = 1 in
         try
-          let _ = Os.run "ls" ["--unknown-option"] in
+          let _ = Os.run "ls" ["--unknown-option"] Os.ignore in
           let msg = "expected exception" in
           assert_failure msg
         with
@@ -735,7 +848,7 @@ let test_process =
       in
       let test_output ctxt =
         try
-          let _ = Os.run "ls" ["--unknown-option"] in
+          let _ = Os.run "ls" ["--unknown-option"] Os.ignore in
           let msg = "expected exception" in
           assert_failure msg
         with
@@ -763,7 +876,7 @@ let test_process =
     in
     let test_not_found =
       let test_not_found _ =
-        let fn _ = Os.run "i-dont-exist" [] in
+        let fn _ = Os.run "i-dont-exist" [] Os.ignore in
         let exn = Not_found in
         assert_raises exn fn
       in
@@ -788,5 +901,6 @@ let suite =
     test_dir;
     test_search;
     test_atomic;
+    test_output;
     test_process
   ]
