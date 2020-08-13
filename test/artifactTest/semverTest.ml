@@ -110,6 +110,36 @@ let test_semver =
     test_invalid
   ]
 
+(* Accessors *)
+let test_accessors =
+  let test_major ctxt =
+    let actual = Semver.major full_meta_fixture in
+    assert_equal ~ctxt major actual
+  in
+  let test_minor ctxt =
+    let actual = Semver.minor full_meta_fixture in
+    assert_equal ~ctxt minor actual
+  in
+  let test_patch ctxt =
+    let actual = Semver.patch full_meta_fixture in
+    assert_equal ~ctxt patch actual
+  in
+  let test_prerelease ctxt =
+    let actual = Semver.prerelease full_meta_fixture in
+    assert_equal ~ctxt pre_release actual
+  in
+  let test_build_info ctxt =
+    let actual = Semver.build_info full_meta_fixture in
+    assert_equal ~ctxt build_info actual
+  in
+  "Accessors" >::: [
+    "Major Version" >:: test_major;
+    "Minor Version" >:: test_minor;
+    "Patch Version" >:: test_patch;
+    "Pre-release"   >:: test_prerelease;
+    "Build Info"    >:: test_build_info
+  ]
+
 (* Parsing *)
 let test_of_string =
   let test_valid =
@@ -457,6 +487,7 @@ let test_compatibility_groups =
 let suite =
   "Semantic Versions" >::: [
     test_semver;
+    test_accessors;
     test_of_string;
     test_compare;
     test_format;

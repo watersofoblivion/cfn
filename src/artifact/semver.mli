@@ -14,6 +14,21 @@ val semver : int -> int -> int -> string list -> string list -> t
     version.  Returns {!Invalid_argument} if the given values do not constitute
     a valid semantic version. *)
 
+val major : t -> int
+(** [major semver] returns the major version of [semver]. *)
+
+val minor : t -> int
+(** [minor semver] returns the minor version of [semver]. *)
+
+val patch : t -> int
+(** [patch semver] returns the patch version of [semver]. *)
+
+val prerelease : t -> string list
+(** [prerelease semver] returns the pre-release segments of [semver]. *)
+
+val build_info : t -> string list
+(** [build_info semver] returns the build information segments of [semver]. *)
+
 val of_string : string -> t
 (** [of_string str] parses [str] as a semantic version.  Raises
     {!Invalid_argument} if [str] is not a valid semver string. *)

@@ -74,6 +74,12 @@ let semver major minor patch pre_release build_info =
     pre_release = validate_meta "pre-release" pre_release;
     build_info  = validate_meta "build info" build_info }
 
+let major semver = semver.major
+let minor semver = semver.minor
+let patch semver = semver.patch
+let prerelease semver = semver.pre_release
+let build_info semver = semver.build_info
+
 (* Parsing *)
 
 let of_string str =
