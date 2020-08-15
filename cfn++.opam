@@ -28,4 +28,5 @@ depends: [
   "ounit2"
   "llvm"
   "zarith"
+  "simple-diff"
 ]

@@ -7,15 +7,12 @@ let with_env k v f x =
     try Unix.getenv k
     with Not_found -> ""
   in
-  Unix.putenv k v;
-
-  try
-    let res = f x in
-    Unix.putenv k old;
-    res
-  with exn ->
-    Unix.putenv k old;
-    raise exn
+  let finally _ = Unix.putenv k old in
+  let fn _ =
+    Unix.putenv k v;
+    f x
+  in
+  Fun.protect ~finally fn
 
 let test_with_env =
   let var_name = "__TEST_VARIABLE__" in
