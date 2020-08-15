@@ -29,4 +29,5 @@ depends: [
   "llvm"
   "zarith"
   "simple-diff"
+  "ANSITerminal"
 ]

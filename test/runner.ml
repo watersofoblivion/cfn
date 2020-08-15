@@ -62,7 +62,7 @@ let test_system =
     SystemTest.TestUtil.suite;
     SystemTest.OsTest.suite;
     SystemTest.SemverTest.suite;
-    (* SystemTest.GitTest.suite; *)
+    SystemTest.GitTest.suite;
     SystemTest.DockerTest.suite
   ]
 

@@ -2,4 +2,6 @@
  (name systemTest)
  (libraries
     ounit2
-    system))
+    system
+    simple-diff
+    ANSITerminal))

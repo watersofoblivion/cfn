@@ -32,7 +32,7 @@ let test_command =
     let fn _ = Docker.docker ["invalid-command"] Os.ignore in
     let stderr =
       let msg =
-        "docker: 'invalid-command' is not a docker command.\n" ^
+        "docker: 'invalid-command' asdfasdf is not a docker command.\n" ^
         "See 'docker --help'\n"
       in
       Some msg

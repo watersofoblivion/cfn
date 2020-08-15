@@ -1,4 +1,4 @@
-(* open Format *)
+open Format
 
 open OUnit2
 
@@ -9,26 +9,31 @@ let string_equals ~ctxt expected actual =
   let _ = assert_equal ~ctxt ~printer expected actual in
   actual
 
-(*
-module StringDiff = Simple_diff.Make(String)
 let text_equals ~ctxt expected actual =
+  let module StringDiff = Simple_diff.Make(String) in
   let pp_diff fmt (expected, actual) =
     let changes_iter change = fprintf fmt "%s" change in
     let diff_iter change =
       let (prefix, changes) = match change with
-        | Diff.Added lines -> ("+", lines)
-        | Diff.Deleted lines -> ("-", lines)
-        | Diff.Equal lines -> (" ", lines)
+        | StringDiff.Added lines -> ("+", lines)
+        | StringDiff.Deleted lines -> ("-", lines)
+        | StringDiff.Equal lines -> (" ", lines)
       in
       fprintf fmt "%s " prefix;
-      List.iter changes_iter changes;
+      Array.iter changes_iter changes;
       fprintf fmt "\n"
     in
-
-    let expected_lines = String.split_on_char '\n' expected in
-    String.split_on_char '\n' actual
-      |> Diff.get_diff expected_lines
-      |> List.iter iter
+    let explode str =
+      str
+        |> String.split_on_char '\n'
+        |> Array.of_list
+    in
+    fprintf fmt "\n";
+    let expected_lines = explode expected in
+    actual
+      |> explode
+      |> StringDiff.get_diff expected_lines
+      |> List.iter diff_iter
   in
   let _ = assert_equal ~ctxt ~pp_diff expected actual in
-  actual *)
+  actual

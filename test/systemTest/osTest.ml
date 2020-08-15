@@ -8,9 +8,10 @@ open System
 
 
 let assert_output extractor ~ctxt output expected =
-  let expected = Bytes.of_string expected in
-  let actual = extractor output in
-  assert_equal ~ctxt expected actual
+  output
+    |> extractor
+    |> Bytes.to_string
+    |> Assert.text_equals ~ctxt expected
 
 let assert_stdout = assert_output Os.stdout
 let assert_stderr = assert_output Os.stderr
@@ -27,11 +28,11 @@ let assert_non_zero ~ctxt ?stdout:(stdout = None) ?stderr:(stderr = None) status
       Format.eprintf "STDERR:\n%s\n%!" msg; *)
       let _ = match stdout with
         | Some stdout -> assert_stdout ~ctxt output stdout
-        | None -> ()
+        | None -> ""
       in
       let _ = match stderr with
         | Some stderr -> assert_stderr ~ctxt output stderr
-        | None -> ()
+        | None -> ""
       in
       assert_equal ~ctxt status actual
     | exn -> raise exn

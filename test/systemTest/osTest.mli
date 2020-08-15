@@ -24,17 +24,18 @@ open System
  Assertions to test the exit status and output of an executed process.
  *)
 
-val assert_output : (Os.output list -> bytes) -> ctxt:test_ctxt -> Os.output list -> string -> unit
+val assert_output : (Os.output list -> bytes) -> ctxt:test_ctxt -> Os.output list -> string -> string
 (** [assert_output extractor ~ctxt output expected] asserts the the value
-    extracted from [output] using [extractor] is equal to [expected]. *)
+    extracted from [output] using [extractor] is equal to [expected].  Returns
+    the extracted output. *)
 
-val assert_stdout : ctxt:test_ctxt -> Os.output list -> string -> unit
+val assert_stdout : ctxt:test_ctxt -> Os.output list -> string -> string
 (** [assert_stdout ~ctxt output expected] asserts the standard output in
-    [output] is equal to [expected]. *)
+    [output] is equal to [expected].  Returns the standard output. *)
 
-val assert_stderr : ctxt:test_ctxt -> Os.output list -> string -> unit
+val assert_stderr : ctxt:test_ctxt -> Os.output list -> string -> string
 (** [assert_stderr ~ctxt output expected] asserts the standard error in
-    [output] is equal to [expected]. *)
+    [output] is equal to [expected].  Returns the standard error. *)
 
 val assert_non_zero : ctxt:test_ctxt -> ?stdout:string option -> ?stderr:string option -> int -> (unit -> unit) -> unit
 (** [assert_non_zero ~ctxt ?stdout ?stderr status fn] asserts that [fn] raises

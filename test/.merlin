@@ -80,11 +80,13 @@ B /Users/jonathan/.opam/default/lib/ptime
 B /Users/jonathan/.opam/default/lib/ptime/os
 B /Users/jonathan/.opam/default/lib/re
 B /Users/jonathan/.opam/default/lib/re/posix
+B /Users/jonathan/.opam/default/lib/re/str
 B /Users/jonathan/.opam/default/lib/result
 B /Users/jonathan/.opam/default/lib/rresult
 B /Users/jonathan/.opam/default/lib/seq
 B /Users/jonathan/.opam/default/lib/sexplib
 B /Users/jonathan/.opam/default/lib/sexplib0
+B /Users/jonathan/.opam/default/lib/simple-diff
 B /Users/jonathan/.opam/default/lib/stdlib-shims
 B /Users/jonathan/.opam/default/lib/stringext
 B /Users/jonathan/.opam/default/lib/tls
@@ -199,11 +201,13 @@ S /Users/jonathan/.opam/default/lib/ptime
 S /Users/jonathan/.opam/default/lib/ptime/os
 S /Users/jonathan/.opam/default/lib/re
 S /Users/jonathan/.opam/default/lib/re/posix
+S /Users/jonathan/.opam/default/lib/re/str
 S /Users/jonathan/.opam/default/lib/result
 S /Users/jonathan/.opam/default/lib/rresult
 S /Users/jonathan/.opam/default/lib/seq
 S /Users/jonathan/.opam/default/lib/sexplib
 S /Users/jonathan/.opam/default/lib/sexplib0
+S /Users/jonathan/.opam/default/lib/simple-diff
 S /Users/jonathan/.opam/default/lib/stdlib-shims
 S /Users/jonathan/.opam/default/lib/stringext
 S /Users/jonathan/.opam/default/lib/tls
