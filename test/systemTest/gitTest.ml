@@ -101,6 +101,8 @@ let tag ?ignore:(ignore = false) contents path major minor patch repo =
   let _ = create_tag tag repo in
   (sha, semver)
 
+(* Assertions *)
+
 (* Tests *)
 
 let test_repo =
@@ -130,12 +132,10 @@ let test_command =
       | [] -> assert_failure "expected output"
       | _ -> ()
   in
-  let test_invalid _ =
-    let fn _ =
-      Git.git repo ["invalid-command"] Os.ignore
-    in
-    let exn = Failure "exited with status 1" in
-    assert_raises exn fn
+  let test_invalid ctxt =
+    let fn _ = Git.git repo ["invalid-command"] Os.ignore in
+    let stderr = Some "git: 'invalid-command' is not a git command. See 'git --help'.\n" in
+    OsTest.assert_non_zero ~ctxt ~stderr 1 fn
   in
   "Command" >::: [
     "Valid"   >:: test_valid;
@@ -203,15 +203,22 @@ let test_clone =
     ]
   in
   let test_failure =
-    let test_no_such_repo _ =
+    let test_no_such_repo ctxt =
       let cwd = Sys.getcwd () in
-
-      let cloned_dir = Filename.concat cwd "cloned_repo" in
-
-      let uri = Uri.of_string "https://example.com/non/existent/repo.git" in
-      let fn _ = Git.clone uri cloned_dir in
-      let exn = Failure "exited with status 128" in
-      assert_raises exn fn
+      let temp_dir = Filename.concat cwd "cloned_repo" in
+      let fn _ =
+        let uri = Uri.of_string "https://example.com/non/existent/repo.git" in
+        let _ = Git.clone uri temp_dir in
+        ()
+      in
+      let stderr =
+        let msg =
+          sprintf "Cloning into '%s'...\n" temp_dir ^
+          "fatal: repository 'https://example.com/non/existent/repo.git/' not found\n"
+        in
+        Some msg
+      in
+      OsTest.assert_non_zero ~ctxt ~stderr 128 fn
     in
     "Failure" >::: [
       "No such repo" >:: Os.in_temp_dir test_no_such_repo
@@ -302,6 +309,8 @@ let test_checkout =
     let actual = sha cloned_repo "HEAD" in
     assert_equal ~ctxt sha_one actual
   in
+
+
   let test_invalid ctxt =
     let (origin_path, origin_uri, origin_repo) = make_repo () in
     let path = Filename.concat origin_path filename in
@@ -314,8 +323,8 @@ let test_checkout =
     assert_equal ~ctxt head_sha actual;
 
     let fn _ = Git.checkout cloned_repo "invalid-ref" in
-    let exn = Failure "exited with status 1" in
-    assert_raises exn fn;
+    let stderr = Some "error: pathspec 'invalid-ref' did not match any file(s) known to git\n" in
+    OsTest.assert_non_zero ~ctxt ~stderr 1 fn;
 
     let actual = sha cloned_repo "HEAD" in
     assert_equal ~ctxt head_sha actual

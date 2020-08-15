@@ -28,7 +28,7 @@ val default_branch : r -> string
 val git : r -> string list -> (bytes -> 'a) -> 'a
 (** [git repo args handler] runs the "git" command with command-line arguments
     [args] in [repo].  On success, returns the result of passing standard output
-    to [handler].  On failure (non-zero exit status), raises {!Os.NonZero}. *)
+    to [handler].  On failure (non-zero exit status), raises {!Error}. *)
 
 (**
  {2 Operations}

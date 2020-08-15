@@ -1,5 +1,3 @@
-open Format
-
 (* Repositories *)
 
 type r = {
@@ -16,25 +14,14 @@ let default_branch repo = repo.default_branch
 (* Commands *)
 
 let git repo args handler =
-  let fn _ =
-    try Os.run "git" args handler
-    with Os.NonZero(exit_status, output) ->
-      let _ = Os.dump Stdlib.stdout Stdlib.stderr output in
-      let msg = sprintf "exited with status %d" exit_status in
-      failwith msg
-  in
+  let fn _ = Os.run "git" args handler in
   Os.in_dir repo.root fn handler
 
 let clone uri dir =
   let uri_str = Uri.to_string uri in
-  let _ =
-    try let _ = Os.run "git" ["clone"; uri_str; dir] Os.ignore in ()
-    with Os.NonZero(exit_status, output) ->
-      let _ = Os.dump Stdlib.stdout Stdlib.stderr output in
-      let msg = sprintf "exited with status %d" exit_status in
-      failwith msg
-  in
   let repo = repo dir "" in
+
+  let _ = Os.run "git" ["clone"; uri_str; dir] Os.ignore in
   let default_branch = git repo ["symbolic-ref"; "HEAD"] Os.line in
   { repo with default_branch = default_branch }
 

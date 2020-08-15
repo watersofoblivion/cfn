@@ -4,6 +4,38 @@ open OUnit2
 
 open System
 
+(* Assertions *)
+
+
+let assert_output extractor ~ctxt output expected =
+  let expected = Bytes.of_string expected in
+  let actual = extractor output in
+  assert_equal ~ctxt expected actual
+
+let assert_stdout = assert_output Os.stdout
+let assert_stderr = assert_output Os.stderr
+
+let assert_non_zero ~ctxt ?stdout:(stdout = None) ?stderr:(stderr = None) status fn =
+  try
+    fn ();
+    assert_failure "expected Os.NonZero to be raised"
+  with
+    | Os.NonZero(actual, output) ->
+      (* let msg = output |> Os.stdout |> Bytes.to_string in
+      Format.eprintf "STDOUT:\n%s\n%!" msg;
+      let msg = output |> Os.stderr |> Bytes.to_string in
+      Format.eprintf "STDERR:\n%s\n%!" msg; *)
+      let _ = match stdout with
+        | Some stdout -> assert_stdout ~ctxt output stdout
+        | None -> ()
+      in
+      let _ = match stderr with
+        | Some stderr -> assert_stderr ~ctxt output stderr
+        | None -> ()
+      in
+      assert_equal ~ctxt status actual
+    | exn -> raise exn
+
 (* Helpers *)
 
 let read_all ic =

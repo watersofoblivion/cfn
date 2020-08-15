@@ -10,12 +10,16 @@ let test_command =
       | [] -> assert_failure "expected output"
       | _ -> ()
   in
-  let test_invalid _ =
-    let fn _ =
-      Docker.docker ["invalid-command"] Os.ignore
+  let test_invalid ctxt =
+    let fn _ = Docker.docker ["invalid-command"] Os.ignore in
+    let stderr =
+      let msg =
+        "docker: 'invalid-command' is not a docker command.\n" ^
+        "See 'docker --help'\n"
+      in
+      Some msg
     in
-    let exn = Failure "exited with status 1" in
-    assert_raises exn fn
+    OsTest.assert_non_zero ~ctxt ~stderr 1 fn
   in
   "Command" >::: [
     "Valid"   >:: test_valid;
@@ -36,7 +40,7 @@ let test_run =
 
 (* Test Suite *)
 let suite =
-  "Git" >::: [
+  "Docker" >::: [
     test_command;
     test_image;
     test_container;
