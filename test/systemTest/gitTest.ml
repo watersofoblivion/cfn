@@ -234,8 +234,9 @@ let test_fetch =
 
   let assert_remote ~ctxt remote_repo local_repo remote branch =
     let expected = sha remote_repo ("refs/heads/" ^ branch) in
-    let actual = sha local_repo ("refs/remotes/" ^ remote ^ "/" ^ branch) in
-    assert_equal ~ctxt expected actual
+    sha local_repo ("refs/remotes/" ^ remote ^ "/" ^ branch)
+      |> Assert.string_equals ~ctxt expected
+      |> Assert.success
   in
 
   let test_single_remote ctxt =

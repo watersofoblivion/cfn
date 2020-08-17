@@ -24,7 +24,7 @@ open System
  Assertions to test the exit status and output of an executed process.
  *)
 
-val assert_output : (Os.output list -> bytes) -> ctxt:test_ctxt -> Os.output list -> string -> string
+val assert_output : (Os.output list -> bytes) -> ctxt:test_ctxt -> msg:string -> Os.output list -> string -> string
 (** [assert_output extractor ~ctxt output expected] asserts the the value
     extracted from [output] using [extractor] is equal to [expected].  Returns
     the extracted output. *)

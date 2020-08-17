@@ -6,15 +6,13 @@ open System
 
 (* Assertions *)
 
-
-let assert_output extractor ~ctxt output expected =
+let assert_output extractor ~ctxt ~msg output expected =
   output
     |> extractor
     |> Bytes.to_string
-    |> Assert.text_equals ~ctxt expected
-
-let assert_stdout = assert_output Os.stdout
-let assert_stderr = assert_output Os.stderr
+    |> Assert.text_equals ~ctxt ~msg expected
+let assert_stdout = assert_output ~msg:"Standard Output" Os.stdout
+let assert_stderr = assert_output ~msg:"Standard Error" Os.stderr
 
 let assert_non_zero ~ctxt ?stdout:(stdout = None) ?stderr:(stderr = None) status fn =
   try
@@ -22,10 +20,6 @@ let assert_non_zero ~ctxt ?stdout:(stdout = None) ?stderr:(stderr = None) status
     assert_failure "expected Os.NonZero to be raised"
   with
     | Os.NonZero(actual, output) ->
-      (* let msg = output |> Os.stdout |> Bytes.to_string in
-      Format.eprintf "STDOUT:\n%s\n%!" msg;
-      let msg = output |> Os.stderr |> Bytes.to_string in
-      Format.eprintf "STDERR:\n%s\n%!" msg; *)
       let _ = match stdout with
         | Some stdout -> assert_stdout ~ctxt output stdout
         | None -> ""
@@ -34,7 +28,7 @@ let assert_non_zero ~ctxt ?stdout:(stdout = None) ?stderr:(stderr = None) status
         | Some stderr -> assert_stderr ~ctxt output stderr
         | None -> ""
       in
-      assert_equal ~ctxt status actual
+      assert_equal ~ctxt ~msg:"Exit Status" status actual
     | exn -> raise exn
 
 (* Helpers *)

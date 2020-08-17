@@ -1,2 +1,3 @@
 _build
 .metals/metals.lock.db
+.docker

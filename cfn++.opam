@@ -30,4 +30,5 @@ depends: [
   "zarith"
   "simple-diff"
   "ANSITerminal"
+  "bisect"
 ]

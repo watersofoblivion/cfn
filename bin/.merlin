@@ -1,5 +1,4 @@
 EXCLUDE_QUERY_DIR
-B /Users/jonathan/.opam/default/lib/ANSITerminal
 B /Users/jonathan/.opam/default/lib/angstrom
 B /Users/jonathan/.opam/default/lib/asn1-combinators
 B /Users/jonathan/.opam/default/lib/astring
@@ -72,8 +71,6 @@ B /Users/jonathan/.opam/default/lib/ocamlgraph
 B /Users/jonathan/.opam/default/lib/ocplib-endian
 B /Users/jonathan/.opam/default/lib/ocplib-endian/bigstring
 B /Users/jonathan/.opam/default/lib/optint
-B /Users/jonathan/.opam/default/lib/ounit2
-B /Users/jonathan/.opam/default/lib/ounit2/advanced
 B /Users/jonathan/.opam/default/lib/parsexp
 B /Users/jonathan/.opam/default/lib/ppx_sexp_conv/runtime-lib
 B /Users/jonathan/.opam/default/lib/psq
@@ -81,13 +78,11 @@ B /Users/jonathan/.opam/default/lib/ptime
 B /Users/jonathan/.opam/default/lib/ptime/os
 B /Users/jonathan/.opam/default/lib/re
 B /Users/jonathan/.opam/default/lib/re/posix
-B /Users/jonathan/.opam/default/lib/re/str
 B /Users/jonathan/.opam/default/lib/result
 B /Users/jonathan/.opam/default/lib/rresult
 B /Users/jonathan/.opam/default/lib/seq
 B /Users/jonathan/.opam/default/lib/sexplib
 B /Users/jonathan/.opam/default/lib/sexplib0
-B /Users/jonathan/.opam/default/lib/simple-diff
 B /Users/jonathan/.opam/default/lib/stdlib-shims
 B /Users/jonathan/.opam/default/lib/stringext
 B /Users/jonathan/.opam/default/lib/tls
@@ -100,6 +95,8 @@ B /Users/jonathan/.opam/default/lib/yojson
 B /Users/jonathan/.opam/default/lib/zarith
 B /usr/local/lib/ocaml
 B /usr/local/lib/ocaml/threads
+B ../_build/default/bin/.cfnpp.eobjs/byte
+B ../_build/default/src/.cfnpp.objs/byte
 B ../_build/default/src/cli/.cli.objs/byte
 B ../_build/default/src/codegen/.codegen.objs/byte
 B ../_build/default/src/external/.ext.objs/byte
@@ -110,18 +107,6 @@ B ../_build/default/src/opt/.opt.objs/byte
 B ../_build/default/src/source/.source.objs/byte
 B ../_build/default/src/syntax/.syntax.objs/byte
 B ../_build/default/src/system/.system.objs/byte
-B ../_build/default/test/.runner.eobjs/byte
-B ../_build/default/test/cliTest/.cliTest.objs/byte
-B ../_build/default/test/codegenTest/.codegenTest.objs/byte
-B ../_build/default/test/externalTest/.extTest.objs/byte
-B ../_build/default/test/externalTest/awsSpecTest/.awsSpecTest.objs/byte
-B ../_build/default/test/externalTest/cfnSpecTest/.cfnSpecTest.objs/byte
-B ../_build/default/test/irTest/.irTest.objs/byte
-B ../_build/default/test/optTest/.optTest.objs/byte
-B ../_build/default/test/sourceTest/.sourceTest.objs/byte
-B ../_build/default/test/syntaxTest/.syntaxTest.objs/byte
-B ../_build/default/test/systemTest/.systemTest.objs/byte
-S /Users/jonathan/.opam/default/lib/ANSITerminal
 S /Users/jonathan/.opam/default/lib/angstrom
 S /Users/jonathan/.opam/default/lib/asn1-combinators
 S /Users/jonathan/.opam/default/lib/astring
@@ -194,8 +179,6 @@ S /Users/jonathan/.opam/default/lib/ocamlgraph
 S /Users/jonathan/.opam/default/lib/ocplib-endian
 S /Users/jonathan/.opam/default/lib/ocplib-endian/bigstring
 S /Users/jonathan/.opam/default/lib/optint
-S /Users/jonathan/.opam/default/lib/ounit2
-S /Users/jonathan/.opam/default/lib/ounit2/advanced
 S /Users/jonathan/.opam/default/lib/parsexp
 S /Users/jonathan/.opam/default/lib/ppx_sexp_conv/runtime-lib
 S /Users/jonathan/.opam/default/lib/psq
@@ -203,13 +186,11 @@ S /Users/jonathan/.opam/default/lib/ptime
 S /Users/jonathan/.opam/default/lib/ptime/os
 S /Users/jonathan/.opam/default/lib/re
 S /Users/jonathan/.opam/default/lib/re/posix
-S /Users/jonathan/.opam/default/lib/re/str
 S /Users/jonathan/.opam/default/lib/result
 S /Users/jonathan/.opam/default/lib/rresult
 S /Users/jonathan/.opam/default/lib/seq
 S /Users/jonathan/.opam/default/lib/sexplib
 S /Users/jonathan/.opam/default/lib/sexplib0
-S /Users/jonathan/.opam/default/lib/simple-diff
 S /Users/jonathan/.opam/default/lib/stdlib-shims
 S /Users/jonathan/.opam/default/lib/stringext
 S /Users/jonathan/.opam/default/lib/tls
@@ -222,6 +203,7 @@ S /Users/jonathan/.opam/default/lib/yojson
 S /Users/jonathan/.opam/default/lib/zarith
 S /usr/local/lib/ocaml
 S /usr/local/lib/ocaml/threads
+S .
 S ../src/cli
 S ../src/codegen
 S ../src/external
@@ -231,13 +213,4 @@ S ../src/ir
 S ../src/source
 S ../src/syntax
 S ../src/system
-S .
-S codegenTest
-S externalTest
-S externalTest/awsSpecTest
-S externalTest/cfnSpecTest
-S irTest
-S sourceTest
-S syntaxTest
-S systemTest
 FLG -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs

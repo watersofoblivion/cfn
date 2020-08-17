@@ -5,6 +5,5 @@
     str
     atdgen
     yojson
-    git
-    git-unix
-    syntax))
+    syntax
+    uri))
