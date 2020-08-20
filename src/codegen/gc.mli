@@ -33,11 +33,23 @@ val to_ptr_name : string
 val init_name : string
 (** [init_name] is the name of the initialization function. *)
 
+val close_perm_gen_name : string
+(** [close_perm_gen_name] is the name of the function to close the permanent
+    generation in preparation for stop-copy garbage collection. *)
+
+val swap_spaces_name : string
+(** [swap_spaces gc] is the name of the function to swap the from and to spaces
+    between stop-copy garbage collection passes. *)
+
+val init_main_gen_name : string
+(** [init_main_gen gc] is the name of the function to initialize the main
+    generation in preparation for event handling. *)
+
 val malloc_name : string
 (** [malloc_name] is the name of the allocation function. *)
 
-val collect_name : string
-(** [collect_name] is the name of the full collection function. *)
+val major_name : string
+(** [major_name] is the name of the full major collection function. *)
 
 (**
  {2 Collector}
@@ -79,5 +91,18 @@ val init : t -> Llvm.llvalue
 val malloc : t -> Llvm.llvalue
 (** [malloc gc] returns the allocation function. *)
 
-val collect : t -> Llvm.llvalue
-(** [collect gc] returns the full collection function. *)
+val close_perm_gen : t -> Llvm.llvalue
+(** [close_perm_gen gc] returns the function to close the permanent generation
+    in preparation for stop-copy garbage collection. *)
+
+val swap_spaces : t -> Llvm.llvalue
+(** [swap_spaces gc] returns the function to swap the from and to spaces between
+    stop-copy garbage collection passes. *)
+
+val init_main_gen : t -> Llvm.llvalue
+(** [init_main_gen gc] returns the function to initialize the main generation in
+    preparation for event handling. *)
+
+val major : t -> Llvm.llvalue
+(** [major gc] returns the function to perform a full major collection of the
+    main generation. *)

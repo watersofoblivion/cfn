@@ -11,7 +11,10 @@ let to_ptr_name = prefix ^ "to-ptr"
 
 let init_name = prefix ^ "init"
 let malloc_name = prefix ^ "malloc"
-let collect_name = prefix ^ "collect"
+let close_perm_gen_name = prefix ^ "close-perm-gen"
+let swap_spaces_name = prefix ^ "swap-spaces"
+let init_main_gen_name = prefix ^ "init-main-gen"
+let major_name = prefix ^ "major"
 
 (* Generate *)
 
@@ -23,13 +26,12 @@ type t = {
   from_ptr:  llvalue;
   to_ptr:    llvalue;
 
-  init:    llvalue;
-  malloc:  llvalue;
-  collect: llvalue;
-
-  init_perm_gen:  llvalue;
+  init:           llvalue;
+  malloc:         llvalue;
   close_perm_gen: llvalue;
-  init_main_gen:  llvalue
+  swap_spaces:    llvalue;
+  init_main_gen:  llvalue;
+  major:          llvalue;
 }
 
 let base_ptr gc = gc.base_ptr
@@ -41,7 +43,10 @@ let to_ptr gc = gc.to_ptr
 
 let init gc = gc.init
 let malloc gc = gc.malloc
-let collect gc = gc.collect
+let close_perm_gen gc = gc.close_perm_gen
+let swap_spaces gc = gc.swap_spaces
+let init_main_gen gc = gc.init_main_gen
+let major gc = gc.major
 
 let generate md =
   let ctx = Llvm.module_context md in
@@ -135,10 +140,66 @@ let generate md =
     fn
   in
 
-  let collect =
+  let close_perm_gen =
     let fn =
       let ty = function_type (void_type ctx) [||] in
-      define_function collect_name ty md
+      define_function close_perm_gen_name ty md
+    in
+
+    let entry = entry_block fn in
+    let builder = builder_at_end ctx entry in
+
+    let base_addr = build_load base_ptr "base_addr" builder in
+    let next_addr = build_load next_ptr "next_addr" builder in
+    let _ = build_store base_addr from_ptr builder in
+    let _ = build_store next_addr to_ptr builder in
+
+    let _ = build_ret_void builder in
+
+    fn
+  in
+
+  let swap_spaces =
+    let fn =
+      let ty = function_type (void_type ctx) [||] in
+      define_function swap_spaces_name ty md
+    in
+
+    let entry = entry_block fn in
+    let builder = builder_at_end ctx entry in
+
+    let from_addr = build_load from_ptr "from_addr" builder in
+    let to_addr = build_load to_ptr "to_addr" builder in
+    let _ = build_store from_addr next_ptr builder in
+    let _ = build_store from_addr to_ptr  builder in
+    let _ = build_store to_addr from_ptr builder in
+
+    let _ = build_ret_void builder in
+
+    fn
+  in
+
+  let init_main_gen =
+    let fn =
+      let ty = function_type (void_type ctx) [||] in
+      define_function init_main_gen_name ty md
+    in
+
+    let entry = entry_block fn in
+    let builder = builder_at_end ctx entry in
+
+    let next_addr = build_load next_ptr "next_addr" builder in
+    let _ = build_store next_addr reset_ptr builder in
+
+    let _ = build_ret_void builder in
+
+    fn
+  in
+
+  let major =
+    let fn =
+      let ty = function_type (void_type ctx) [||] in
+      define_function major_name ty md
     in
 
     let entry = entry_block fn in
@@ -150,7 +211,6 @@ let generate md =
     fn
   in
 
-  let dummy = const_int addr_ty 42 in
   { base_ptr       = base_ptr;
     reset_ptr      = reset_ptr;
     next_ptr       = next_ptr;
@@ -160,8 +220,7 @@ let generate md =
 
     init           = init;
     malloc         = malloc;
-    collect        = collect;
-
-    init_perm_gen  = dummy;
-    close_perm_gen = dummy;
-    init_main_gen  = dummy }
+    close_perm_gen = close_perm_gen;
+    swap_spaces    = swap_spaces;
+    init_main_gen  = init_main_gen;
+    major          = major }
