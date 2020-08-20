@@ -2,28 +2,82 @@
  {1 Garbage Collector}
  *)
 
- type t = private {
-   (* State *)
-   base_ptr:  Llvm.llvalue; (** Base address of heap *)
-   reset_ptr: Llvm.llvalue; (** Address to reset next_ptr to on collection *)
-   next_ptr:  Llvm.llvalue; (** Address of the next value to be allocated *)
-   end_ptr:   Llvm.llvalue; (** End address of the heap *)
+(**
+ {2 Names}
+ *)
 
-   (* C Integration API *)
-   malloc:              Llvm.llvalue; (** Allocate memory *)
-   malloc_with_realloc: Llvm.llvalue; (** Allocate memory that can be re-allocated *)
-   calloc_with_realloc: Llvm.llvalue; (** Allocate and clear memory that can be re-allocated *)
-   realloc:             Llvm.llvalue; (** Re-allocate memory *)
-   strdup:              Llvm.llvalue; (** Duplicate a string *)
-   free:                Llvm.llvalue; (** Free memory *)
+val base_ptr_name : string
+(** [base_ptr_name] is the name of the global variable pointing to the beginning
+    of the heap. *)
 
-   (* Runtime API *)
-   init_perm_gen:  Llvm.llvalue; (** Finalize the sys gen and initialize the perm gen *)
-   close_perm_gen: Llvm.llvalue; (** Close the perm gen in preparation for stop-copy pass *)
-   init_main_gen:  Llvm.llvalue; (** Initialize the main gen after the stop-copy pass *)
-   collect:        Llvm.llvalue  (** Perform a full GC between requests *)
- }
- (** Garbage Collector *)
+val reset_ptr_name : string
+(** [reset_ptr_name] is the name of the global variable pointing to the end of
+    the perm generation. *)
 
-val gen : Llvm.llcontext -> Llvm.llmodule -> t
-(** [gen ctx mod] generates a garbage collector into [mod]. *)
+val next_ptr_name : string
+(** [next_ptr_name] is the name of the global variable pointing to the starting
+    address of the next allocated block of the heap. *)
+
+val end_ptr_name : string
+(** [end_ptr_name] is the name of the global variable pointing to the end of the
+    heap. *)
+
+val from_ptr_name : string
+(** [from_ptr_name] is the name of the global variable pointing to the beginning
+    of the garbage collector's "from" space. *)
+
+val to_ptr_name : string
+(** [to_ptr_name] is the name of the global variable pointing to the beginning
+    of the garbage collector's "to" space. *)
+
+val init_name : string
+(** [init_name] is the name of the initialization function. *)
+
+val malloc_name : string
+(** [malloc_name] is the name of the allocation function. *)
+
+val collect_name : string
+(** [collect_name] is the name of the full collection function. *)
+
+(**
+ {2 Collector}
+ *)
+
+type t
+(** Garbage Collector *)
+
+val generate : Llvm.llmodule -> t
+(** [generage mod] generates the garbage collector into [mod]. *)
+
+val base_ptr : t -> Llvm.llvalue
+(** [base_ptr gc] returns the global variable which points to the beginning of
+    the heap. *)
+
+val reset_ptr : t -> Llvm.llvalue
+(** [reset_ptr gc] returns the global variable which points to the end of the perm
+    generation. *)
+
+val next_ptr : t -> Llvm.llvalue
+(** [next_ptr gc] returns the global variable which points to the starting address
+    of the next allocated block on the heap. *)
+
+val end_ptr : t -> Llvm.llvalue
+(** [end_ptr gc] returns the global variable which points to the end of the
+    heap. *)
+
+val from_ptr : t -> Llvm.llvalue
+(** [from_ptr gc] returns the global variable pointing to the beginning of the
+    garbage collector's "from" space. *)
+
+val to_ptr : t -> Llvm.llvalue
+(** [to_ptr gc] returns the global variable pointing to the beginning of the
+    garbage collector's "to" space. *)
+
+val init : t -> Llvm.llvalue
+(** [init gc] returns the collector initialization function. *)
+
+val malloc : t -> Llvm.llvalue
+(** [malloc gc] returns the allocation function. *)
+
+val collect : t -> Llvm.llvalue
+(** [collect gc] returns the full collection function. *)

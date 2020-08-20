@@ -31,4 +31,5 @@ depends: [
   "simple-diff"
   "ANSITerminal"
   "bisect"
+  "ctypes-foreign"
 ]

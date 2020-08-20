@@ -1,7 +1,7 @@
 open OUnit2
 
 let test_spec =
-  "External" >::: [
+  "External Specifications" >::: [
     ExtTest.ParseTest.suite;
     "AWS API Specification" >::: [
       AwsSpecTest.ApiTest.suite;
@@ -21,8 +21,23 @@ let test_spec =
     ]
   ]
 
+let test_system =
+  "Operating System Integration" >::: [
+    SystemTest.TestUtil.suite;
+    SystemTest.OsTest.suite;
+    SystemTest.SemverTest.suite;
+    SystemTest.GitTest.suite;
+    SystemTest.DockerTest.suite
+  ]
+
+let test_source =
+  "Source Code Management" >::: [
+    SourceTest.PathTest.suite;
+    SourceTest.WorkspaceTest.suite
+  ]
+
 let test_syntax =
-  "Syntax" >::: [
+  "Abstract Syntax" >::: [
     SyntaxTest.LocTest.suite;
     SyntaxTest.TypeTest.suite;
     SyntaxTest.AstTest.suite;
@@ -48,22 +63,9 @@ let test_codegen =
     CodegenTest.GcTest.suite;
     CodegenTest.HttpTest.suite;
     CodegenTest.JsonTest.suite;
-    CodegenTest.TmplTest.suite
-  ]
-
-let test_source =
-  "Source" >::: [
-    SourceTest.PathTest.suite;
-    SourceTest.WorkspaceTest.suite
-  ]
-
-let test_system =
-  "System" >::: [
-    SystemTest.TestUtil.suite;
-    SystemTest.OsTest.suite;
-    SystemTest.SemverTest.suite;
-    SystemTest.GitTest.suite;
-    SystemTest.DockerTest.suite
+    CodegenTest.XmlTest.suite;
+    CodegenTest.TmplTest.suite;
+    CodegenTest.RuntimeTest.suite
   ]
 
 let test_cli =
@@ -73,12 +75,12 @@ let test_cli =
 let suite =
   "CFN++" >::: [
     test_spec;
+    test_system;
+    test_source;
     test_syntax;
     test_ir;
     test_opt;
     test_codegen;
-    test_source;
-    test_system;
     test_cli
   ]
 
