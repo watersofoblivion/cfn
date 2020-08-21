@@ -9,6 +9,7 @@
    ir
    opt
    codegen
+   rt
    source
    system
    cli))

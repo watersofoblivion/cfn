@@ -59,17 +59,22 @@ let test_opt =
   ]
 
 let test_codegen =
+  let runtime =
+    "Runtime" >::: [
+      RtTest.SyscallTest.suite;
+      RtTest.LibcTest.suite;
+      RtTest.UnwindTest.suite;
+      RtTest.ExnTest.suite;
+      RtTest.GcTest.suite;
+      RtTest.HttpTest.suite;
+      RtTest.JsonTest.suite;
+      RtTest.XmlTest.suite;
+      RtTest.RuntimeTest.suite
+    ]
+  in
   "Code Generation" >::: [
-    CodegenTest.SyscallTest.suite;
-    CodegenTest.LibcTest.suite;
-    CodegenTest.UnwindTest.suite;
-    CodegenTest.ExnTest.suite;
-    CodegenTest.GcTest.suite;
-    CodegenTest.HttpTest.suite;
-    CodegenTest.JsonTest.suite;
-    CodegenTest.XmlTest.suite;
+    runtime;
     CodegenTest.TmplTest.suite;
-    CodegenTest.RuntimeTest.suite
   ]
 
 let test_cli =

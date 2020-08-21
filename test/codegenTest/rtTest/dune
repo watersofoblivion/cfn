@@ -1,0 +1,7 @@
+(library
+ (name rtTest)
+ (libraries
+    ounit2
+    llvm
+    llvm.executionengine
+    rt))
