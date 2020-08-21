@@ -8,6 +8,18 @@ type t
 val generate : Llvm.llmodule -> t
 (** [generate md] generates the runtime into [md]. *)
 
+val syscall : t -> Syscall.t
+(** [syscall rt] gets the syscall bindings. *)
+
+val libc : t -> Libc.t
+(** [libc rt] gets the libc bindings. *)
+
+val unwind : t -> Unwind.t
+(** [unwind rt] gets the stack unwinder. *)
+
+val exn : t -> Exn.t
+(** [exn rt] gets the exception handling functions. *)
+
 val gc : t -> Gc.t
 (** [gc rt] gets the generated garbage collector. *)
 

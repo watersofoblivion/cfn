@@ -48,23 +48,16 @@ let swap_spaces gc = gc.swap_spaces
 let init_main_gen gc = gc.init_main_gen
 let major gc = gc.major
 
-let generate md =
+let generate libc md =
   let ctx = Llvm.module_context md in
 
-  (* Types *)
+  let void_ty = Libc.void_ty libc in
+  let void_ptr_ty = Libc.void_ptr_ty libc in
+  let size_ty = Libc.size_ty libc in
   let addr_ty = i64_type ctx in
-  let size_ty = i64_type ctx in
-  let void_ptr_ty = pointer_type (i8_type ctx) in
-
-  (* Constants *)
-
   let null_addr = const_int addr_ty 0 in
 
-  (* Global Helpers *)
-
   let global_void_ptr id = define_global id null_addr md in
-
-  (* Globals *)
 
   let base_ptr = global_void_ptr base_ptr_name in
   let reset_ptr = global_void_ptr reset_ptr_name in
@@ -73,16 +66,12 @@ let generate md =
   let from_ptr = global_void_ptr from_ptr_name in
   let to_ptr = global_void_ptr to_ptr_name in
 
-  let malloc =
-    let ty = function_type (pointer_type addr_ty) [|size_ty|] in
-    declare_function "malloc" ty md
-  in
-
   let init =
     let fn =
-      let ty = function_type (void_type ctx) [|size_ty|] in
+      let ty = function_type void_ty [|size_ty|] in
       define_function init_name ty md
     in
+    let malloc = Libc.malloc libc in
 
     let entry = entry_block fn in
     let builder = builder_at_end ctx entry in
@@ -118,7 +107,7 @@ let generate md =
       let builder = builder_at_end ctx bb in
 
       let null_ptr = build_inttoptr null_addr void_ptr_ty "null_ptr" builder in
-      let _ = build_ret null_ptr builder in
+      ignore (build_ret null_ptr builder);
 
       bb
     in
@@ -127,22 +116,22 @@ let generate md =
       let bb = append_block ctx "allocate" fn in
       let builder = builder_at_end ctx bb in
 
-      let _ = build_store new_next next_ptr builder in
+      ignore (build_store new_next next_ptr builder);
       let next_ptr = build_inttoptr next_addr void_ptr_ty "next_ptr" builder in
-      let _ = build_ret next_ptr builder in
+      ignore (build_ret next_ptr builder);
 
       bb
     in
 
     let cond = build_icmp Icmp.Ugt new_next end_addr "cond" builder in
-    let _ = build_cond_br cond oom alloc builder in
+    ignore (build_cond_br cond oom alloc builder);
 
     fn
   in
 
   let close_perm_gen =
     let fn =
-      let ty = function_type (void_type ctx) [||] in
+      let ty = function_type void_ty [||] in
       define_function close_perm_gen_name ty md
     in
 
@@ -151,17 +140,17 @@ let generate md =
 
     let base_addr = build_load base_ptr "base_addr" builder in
     let next_addr = build_load next_ptr "next_addr" builder in
-    let _ = build_store base_addr from_ptr builder in
-    let _ = build_store next_addr to_ptr builder in
+    ignore (build_store base_addr from_ptr builder);
+    ignore (build_store next_addr to_ptr builder);
 
-    let _ = build_ret_void builder in
+    ignore (build_ret_void builder);
 
     fn
   in
 
   let swap_spaces =
     let fn =
-      let ty = function_type (void_type ctx) [||] in
+      let ty = function_type void_ty [||] in
       define_function swap_spaces_name ty md
     in
 
@@ -170,18 +159,18 @@ let generate md =
 
     let from_addr = build_load from_ptr "from_addr" builder in
     let to_addr = build_load to_ptr "to_addr" builder in
-    let _ = build_store from_addr next_ptr builder in
-    let _ = build_store from_addr to_ptr  builder in
-    let _ = build_store to_addr from_ptr builder in
+    ignore (build_store from_addr next_ptr builder);
+    ignore (build_store from_addr to_ptr  builder);
+    ignore (build_store to_addr from_ptr builder);
 
-    let _ = build_ret_void builder in
+    ignore (build_ret_void builder);
 
     fn
   in
 
   let init_main_gen =
     let fn =
-      let ty = function_type (void_type ctx) [||] in
+      let ty = function_type void_ty [||] in
       define_function init_main_gen_name ty md
     in
 
@@ -189,24 +178,24 @@ let generate md =
     let builder = builder_at_end ctx entry in
 
     let next_addr = build_load next_ptr "next_addr" builder in
-    let _ = build_store next_addr reset_ptr builder in
+    ignore (build_store next_addr reset_ptr builder);
 
-    let _ = build_ret_void builder in
+    ignore (build_ret_void builder);
 
     fn
   in
 
   let major =
     let fn =
-      let ty = function_type (void_type ctx) [||] in
+      let ty = function_type void_ty [||] in
       define_function major_name ty md
     in
 
     let entry = entry_block fn in
     let builder = builder_at_end ctx entry in
     let reset_addr = build_load reset_ptr "reset_addr" builder in
-    let _ = build_store reset_addr next_ptr builder in
-    let _ = build_ret_void builder in
+    ignore (build_store reset_addr next_ptr builder);
+    ignore (build_ret_void builder);
 
     fn
   in

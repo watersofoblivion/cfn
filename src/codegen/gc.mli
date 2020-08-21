@@ -1,3 +1,5 @@
+open Llvm
+
 (**
  {1 Garbage Collector}
  *)
@@ -58,51 +60,51 @@ val major_name : string
 type t
 (** Garbage Collector *)
 
-val generate : Llvm.llmodule -> t
+val generate : Libc.t -> llmodule -> t
 (** [generage mod] generates the garbage collector into [mod]. *)
 
-val base_ptr : t -> Llvm.llvalue
+val base_ptr : t -> llvalue
 (** [base_ptr gc] returns the global variable which points to the beginning of
     the heap. *)
 
-val reset_ptr : t -> Llvm.llvalue
+val reset_ptr : t -> llvalue
 (** [reset_ptr gc] returns the global variable which points to the end of the perm
     generation. *)
 
-val next_ptr : t -> Llvm.llvalue
+val next_ptr : t -> llvalue
 (** [next_ptr gc] returns the global variable which points to the starting address
     of the next allocated block on the heap. *)
 
-val end_ptr : t -> Llvm.llvalue
+val end_ptr : t -> llvalue
 (** [end_ptr gc] returns the global variable which points to the end of the
     heap. *)
 
-val from_ptr : t -> Llvm.llvalue
+val from_ptr : t -> llvalue
 (** [from_ptr gc] returns the global variable pointing to the beginning of the
     garbage collector's "from" space. *)
 
-val to_ptr : t -> Llvm.llvalue
+val to_ptr : t -> llvalue
 (** [to_ptr gc] returns the global variable pointing to the beginning of the
     garbage collector's "to" space. *)
 
-val init : t -> Llvm.llvalue
+val init : t -> llvalue
 (** [init gc] returns the collector initialization function. *)
 
-val malloc : t -> Llvm.llvalue
+val malloc : t -> llvalue
 (** [malloc gc] returns the allocation function. *)
 
-val close_perm_gen : t -> Llvm.llvalue
+val close_perm_gen : t -> llvalue
 (** [close_perm_gen gc] returns the function to close the permanent generation
     in preparation for stop-copy garbage collection. *)
 
-val swap_spaces : t -> Llvm.llvalue
+val swap_spaces : t -> llvalue
 (** [swap_spaces gc] returns the function to swap the from and to spaces between
     stop-copy garbage collection passes. *)
 
-val init_main_gen : t -> Llvm.llvalue
+val init_main_gen : t -> llvalue
 (** [init_main_gen gc] returns the function to initialize the main generation in
     preparation for event handling. *)
 
-val major : t -> Llvm.llvalue
+val major : t -> llvalue
 (** [major gc] returns the function to perform a full major collection of the
     main generation. *)

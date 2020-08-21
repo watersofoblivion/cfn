@@ -1,26 +1,17 @@
 open Format
 
-(* open Llvm *)
 open Ctypes
 
 open Codegen
 
 open OUnit2
 
-let _ =
-  if Llvm_executionengine.initialize ()
-  then ()
-  else failwith "Could not initialize LLVM JIT"
+let _ = Helper.init ()
 
-let get_global_var ty name = Llvm_executionengine.get_global_value_address name ty
-let get_function ty name = Llvm_executionengine.get_function_address name ty
-
-let get_global_uint64_var = get_global_var uint64_t
-
-let get_base_ptr = get_global_uint64_var Gc.base_ptr_name
-let get_reset_ptr = get_global_uint64_var Gc.reset_ptr_name
-let get_next_ptr = get_global_uint64_var Gc.next_ptr_name
-let get_end_ptr = get_global_uint64_var Gc.end_ptr_name
+let get_base_ptr = Helper.get_global_uint64_var Gc.base_ptr_name
+let get_reset_ptr = Helper.get_global_uint64_var Gc.reset_ptr_name
+let get_next_ptr = Helper.get_global_uint64_var Gc.next_ptr_name
+let get_end_ptr = Helper.get_global_uint64_var Gc.end_ptr_name
 
 let get_generation_pointers ee =
   (
@@ -30,8 +21,8 @@ let get_generation_pointers ee =
     get_end_ptr ee
   )
 
-let get_from_ptr = get_global_uint64_var Gc.from_ptr_name
-let get_to_ptr = get_global_uint64_var Gc.to_ptr_name
+let get_from_ptr = Helper.get_global_uint64_var Gc.from_ptr_name
+let get_to_ptr = Helper.get_global_uint64_var Gc.to_ptr_name
 
 let get_space_pointers ee =
   (
@@ -41,43 +32,37 @@ let get_space_pointers ee =
 
 let get_init =
   let ty = Foreign.funptr (int64_t @-> returning void) in
-  get_function ty Gc.init_name
+  Helper.get_function ty Gc.init_name
 
 let get_malloc =
   let ty = Foreign.funptr (int64_t @-> returning (ptr int64_t)) in
-  get_function ty Gc.malloc_name
+  Helper.get_function ty Gc.malloc_name
 
 let get_close_perm_gen =
   let ty = Foreign.funptr (void @-> returning void) in
-  get_function ty Gc.close_perm_gen_name
+  Helper.get_function ty Gc.close_perm_gen_name
 
 let get_swap_spaces =
   let ty = Foreign.funptr (void @-> returning void) in
-  get_function ty Gc.swap_spaces_name
+  Helper.get_function ty Gc.swap_spaces_name
 
 let get_init_main_gen =
   let ty = Foreign.funptr (void @-> returning void) in
-  get_function ty Gc.init_main_gen_name
+  Helper.get_function ty Gc.init_main_gen_name
 
 let get_major =
   let ty = Foreign.funptr (void @-> returning void) in
-  get_function ty Gc.major_name
+  Helper.get_function ty Gc.major_name
 
-let llvm_test setup tester ctxt =
-  let ctx = Llvm.create_context () in
-  let finally _ = Llvm.dispose_context ctx in
-
-  let md = Llvm.create_module ctx "test-module" in
-  let _ = setup md in
-  let _ = match Llvm_analysis.verify_module md with
-    | None -> ()
-    | Some msg ->
-      Llvm.dump_module md;
-      let msg = sprintf "Invalid module: %s\n%!" msg in
-      assert_failure msg
+let gc_test =
+  let setup md =
+    let syscall = Syscall.generate md in
+    let libc = Libc.generate md in
+    let unwind = Unwind.generate libc md in
+    ignore (Exn.generate syscall libc unwind md);
+    ignore (Gc.generate libc md)
   in
-  let ee = Llvm_executionengine.create md in
-  Fun.protect ~finally (fun _ -> tester ee ctxt)
+  Helper.llvm_test setup
 
 let test_generate =
   let printer x = sprintf "%x" (Unsigned.UInt64.to_int x) in
@@ -109,7 +94,7 @@ let test_generate =
       assert_equal ~ctxt ~msg:"GC End Pointer" expected_end end_ptr;
     in
     "Initialize" >::: [
-      "Valid" >:: llvm_test Gc.generate test_valid
+      "Valid" >:: gc_test test_valid
     ]
   in
   let test_malloc =
@@ -195,11 +180,11 @@ let test_generate =
         assert_equal ~ctxt ~printer ~msg:"Returned Address" zero addr;
       in
       "Invalid" >::: [
-        "Out of Memory" >:: llvm_test Gc.generate test_out_of_memory
+        "Out of Memory" >:: gc_test test_out_of_memory
       ]
     in
     "Malloc" >::: [
-      "Valid" >:: llvm_test Gc.generate test_valid;
+      "Valid" >:: gc_test test_valid;
       test_invalid
     ]
   in
@@ -219,7 +204,7 @@ let test_generate =
       assert_equal ~ctxt ~printer ~msg:"From Space Pointer" zero from_ptr;
       assert_equal ~ctxt ~printer ~msg:"To Space Pointer" zero to_ptr;
 
-      let _ = malloc padding in
+      ignore (malloc padding);
 
       let (base_ptr, _, next_ptr, _) = get_generation_pointers ee in
       let (from_ptr, to_ptr) = get_space_pointers ee in
@@ -239,7 +224,7 @@ let test_generate =
       let swap_spaces = get_swap_spaces ee in
 
       init heap_size;
-      let _ = malloc padding in
+      ignore (malloc padding);
       close_perm_gen ();
 
       let (_, to_ptr) = get_space_pointers ee in
@@ -259,11 +244,11 @@ let test_generate =
       let init_main_gen = get_init_main_gen ee in
 
       init heap_size;
-      let _ = malloc padding in
+      ignore (malloc padding);
       close_perm_gen ();
-      let _ = malloc padding in
+      ignore (malloc padding);
       swap_spaces ();
-      let _ = malloc padding in
+      ignore (malloc padding);
       init_main_gen ();
 
       let (base_ptr, reset_ptr, next_ptr, _) = get_generation_pointers ee in
@@ -287,7 +272,7 @@ let test_generate =
         let size = Unsigned.UInt64.of_int64 size in
         Unsigned.UInt64.add next_ptr size
       in
-      let _ = malloc size in
+      ignore (malloc size);
 
       let (new_base_ptr, new_reset_ptr, new_next_ptr, new_end_ptr) = get_generation_pointers ee in
       assert_equal ~ctxt ~printer ~msg:"GC Base Pointer" base_ptr new_base_ptr;
@@ -304,10 +289,10 @@ let test_generate =
       assert_equal ~ctxt ~printer ~msg:"GC End Pointer" end_ptr new_end_ptr;
     in
     "Collection" >::: [
-      "Close Permanent Generation" >:: llvm_test Gc.generate test_close_perm_gen;
-      "Swap Spaces"                >:: llvm_test Gc.generate test_swap_spaces;
-      "Initialize Main Generation" >:: llvm_test Gc.generate test_init_main_gen;
-      "Major Collection"           >:: llvm_test Gc.generate test_collect;
+      "Close Permanent Generation" >:: gc_test test_close_perm_gen;
+      "Swap Spaces"                >:: gc_test test_swap_spaces;
+      "Initialize Main Generation" >:: gc_test test_init_main_gen;
+      "Major Collection"           >:: gc_test test_collect;
     ]
   in
   "Generated GC" >::: [

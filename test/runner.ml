@@ -60,6 +60,10 @@ let test_opt =
 
 let test_codegen =
   "Code Generation" >::: [
+    CodegenTest.SyscallTest.suite;
+    CodegenTest.LibcTest.suite;
+    CodegenTest.UnwindTest.suite;
+    CodegenTest.ExnTest.suite;
     CodegenTest.GcTest.suite;
     CodegenTest.HttpTest.suite;
     CodegenTest.JsonTest.suite;
