@@ -1,7 +1,7 @@
 (library
- (name rtTest)
+ (name runtimeTest)
  (libraries
     ounit2
     llvm
     llvm.executionengine
-    rt))
+    runtime))

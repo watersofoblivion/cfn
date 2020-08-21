@@ -104,7 +104,7 @@ B /usr/local/lib/ocaml
 B /usr/local/lib/ocaml/threads
 B ../_build/default/src/cli/.cli.objs/byte
 B ../_build/default/src/codegen/.codegen.objs/byte
-B ../_build/default/src/codegen/rt/.rt.objs/byte
+B ../_build/default/src/codegen/runtime/.runtime.objs/byte
 B ../_build/default/src/external/.ext.objs/byte
 B ../_build/default/src/external/awsSpec/.awsSpec.objs/byte
 B ../_build/default/src/external/cfnSpec/.cfnSpec.objs/byte
@@ -116,7 +116,7 @@ B ../_build/default/src/system/.system.objs/byte
 B ../_build/default/test/.runner.eobjs/byte
 B ../_build/default/test/cliTest/.cliTest.objs/byte
 B ../_build/default/test/codegenTest/.codegenTest.objs/byte
-B ../_build/default/test/codegenTest/rtTest/.rtTest.objs/byte
+B ../_build/default/test/codegenTest/runtimeTest/.runtimeTest.objs/byte
 B ../_build/default/test/externalTest/.extTest.objs/byte
 B ../_build/default/test/externalTest/awsSpecTest/.awsSpecTest.objs/byte
 B ../_build/default/test/externalTest/cfnSpecTest/.cfnSpecTest.objs/byte
@@ -230,7 +230,7 @@ S /usr/local/lib/ocaml
 S /usr/local/lib/ocaml/threads
 S ../src/cli
 S ../src/codegen
-S ../src/codegen/rt
+S ../src/codegen/runtime
 S ../src/external
 S ../src/external/awsSpec
 S ../src/external/cfnSpec
@@ -240,7 +240,7 @@ S ../src/syntax
 S ../src/system
 S .
 S codegenTest
-S codegenTest/rtTest
+S codegenTest/runtimeTest
 S externalTest
 S externalTest/awsSpecTest
 S externalTest/cfnSpecTest

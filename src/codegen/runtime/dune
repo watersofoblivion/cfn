@@ -1,5 +1,5 @@
 (library
-  (name rt)
+  (name runtime)
 ;  (bisect_ppx)
   (libraries
     llvm

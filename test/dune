@@ -16,7 +16,7 @@
     irTest
     optTest
     codegenTest
-    rtTest
+    runtimeTest
     sourceTest
     systemTest
     cliTest))

@@ -8,8 +8,8 @@ B /Users/jonathan/.opam/default/lib/ounit2/advanced
 B /Users/jonathan/.opam/default/lib/stdlib-shims
 B /usr/local/lib/ocaml
 B /usr/local/lib/ocaml/threads
-B ../../../_build/default/src/codegen/rt/.rt.objs/byte
-B ../../../_build/default/test/codegenTest/rtTest/.rtTest.objs/byte
+B ../../../_build/default/src/codegen/runtime/.runtime.objs/byte
+B ../../../_build/default/test/codegenTest/runtimeTest/.runtimeTest.objs/byte
 S /Users/jonathan/.opam/default/lib/bytes
 S /Users/jonathan/.opam/default/lib/ctypes
 S /Users/jonathan/.opam/default/lib/integers
@@ -19,6 +19,6 @@ S /Users/jonathan/.opam/default/lib/ounit2/advanced
 S /Users/jonathan/.opam/default/lib/stdlib-shims
 S /usr/local/lib/ocaml
 S /usr/local/lib/ocaml/threads
-S ../../../src/codegen/rt
+S ../../../src/codegen/runtime
 S .
-FLG -open RtTest -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs
+FLG -open RuntimeTest -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs
