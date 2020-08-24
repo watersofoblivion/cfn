@@ -6,75 +6,92 @@ open Runtime
 
 open OUnit2
 
-let _ = Helper.init ()
+module type Bindings = sig
+  val throw : (unit, [`C]) pointer -> (unit, [`C]) pointer -> (unit, [`C]) pointer -> unit
+  val personality : unit -> unit
+  val begin_catch : unit -> unit
+  val end_catch : unit -> unit
+end
 
-let eh_test =
-  let setup md =
-    let syscall = Syscall.generate md in
-    let libc = Libc.generate md in
-    let unwind = Unwind.generate libc md in
-    ignore (Exn.generate syscall libc unwind md)
+module Bind (Asm: Exn.Asm) (Exe: TargetTest.Exe) = struct
+  let throw =
+    let ty = Foreign.funptr (ptr void @-> ptr void @-> ptr void @-> returning void) in
+    Exe.func ty Asm.Names.throw
+
+  let personality =
+    let ty = Foreign.funptr (void @-> returning void) in
+    Exe.func ty Asm.Names.personality
+
+  let begin_catch =
+    let ty = Foreign.funptr (void @-> returning void) in
+    Exe.func ty Asm.Names.begin_catch
+
+  let end_catch =
+    let ty = Foreign.funptr (void @-> returning void) in
+    Exe.func ty Asm.Names.end_catch
+end
+
+let exn_test tester ctxt =
+  let ctx = Llvm.create_context () in
+  let finally _ = Llvm.dispose_context ctx in
+  let fn _ =
+    let module Target = struct
+      module Names = struct
+        let prefix = "cfn++"
+      end
+      let ctx = ctx
+      let md = Llvm.create_module ctx "test-module"
+    end in
+
+    let module Syscall = Syscall.Generate (Target) in
+    let module Libc = Libc.Generate (Target) in
+    let module Unwind = Unwind.Generate (Libc) (Target) in
+
+    let module Asm = Exn.Generate (Syscall) (Libc) (Unwind) (Target) in
+    let module Exe = TargetTest.Compile (Target) in
+
+    let module Exn = Bind (Asm) (Exe) in
+    tester (module Exn: Bindings) ctxt
   in
-  Helper.llvm_test setup
-
-let get_throw =
-  let ty = Foreign.funptr (ptr void @-> ptr void @-> ptr void @-> returning void) in
-  Helper.get_function ty Exn.throw_name
-
-let get_personality =
-  let ty = Foreign.funptr (void @-> returning void) in
-  Helper.get_function ty Exn.personality_name
-
-let get_begin_catch =
-  let ty = Foreign.funptr (void @-> returning void) in
-  Helper.get_function ty Exn.begin_catch_name
-
-let get_end_catch =
-  let ty = Foreign.funptr (void @-> returning void) in
-  Helper.get_function ty Exn.end_catch_name
+  Fun.protect ~finally fn
 
 let test_throw =
-  let test_valid ee ctxt =
-    let throw = get_throw ee in
+  let test_valid (module Exn: Bindings) ctxt =
     let _ = ctxt in
-    let _ = throw in
     ()
   in
   "Throw" >::: [
-    "Valid" >:: eh_test test_valid
+    "Valid" >:: exn_test test_valid
   ]
 
 let test_personality =
-  let test_valid ee ctxt =
-    let personality = get_personality ee in
+  let test_valid (module Exn: Bindings) ctxt =
     let _ = ctxt in
 
-    personality ()
+    Exn.personality ()
   in
   "Personality Function" >::: [
-    "Valid" >:: eh_test test_valid
+    "Valid" >:: exn_test test_valid
   ]
 
 let test_begin_catch =
-  let test_valid ee ctxt =
-    let begin_catch = get_begin_catch ee in
+  let test_valid (module Exn: Bindings) ctxt =
     let _ = ctxt in
 
-    begin_catch ()
+    Exn.begin_catch ()
   in
   "Begin Catch" >::: [
-    "Valid" >:: eh_test test_valid
+    "Valid" >:: exn_test test_valid
   ]
 
 let test_end_catch =
-  let test_valid ee ctxt =
-    let end_catch = get_end_catch ee in
+  let test_valid (module Exn: Bindings) ctxt =
     let _ = ctxt in
 
-    end_catch ()
+    Exn.end_catch ()
   in
   "End Catch" >::: [
-    "Valid" >:: eh_test test_valid
+    "Valid" >:: exn_test test_valid
   ]
 
 let suite =

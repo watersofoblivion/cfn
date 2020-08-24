@@ -1,13 +1,17 @@
 open Llvm
 
-type t
+module type Asm = sig
+  module Names : sig
+    val malloc : string
+  end
 
-val generate : llmodule -> t
+  val int_t : lltype
+  val word_t : lltype
+  val size_t : lltype
+  val void_t : lltype
+  val void_ptr_t : lltype
 
-val int_ty : t -> lltype
-val word_ty : t -> lltype
-val size_ty : t -> lltype
-val void_ty : t -> lltype
-val void_ptr_ty : t -> lltype
+  val malloc : llvalue
+end
 
-val malloc : t -> llvalue
+module Generate : functor (Target: Target.Asm) -> Asm

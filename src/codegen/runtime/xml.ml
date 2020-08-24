@@ -1,5 +1,7 @@
-(* JSON *)
+(* XML *)
 
-type t = unit
+module type Asm = sig
+end
 
-let generate _ = ()
+module Generate (Target: Target.Asm) = struct
+end

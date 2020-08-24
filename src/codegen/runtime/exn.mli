@@ -8,7 +8,7 @@ open Llvm
  {2 Names}
  *)
 
-val throw_name : string
+(* val throw_name : string
 (** [throw_name] is the name of the function which throws an exception. *)
 
 val personality_name : string
@@ -21,12 +21,12 @@ val begin_catch_name : string
 
 val end_catch_name : string
 (** [end_catch_name] is the name of the function called on exiting a catch
-    block. *)
+    block. *) *)
 
 (**
  {2 Code}
  *)
-
+(*
 type t
 (** Generated exception handling code *)
 
@@ -44,4 +44,21 @@ val begin_catch : t -> llvalue
 (** [begin_catch eh] is the function called when entering a catch block. *)
 
 val end_catch : t -> llvalue
-(** [end_catch eh] is the function called on exiting a catch block. *)
+(** [end_catch eh] is the function called on exiting a catch block. *) *)
+
+
+module type Asm = sig
+  module Names : sig
+    val throw : string
+    val personality : string
+    val begin_catch : string
+    val end_catch : string
+  end
+
+  val throw : llvalue
+  val personality : llvalue
+  val begin_catch : llvalue
+  val end_catch : llvalue
+end
+
+module Generate : functor (Syscall: Syscall.Asm) -> functor (Libc: Libc.Asm) -> functor (Unwind: Unwind.Asm) -> functor (Target: Target.Asm) -> Asm

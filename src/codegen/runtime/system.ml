@@ -1,37 +1,22 @@
-type t = {
-  syscall: Syscall.t;
-  libc:    Libc.t;
-  unwind:  Unwind.t;
-  exn:     Exn.t;
-  gc:      Gc.t;
-  json:    Json.t;
-  xml:     Xml.t;
-  http:    Http.t
-}
 
-let syscall rt = rt.syscall
-let libc rt = rt.libc
-let unwind rt = rt.unwind
-let exn rt = rt.exn
-let gc rt = rt.gc
-let json rt = rt.json
-let xml rt = rt.xml
-let http rt = rt.http
+module type Asm = sig
+  module Syscall : Syscall.Asm
+  module Libc : Libc.Asm
+  module Unwind : Unwind.Asm
+  module Exn : Exn.Asm
+  module Gc : Gc.Asm
+  module Json : Json.Asm
+  module Xml : Xml.Asm
+  module Http : Http.Asm
+end
 
-let generate md =
-  let syscall = Syscall.generate md in
-  let libc = Libc.generate md in
-  let unwind = Unwind.generate libc md in
-  let exn = Exn.generate syscall libc unwind md in
-  let gc = Gc.generate libc md in
-  let json = Json.generate md in
-  let xml = Xml.generate md in
-  let http = Http.generate md in
-  { syscall = syscall;
-    libc    = libc;
-    unwind  = unwind;
-    exn     = exn;
-    gc      = gc;
-    json    = json;
-    xml     = xml;
-    http    = http }
+module Generate (Target: Target.Asm) = struct
+  module Syscall = Syscall.Generate (Target)
+  module Libc = Libc.Generate (Target)
+  module Unwind = Unwind.Generate (Libc) (Target)
+  module Exn = Exn.Generate (Syscall) (Libc) (Unwind) (Target)
+  module Gc = Gc.Generate (Libc) (Target)
+  module Json = Json.Generate (Target)
+  module Xml = Xml.Generate (Target)
+  module Http = Http.Generate (Target)
+end

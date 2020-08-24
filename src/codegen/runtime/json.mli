@@ -2,6 +2,7 @@
  {1 JSON}
  *)
 
- type t
+ module type Asm = sig
+ end
 
- val generate : Llvm.llmodule -> t
+ module Generate : functor (Target: Target.Asm) -> Asm

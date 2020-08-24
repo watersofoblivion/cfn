@@ -1,17 +1,19 @@
 open Llvm
 
-type t = {
-  exit: llvalue;
-}
+module type Asm = sig
+  module Names : sig
+    val exit : string
+  end
 
-let exit syscall = syscall.exit
+  val exit : llvalue
+end
 
-let generate md =
-  let ctx = module_context md in
+module Generate (Target : Target.Asm) = struct
+  module Names = struct
+    let exit = "exit"
+  end
 
   let exit =
-    let ty = function_type (void_type ctx) [|i32_type ctx|] in
-    declare_function "exit" ty md
-  in
-
-  { exit = exit }
+    let ty = function_type (void_type Target.ctx) [|i32_type Target.ctx|] in
+    declare_function Names.exit ty Target.md
+end

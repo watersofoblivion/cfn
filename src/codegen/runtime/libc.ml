@@ -1,41 +1,31 @@
 open Llvm
 
-type t = {
-  int_ty:      lltype;
-  word_ty:     lltype;
-  size_ty:     lltype;
-  void_ty:     lltype;
-  void_ptr_ty: lltype;
+module type Asm = sig
+  module Names : sig
+    val malloc : string
+  end
 
-  malloc: llvalue
-}
+  val int_t : lltype
+  val word_t : lltype
+  val size_t : lltype
+  val void_t : lltype
+  val void_ptr_t : lltype
 
-let int_ty libc = libc.int_ty
-let word_ty libc = libc.word_ty
-let size_ty libc = libc.size_ty
-let void_ty libc = libc.void_ty
-let void_ptr_ty libc = libc.void_ptr_ty
+  val malloc : llvalue
+end
 
-let malloc libc = libc.malloc
+module Generate (Target: Target.Asm) = struct
+  module Names = struct
+    let malloc = "malloc"
+  end
 
-let generate md =
-  let ctx = module_context md in
-
-  let int_ty = i32_type ctx in
-  let word_ty = i64_type ctx in
-  let size_ty = i64_type ctx in
-  let void_ty = void_type ctx in
-  let void_ptr_ty = pointer_type (i8_type ctx) in
+  let int_t = i32_type Target.ctx
+  let word_t = i64_type Target.ctx
+  let size_t = i64_type Target.ctx
+  let void_t = void_type Target.ctx
+  let void_ptr_t = pointer_type (i8_type Target.ctx)
 
   let malloc =
-    let ty = function_type void_ptr_ty [|size_ty|] in
-    declare_function "malloc" ty md
-  in
-
-  { int_ty      = int_ty;
-    word_ty     = word_ty;
-    size_ty     = size_ty;
-    void_ty     = void_ty;
-    void_ptr_ty = void_ptr_ty;
-
-    malloc = malloc }
+    let ty = function_type void_ptr_t [|size_t|] in
+    declare_function Names.malloc ty Target.md
+end

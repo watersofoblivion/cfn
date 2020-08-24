@@ -1,107 +1,98 @@
 open Llvm
 
-let prefix = "cfn++::exception-handling::"
+module type Asm = sig
+  module Names : sig
+    val throw : string
+    val personality : string
+    val begin_catch : string
+    val end_catch : string
+  end
 
-let throw_name = prefix ^ "throw"
-let personality_name = prefix ^ "personality"
-let begin_catch_name = prefix ^ "begin-catch"
-let end_catch_name = prefix ^ "end-catch"
+  val throw : llvalue
+  val personality : llvalue
+  val begin_catch : llvalue
+  val end_catch : llvalue
+end
 
-type t = {
-  throw:       llvalue;
-  personality: llvalue;
-  begin_catch: llvalue;
-  end_catch:   llvalue
-}
+module Generate (Syscall: Syscall.Asm) (Libc: Libc.Asm) (Unwind: Unwind.Asm) (Target: Target.Asm) = struct
+  module Names = struct
+    let prefix = Target.Names.prefix ^ "::exception-handling::"
 
-let throw eh = eh.throw
-let personality eh = eh.personality
-let begin_catch eh = eh.begin_catch
-let end_catch eh = eh.end_catch
+    let throw = prefix ^ "throw"
+    let personality = prefix ^ "personality"
+    let begin_catch = prefix ^ "begin-catch"
+    let end_catch = prefix ^ "end-catch"
 
-let generate syscall libc unwind md =
-  let ctx = Llvm.module_context md in
-
-  let int_ty = Libc.int_ty libc in
-  let void_ty = Libc.void_ty libc in
-  let void_ptr_ty = Libc.void_ptr_ty libc in
+    let intrinsic_begin_catch = "llvm.eh.begincatch"
+    let intrinsic_end_catch = "llvm.eh.endcatch"
+  end
 
   let throw =
-    let exit = Syscall.exit syscall in
-    let unwind = Unwind.raise_exception unwind in
     let fn =
-      let ty = function_type void_ty [|void_ptr_ty; void_ptr_ty; void_ptr_ty|] in
-      define_function throw_name ty md
+      let ty = function_type Libc.void_t [|Libc.void_ptr_t; Libc.void_ptr_t; Libc.void_ptr_t|] in
+      define_function Names.throw ty Target.md
     in
 
     let block = entry_block fn in
-    let builder = builder_at_end ctx block in
+    let builder = builder_at_end Target.ctx block in
 
-    ignore (unwind);
-
-    let one = const_null int_ty in
-    ignore (build_call exit [|one|] "" builder);
+    let one = const_null Libc.int_t in
+    ignore (build_call Syscall.exit [|one|] "" builder);
     ignore (build_ret_void builder);
 
     fn
-  in
 
   let personality =
     let fn =
-      let ty = function_type void_ty [||] in
-      define_function personality_name ty md
+      let ty = function_type Unwind.ReasonCode.t [|Libc.int_t; Unwind.Action.t; i64_type Target.ctx; pointer_type Unwind.exception_t; Unwind.context_t|] in
+      define_function Names.personality ty Target.md
     in
 
     let block = entry_block fn in
-    let builder = builder_at_end ctx block in
+    let builder = builder_at_end Target.ctx block in
 
-    ignore (build_ret_void builder);
+    ignore (build_ret Unwind.ReasonCode.no_reason builder);
 
     fn
-  in
 
   let begin_catch =
     let begin_catch_intrinsic =
-      let ty = function_type void_ty [|void_ptr_ty; void_ptr_ty|] in
-      declare_function "llvm.eh.begincatch" ty md
+      let ty = function_type Libc.void_t [|Libc.void_ptr_t; Libc.void_ptr_t|] in
+      declare_function Names.intrinsic_begin_catch ty Target.md
     in
+    ignore (begin_catch_intrinsic);
+
     let fn =
-      let ty = function_type void_ty [||] in
-      define_function begin_catch_name ty md
+      let ty = function_type Libc.void_t [||] in
+      define_function Names.begin_catch ty Target.md
     in
 
     let block = entry_block fn in
-    let builder = builder_at_end ctx block in
+    let builder = builder_at_end Target.ctx block in
 
-    ignore (begin_catch_intrinsic);
     (* let null_value = const_null (pointer_type (i8_type ctx)) in
     ignore (build_call begin_catch_intrinsic [|null_value; null_value|] "" builder); *)
     ignore (build_ret_void builder);
 
     fn
-  in
 
   let end_catch =
     let end_catch_intrinsic =
-      let ty = function_type void_ty [||] in
-      declare_function "llvm.eh.endcatch" ty md
+      let ty = function_type Libc.void_t [||] in
+      declare_function Names.intrinsic_end_catch ty Target.md
     in
+    ignore (end_catch_intrinsic);
+
     let fn =
-      let ty = function_type void_ty [||] in
-      define_function end_catch_name ty md
+      let ty = function_type Libc.void_t [||] in
+      define_function Names.end_catch ty Target.md
     in
 
     let block = entry_block fn in
-    let builder = builder_at_end ctx block in
+    let builder = builder_at_end Target.ctx block in
 
-    ignore (end_catch_intrinsic);
     (* ignore (build_call end_catch_intrinsic [||] "" builder); *)
     ignore (build_ret_void builder);
 
     fn
-  in
-
-  { throw       = throw;
-    personality = personality;
-    begin_catch = begin_catch;
-    end_catch   = end_catch }
+end

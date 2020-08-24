@@ -1,7 +1,7 @@
 (**
  {1 Runtime}
  *)
-
+(*
 type t
 (** The generated runtime. *)
 
@@ -30,4 +30,17 @@ val xml : t -> Xml.t
 (** [xml rt] gets the generated XML processor. *)
 
 val http : t -> Http.t
-(** [http rt] gets the generated HTTP client. *)
+(** [http rt] gets the generated HTTP client. *) *)
+
+module type Asm = sig
+  module Syscall : Syscall.Asm
+  module Libc : Libc.Asm
+  module Unwind : Unwind.Asm
+  module Exn : Exn.Asm
+  module Gc : Gc.Asm
+  module Json : Json.Asm
+  module Xml : Xml.Asm
+  module Http : Http.Asm
+end
+
+module Generate : functor (Target: Target.Asm) -> Asm

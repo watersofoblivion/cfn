@@ -1,7 +1,11 @@
 open Llvm
 
-type t
+module type Asm = sig
+  module Names : sig
+    val exit : string
+  end
 
-val generate : llmodule -> t
+  val exit : llvalue
+end
 
-val exit : t -> llvalue
+module Generate : functor (Target: Target.Asm) -> Asm

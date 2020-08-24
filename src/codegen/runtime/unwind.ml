@@ -1,96 +1,87 @@
 open Llvm
 
-type t = {
-  word_ty:                 lltype;
-  exception_class_ty:      lltype;
-  reason_code_ty:          lltype;
-  exception_ty:            lltype;
-  exception_cleanup_fn_ty: lltype;
+module type Asm = sig
+  module Names : sig
+    val raise_exception : string
+  end
 
-  reason_code_no_reason:                llvalue;
-  reason_code_foreign_exception_caught: llvalue;
-  reason_code_fatal_phase_1_error:      llvalue;
-  reason_code_fatal_phase_2_error:      llvalue;
-  reason_code_normal_stop:              llvalue;
-  reason_code_end_of_stack:             llvalue;
-  reason_code_handler_found:            llvalue;
-  reason_code_install_context:          llvalue;
-  reason_code_continue_unwind:          llvalue;
+  val word_t : lltype
+  val exception_class_t : lltype
+  val exception_t : lltype
+  val exception_cleanup_fn_t : lltype
+  val context_t : lltype
 
-  raise_exception: llvalue
-}
+  module ReasonCode : sig
+    val t : lltype
 
-let word_ty unwind = unwind.word_ty
-let exception_class_ty unwind = unwind.exception_class_ty
-let reason_code_ty unwind = unwind.reason_code_ty
-let exception_ty unwind = unwind.exception_ty
-let exception_cleanup_fn_ty unwind = unwind.exception_cleanup_fn_ty
+    val no_reason : llvalue
+    val foreign_exception_caught : llvalue
+    val fatal_phase_1_error : llvalue
+    val fatal_phase_2_error : llvalue
+    val normal_stop : llvalue
+    val end_of_stack : llvalue
+    val handler_found : llvalue
+    val install_context : llvalue
+    val continue_unwind : llvalue
+  end
 
-let reason_code_no_reason unwind = unwind.reason_code_no_reason
-let reason_code_foreign_exception_caught unwind = unwind.reason_code_foreign_exception_caught
-let reason_code_fatal_phase_1_error unwind = unwind.reason_code_fatal_phase_1_error
-let reason_code_fatal_phase_2_error unwind = unwind.reason_code_fatal_phase_2_error
-let reason_code_normal_stop unwind = unwind.reason_code_normal_stop
-let reason_code_end_of_stack unwind = unwind.reason_code_end_of_stack
-let reason_code_handler_found unwind = unwind.reason_code_handler_found
-let reason_code_install_context unwind = unwind.reason_code_install_context
-let reason_code_continue_unwind unwind = unwind.reason_code_continue_unwind
+  module Action : sig
+    val t : lltype
 
-let raise_exception unwind = unwind.raise_exception
+    val search_phase : llvalue
+    val cleanup_phase : llvalue
+    val handler_frame : llvalue
+    val force_unwind : llvalue
+    val end_of_stack : llvalue
+  end
 
-let generate libc md =
-  let ctx = module_context md in
+  val raise_exception: llvalue
+end
 
-  let void_ty = Libc.void_ty libc in
+module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
+  module Names = struct
+    let raise_exception = "_Unwind_RaiseException"
+  end
 
-  let word_ty = i64_type ctx in
-  let exception_class_ty = i64_type ctx in
+  let word_t = i64_type Target.ctx
+  let exception_class_t = i64_type Target.ctx
 
-  let reason_code_ty = i32_type ctx in
-  let reason_code_no_reason = const_int reason_code_ty 0 in
-  let reason_code_foreign_exception_caught = const_int reason_code_ty 1 in
-  let reason_code_fatal_phase_1_error = const_int reason_code_ty 2 in
-  let reason_code_fatal_phase_2_error = const_int reason_code_ty 3 in
-  let reason_code_normal_stop = const_int reason_code_ty 4 in
-  let reason_code_end_of_stack = const_int reason_code_ty 5 in
-  let reason_code_handler_found = const_int reason_code_ty 6 in
-  let reason_code_install_context = const_int reason_code_ty 7 in
-  let reason_code_continue_unwind = const_int reason_code_ty 8 in
+  module ReasonCode = struct
+    let t = i32_type Target.ctx
 
-  let exception_ty =
-    named_struct_type ctx "unwind-exception-ty"
-  in
+    let no_reason = const_int t 0
+    let foreign_exception_caught = const_int t 1
+    let fatal_phase_1_error = const_int t 2
+    let fatal_phase_2_error = const_int t 3
+    let normal_stop = const_int t 4
+    let end_of_stack = const_int t 5
+    let handler_found = const_int t 6
+    let install_context = const_int t 7
+    let continue_unwind = const_int t 8
+  end
 
-  let exception_cleanup_fn_ty =
-    function_type void_ty [|reason_code_ty; pointer_type exception_ty|]
-  in
+  let exception_t =
+    named_struct_type Target.ctx "unwind-exception-t"
 
-  ignore (struct_set_body exception_ty [|
-    reason_code_ty;
-    exception_cleanup_fn_ty;
-    word_ty;
-    word_ty;
-  |] false);
+  let exception_cleanup_fn_t =
+    function_type Libc.void_t [|ReasonCode.t; pointer_type exception_t|]
+
+  let _ =
+    struct_set_body exception_t [|ReasonCode.t; exception_cleanup_fn_t; word_t; word_t|] false
 
   let raise_exception =
-    let ty = function_type void_ty [|pointer_type exception_ty|] in
-    declare_function "_Unwind_RaiseException" ty md
-  in
+    let ty = function_type Libc.void_t [|pointer_type exception_t|] in
+    declare_function Names.raise_exception ty Target.md
 
-  { word_ty                 = word_ty;
-    exception_class_ty      = exception_class_ty;
-    reason_code_ty          = reason_code_ty;
-    exception_ty            = exception_ty;
-    exception_cleanup_fn_ty = exception_cleanup_fn_ty;
+  module Action = struct
+    let t = i32_type Target.ctx
 
-    reason_code_no_reason                = reason_code_no_reason;
-    reason_code_foreign_exception_caught = reason_code_foreign_exception_caught;
-    reason_code_fatal_phase_1_error      = reason_code_fatal_phase_1_error;
-    reason_code_fatal_phase_2_error      = reason_code_fatal_phase_2_error;
-    reason_code_normal_stop              = reason_code_normal_stop;
-    reason_code_end_of_stack             = reason_code_end_of_stack;
-    reason_code_handler_found            = reason_code_handler_found;
-    reason_code_install_context          = reason_code_install_context;
-    reason_code_continue_unwind          = reason_code_continue_unwind;
+    let search_phase = const_int t 1
+    let cleanup_phase = const_int t 2
+    let handler_frame = const_int t 4
+    let force_unwind = const_int t 8
+    let end_of_stack = const_int t 16
+  end
 
-    raise_exception = raise_exception }
+  let context_t = Libc.void_ptr_t
+end

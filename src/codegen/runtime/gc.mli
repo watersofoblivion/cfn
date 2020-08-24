@@ -8,7 +8,7 @@ open Llvm
  {2 Names}
  *)
 
-val base_ptr_name : string
+(* val base_ptr_name : string
 (** [base_ptr_name] is the name of the global variable pointing to the beginning
     of the heap. *)
 
@@ -51,12 +51,12 @@ val malloc_name : string
 (** [malloc_name] is the name of the allocation function. *)
 
 val major_name : string
-(** [major_name] is the name of the full major collection function. *)
+(** [major_name] is the name of the full major collection function. *) *)
 
 (**
  {2 Collector}
  *)
-
+(*
 type t
 (** Garbage Collector *)
 
@@ -107,4 +107,40 @@ val init_main_gen : t -> llvalue
 
 val major : t -> llvalue
 (** [major gc] returns the function to perform a full major collection of the
-    main generation. *)
+    main generation. *) *)
+
+module type Asm = sig
+  module Names : sig
+    val base_ptr : string
+    val reset_ptr : string
+    val next_ptr : string
+    val end_ptr : string
+
+    val from_ptr : string
+    val to_ptr : string
+
+    val init : string
+    val malloc : string
+    val close_perm_gen : string
+    val swap_spaces : string
+    val init_main_gen : string
+    val major : string
+  end
+
+  val base_ptr : llvalue
+  val reset_ptr : llvalue
+  val next_ptr : llvalue
+  val end_ptr : llvalue
+
+  val from_ptr : llvalue
+  val to_ptr : llvalue
+
+  val init : llvalue
+  val malloc : llvalue
+  val close_perm_gen : llvalue
+  val swap_spaces : llvalue
+  val init_main_gen : llvalue
+  val major : llvalue
+end
+
+module Generate : functor (Libc: Libc.Asm) -> functor (Target: Target.Asm) -> Asm

@@ -1,23 +1,41 @@
 open Llvm
 
-type t
+module type Asm = sig
+  module Names : sig
+    val raise_exception : string
+  end
 
-val generate : Libc.t -> llmodule -> t
+  val word_t : lltype
+  val exception_class_t : lltype
+  val exception_t : lltype
+  val exception_cleanup_fn_t : lltype
+  val context_t : lltype
 
-val word_ty : t -> lltype
-val exception_class_ty : t -> lltype
-val reason_code_ty : t -> lltype
-val exception_ty : t -> lltype
-val exception_cleanup_fn_ty : t -> lltype
+  module ReasonCode : sig
+    val t : lltype
 
-val reason_code_no_reason : t -> llvalue
-val reason_code_foreign_exception_caught : t -> llvalue
-val reason_code_fatal_phase_1_error : t -> llvalue
-val reason_code_fatal_phase_2_error : t -> llvalue
-val reason_code_normal_stop : t -> llvalue
-val reason_code_end_of_stack : t -> llvalue
-val reason_code_handler_found : t -> llvalue
-val reason_code_install_context : t -> llvalue
-val reason_code_continue_unwind : t -> llvalue
+    val no_reason : llvalue
+    val foreign_exception_caught : llvalue
+    val fatal_phase_1_error : llvalue
+    val fatal_phase_2_error : llvalue
+    val normal_stop : llvalue
+    val end_of_stack : llvalue
+    val handler_found : llvalue
+    val install_context : llvalue
+    val continue_unwind : llvalue
+  end
 
-val raise_exception : t -> llvalue
+  module Action : sig
+    val t : lltype
+
+    val search_phase : llvalue
+    val cleanup_phase : llvalue
+    val handler_frame : llvalue
+    val force_unwind : llvalue
+    val end_of_stack : llvalue
+  end
+
+  val raise_exception: llvalue
+end
+
+module Generate : functor (Libc: Libc.Asm) -> functor (Target: Target.Asm) -> Asm
