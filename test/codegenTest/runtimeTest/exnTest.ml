@@ -31,18 +31,8 @@ module Bind (Asm: Exn.Asm) (Exe: TargetTest.Exe) = struct
     Exe.func ty Asm.Names.end_catch
 end
 
-let exn_test tester ctxt =
-  let ctx = Llvm.create_context () in
-  let finally _ = Llvm.dispose_context ctx in
-  let fn _ =
-    let module Target = struct
-      module Names = struct
-        let prefix = "cfn++"
-      end
-      let ctx = ctx
-      let md = Llvm.create_module ctx "test-module"
-    end in
-
+let exn_test test_fn =
+  TargetTest.test (fun (module Target: Target.Asm) ->
     let module Syscall = Syscall.Generate (Target) in
     let module Libc = Libc.Generate (Target) in
     let module Unwind = Unwind.Generate (Libc) (Target) in
@@ -51,9 +41,7 @@ let exn_test tester ctxt =
     let module Exe = TargetTest.Compile (Target) in
 
     let module Exn = Bind (Asm) (Exe) in
-    tester (module Exn: Bindings) ctxt
-  in
-  Fun.protect ~finally fn
+    test_fn (module Exn: Bindings))
 
 let test_throw =
   let test_valid (module Exn: Bindings) ctxt =

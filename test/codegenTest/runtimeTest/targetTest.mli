@@ -14,6 +14,4 @@ end
 
 module Compile : functor (Asm: Target.Asm) -> Exe
 
-module type Suite = sig
-  val suite : test
-end
+val test : ((module Target.Asm) -> test_ctxt -> unit) -> test_ctxt -> unit

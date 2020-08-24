@@ -36,6 +36,17 @@ module Compile (Asm: Target.Asm) = struct
   let func ty name = get_function_address name ty ee
 end
 
-module type Suite = sig
-  val suite : test
-end
+let test test_fn ctxt =
+  let module Asm =
+    struct
+      module Names = struct
+        let prefix = "cfn++"
+      end
+      let ctx = Llvm.create_context ()
+      let md = Llvm.create_module ctx "test-module"
+      let finally _ = Llvm.dispose_context ctx
+    end
+  in
+  Fun.protect ~finally:Asm.finally (fun _ ->
+    test_fn (module Asm: Target.Asm) ctxt
+  )

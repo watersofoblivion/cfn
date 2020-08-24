@@ -18,27 +18,15 @@ module Bind (Asm: Unwind.Asm) (Exe: TargetTest.Exe) = struct
     Exe.func ty Asm.Names.raise_exception
 end
 
-let unwind_test tester ctxt =
-  let ctx = Llvm.create_context () in
-  let finally _ = Llvm.dispose_context ctx in
-  let fn _ =
-    let module Target = struct
-      module Names = struct
-        let prefix = "cfn++"
-      end
-      let ctx = ctx
-      let md = Llvm.create_module ctx "test-module"
-    end in
-
+let unwind_test test_fn =
+  TargetTest.test (fun (module Target: Target.Asm) ->
     let module Libc = Libc.Generate (Target) in
 
     let module Asm = Unwind.Generate (Libc) (Target) in
     let module Exe = TargetTest.Compile (Target) in
 
     let module Unwind = Bind (Asm) (Exe) in
-    tester (module Unwind: Bindings) ctxt
-  in
-  Fun.protect ~finally fn
+    test_fn (module Unwind: Bindings))
 
 let _ = unwind_test
 

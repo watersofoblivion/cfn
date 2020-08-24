@@ -63,27 +63,15 @@ module Bind (Asm: Gc.Asm) (Exe: TargetTest.Exe) = struct
     Exe.func ty Asm.Names.major
 end
 
-let gc_test tester ctxt =
-  let ctx = Llvm.create_context () in
-  let finally _ = Llvm.dispose_context ctx in
-  let fn _ =
-    let module Target = struct
-      module Names = struct
-        let prefix = "cfn++"
-      end
-      let ctx = ctx
-      let md = Llvm.create_module ctx "test-module"
-    end in
-
+let gc_test test_fn =
+  TargetTest.test (fun (module Target: Target.Asm) ->
     let module Libc = Libc.Generate (Target) in
 
     let module Asm = Gc.Generate (Libc) (Target) in
     let module Exe = TargetTest.Compile (Target) in
 
     let module Gc = Bind (Asm) (Exe) in
-    tester (module Gc: Bindings) ctxt
-  in
-  Fun.protect ~finally fn
+    test_fn (module Gc: Bindings))
 
 let test_generate =
   let printer x = sprintf "%x" (Unsigned.UInt64.to_int x) in

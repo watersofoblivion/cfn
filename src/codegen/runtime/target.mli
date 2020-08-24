@@ -7,4 +7,5 @@ module type Asm = sig
 
   val ctx : llcontext
   val md : llmodule
+  val finally : unit -> unit
 end

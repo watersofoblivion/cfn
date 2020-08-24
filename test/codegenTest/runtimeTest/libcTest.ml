@@ -14,25 +14,13 @@ module Bind (Asm: Libc.Asm) (Exe: TargetTest.Exe) = struct
     Exe.func ty Asm.Names.malloc
 end
 
-let libc_test tester ctxt =
-  let ctx = Llvm.create_context () in
-  let finally _ = Llvm.dispose_context ctx in
-  let fn _ =
-    let module Target = struct
-      module Names = struct
-        let prefix = "cfn++"
-      end
-      let ctx = ctx
-      let md = Llvm.create_module ctx "test-module"
-    end in
-
+let libc_test test_fn =
+  TargetTest.test (fun (module Target: Target.Asm) ->
     let module Asm = Libc.Generate (Target) in
     let module Exe = TargetTest.Compile (Target) in
 
     let module Libc = Bind (Asm) (Exe) in
-    tester (module Libc: Bindings) ctxt
-  in
-  Fun.protect ~finally fn
+    test_fn (module Libc: Bindings))
 
 let _ = libc_test
 
