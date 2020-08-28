@@ -14,7 +14,7 @@ module type Asm = sig
   val end_catch : llvalue
 end
 
-module Generate (Syscall: Syscall.Asm) (Libc: Libc.Asm) (Unwind: Unwind.Asm) (Target: Target.Asm) = struct
+module Generate (Types: Types.Asm) (Syscall: Syscall.Asm) (Unwind: Unwind.Asm) (Target: Target.Asm) = struct
   module Names = struct
     let prefix = Target.Names.prefix ^ "::exception-handling::"
 
@@ -29,14 +29,14 @@ module Generate (Syscall: Syscall.Asm) (Libc: Libc.Asm) (Unwind: Unwind.Asm) (Ta
 
   let throw =
     let fn =
-      let ty = function_type Libc.void_t [|Libc.void_ptr_t; Libc.void_ptr_t; Libc.void_ptr_t|] in
+      let ty = function_type Types.void_t [|Types.void_ptr_t; Types.void_ptr_t; Types.void_ptr_t|] in
       define_function Names.throw ty Target.md
     in
 
     let block = entry_block fn in
     let builder = builder_at_end Target.ctx block in
 
-    let one = const_null Libc.int_t in
+    let one = const_null Types.int_t in
     ignore (build_call Syscall.exit [|one|] "" builder);
     ignore (build_ret_void builder);
 
@@ -44,7 +44,7 @@ module Generate (Syscall: Syscall.Asm) (Libc: Libc.Asm) (Unwind: Unwind.Asm) (Ta
 
   let personality =
     let fn =
-      let ty = function_type Unwind.ReasonCode.t [|Libc.int_t; Unwind.Action.t; i64_type Target.ctx; pointer_type Unwind.exception_t; Unwind.context_t|] in
+      let ty = function_type Unwind.ReasonCode.t [|Types.int_t; Unwind.Action.t; Types.long_t; pointer_type Unwind.exception_t; Unwind.context_t|] in
       define_function Names.personality ty Target.md
     in
 
@@ -57,13 +57,13 @@ module Generate (Syscall: Syscall.Asm) (Libc: Libc.Asm) (Unwind: Unwind.Asm) (Ta
 
   let begin_catch =
     let begin_catch_intrinsic =
-      let ty = function_type Libc.void_t [|Libc.void_ptr_t; Libc.void_ptr_t|] in
+      let ty = function_type Types.void_t [|Types.void_ptr_t; Types.void_ptr_t|] in
       declare_function Names.intrinsic_begin_catch ty Target.md
     in
     ignore (begin_catch_intrinsic);
 
     let fn =
-      let ty = function_type Libc.void_t [||] in
+      let ty = function_type Types.void_t [||] in
       define_function Names.begin_catch ty Target.md
     in
 
@@ -78,13 +78,13 @@ module Generate (Syscall: Syscall.Asm) (Libc: Libc.Asm) (Unwind: Unwind.Asm) (Ta
 
   let end_catch =
     let end_catch_intrinsic =
-      let ty = function_type Libc.void_t [||] in
+      let ty = function_type Types.void_t [||] in
       declare_function Names.intrinsic_end_catch ty Target.md
     in
     ignore (end_catch_intrinsic);
 
     let fn =
-      let ty = function_type Libc.void_t [||] in
+      let ty = function_type Types.void_t [||] in
       define_function Names.end_catch ty Target.md
     in
 

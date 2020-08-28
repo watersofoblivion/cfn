@@ -19,7 +19,7 @@ module type Bindings = sig
   val space_pointers : unit -> (Unsigned.uint64 * Unsigned.uint64)
 
   val init : int64 -> unit
-  val malloc : int64 -> (int64, [`C]) pointer
+  val malloc : int64 -> int64 ptr
   val close_perm_gen : unit -> unit
   val swap_spaces : unit -> unit
   val init_main_gen : unit -> unit
@@ -27,13 +27,13 @@ module type Bindings = sig
 end
 
 module Bind (Asm: Gc.Asm) (Exe: TargetTest.Exe) = struct
-  let base_ptr _ = Exe.global Ctypes.uint64_t Asm.Names.base_ptr
-  let reset_ptr _ = Exe.global Ctypes.uint64_t Asm.Names.reset_ptr
-  let next_ptr _ = Exe.global Ctypes.uint64_t Asm.Names.next_ptr
-  let end_ptr _ = Exe.global Ctypes.uint64_t Asm.Names.end_ptr
+  let base_ptr _ = Exe.global uint64_t Asm.Names.base_ptr
+  let reset_ptr _ = Exe.global uint64_t Asm.Names.reset_ptr
+  let next_ptr _ = Exe.global uint64_t Asm.Names.next_ptr
+  let end_ptr _ = Exe.global uint64_t Asm.Names.end_ptr
 
-  let from_ptr _ = Exe.global Ctypes.uint64_t Asm.Names.from_ptr
-  let to_ptr _ = Exe.global Ctypes.uint64_t Asm.Names.to_ptr
+  let from_ptr _ = Exe.global uint64_t Asm.Names.from_ptr
+  let to_ptr _ = Exe.global uint64_t Asm.Names.to_ptr
 
   let gen_pointers _ = (base_ptr (), reset_ptr (), next_ptr (), end_ptr ())
   let space_pointers _ = (from_ptr (), to_ptr ())
@@ -65,9 +65,10 @@ end
 
 let gc_test test_fn =
   TargetTest.test (fun (module Target: Target.Asm) ->
-    let module Libc = Libc.Generate (Target) in
+    let module Types = Types.Generate (Target) in
+    let module Libc = Libc.Generate (Types) (Target) in
 
-    let module Asm = Gc.Generate (Libc) (Target) in
+    let module Asm = Gc.Generate (Types) (Libc) (Target) in
     let module Exe = TargetTest.Compile (Target) in
 
     let module Gc = Bind (Asm) (Exe) in

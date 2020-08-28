@@ -3,6 +3,7 @@ open Runtime
 open OUnit2
 
 module type Bindings = sig
+  module Types : TypesTest.Bindings
   module Syscall : SyscallTest.Bindings
   module Libc : LibcTest.Bindings
   module Unwind : UnwindTest.Bindings
@@ -14,6 +15,7 @@ module type Bindings = sig
 end
 
 module Bind (Asm: System.Asm) (Exe: TargetTest.Exe) = struct
+  module Types = TypesTest.Bind (Asm.Types) (Exe)
   module Syscall = SyscallTest.Bind (Asm.Syscall) (Exe)
   module Libc = LibcTest.Bind (Asm.Libc) (Exe)
   module Unwind = UnwindTest.Bind (Asm.Unwind) (Exe)

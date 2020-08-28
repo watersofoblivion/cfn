@@ -20,9 +20,9 @@ end
 
 let unwind_test test_fn =
   TargetTest.test (fun (module Target: Target.Asm) ->
-    let module Libc = Libc.Generate (Target) in
+    let module Types = Types.Generate (Target) in
 
-    let module Asm = Unwind.Generate (Libc) (Target) in
+    let module Asm = Unwind.Generate (Types) (Target) in
     let module Exe = TargetTest.Compile (Target) in
 
     let module Unwind = Bind (Asm) (Exe) in

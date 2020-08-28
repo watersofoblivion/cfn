@@ -5,7 +5,6 @@ module type Asm = sig
     val raise_exception : string
   end
 
-  val word_t : lltype
   val exception_class_t : lltype
   val exception_t : lltype
   val exception_cleanup_fn_t : lltype
@@ -38,4 +37,4 @@ module type Asm = sig
   val raise_exception: llvalue
 end
 
-module Generate : functor (Libc: Libc.Asm) -> functor (Target: Target.Asm) -> Asm
+module Generate : functor (Types: Types.Asm) -> functor (Target: Target.Asm) -> Asm

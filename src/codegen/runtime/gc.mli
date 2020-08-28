@@ -143,4 +143,4 @@ module type Asm = sig
   val major : llvalue
 end
 
-module Generate : functor (Libc: Libc.Asm) -> functor (Target: Target.Asm) -> Asm
+module Generate : functor (Types: Types.Asm) -> functor (Libc: Libc.Asm) -> functor (Target: Target.Asm) -> Asm

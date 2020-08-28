@@ -8,12 +8,12 @@ module type Asm = sig
   val exit : llvalue
 end
 
-module Generate (Target : Target.Asm) = struct
+module Generate (Types: Types.Asm) (Target : Target.Asm) = struct
   module Names = struct
     let exit = "exit"
   end
 
   let exit =
-    let ty = function_type (void_type Target.ctx) [|i32_type Target.ctx|] in
+    let ty = function_type Types.void_t [|Types.int_t|] in
     declare_function Names.exit ty Target.md
 end

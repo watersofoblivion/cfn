@@ -33,11 +33,12 @@ end
 
 let exn_test test_fn =
   TargetTest.test (fun (module Target: Target.Asm) ->
-    let module Syscall = Syscall.Generate (Target) in
-    let module Libc = Libc.Generate (Target) in
-    let module Unwind = Unwind.Generate (Libc) (Target) in
+    let module Types = Types.Generate (Target) in
+    let module Syscall = Syscall.Generate (Types) (Target) in
+    let module Libc = Libc.Generate (Types) (Target) in
+    let module Unwind = Unwind.Generate (Types) (Target) in
 
-    let module Asm = Exn.Generate (Syscall) (Libc) (Unwind) (Target) in
+    let module Asm = Exn.Generate (Types) (Syscall) (Unwind) (Target) in
     let module Exe = TargetTest.Compile (Target) in
 
     let module Exn = Bind (Asm) (Exe) in

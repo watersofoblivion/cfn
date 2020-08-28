@@ -1,5 +1,6 @@
 
 module type Asm = sig
+  module Types : Types.Asm
   module Syscall : Syscall.Asm
   module Libc : Libc.Asm
   module Unwind : Unwind.Asm
@@ -11,11 +12,12 @@ module type Asm = sig
 end
 
 module Generate (Target: Target.Asm) = struct
-  module Syscall = Syscall.Generate (Target)
-  module Libc = Libc.Generate (Target)
-  module Unwind = Unwind.Generate (Libc) (Target)
-  module Exn = Exn.Generate (Syscall) (Libc) (Unwind) (Target)
-  module Gc = Gc.Generate (Libc) (Target)
+  module Types = Types.Generate (Target)
+  module Syscall = Syscall.Generate (Types) (Target)
+  module Libc = Libc.Generate (Types) (Target)
+  module Unwind = Unwind.Generate (Types) (Target)
+  module Exn = Exn.Generate (Types) (Syscall) (Unwind) (Target)
+  module Gc = Gc.Generate (Types) (Libc) (Target)
   module Json = Json.Generate (Target)
   module Xml = Xml.Generate (Target)
   module Http = Http.Generate (Target)

@@ -34,7 +34,7 @@ module type Asm = sig
   val major : llvalue
 end
 
-module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
+module Generate (Types: Types.Asm) (Libc: Libc.Asm) (Target: Target.Asm) = struct
   module Names = struct
     let prefix = Target.Names.prefix ^ "::gc::"
 
@@ -53,7 +53,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
     let major = prefix ^ "major"
   end
 
-  let addr_ty = i64_type Target.ctx
+  let addr_ty = Types.word_t
   let null_addr = const_int addr_ty 0
 
   let global_void_ptr id = define_global id null_addr Target.md
@@ -67,7 +67,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
 
   let init =
     let fn =
-      let ty = function_type Libc.void_t [|Libc.size_t|] in
+      let ty = function_type Types.void_t [|Libc.size_t|] in
       define_function Names.init ty Target.md
     in
 
@@ -88,7 +88,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
 
   let malloc =
     let fn =
-      let ty = function_type Libc.void_ptr_t [|Libc.size_t|] in
+      let ty = function_type Types.void_ptr_t [|Libc.size_t|] in
       define_function Names.malloc ty Target.md
     in
     let size = param fn 0 in
@@ -103,7 +103,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
       let bb = append_block Target.ctx "out-of-memory" fn in
       let builder = builder_at_end Target.ctx bb in
 
-      let null_ptr = build_inttoptr null_addr Libc.void_ptr_t "null_ptr" builder in
+      let null_ptr = build_inttoptr null_addr Types.void_ptr_t "null_ptr" builder in
       ignore (build_ret null_ptr builder);
 
       bb
@@ -114,7 +114,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
       let builder = builder_at_end Target.ctx bb in
 
       ignore (build_store new_next next_ptr builder);
-      let next_ptr = build_inttoptr next_addr Libc.void_ptr_t "next_ptr" builder in
+      let next_ptr = build_inttoptr next_addr Types.void_ptr_t "next_ptr" builder in
       ignore (build_ret next_ptr builder);
 
       bb
@@ -127,7 +127,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
 
   let close_perm_gen =
     let fn =
-      let ty = function_type Libc.void_t [||] in
+      let ty = function_type Types.void_t [||] in
       define_function Names.close_perm_gen ty Target.md
     in
 
@@ -145,7 +145,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
 
   let swap_spaces =
     let fn =
-      let ty = function_type Libc.void_t [||] in
+      let ty = function_type Types.void_t [||] in
       define_function Names.swap_spaces ty Target.md
     in
 
@@ -164,7 +164,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
 
   let init_main_gen =
     let fn =
-      let ty = function_type Libc.void_t [||] in
+      let ty = function_type Types.void_t [||] in
       define_function Names.init_main_gen ty Target.md
     in
 
@@ -180,7 +180,7 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
 
   let major =
     let fn =
-      let ty = function_type Libc.void_t [||] in
+      let ty = function_type Types.void_t [||] in
       define_function Names.major ty Target.md
     in
 

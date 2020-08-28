@@ -8,4 +8,4 @@ module type Asm = sig
   val exit : llvalue
 end
 
-module Generate : functor (Target: Target.Asm) -> Asm
+module Generate : functor (Types: Types.Asm) -> functor (Target: Target.Asm) -> Asm

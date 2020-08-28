@@ -61,4 +61,4 @@ module type Asm = sig
   val end_catch : llvalue
 end
 
-module Generate : functor (Syscall: Syscall.Asm) -> functor (Libc: Libc.Asm) -> functor (Unwind: Unwind.Asm) -> functor (Target: Target.Asm) -> Asm
+module Generate : functor (Types: Types.Asm) -> functor (Syscall: Syscall.Asm) -> functor (Unwind: Unwind.Asm) -> functor (Target: Target.Asm) -> Asm

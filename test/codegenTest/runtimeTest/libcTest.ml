@@ -5,7 +5,7 @@ open Runtime
 open OUnit2
 
 module type Bindings = sig
-  val malloc : int64 -> (int64, [`C]) pointer
+  val malloc : int64 -> int64 ptr
 end
 
 module Bind (Asm: Libc.Asm) (Exe: TargetTest.Exe) = struct
@@ -16,7 +16,8 @@ end
 
 let libc_test test_fn =
   TargetTest.test (fun (module Target: Target.Asm) ->
-    let module Asm = Libc.Generate (Target) in
+    let module Types = Types.Generate (Target) in
+    let module Asm = Libc.Generate (Types) (Target) in
     let module Exe = TargetTest.Compile (Target) in
 
     let module Libc = Bind (Asm) (Exe) in

@@ -1,6 +1,7 @@
 open Runtime
 
 module type Bindings = sig
+  module Types : TypesTest.Bindings
   module Syscall : SyscallTest.Bindings
   module Libc : LibcTest.Bindings
   module Unwind : UnwindTest.Bindings

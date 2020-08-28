@@ -5,7 +5,6 @@ module type Asm = sig
     val raise_exception : string
   end
 
-  val word_t : lltype
   val exception_class_t : lltype
   val exception_t : lltype
   val exception_cleanup_fn_t : lltype
@@ -38,16 +37,15 @@ module type Asm = sig
   val raise_exception: llvalue
 end
 
-module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
+module Generate (Types: Types.Asm) (Target: Target.Asm) = struct
   module Names = struct
     let raise_exception = "_Unwind_RaiseException"
   end
 
-  let word_t = i64_type Target.ctx
-  let exception_class_t = i64_type Target.ctx
+  let exception_class_t = Types.long_t
 
   module ReasonCode = struct
-    let t = i32_type Target.ctx
+    let t = Types.int_t
 
     let no_reason = const_int t 0
     let foreign_exception_caught = const_int t 1
@@ -64,17 +62,17 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
     named_struct_type Target.ctx "unwind-exception-t"
 
   let exception_cleanup_fn_t =
-    function_type Libc.void_t [|ReasonCode.t; pointer_type exception_t|]
+    function_type Types.void_t [|ReasonCode.t; pointer_type exception_t|]
 
   let _ =
-    struct_set_body exception_t [|ReasonCode.t; exception_cleanup_fn_t; word_t; word_t|] false
+    struct_set_body exception_t [|ReasonCode.t; exception_cleanup_fn_t; Types.word_t; Types.word_t|] false
 
   let raise_exception =
-    let ty = function_type Libc.void_t [|pointer_type exception_t|] in
+    let ty = function_type Types.void_t [|pointer_type exception_t|] in
     declare_function Names.raise_exception ty Target.md
 
   module Action = struct
-    let t = i32_type Target.ctx
+    let t = Types.int_t
 
     let search_phase = const_int t 1
     let cleanup_phase = const_int t 2
@@ -83,5 +81,5 @@ module Generate (Libc: Libc.Asm) (Target: Target.Asm) = struct
     let end_of_stack = const_int t 16
   end
 
-  let context_t = Libc.void_ptr_t
+  let context_t = Types.void_ptr_t
 end
