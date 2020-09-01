@@ -1,13 +1,10 @@
 open Runtime
 
 module type Bindings = sig
-  module Types : TypesTest.Bindings
-
-  val exit : Types.void_t -> Types.void_t
+  val exit : int32 -> unit
 end
 
-module Bind : functor (Types: TypesTest.Bindings) ->
-              functor (Syscall: Syscall.Asm) ->
+module Bind : functor (Syscall: Syscall.Asm) ->
               functor (Exe: TargetTest.Exe) ->
               Bindings
 

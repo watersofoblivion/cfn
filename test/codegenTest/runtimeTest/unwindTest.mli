@@ -12,6 +12,8 @@ module type Bindings = sig
   val resume : unit -> unit
 end
 
-module Bind : functor (Unwind: Unwind.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
+module Bind : functor (Unwind: Unwind.Asm) ->
+              functor (Exe: TargetTest.Exe) ->
+              Bindings
 
 val suite : OUnit2.test

@@ -16,7 +16,7 @@ end
 
 module Bind (System: System.Asm) (Exe: TargetTest.Exe) = struct
   module Types = TypesTest.Bind (System.Types) (Exe)
-  module Syscall = SyscallTest.Bind (Types) (System.Syscall) (Exe)
+  module Syscall = SyscallTest.Bind (System.Syscall) (Exe)
   module Libc = LibcTest.Bind (System.Libc) (Exe)
   module Unwind = UnwindTest.Bind (System.Unwind) (Exe)
   module Exn = ExnTest.Bind (System.Exn) (Exe)

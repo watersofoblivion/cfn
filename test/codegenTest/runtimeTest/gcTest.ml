@@ -7,19 +7,19 @@ open Runtime
 open OUnit2
 
 module type Bindings = sig
-  val base_ptr : unit -> Unsigned.uint64
-  val reset_ptr : unit -> Unsigned.uint64
-  val next_ptr : unit -> Unsigned.uint64
-  val end_ptr : unit -> Unsigned.uint64
+  val base_ptr : unit -> nativeint
+  val reset_ptr : unit -> nativeint
+  val next_ptr : unit -> nativeint
+  val end_ptr : unit -> nativeint
 
-  val from_ptr : unit -> Unsigned.uint64
-  val to_ptr : unit -> Unsigned.uint64
+  val from_ptr : unit -> nativeint
+  val to_ptr : unit -> nativeint
 
-  val gen_pointers : unit -> (Unsigned.uint64 * Unsigned.uint64 * Unsigned.uint64 * Unsigned.uint64)
-  val space_pointers : unit -> (Unsigned.uint64 * Unsigned.uint64)
+  val gen_pointers : unit -> (nativeint * nativeint * nativeint * nativeint)
+  val space_pointers : unit -> (nativeint * nativeint)
 
-  val init : int64 -> unit
-  val malloc : int64 -> int64 ptr
+  val init : nativeint -> unit
+  val malloc : nativeint -> unit Ctypes.ptr
   val close_perm_gen : unit -> unit
   val swap_spaces : unit -> unit
   val init_main_gen : unit -> unit
@@ -27,23 +27,23 @@ module type Bindings = sig
 end
 
 module Bind (Gc: Gc.Asm) (Exe: TargetTest.Exe) = struct
-  let base_ptr _ = Exe.global uint64_t Gc.Names.base_ptr
-  let reset_ptr _ = Exe.global uint64_t Gc.Names.reset_ptr
-  let next_ptr _ = Exe.global uint64_t Gc.Names.next_ptr
-  let end_ptr _ = Exe.global uint64_t Gc.Names.end_ptr
+  let base_ptr _ = Exe.global nativeint Gc.Names.base_ptr
+  let reset_ptr _ = Exe.global nativeint Gc.Names.reset_ptr
+  let next_ptr _ = Exe.global nativeint Gc.Names.next_ptr
+  let end_ptr _ = Exe.global nativeint Gc.Names.end_ptr
 
-  let from_ptr _ = Exe.global uint64_t Gc.Names.from_ptr
-  let to_ptr _ = Exe.global uint64_t Gc.Names.to_ptr
+  let from_ptr _ = Exe.global nativeint Gc.Names.from_ptr
+  let to_ptr _ = Exe.global nativeint Gc.Names.to_ptr
 
   let gen_pointers _ = (base_ptr (), reset_ptr (), next_ptr (), end_ptr ())
   let space_pointers _ = (from_ptr (), to_ptr ())
 
   let init =
-    let ty = Foreign.funptr (int64_t @-> returning void) in
+    let ty = Foreign.funptr (nativeint @-> returning void) in
     Exe.func ty Gc.Names.init
 
   let malloc =
-    let ty = Foreign.funptr (int64_t @-> returning (ptr int64_t)) in
+    let ty = Foreign.funptr (nativeint @-> returning (ptr void)) in
     Exe.func ty Gc.Names.malloc
 
   let close_perm_gen =
@@ -75,30 +75,25 @@ let gc_test test_fn =
     test_fn (module Gc: Bindings))
 
 let test_generate =
-  let printer x = sprintf "%x" (Unsigned.UInt64.to_int x) in
+  let printer x = sprintf "%x" (Nativeint.to_int x) in
 
   let test_initialize =
     let test_valid (module Gc: Bindings) ctxt =
-      let zero = Unsigned.UInt64.of_int64 (Int64.zero) in
-
       let (base_ptr, reset_ptr, next_ptr, end_ptr) = Gc.gen_pointers () in
-      assert_equal ~ctxt ~msg:"GC Base Pointer" zero base_ptr;
-      assert_equal ~ctxt ~msg:"GC Reset Pointer" zero reset_ptr;
-      assert_equal ~ctxt ~msg:"GC Next Pointer" zero next_ptr;
-      assert_equal ~ctxt ~msg:"GC End Pointer" zero end_ptr;
+      assert_equal ~ctxt ~msg:"GC Base Pointer" 0n base_ptr;
+      assert_equal ~ctxt ~msg:"GC Reset Pointer" 0n reset_ptr;
+      assert_equal ~ctxt ~msg:"GC Next Pointer" 0n next_ptr;
+      assert_equal ~ctxt ~msg:"GC End Pointer" 0n end_ptr;
 
-      let heap_size = Int64.of_int 1024 in
+      let heap_size = 1024n in
       Gc.init heap_size;
 
       let (base_ptr, reset_ptr, next_ptr, end_ptr) = Gc.gen_pointers () in
-      let expected_end =
-        let heap_size = Unsigned.UInt64.of_int64 heap_size in
-        Unsigned.UInt64.add base_ptr heap_size
-      in
+      let expected_end = Nativeint.add base_ptr heap_size in
       let cmp x y = not (x = y) in
-      assert_equal ~ctxt ~cmp ~msg:"GC Base Pointer" zero base_ptr;
+      assert_equal ~ctxt ~cmp ~msg:"GC Base Pointer" 0n base_ptr;
       assert_equal ~ctxt ~msg:"GC Reset Pointer" base_ptr reset_ptr;
-      assert_equal ~ctxt ~msg:"GC Next Pointer"base_ptr next_ptr;
+      assert_equal ~ctxt ~msg:"GC Next Pointer" base_ptr next_ptr;
       assert_equal ~ctxt ~msg:"GC End Pointer" expected_end end_ptr;
     in
     "Initialize" >::: [
@@ -107,22 +102,16 @@ let test_generate =
   in
   let test_malloc =
     let test_valid (module Gc: Bindings) ctxt =
-      let heap_size = Int64.of_int 1024 in
+      let heap_size = 1024n in
       Gc.init heap_size;
 
       let (base_ptr, reset_ptr, next_ptr, end_ptr) = Gc.gen_pointers () in
-      let size_one = Int64.of_int 8 in
-      let expected_next =
-        let size = Unsigned.UInt64.of_int64 size_one in
-        Unsigned.UInt64.add next_ptr size
-      in
+      let size_one = 8n in
+      let expected_next = Nativeint.add next_ptr size_one in
       let addr_one =
         size_one
           |> Gc.malloc
-          |> to_voidp
           |> raw_address_of_ptr
-          |> Int64.of_nativeint
-          |> Unsigned.UInt64.of_int64
       in
 
       let (new_base_ptr, new_reset_ptr, new_next_ptr, new_end_ptr) = Gc.gen_pointers () in
@@ -132,19 +121,13 @@ let test_generate =
       assert_equal ~ctxt ~printer ~msg:"GC End Pointer" end_ptr new_end_ptr;
       assert_equal ~ctxt ~printer ~msg:"Returned Address" next_ptr addr_one;
 
-      let size_two = Int64.of_int 16 in
+      let size_two = 16n in
       let expected_addr = new_next_ptr in
-      let expected_next =
-        let size = Unsigned.UInt64.of_int64 size_two in
-        Unsigned.UInt64.add expected_next size
-      in
+      let expected_next = Nativeint.add expected_next size_two in
       let addr_two =
         size_two
           |> Gc.malloc
-          |> to_voidp
           |> raw_address_of_ptr
-          |> Int64.of_nativeint
-          |> Unsigned.UInt64.of_int64
       in
 
       let (new_base_ptr, new_reset_ptr, new_next_ptr, new_end_ptr) = Gc.gen_pointers () in
@@ -156,20 +139,15 @@ let test_generate =
     in
     let test_invalid =
       let test_out_of_memory (module Gc: Bindings) ctxt =
-        let zero = Unsigned.UInt64.of_int64 (Int64.zero) in
-
-        let heap_size = Int64.of_int 4 in
+        let heap_size = 4n in
         Gc.init heap_size;
 
         let (base_ptr, reset_ptr, next_ptr, end_ptr) = Gc.gen_pointers () in
         let addr =
-          let alloc_size = Int64.of_int 8 in
+          let alloc_size = 8n in
           alloc_size
             |> Gc.malloc
-            |> to_voidp
             |> raw_address_of_ptr
-            |> Int64.of_nativeint
-            |> Unsigned.UInt64.of_int64
         in
 
         let (new_base_ptr, new_reset_ptr, new_next_ptr, new_end_ptr) = Gc.gen_pointers () in
@@ -177,7 +155,7 @@ let test_generate =
         assert_equal ~ctxt ~printer ~msg:"GC Reset Pointer" reset_ptr new_reset_ptr;
         assert_equal ~ctxt ~printer ~msg:"GC Next Pointer" next_ptr new_next_ptr;
         assert_equal ~ctxt ~printer ~msg:"GC End Pointer" end_ptr new_end_ptr;
-        assert_equal ~ctxt ~printer ~msg:"Returned Address" zero addr;
+        assert_equal ~ctxt ~printer ~msg:"Returned Address" 0n addr;
       in
       "Invalid" >::: [
         "Out of Memory" >:: gc_test test_out_of_memory
@@ -189,23 +167,22 @@ let test_generate =
     ]
   in
   let test_collect =
-    let heap_size = Int64.of_int 1024 in
-    let padding = Int64.of_int 64 in
-    let zero = Unsigned.UInt64.of_int64 (Int64.zero) in
+    let heap_size = 1024n in
+    let padding = 64n in
 
     let test_close_perm_gen (module Gc: Bindings) ctxt =
       Gc.init heap_size;
 
       let (from_ptr, to_ptr) = Gc.space_pointers () in
-      assert_equal ~ctxt ~printer ~msg:"From Space Pointer" zero from_ptr;
-      assert_equal ~ctxt ~printer ~msg:"To Space Pointer" zero to_ptr;
+      assert_equal ~ctxt ~printer ~msg:"From Space Pointer" 0n from_ptr;
+      assert_equal ~ctxt ~printer ~msg:"To Space Pointer" 0n to_ptr;
 
       ignore (Gc.malloc padding);
 
       let (base_ptr, _, next_ptr, _) = Gc.gen_pointers () in
       let (from_ptr, to_ptr) = Gc.space_pointers () in
-      assert_equal ~ctxt ~printer ~msg:"From Space Pointer" zero from_ptr;
-      assert_equal ~ctxt ~printer ~msg:"To Space Pointer" zero to_ptr;
+      assert_equal ~ctxt ~printer ~msg:"From Space Pointer" 0n from_ptr;
+      assert_equal ~ctxt ~printer ~msg:"To Space Pointer" 0n to_ptr;
 
       Gc.close_perm_gen ();
 
@@ -237,10 +214,7 @@ let test_generate =
       Gc.init_main_gen ();
 
       let (base_ptr, reset_ptr, next_ptr, _) = Gc.gen_pointers () in
-      let expected_ptr =
-        let size = Unsigned.UInt64.of_int64 padding in
-        Unsigned.UInt64.add base_ptr size
-      in
+      let expected_ptr = Nativeint.add base_ptr padding in
       assert_equal ~ctxt ~printer ~msg:"GC Next Pointer" expected_ptr next_ptr;
       assert_equal ~ctxt ~printer ~msg:"GC Reset Pointer" expected_ptr reset_ptr
     in
@@ -248,11 +222,8 @@ let test_generate =
       Gc.init heap_size;
 
       let (base_ptr, reset_ptr, next_ptr, end_ptr) = Gc.gen_pointers () in
-      let size = Int64.of_int 8 in
-      let expected_next =
-        let size = Unsigned.UInt64.of_int64 size in
-        Unsigned.UInt64.add next_ptr size
-      in
+      let size = 8n in
+      let expected_next = Nativeint.add next_ptr size in
       ignore (Gc.malloc size);
 
       let (new_base_ptr, new_reset_ptr, new_next_ptr, new_end_ptr) = Gc.gen_pointers () in

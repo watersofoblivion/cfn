@@ -5,12 +5,12 @@ open Runtime
 open OUnit2
 
 module type Bindings = sig
-  val malloc : int64 -> int64 ptr
+  val malloc : nativeint -> unit Ctypes.ptr
 end
 
 module Bind (Libc: Libc.Asm) (Exe: TargetTest.Exe) = struct
   let malloc =
-    let ty = Foreign.funptr (int64_t @-> returning (ptr int64_t)) in
+    let ty = Foreign.funptr (nativeint @-> returning (ptr void)) in
     Exe.func ty Libc.Names.malloc
 end
 

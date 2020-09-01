@@ -12,6 +12,8 @@ module type Bindings = sig
   module Http : HttpTest.Bindings
 end
 
-module Bind : functor (System: System.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
+module Bind : functor (System: System.Asm) ->
+              functor (Exe: TargetTest.Exe) ->
+              Bindings
 
 val suite : OUnit2.test
