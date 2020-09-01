@@ -5,7 +5,7 @@ open OUnit2
 module type Bindings = sig
 end
 
-module Bind (Asm: Xml.Asm) (Exe: TargetTest.Exe) = struct
+module Bind (Xml: Xml.Asm) (Exe: TargetTest.Exe) = struct
 end
 
 let xml_test test_fn =

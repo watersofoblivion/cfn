@@ -9,6 +9,6 @@ module type Bindings = sig
   val end_catch : unit -> unit
 end
 
-module Bind : functor (Asm: Exn.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
+module Bind : functor (Exn: Exn.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
 
 val suite : OUnit2.test

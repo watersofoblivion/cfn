@@ -12,6 +12,6 @@ module type Bindings = sig
   val ptr_to_int : void_ptr_t -> nativeint
 end
 
-module Bind : functor (Asm: Types.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
+module Bind : functor (Types: Types.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
 
 val suite : OUnit2.test

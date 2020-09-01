@@ -26,41 +26,41 @@ module type Bindings = sig
   val major : unit -> unit
 end
 
-module Bind (Asm: Gc.Asm) (Exe: TargetTest.Exe) = struct
-  let base_ptr _ = Exe.global uint64_t Asm.Names.base_ptr
-  let reset_ptr _ = Exe.global uint64_t Asm.Names.reset_ptr
-  let next_ptr _ = Exe.global uint64_t Asm.Names.next_ptr
-  let end_ptr _ = Exe.global uint64_t Asm.Names.end_ptr
+module Bind (Gc: Gc.Asm) (Exe: TargetTest.Exe) = struct
+  let base_ptr _ = Exe.global uint64_t Gc.Names.base_ptr
+  let reset_ptr _ = Exe.global uint64_t Gc.Names.reset_ptr
+  let next_ptr _ = Exe.global uint64_t Gc.Names.next_ptr
+  let end_ptr _ = Exe.global uint64_t Gc.Names.end_ptr
 
-  let from_ptr _ = Exe.global uint64_t Asm.Names.from_ptr
-  let to_ptr _ = Exe.global uint64_t Asm.Names.to_ptr
+  let from_ptr _ = Exe.global uint64_t Gc.Names.from_ptr
+  let to_ptr _ = Exe.global uint64_t Gc.Names.to_ptr
 
   let gen_pointers _ = (base_ptr (), reset_ptr (), next_ptr (), end_ptr ())
   let space_pointers _ = (from_ptr (), to_ptr ())
 
   let init =
     let ty = Foreign.funptr (int64_t @-> returning void) in
-    Exe.func ty Asm.Names.init
+    Exe.func ty Gc.Names.init
 
   let malloc =
     let ty = Foreign.funptr (int64_t @-> returning (ptr int64_t)) in
-    Exe.func ty Asm.Names.malloc
+    Exe.func ty Gc.Names.malloc
 
   let close_perm_gen =
     let ty = Foreign.funptr (void @-> returning void) in
-    Exe.func ty Asm.Names.close_perm_gen
+    Exe.func ty Gc.Names.close_perm_gen
 
   let swap_spaces =
     let ty = Foreign.funptr (void @-> returning void) in
-    Exe.func ty Asm.Names.swap_spaces
+    Exe.func ty Gc.Names.swap_spaces
 
   let init_main_gen =
     let ty = Foreign.funptr (void @-> returning void) in
-    Exe.func ty Asm.Names.init_main_gen
+    Exe.func ty Gc.Names.init_main_gen
 
   let major =
     let ty = Foreign.funptr (void @-> returning void) in
-    Exe.func ty Asm.Names.major
+    Exe.func ty Gc.Names.major
 end
 
 let gc_test test_fn =

@@ -8,10 +8,10 @@ module type Bindings = sig
   val malloc : int64 -> int64 ptr
 end
 
-module Bind (Asm: Libc.Asm) (Exe: TargetTest.Exe) = struct
+module Bind (Libc: Libc.Asm) (Exe: TargetTest.Exe) = struct
   let malloc =
     let ty = Foreign.funptr (int64_t @-> returning (ptr int64_t)) in
-    Exe.func ty Asm.Names.malloc
+    Exe.func ty Libc.Names.malloc
 end
 
 let libc_test test_fn =

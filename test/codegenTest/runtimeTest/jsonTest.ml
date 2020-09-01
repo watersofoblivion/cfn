@@ -5,7 +5,7 @@ open OUnit2
 module type Bindings = sig
 end
 
-module Bind (Asm: Json.Asm) (Exe: TargetTest.Exe) = struct
+module Bind (Json: Json.Asm) (Exe: TargetTest.Exe) = struct
 end
 
 let json_test test_fn =

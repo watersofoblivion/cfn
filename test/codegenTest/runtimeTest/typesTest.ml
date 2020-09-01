@@ -16,7 +16,7 @@ module type Bindings = sig
   val ptr_to_int : void_ptr_t -> nativeint
 end
 
-module Bind (Asm: Types.Asm) (Exe: TargetTest.Exe) = struct
+module Bind (Types: Types.Asm) (Exe: TargetTest.Exe) = struct
   type int_t = int32
   type long_t = int64
   type word_t = nativeint

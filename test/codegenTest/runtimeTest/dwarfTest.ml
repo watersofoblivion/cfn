@@ -5,7 +5,7 @@ open OUnit2
 module type Bindings = sig
 end
 
-module Bind (Asm: Dwarf.Asm) (Exe: TargetTest.Exe) = struct
+module Bind (Dwarf: Dwarf.Asm) (Exe: TargetTest.Exe) = struct
 end
 
 let dwarf_test test_fn =

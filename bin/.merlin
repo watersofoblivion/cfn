@@ -101,6 +101,7 @@ B ../_build/default/bin/.cfnpp.eobjs/byte
 B ../_build/default/src/.cfnpp.objs/byte
 B ../_build/default/src/cli/.cli.objs/byte
 B ../_build/default/src/codegen/.codegen.objs/byte
+B ../_build/default/src/codegen/runtime/.runtime.objs/byte
 B ../_build/default/src/external/.ext.objs/byte
 B ../_build/default/src/external/awsSpec/.awsSpec.objs/byte
 B ../_build/default/src/external/cfnSpec/.cfnSpec.objs/byte
@@ -210,6 +211,7 @@ S /usr/local/lib/ocaml/threads
 S .
 S ../src/cli
 S ../src/codegen
+S ../src/codegen/runtime
 S ../src/external
 S ../src/external/awsSpec
 S ../src/external/cfnSpec

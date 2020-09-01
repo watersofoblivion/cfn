@@ -13,22 +13,22 @@ module type Bindings = sig
   val end_catch : unit -> unit
 end
 
-module Bind (Asm: Exn.Asm) (Exe: TargetTest.Exe) = struct
+module Bind (Exn: Exn.Asm) (Exe: TargetTest.Exe) = struct
   let throw =
     let ty = Foreign.funptr (ptr void @-> ptr void @-> ptr void @-> returning void) in
-    Exe.func ty Asm.Names.throw
+    Exe.func ty Exn.Names.throw
 
   let personality =
     let ty = Foreign.funptr (void @-> returning void) in
-    Exe.func ty Asm.Names.personality
+    Exe.func ty Exn.Names.personality
 
   let begin_catch =
     let ty = Foreign.funptr (void @-> returning void) in
-    Exe.func ty Asm.Names.begin_catch
+    Exe.func ty Exn.Names.begin_catch
 
   let end_catch =
     let ty = Foreign.funptr (void @-> returning void) in
-    Exe.func ty Asm.Names.end_catch
+    Exe.func ty Exn.Names.end_catch
 end
 
 let exn_test test_fn =

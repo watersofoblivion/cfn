@@ -14,16 +14,16 @@ module type Bindings = sig
   module Http : HttpTest.Bindings
 end
 
-module Bind (Asm: System.Asm) (Exe: TargetTest.Exe) = struct
-  module Types = TypesTest.Bind (Asm.Types) (Exe)
-  module Syscall = SyscallTest.Bind (Asm.Syscall) (Exe)
-  module Libc = LibcTest.Bind (Asm.Libc) (Exe)
-  module Unwind = UnwindTest.Bind (Asm.Unwind) (Exe)
-  module Exn = ExnTest.Bind (Asm.Exn) (Exe)
-  module Gc = GcTest.Bind (Asm.Gc) (Exe)
-  module Json = JsonTest.Bind (Asm.Json) (Exe)
-  module Xml = XmlTest.Bind (Asm.Xml) (Exe)
-  module Http = HttpTest.Bind (Asm.Http) (Exe)
+module Bind (System: System.Asm) (Exe: TargetTest.Exe) = struct
+  module Types = TypesTest.Bind (System.Types) (Exe)
+  module Syscall = SyscallTest.Bind (Types) (System.Syscall) (Exe)
+  module Libc = LibcTest.Bind (System.Libc) (Exe)
+  module Unwind = UnwindTest.Bind (System.Unwind) (Exe)
+  module Exn = ExnTest.Bind (System.Exn) (Exe)
+  module Gc = GcTest.Bind (System.Gc) (Exe)
+  module Json = JsonTest.Bind (System.Json) (Exe)
+  module Xml = XmlTest.Bind (System.Xml) (Exe)
+  module Http = HttpTest.Bind (System.Http) (Exe)
 end
 
 let system_test test_fn =

@@ -5,7 +5,7 @@ open OUnit2
 module type Bindings = sig
 end
 
-module Bind (Asm: Http.Asm) (Exe: TargetTest.Exe) = struct
+module Bind (Http: Http.Asm) (Exe: TargetTest.Exe) = struct
 end
 
 let http_test test_fn =

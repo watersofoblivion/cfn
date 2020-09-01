@@ -3,6 +3,12 @@ open Llvm
 module type Asm = sig
   module Names : sig
     val raise_exception : string
+    val get_language_specific_data : string
+    val get_region_start : string
+    val get_ip : string
+    val set_ip : string
+    val set_gr : string
+    val resume : string
   end
 
   val exception_class_t : lltype
@@ -35,11 +41,23 @@ module type Asm = sig
   end
 
   val raise_exception: llvalue
+  val get_language_specific_data : llvalue
+  val get_region_start : llvalue
+  val get_ip : llvalue
+  val set_ip : llvalue
+  val set_gr : llvalue
+  val resume : llvalue
 end
 
 module Generate (Types: Types.Asm) (Target: Target.Asm) = struct
   module Names = struct
     let raise_exception = "_Unwind_RaiseException"
+    let get_language_specific_data = "_Unwind_GetLanguageSpecificData"
+    let get_region_start = "_Unwind_GetRegionStart"
+    let get_ip = "_Unwind_GetIP"
+    let set_ip = "_Unwind_SetIP"
+    let set_gr = "_Unwind_SetGR"
+    let resume = "_Unwind_Resume"
   end
 
   let exception_class_t = Types.long_t
@@ -82,4 +100,30 @@ module Generate (Types: Types.Asm) (Target: Target.Asm) = struct
   end
 
   let context_t = Types.void_ptr_t
+
+  let uint64_t = i64_type Target.ctx
+
+  let get_language_specific_data =
+    let ty = function_type uint64_t [|context_t|] in
+    declare_function Names.get_language_specific_data ty Target.md
+
+  let get_region_start =
+    let ty = function_type uint64_t [|context_t|] in
+    declare_function Names.get_region_start ty Target.md
+
+  let get_ip =
+    let ty = function_type uint64_t [|context_t|] in
+    declare_function Names.get_ip ty Target.md
+
+  let set_ip =
+    let ty = function_type Types.void_t [|context_t; uint64_t|] in
+    declare_function Names.set_ip ty Target.md
+
+  let set_gr =
+    let ty = function_type Types.void_t [|context_t; Types.int_t; uint64_t|] in
+    declare_function Names.set_gr ty Target.md
+
+  let resume =
+    let ty = function_type Types.void_t [|pointer_type exception_t|] in
+    declare_function Names.resume ty Target.md
 end

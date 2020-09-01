@@ -22,6 +22,6 @@ module type Bindings = sig
   val major : unit -> unit
 end
 
-module Bind : functor (Asm: Gc.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
+module Bind : functor (Gc: Gc.Asm) -> functor (Exe: TargetTest.Exe) -> Bindings
 
 val suite : OUnit2.test
