@@ -55,10 +55,23 @@ module type Asm = sig
     val end_catch : string
   end
 
+  module Dwarf : sig
+    module Names : sig
+      val uleb128_decode : string
+      val sleb128_decode : string
+    end
+
+    val uleb128_decode : llvalue
+    val sleb128_decode : llvalue
+  end
+
   val throw : llvalue
   val personality : llvalue
   val begin_catch : llvalue
   val end_catch : llvalue
 end
 
-module Generate : functor (Types: Types.Asm) -> functor (Syscall: Syscall.Asm) -> functor (Unwind: Unwind.Asm) -> functor (Target: Target.Asm) -> Asm
+module Generate : functor (Types: Types.Asm) ->
+                  functor (Libc: Libc.Asm) ->
+                  functor (Target: Target.Asm) ->
+                  Asm

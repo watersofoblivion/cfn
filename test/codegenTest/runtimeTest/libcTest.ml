@@ -6,12 +6,17 @@ open OUnit2
 
 module type Bindings = sig
   val malloc : nativeint -> unit Ctypes.ptr
+  val exit : int32 -> unit
 end
 
 module Bind (Libc: Libc.Asm) (Exe: TargetTest.Exe) = struct
   let malloc =
     let ty = Foreign.funptr (nativeint @-> returning (ptr void)) in
     Exe.func ty Libc.Names.malloc
+
+  let exit =
+    let ty = Foreign.funptr (Ctypes.int32_t @-> returning void) in
+    Exe.func ty Libc.Names.exit
 end
 
 let libc_test test_fn =

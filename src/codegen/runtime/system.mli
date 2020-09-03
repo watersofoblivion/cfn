@@ -34,9 +34,7 @@ val http : t -> Http.t
 
 module type Asm = sig
   module Types : Types.Asm
-  module Syscall : Syscall.Asm
   module Libc : Libc.Asm
-  module Unwind : Unwind.Asm
   module Exn : Exn.Asm
   module Gc : Gc.Asm
   module Json : Json.Asm

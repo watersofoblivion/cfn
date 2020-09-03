@@ -1,10 +1,12 @@
 open Runtime
 
 module type Bindings = sig
-  val throw : unit Ctypes.ptr -> unit Ctypes.ptr -> unit Ctypes.ptr -> unit
-  val personality : unit -> unit
-  val begin_catch : unit -> unit
-  val end_catch : unit -> unit
+  module Dwarf : sig
+    val uleb128_decode : unit Ctypes.ptr -> Unsigned.uint64
+    val sleb128_decode : unit Ctypes.ptr -> int64
+  end
+
+  val personality : int32 -> int32 -> Unsigned.uint64 -> unit Ctypes.ptr -> unit Ctypes.ptr -> int32
 end
 
 module Bind : functor (Exn: Exn.Asm) ->

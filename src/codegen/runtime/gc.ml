@@ -36,21 +36,21 @@ end
 
 module Generate (Types: Types.Asm) (Libc: Libc.Asm) (Target: Target.Asm) = struct
   module Names = struct
-    let prefix = Target.Names.prefix ^ "::gc::"
+    let prefix = Target.Names.prefix ^ "::gc"
 
-    let base_ptr = prefix ^ "base-ptr"
-    let reset_ptr = prefix ^ "reset-ptr"
-    let next_ptr = prefix ^ "next-ptr"
-    let end_ptr = prefix ^ "end-ptr"
-    let from_ptr = prefix ^ "from-ptr"
-    let to_ptr = prefix ^ "to-ptr"
+    let base_ptr = prefix ^ "::base-ptr"
+    let reset_ptr = prefix ^ "::reset-ptr"
+    let next_ptr = prefix ^ "::next-ptr"
+    let end_ptr = prefix ^ "::end-ptr"
+    let from_ptr = prefix ^ "::from-ptr"
+    let to_ptr = prefix ^ "::to-ptr"
 
-    let init = prefix ^ "init"
-    let malloc = prefix ^ "malloc"
-    let close_perm_gen = prefix ^ "close-perm-gen"
-    let swap_spaces = prefix ^ "swap-spaces"
-    let init_main_gen = prefix ^ "init-main-gen"
-    let major = prefix ^ "major"
+    let init = prefix ^ "::init"
+    let malloc = prefix ^ "::malloc"
+    let close_perm_gen = prefix ^ "::close-perm-gen"
+    let swap_spaces = prefix ^ "::swap-spaces"
+    let init_main_gen = prefix ^ "::init-main-gen"
+    let major = prefix ^ "::major"
   end
 
   let addr_ty = Types.word_t

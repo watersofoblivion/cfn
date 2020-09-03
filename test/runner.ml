@@ -62,10 +62,7 @@ let test_codegen =
   let runtime =
     "Runtime" >::: [
       RuntimeTest.TypesTest.suite;
-      RuntimeTest.SyscallTest.suite;
       RuntimeTest.LibcTest.suite;
-      RuntimeTest.UnwindTest.suite;
-      RuntimeTest.DwarfTest.suite;
       RuntimeTest.ExnTest.suite;
       RuntimeTest.GcTest.suite;
       RuntimeTest.HttpTest.suite;

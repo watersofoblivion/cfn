@@ -2,6 +2,7 @@ open Runtime
 
 module type Bindings = sig
   val malloc : nativeint -> unit Ctypes.ptr
+  val exit : int32 -> unit
 end
 
 module Bind : functor (Libc: Libc.Asm) ->
