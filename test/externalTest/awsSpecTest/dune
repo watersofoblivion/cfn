@@ -1,5 +1,6 @@
 (library
  (name awsSpecTest)
+ (modes native)
  (libraries
     ounit2
     awsSpec))

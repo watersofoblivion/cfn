@@ -1,4 +1,5 @@
 (library
   (name ir)
-;  (bisect_ppx)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
   )

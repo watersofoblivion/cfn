@@ -22,9 +22,11 @@
 %}
 
 %token <Loc.t> EOF
-%token <Loc.t> PACKAGE
-%token <Loc.t> FROM IMPORT
-%token <Loc.t> PIPE ARROW
+%token <Loc.t> PACKAGE "package"
+%token <Loc.t> FROM "from"
+%token <Loc.t> IMPORT "import"
+%token <Loc.t> PIPE "|"
+%token <Loc.t> ARROW "->"
 %token <Loc.t * string> LIDENT
 %token <Loc.t * string> STRING
 
@@ -41,76 +43,61 @@
  */
 
 package_only:
-    package_stmt end_of_package_only { make_file $1 [] }
-;
+| pkg_stmt = package_stmt; end_of_package_only { make_file pkg_stmt [] }
 
 end_of_package_only:
-    FROM                { () }
-  | IMPORT              { () }
-  | end_of_imports_only { () }
-;
+| "from"              { () }
+| "import"            { () }
+| end_of_imports_only { () }
 
 imports_only:
-    package_stmt import_stmt_list end_of_imports_only { make_file $1 $2 }
-;
+| pkg_stmt = package_stmt; import_stmts = import_stmt_list; end_of_imports_only { make_file pkg_stmt import_stmts }
 
 end_of_imports_only:
-    end_of_file { () }
-;
+| end_of_file { () }
 
 file:
-    package_stmt import_stmt_list end_of_file { make_file $1 $2 }
-;
+| pkg_stmt = package_stmt; import_stmts = import_stmt_list; end_of_file { make_file pkg_stmt import_stmts }
 
 end_of_file:
-    EOF { () }
-;
+| EOF { () }
 
 /*
  * Package Statement
  */
 
 package_stmt:
-    PACKAGE LIDENT { make_package_stmt $1 $2 }
-;
+| stmt_loc = "package"; id = LIDENT { make_package_stmt stmt_loc id }
 
 /*
  * Imports
  */
 
 import_stmt_list:
-                                 { [] }
-  | import_stmt import_stmt_list { $1::$2 }
-;
+|                                             { [] }
+| stmt = import_stmt; rest = import_stmt_list { stmt :: rest }
 
 import_stmt:
-    from_clause import_clause { make_import_stmt $1 $2 }
-;
+| from = from_clause; import = import_clause { make_import_stmt from import }
 
 from_clause:
-                { None }
-  | FROM STRING { Some (make_from_clause $1 $2) }
-;
+|                                 { None }
+| from_loc = "from"; pkg = STRING { Some (make_from_clause from_loc pkg) }
 
 import_clause:
-    IMPORT package_clause_list { make_import_clause $1 $2 }
-;
+| import_loc = "import"; clauses = package_clause_list { make_import_clause import_loc clauses }
 
 package_clause_list:
-    package_clause package_clause_list_tl { $1::$2 }
-  | package_clause_list_tl                {     $1 }
-;
+| hd = package_clause; tl = package_clause_list_tl { hd :: tl }
+| tl = package_clause_list_tl                      { tl }
 
 package_clause_list_tl:
-                                               { [] }
-  | PIPE package_clause package_clause_list_tl { $2::$3 }
-;
+|                                                       { [] }
+| "|"; hd = package_clause; tl = package_clause_list_tl { hd :: tl }
 
 package_clause:
-    STRING package_alias { make_package_clause $1 $2 }
-;
+| pkg = STRING; alias = package_alias { make_package_clause pkg alias }
 
 package_alias:
-                 { None }
-  | ARROW LIDENT { Some (make_package_alias $2) }
-;
+|                      { None }
+| "->"; alias = LIDENT { Some (make_package_alias alias) }

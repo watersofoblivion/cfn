@@ -28,7 +28,9 @@ let text_equals ~ctxt ?msg:(msg = "") expected actual =
       let change = ANSITerminal.sprintf style "%s" change in
       fprintf fmt "%s" change
     in
+    let _ = changes_iter in
     let diff_iter change =
+      let _ = change in
       let (prefix, changes, style) = match change with
         | StringDiff.Added lines -> ("+", lines, [ANSITerminal.green])
         | StringDiff.Deleted lines -> ("-", lines, [ANSITerminal.red])

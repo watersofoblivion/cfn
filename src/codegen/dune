@@ -1,6 +1,7 @@
 (library
   (name codegen)
-;  (bisect_ppx)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
   (libraries
     yojson
     llvm

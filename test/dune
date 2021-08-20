@@ -1,5 +1,6 @@
 (test
  (name runner)
+ (modes native)
  (action
    (run %{test}
      -testdata-dir %{workspace_root}/../../test
@@ -9,6 +10,7 @@
      -chooser failfirst))
  (libraries
     ounit2
+    commonTest
     extTest
     awsSpecTest
     cfnSpecTest

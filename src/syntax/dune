@@ -1,11 +1,17 @@
 (ocamllex lexer)
 (menhir
  (modules parser)
- (flags --strict --explain --dump))
+ (flags
+   --strict
+   --explain
+   --dump
+   --dump-resolved
+   --no-dollars))
 
 (library
   (name syntax)
-;  (bisect_ppx)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
   (libraries
     unix
     str))

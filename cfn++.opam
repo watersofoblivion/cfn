@@ -30,6 +30,7 @@ depends: [
   "zarith"
   "simple-diff"
   "ANSITerminal"
-  "bisect"
+  "bisect_ppx"
   "ctypes-foreign"
+  "uri"
 ]

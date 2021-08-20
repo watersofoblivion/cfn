@@ -1,7 +1,9 @@
 (library
  (name systemTest)
+ (modes native)
  (libraries
     ounit2
     system
     simple-diff
-    ANSITerminal))
+    ANSITerminal
+    ))

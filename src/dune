@@ -1,7 +1,8 @@
 (library
  (name cfnpp)
-; (bisect_ppx)
+ (instrumentation (backend bisect_ppx))
  (libraries
+   common
    ext
    awsSpec
    cfnSpec

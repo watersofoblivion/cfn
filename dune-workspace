@@ -1,0 +1,3 @@
+(lang dune 2.9)
+
+(instrument_with bisect_ppx)

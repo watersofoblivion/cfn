@@ -2,7 +2,11 @@
   open Path
 %}
 
-%token EOF LBRACKET RBRACKET DOT OR
+%token EOF
+%token LBRACKET "["
+%token RBRACKET "]"
+%token DOT "."
+%token OR "|"
 %token <int> IDX
 %token <string> IDENT
 
@@ -19,23 +23,23 @@
 %%
 
 json_path:
-    EOF                                  { blank }
-  | json_path_expr EOF                   { $1 }
+    EOF                        { blank }
+  | expr = json_path_expr; EOF { expr }
 ;
 
 json_path_expr:
-    IDENT                                { ident $1 }
-  | json_path_expr DOT IDENT             { field $1 $3 }
-  | json_path_expr LBRACKET IDX RBRACKET { index $1 $3 }
-  | json_path_expr OR json_path_expr     { choice $1 $3 }
+    id = IDENT                                        { ident id }
+  | expr = json_path_expr; "."; id = IDENT            { field expr id }
+  | expr = json_path_expr; "["; idx = IDX; "]"        { index expr idx }
+  | expr1 = json_path_expr "|" expr2 = json_path_expr { choice expr1 expr2 }
 ;
 
 shape_path:
-    EOF                 { blank }
-  | shape_path_expr EOF { $1 }
+    EOF                         { blank }
+  | expr = shape_path_expr; EOF { expr }
 ;
 
 shape_path_expr:
-    IDENT                     { ident $1 }
-  | shape_path_expr DOT IDENT { field $1 $3 }
+    id = IDENT                              { ident id }
+  | expr = shape_path_expr; "."; id = IDENT { field expr id }
 ;

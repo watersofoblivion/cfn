@@ -21,7 +21,8 @@
 
 (library
   (name cfnSpec)
-;  (bisect_ppx)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
   (libraries
     system
     ext

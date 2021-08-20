@@ -36,6 +36,18 @@ let test_source =
     SourceTest.WorkspaceTest.suite
   ]
 
+let test_common =
+  "Common" >::: [
+    CommonTest.LocTest.suite;
+    CommonTest.SymTest.suite;
+    CommonTest.PrettyTest.suite;
+    CommonTest.EnvTest.suite;
+    CommonTest.LintTest.suite;
+    CommonTest.DocTest.suite;
+    CommonTest.LexTest.suite;
+    CommonTest.CliTest.suite;
+  ]
+
 let test_syntax =
   "Abstract Syntax" >::: [
     SyntaxTest.LocTest.suite;
@@ -86,6 +98,7 @@ let suite =
     test_spec;
     test_system;
     test_source;
+    test_common;
     test_syntax;
     test_ir;
     test_opt;
