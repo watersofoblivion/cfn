@@ -1,0 +1,6 @@
+(library
+ (name optTest)
+ (modes native)
+ (libraries
+    ounit2
+    opt))

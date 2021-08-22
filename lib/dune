@@ -1,0 +1,19 @@
+(library
+ (name cfnpp)
+ (instrumentation (backend bisect_ppx))
+ (libraries
+   common
+   ext
+   awsSpec
+   cfnSpec
+   syntax
+   annot
+   ir
+   opt
+   mono
+   clos
+   codegen
+   runtime
+   source
+   system
+   cli))

@@ -1,0 +1,6 @@
+(library
+ (name irTest)
+ (modes native)
+ (libraries
+    ounit2
+    ir))

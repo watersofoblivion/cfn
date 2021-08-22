@@ -1,0 +1,30 @@
+;;;;;;;;;;;
+; ATD Gen ;
+;;;;;;;;;;;
+
+; CFN
+(rule
+ (targets cfn_j.ml cfn_j.mli)
+ (deps    cfn.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets cfn_t.ml cfn_t.mli)
+ (deps    cfn.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+;;;;;;;;;;;
+; Library ;
+;;;;;;;;;;;
+
+(library
+  (name cfnSpec)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  (libraries
+    system
+    ext
+    atdgen
+    yojson))

@@ -1,5 +1,27 @@
 (test
- (name testMain)
+ (name runner)
+ (modes native)
+ (action
+   (run %{test}
+     -testdata-dir %{workspace_root}/../../test
+     -ci true
+     -shards 8
+     -display false
+     -chooser failfirst))
  (libraries
-    ounit
-    cfn))
+    ounit2
+    commonTest
+    extTest
+    awsSpecTest
+    cfnSpecTest
+    syntaxTest
+    annotTest
+    irTest
+    optTest
+    monoTest
+    closTest
+    codegenTest
+    runtimeTest
+    sourceTest
+    systemTest
+    cliTest))

@@ -1,0 +1,6 @@
+(library
+ (name extTest)
+ (modes native)
+ (libraries
+    ounit2
+    ext))

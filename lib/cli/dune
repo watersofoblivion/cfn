@@ -1,0 +1,8 @@
+(library
+ (name cli)
+ (modes native)
+ (instrumentation (backend bisect_ppx))
+ (libraries
+   source
+   system
+   cmdliner))

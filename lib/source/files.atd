@@ -1,0 +1,20 @@
+(* Project File *)
+
+type project_file =
+  { id: string }
+
+(* Lock File *)
+
+type vcs =
+  [ Git <json name="git"> ]
+<ocaml repr="classic">
+
+type dependency =
+  { source:  string;
+    major:   int;
+    vcs:     vcs;
+    version: string wrap <ocaml t="System.Semver.t" wrap="System.Semver.of_string" unwrap="System.Semver.to_string">;
+    commit:  string; }
+
+type lock_file =
+  { dependencies: dependency list }

@@ -1,0 +1,164 @@
+type json <ocaml module="Yojson.Safe" t="t"> = abstract
+
+type typ =
+  [ Blob <json name="blob">
+  | Boolean <json name="boolean">
+  | Double <json name="double">
+  | Float <json name="float">
+  | Integer <json name="integer">
+  | List <json name="list">
+  | Long <json name="long">
+  | Map <json name="map">
+  | String <json name="string">
+  | Structure <json name="structure">
+  | Timestamp <json name="timestamp"> ]
+  <ocaml repr="classic">
+
+type loc =
+  [ Header <json name="header">
+  | Querystring <json name="querystring">
+  | Uri <json name="uri"> ]
+  <ocaml repr="classic">
+
+type member =
+  { ?box: bool option;
+    ?location: loc option;
+    ?location_name <json name="locationName">: string option;
+    shape: string; }
+
+type key =
+  { ?shape: string option;
+    ?location_name <json name="locationName">: string option; }
+
+type err =
+  { ?http_status_code <json name="httpStatusCode">: int option;
+    ?code: string option;
+    ?sender_fault <json name="senderFault">: bool option; }
+
+type timestamp_format =
+  [ RFC822 <json name="rfc822">
+  | ISO8601 <json name="iso8601">
+  | UnixTimestamp <json name="unixTimestamp"> ]
+  <ocaml repr="classic">
+
+type xml_namespace =
+  { ?prefix: string option;
+    uri: string; }
+
+type shape =
+  { ?box: bool option;
+    ?deprecated: bool option;
+    ?enum: string list option;
+    ?error: err option;
+    ?exn <json name="exception">: bool option;
+    ?fault: bool option;
+    ?flattened: bool option;
+    ?key: key option;
+    ?location_name <json name="locationName">: string option;
+    ?max: float option;
+    ?member: key option;
+    ?members: (string * member) list option;
+    ?min: float option;
+    ?pattern: string option;
+    ?payload: string option;
+    ?required: string list option;
+    ?sensitive: bool option;
+    ?streaming: bool option;
+    ?timestamp_format <json name="timestampFormat">: timestamp_format option;
+    typ <json name="type">: typ;
+    ?value: key option;
+    ?wrapper: bool option;
+    ?xml_namespace <json name="xmlNamespace">: xml_namespace option;
+    ?xml_order <json name="xmlOrder">: string list option; }
+
+type error =
+  { error: err;
+    exn <json name="exception">: bool;
+    fault: bool;
+    shape: string; }
+
+type output =
+  { ?result_wrapper <json name="resultWrapper">: string option;
+    ?shape: string option; }
+
+type input =
+  { ?location_name <json name="locationName">: string option;
+    ?shape: string option;
+    ?xml_namespace <json name="xmlNamespace">: xml_namespace option; }
+
+type meth =
+  [ Head <json name="HEAD">
+  | Get <json name="GET">
+  | Post <json name="POST">
+  | Put <json name="PUT">
+  | Patch <json name="PATCH">
+  | Delete <json name="DELETE"> ]
+  <ocaml repr="classic">
+
+type http =
+  { meth <json name="method">: meth;
+    request_uri <json name="requestUri">: string;
+    ?response_code <json name="responseCode">: int option; }
+
+type auth_type =
+  [ None <json name="none">
+  | V4UnsignedBody <json name="v4-unsigned-body"> ]
+
+type operation =
+  { ?alias: string option;
+    ?auth_type <json name="authType">: auth_type option;
+    ?deprecated: bool option;
+    ?documentation_url <json name="documentationUrl">: string option;
+    ?idempotent: bool option;
+    name: string;
+    http: http;
+    ?input: input option;
+    ?output: output option;
+    ?errors: error list option; }
+
+type signature_version =
+  [ S3 <json name="s3">
+  | V2 <json name="v2">
+  | V4 <json name="v4"> ]
+  <ocaml repr="classic">
+
+type protocol =
+  [ EC2 <json name="ec2">
+  | JSON <json name="json">
+  | Query <json name="query">
+  | RestJSON <json name="rest-json">
+  | RestXML <json name="rest-xml"> ]
+  <ocaml repr="classic">
+
+type json_version =
+  [ Version10 <json name="1.0">
+  | Version11 <json name="1.1"> ]
+  <ocaml repr="classic">
+
+type checksum_format =
+  [ MD5 <json name="md5">
+  | SHA256 <json name="sha256"> ]
+  <ocaml repr="classic">
+
+type metadata =
+  { api_version <json name="apiVersion">: string;
+    ?checksum_format <json name="checksumFormat">: checksum_format option;
+    endpoint_prefix <json name="endpointPrefix">: string;
+    ?global_endpoint <json name="globalEndpoint">: string option;
+    ?json_version <json name="jsonVersion">: json_version option;
+    protocol: protocol;
+    ?service_abbreviation <json name="serviceAbbreviation">: string option;
+    service_full_name <json name="serviceFullName">: string;
+    ?service_id <json name="serviceId">: string option;
+    signature_version <json name="signatureVersion">: signature_version;
+    ?signing_name <json name="signingName">: string option;
+    ?target_prefix <json name="targetPrefix">: string option;
+    ?timestamp_format <json name="timestampFormat">: timestamp_format option;
+    ?uid: string option;
+    ?xml_namespace <json name="xmlNamespace">: xml_namespace option; }
+
+type t =
+  { version: string;
+    metadata: metadata;
+    operations: (string * operation) list <json repr="object">;
+    shapes: (string * shape) list <json repr="object">; }

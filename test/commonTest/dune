@@ -1,0 +1,6 @@
+(library
+ (name commonTest)
+ (modes native)
+ (libraries
+    ounit2
+    common))

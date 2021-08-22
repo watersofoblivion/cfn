@@ -1,7 +1,10 @@
 (executable
  (public_name cfnpp)
- (libraries cmdliner cfn)
- (modules cfnpp))
+ (modules cfnpp)
+; (bisect_ppx)
+ (libraries
+   cfnpp
+   cmdliner))
 
 (install
  (section bin)

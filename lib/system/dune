@@ -1,0 +1,10 @@
+(library
+  (name system)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  (libraries
+    str
+    atdgen
+    yojson
+    syntax
+    uri))

@@ -1,0 +1,9 @@
+(library
+  (name codegen)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  (libraries
+    yojson
+    llvm
+    llvm.analysis
+    ctypes))

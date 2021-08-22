@@ -1,0 +1,10 @@
+type path = string wrap <ocaml t="Path.t" wrap="Lexer.json_path" unwrap="Path.to_string">
+
+type t =
+  { input_token: path;
+    ?limit_key: string option;
+    ?more_results: string option;
+    output_token: path;
+    result_key: path; }
+
+type s = (string * t) list <json repr="object">

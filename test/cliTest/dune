@@ -1,0 +1,6 @@
+(library
+ (name cliTest)
+ (modes native)
+ (libraries
+    ounit2
+    cli))

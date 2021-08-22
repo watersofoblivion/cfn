@@ -1,0 +1,6 @@
+(library
+ (name closTest)
+ (modes native)
+ (libraries
+    ounit2
+    clos))

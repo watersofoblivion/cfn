@@ -1,0 +1,36 @@
+type ty =
+  [ StringAcceptor of string
+  | IntAcceptor of int
+  | BoolAcceptor of bool ]
+  <ocaml repr="classic">
+
+type matcher =
+  [ Error <json name="error">
+  | Path <json name="path">
+  | PathAll <json name="pathAll">
+  | PathAny <json name="pathAny">
+  | Status <json name="status"> ]
+  <ocaml repr="classic">
+
+type state =
+  [ Failure <json name="failure">
+  | Retry <json name="retry">
+  | Success <json name="success"> ]
+  <ocaml repr="classic">
+
+type acceptor =
+  { expected: ty;
+    matcher: matcher;
+    state: state;
+    ?argument: string option; }
+
+type t =
+  { delay: int;
+    operation: string;
+    max_attempts <json name="maxAttempts">: int;
+    acceptors: acceptor list;
+    ?description: string option; }
+
+type s =
+  { version: int;
+    waiters: (string * t) list <json repr="object">; }

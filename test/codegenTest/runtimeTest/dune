@@ -1,0 +1,8 @@
+(library
+ (name runtimeTest)
+ (modes native)
+ (libraries
+    ounit2
+    llvm
+    llvm.executionengine
+    runtime))

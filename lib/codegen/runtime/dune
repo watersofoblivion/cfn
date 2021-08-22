@@ -1,0 +1,8 @@
+(library
+  (name runtime)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  (libraries
+    llvm
+    llvm.analysis
+    ctypes))

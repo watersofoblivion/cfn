@@ -1,0 +1,6 @@
+(library
+ (name cfnSpecTest)
+ (modes native)
+ (libraries
+    ounit2
+    cfnSpec))

@@ -1,0 +1,108 @@
+;;;;;;;;;;;
+; ATD Gen ;
+;;;;;;;;;;;
+
+; API
+(rule
+ (targets api_j.ml api_j.mli)
+ (deps    api.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets api_t.ml api_t.mli)
+ (deps    api.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+; Doc
+(rule
+ (targets doc_j.ml doc_j.mli)
+ (deps    doc.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets doc_t.ml doc_t.mli)
+ (deps    doc.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+; Example
+(rule
+ (targets example_j.ml example_j.mli)
+ (deps    example.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets example_t.ml example_t.mli)
+ (deps    example.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+; Paginator
+(rule
+ (targets paginator_j.ml paginator_j.mli)
+ (deps    paginator.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets paginator_t.ml paginator_t.mli)
+ (deps    paginator.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+; Smoke
+(rule
+ (targets smoke_j.ml smoke_j.mli)
+ (deps    smoke.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets smoke_t.ml smoke_t.mli)
+ (deps    smoke.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+; Waiter
+(rule
+ (targets waiter_j.ml waiter_j.mli)
+ (deps    waiter.atd)
+ (action
+  (run atdgen -j -j-std %{deps})))
+
+(rule
+ (targets waiter_t.ml waiter_t.mli)
+ (deps    waiter.atd)
+ (action
+  (run atdgen -t %{deps})))
+
+;;;;;;;;;;;;;;;;
+; Path Parsing ;
+;;;;;;;;;;;;;;;;
+
+(ocamllex lexer)
+(menhir
+ (modules parser)
+ (flags
+   --strict
+   --explain
+   --dump
+   --dump-resolved
+   --no-dollars))
+
+;;;;;;;;;;;
+; Library ;
+;;;;;;;;;;;
+
+(library
+  (name awsSpec)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  (libraries
+    ext
+    atdgen
+    yojson))
