@@ -1,0 +1,6 @@
+(library
+ (name annotTest)
+ (modes native)
+ (libraries
+    ounit2
+    annot))

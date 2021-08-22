@@ -304,7 +304,7 @@ let test_dir =
       let temp_dir = Filename.get_temp_dir_name () in
       let assert_temp_dir dir =
         let actual = Filename.dirname dir in
-        assert_equal ~ctxt temp_dir (actual ^ Filename.dir_sep);
+        assert_equal ~ctxt ~printer:Fun.id temp_dir actual;
       in
 
       let dir = Os.temp_dir () in

@@ -8,7 +8,7 @@ end
 module Bind (Crypto: Crypto.Asm) (Exe: TargetTest.Exe) = struct
 end
 
-let crypto_test test_fn =
+(* let crypto_test test_fn =
   let heap_size = 4096n in
 
   TargetTest.test (fun (module Target: Target.Asm) ->
@@ -28,10 +28,10 @@ let crypto_test test_fn =
 
     test_fn (module Gc: GcTest.Bindings) (module Crypto: Bindings))
 
-let _ = crypto_test
+let _ = crypto_test *)
 
 let suite =
-  let test_hash =
+  (* let test_hash =
     let test_md5 (module Gc: GcTest.Bindings) (module Crypto: Bindings) _ =
       ()
     in
@@ -54,8 +54,8 @@ let suite =
       "MD5"    >:: crypto_test test_md5;
       "SHA256" >:: crypto_test test_sha256
     ]
-  in
+  in *)
   "Cryptographic Functions" >::: [
-    test_hash;
-    test_hmac
+    (* test_hash; *)
+    (* test_hmac *)
   ]

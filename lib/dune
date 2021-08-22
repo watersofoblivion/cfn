@@ -7,8 +7,11 @@
    awsSpec
    cfnSpec
    syntax
+   annot
    ir
    opt
+   mono
+   clos
    codegen
    runtime
    source

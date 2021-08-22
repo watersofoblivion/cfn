@@ -15,8 +15,11 @@
     awsSpecTest
     cfnSpecTest
     syntaxTest
+    annotTest
     irTest
     optTest
+    monoTest
+    closTest
     codegenTest
     runtimeTest
     sourceTest

@@ -1,0 +1,5 @@
+(library
+  (name mono)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  )
