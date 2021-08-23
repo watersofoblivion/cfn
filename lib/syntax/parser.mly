@@ -1,4 +1,6 @@
 %{
+  open Common
+
   let make_package_stmt kwd_loc (name_loc, pkg_name) =
     Ast.package_stmt kwd_loc name_loc pkg_name
 
@@ -21,14 +23,14 @@
     Ast.file pkg imports
 %}
 
-%token <Loc.t> EOF
-%token <Loc.t> PACKAGE "package"
-%token <Loc.t> FROM "from"
-%token <Loc.t> IMPORT "import"
-%token <Loc.t> PIPE "|"
-%token <Loc.t> ARROW "->"
-%token <Loc.t * string> LIDENT
-%token <Loc.t * string> STRING
+%token <Common.Loc.t> EOF
+%token <Common.Loc.t> PACKAGE "package"
+%token <Common.Loc.t> FROM "from"
+%token <Common.Loc.t> IMPORT "import"
+%token <Common.Loc.t> PIPE "|"
+%token <Common.Loc.t> ARROW "->"
+%token <Common.Loc.t * string> LIDENT
+%token <Common.Loc.t * string> STRING
 
 %type <Ast.file> package_only imports_only file
 

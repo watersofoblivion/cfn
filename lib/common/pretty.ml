@@ -1,10 +1,10 @@
 open Format
 
 let ground fmt = fprintf fmt "_"
-let bool b fmt = fprintf fmt "%b" b
-let int i fmt = fprintf fmt "%d" i
+let bool fmt b = fprintf fmt "%b" b
+let int fmt i = fprintf fmt "%d" i
 
-let tops pp_top tops fmt =
+let tops pp_top fmt file =
   let pp_sep fmt _ = fprintf fmt "@ @ " in
   let pp fmt top = pp_top top fmt in
   fprintf fmt "@[<v>";

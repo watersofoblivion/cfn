@@ -8,7 +8,7 @@ open Common
 
 let assert_pp ~ctxt pp output value =
   let expected = String.concat "\n" output in
-  fprintf str_formatter "%t" (pp value)
+  fprintf str_formatter "%a" pp value
     |> flush_str_formatter
     |> assert_equal ~ctxt ~msg:"Unexpected pretty-printing output" ~printer:Fun.id expected
 

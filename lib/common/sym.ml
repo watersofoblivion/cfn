@@ -30,13 +30,13 @@ let equal sym sym' =
 
 (** Pretty-Printing *)
 
-let pp sym fmt =
-  fprintf fmt "%s$%t" sym.id (Pretty.int sym.sym)
+let pp fmt sym =
+  fprintf fmt "%s$%a" sym.id Pretty.int sym.sym
 
-let pp_id sym fmt =
+let pp_id fmt sym =
   let invalid_argument sym =
     let msg =
-      fprintf str_formatter "Symbol %t does not have an identifier" (pp sym)
+      fprintf str_formatter "Symbol %a does not have an identifier" pp sym
         |> flush_str_formatter
     in
     let exn = Invalid_argument msg in
