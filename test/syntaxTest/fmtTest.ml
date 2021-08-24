@@ -1,19 +1,19 @@
-open Format
+(* open Format *)
 
 open OUnit2
 
-open Syntax
+(* open Syntax *)
+
+(* open CommonTest *)
 
 (* Assertions *)
 
-let assert_pp ~ctxt pp v lines =
-  let printer s = sprintf "\n\"%s\"\n" s in
+(* let assert_pp_pkg = PrettyTest.assert_pp Fmt.pkg *)
+(* let assert_pp_import = PrettyTest.assert_pp Fmt.import *)
 
-  pp str_formatter v;
-  let expected = String.concat "\n" lines in
-  flush_str_formatter ()
-    |> assert_equal ~ctxt ~printer expected
 
+
+(*
 (* Package Statement *)
 let test_package ctxt =
   let pkg_name = "foo" in
@@ -290,12 +290,12 @@ let test_file =
   "Files" >::: [
     "Package Only"        >:: test_package_only;
     "Package and Imports" >:: test_package_and_imports
-  ]
+  ] *)
 
 (* Test Suite *)
 let suite =
   "Pretty Printing" >::: [
-    "Package Statement" >:: test_package;
+    (* "Package Statement" >:: test_package;
     test_imports;
-    test_file
+    test_file *)
   ]

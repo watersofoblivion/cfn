@@ -1,121 +1,113 @@
 (**
- {1 Abstract Syntax}
+ * {1 Abstract Syntax}
  *)
+
+open Common
 
 (**
- {2 Package Statement}
+ * {2 Syntax}
  *)
 
-(** A package statement *)
-type package_stmt = private {
-  package_stmt_loc: Loc.t; (** Location of the statement *)
-  name_loc:         Loc.t; (** Location of the name *)
-  pkg_name:         string (** Name of the package *)
-}
+type name = private
+  | Name of {
+      loc: Loc.t; (** Location *)
+      id:  Sym.t  (** Identifier *)
+    } (** A name *)
+(** Import Names *)
 
-val package_stmt : Loc.t -> Loc.t -> string -> package_stmt
-(** [package_stmt kwd_loc name_loc pkg_name] constructs a package statement
-    where the [package] keyword is located at [kwd_loc], the package name is
-    located at [name_loc], and the package name is [pkg_name]. *)
+(** {3 Imports} *)
 
-val deloc_package_stmt : package_stmt -> package_stmt
-(** [deloc_package_stmt package_stmt] strips all location information from
-    [package_stmt], replacing it with {!Loc.dummy}. *)
+type src = private
+  | Source of {
+      loc:  Loc.t; (** Location *)
+      name: name   (** Name of the source *)
+    } (** An import source *)
+(** Import Sources *)
+
+type from = private
+  | From of {
+      loc: Loc.t; (** Location *)
+      src: src   (** Source to import from *)
+    } (** From clause *)
+(** From Clauses *)
+
+type alias = private
+  | Alias of {
+      loc:   Loc.t;      (** Location *)
+      pkg:   name;       (** Package to import *)
+      alias: name option (** Optional local name *)
+    } (** A package alias *)
+(** Package Aliases *)
+
+type pkgs = private
+  | Packages of {
+      loc:  Loc.t;     (** Location *)
+      pkgs: alias list (** The packages to import *)
+    } (** A package list *)
+(** Package List *)
+
+type import = private
+  | Import of {
+      loc:  Loc.t;       (** Location *)
+      from: from option; (** Optional import source *)
+      pkgs: pkgs         (** The packages to import *)
+    } (** An import statement *)
+(** Import Statements *)
+
+(** {3 Package Statement} *)
+
+type pkg = private
+  | Package of {
+      loc: Loc.t; (** Location *)
+      id:  name   (** Name of the package *)
+    } (** A package statement *)
+(** Package Statements *)
+
+(** {3 Source Files} *)
+
+type file = private
+  | File of {
+      pkg:     pkg;        (** Package statement *)
+      imports: import list (** Import statements *)
+    } (** A source file *)
+(** Source Files *)
 
 (**
- {2 Imports}
+ * {2 Constructors}
  *)
 
-(** The [from] clause in an import statement. *)
-type from_clause = private {
-  from_clause_loc: Loc.t; (** Location of the "from" clause *)
-  ip_loc:          Loc.t; (** Location of the import path *)
-  import_path:     string (** Import path of the project *)
-}
+val name : Loc.t -> Sym.t -> name
+(** [name loc id] constructs a name at location [loc] of the identifier [id]. *)
 
-val from_clause : Loc.t -> Loc.t -> string -> from_clause
-(** [from_clause kwd_loc ip_loc import_path] constructs a [from] clause in an
-    import statement where the [from] keyword is located at [kew_loc], the
-    import path is located at [ip_loc], and the import path is [import_path]. *)
+(** {3 Imports} *)
 
-val deloc_from_clause : from_clause -> from_clause
-(** [deloc_from_clause from_clause] strips all location information from
-    [from_clause], replacing it with {!Loc.dummy}. *)
+val src : Loc.t -> name -> src
+(** [src loc name] constructs a source reference at location [loc] with the name
+    [name]. *)
 
-type package_alias = private {
-  package_alias_loc: Loc.t; (** The location of the alias name *)
-  local_alias:       string (** The alias of the package *)
-}
+val from : Loc.t -> src -> from
+(** [from_clause loc src] constructs a [from] clause at location [loc] importing
+    from the source [src]. *)
 
-val package_alias : Loc.t -> string -> package_alias
-(** [package_alias loc alias] constructs a package alias where the alias is
-    located at [loc] and the name of the alias is [alias]. *)
+val alias : Loc.t -> name -> name option -> alias
+(** [alias loc pkg alias] constructs a package alias at location [loc] importing
+    the package [pkg] with the optional local alias [alias]. *)
 
-val deloc_package_alias : package_alias -> package_alias
-(** [deloc_package_alias package_alias] strips all location information from
-    [package_alias], replacing it with {!Loc.dummy}. *)
+val pkgs : Loc.t -> alias list -> pkgs
+(** [pkgs loc pkgs] constructs a list of package aliases as location [loc]. *)
 
-(** An individual package import in an import statement. *)
-type package_clause = private {
-  package_clause_loc: Loc.t;               (** The location of the package clause *)
-  pp_loc:             Loc.t;               (** The location of the package path *)
-  package_path:       string;              (** The package path, relative to the import path *)
-  alias:              package_alias option (** An optional alias for the imported package *)
-}
+val import : Loc.t -> from option -> pkgs -> import
+(** [import loc from pkgs] constructs an import statement at location [loc]
+    importing the packages [pkgs] from the optional source [from]. *)
 
-val package_clause : Loc.t -> string -> package_alias option -> package_clause
-(** [package_clause pp_loc package_path alias] constructs a package clause where
-    [pp_loc] is the location of the package path, and [package_path] is the
-    package path, and [alias] is the optional local alias of the package. *)
+(** {3 Package Statement} *)
 
-val deloc_package_clause : package_clause -> package_clause
-(** [deloc_package_clause package_clause] strips all location information from
-    [package_clause], replacing it with {!Loc.dummy}. *)
+val pkg : Loc.t -> name -> pkg
+(** [pkg loc id] constructs a package statement at location [loc] with the name
+    [id]. *)
 
-(** The [import] clause in an import statement. *)
-type import_clause = private {
-  import_clause_loc: Loc.t;              (** The location of the import clause *)
-  packages:          package_clause list (** The packages to import from that project, with optional local names *)
-}
+(** {3 Source Files} *)
 
-val import_clause : Loc.t -> package_clause list -> import_clause
-(** [import_clause kwd_loc packages] constructs an import clause where [kwd_loc]
-    is the location of the [import] keyword and [packages] are the package
-    clauses defining the imports. *)
-
-val deloc_import_clause : import_clause -> import_clause
-(** [deloc_import_clause import_clause] strips all location information from
-    [import_clause], replacing it with {!Loc.dummy}. *)
-
-(** An import statement *)
-type import_stmt = private {
-  import_stmt_loc: Loc.t;              (** The location of the import statement *)
-  from:            from_clause option; (** The "from" clause *)
-  import:          import_clause       (** The "import" clause *)
-}
-
-val import_stmt : from_clause option -> import_clause -> import_stmt
-(** [import_stmt from import] constructs an import statement where [from] is the
-    optional from clause and [import] is the import clause. *)
-
-val deloc_import_stmt : import_stmt -> import_stmt
-(** [deloc_import_stmt import_stmt] strips all location information from
-    [import_stmt], replacing it with {!Loc.dummy}. *)
-
-(**
- {2 Source File}
- *)
-
-(** A source file *)
-type file = private {
-  package_stmt: package_stmt;    (** Package name *)
-  import_stmts: import_stmt list (** File imports *)
-}
-
-val file : package_stmt -> import_stmt list -> file
+val file : pkg -> import list -> file
 (** [file pkg imports] constructs a source file where [pkg] is the package
     statement and [imports] is the list of import statements. *)
-
-val deloc_file : file -> file
-(** [deloc_file file] strips all location information from [file], replacing it
-    with {!Loc.dummy}. *)

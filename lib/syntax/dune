@@ -12,6 +12,10 @@
   (name syntax)
   (modes native)
   (instrumentation (backend bisect_ppx))
+; TODO - Wire up Sedlex once I get to rune/string.
+;  (preprocess
+;    (pps sedlex.ppx))
   (libraries
     unix
-    str))
+    str
+    common))

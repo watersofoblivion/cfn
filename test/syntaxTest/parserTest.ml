@@ -2,280 +2,265 @@ open Format
 
 open OUnit2
 
+open Common
 open Syntax
+
+open CommonTest
 
 (* Assertions *)
 
-let assert_parses_gen ~ctxt lexer parser expected lines =
-  let pp_diff fmt (expected, actual) =
-    fprintf fmt "Expected:\n%a\nActual:\n%a\n\n" Fmt.file expected Fmt.file actual
-  in
-  lines
-    |> String.concat "\n"
-    |> Lexer.from_string
-    |> parser lexer
-    |> Ast.deloc_file
-    |> assert_equal ~ctxt ~pp_diff expected
+let assert_parses = ParseTest.assert_parses Lexer.lex
 
-let assert_parses = assert_parses_gen Lexer.lex Parser.file
-let assert_package_only = assert_parses_gen Lexer.lex Parser.package_only
-let assert_imports_only = assert_parses_gen Lexer.lex Parser.imports_only
+let assert_parses_pkg = assert_parses Parser.pkg_test AstTest.assert_pkg_equal
+let assert_parses_import = assert_parses Parser.import_test AstTest.assert_import_equal
 
-(* Fixtures *)
+let assert_parses_package_only = assert_parses Parser.package_only AstTest.assert_file_equal
+let assert_parses_imports_only = assert_parses Parser.imports_only AstTest.assert_file_equal
+let assert_parses_file = assert_parses Parser.file AstTest.assert_file_equal
 
-let pkg_name = "foo"
-let package_stmt = Ast.package_stmt Loc.dummy Loc.dummy pkg_name
+(*  *)
 
-let import_path = "project/path@v42"
-let from_clause = Ast.from_clause Loc.dummy Loc.dummy import_path
+let test_parse_pkg ctxt =
+  let id = "testpackage" in
 
-let package_path_1 = "package/one"
-let package_clause_1 = Ast.package_clause Loc.dummy package_path_1 None
+  let env = EnvTest.fresh () in
+  let loc = LocTest.make (1, 0, 0) (1, 19, 19) in
+  let id_loc = LocTest.make (1, 8, 8) (1, 19, 19) in
+  ()
+    |> Sym.seq
+    |> Sym.gen ~id:id
+    |> Ast.name id_loc
+    |> Ast.pkg loc
+    |> assert_parses_pkg ~ctxt env [
+         sprintf "package %s" id
+       ]
 
-let package_path_2 = "package/two"
-let package_clause_2 = Ast.package_clause Loc.dummy package_path_2 None
+let test_parse_import_from ctxt =
+  let src = "testsrc" in
+  let pkg = "testpkg" in
+  let seq = Sym.seq () in
+  let env = EnvTest.fresh () in
 
-let package_path_3 = "package/three"
-let package_clause_3 = Ast.package_clause Loc.dummy package_path_3 None
-
-let package_path_4 = "package/four"
-let package_clause_4 = Ast.package_clause Loc.dummy package_path_4 None
-
-let local_alias_1 = "alias1"
-let alias_1 = Ast.package_alias Loc.dummy local_alias_1
-let aliased_package_clause_1 = Ast.package_clause Loc.dummy package_path_1 (Some alias_1)
-
-let local_alias_2 = "alias2"
-let alias_2 = Ast.package_alias Loc.dummy local_alias_2
-let aliased_package_clause_2 = Ast.package_clause Loc.dummy package_path_2 (Some alias_2)
-
-(* Package Statement *)
-let test_package_stmt ctxt =
-  let expected = Ast.file package_stmt [] in
-  assert_parses ~ctxt expected [
-    sprintf "package %s" pkg_name
-  ]
-
-(* Package Only Parser *)
-let test_package_only =
-  let expected = Ast.file package_stmt [] in
-
-  let test_stop_at_from ctxt =
-    assert_package_only ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "from \"project/path@v42\" import \"package/path\""
-    ]
-  in
-  let test_stop_at_import ctxt =
-    assert_package_only ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "import \"package/path\""
-    ]
-  in
-  "Package Only" >::: [
-    "Stops at Import Clause" >:: test_stop_at_from;
-    "Stops at From Clause"   >:: test_stop_at_import;
-  ]
-
-(* Imports *)
-let test_imports =
-  let test_single_unaliased ctxt =
-    let import_clause = Ast.import_clause Loc.dummy [package_clause_1] in
-    let import_stmt = Ast.import_stmt None import_clause in
-
-    let expected = Ast.file package_stmt [import_stmt] in
-
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "import %S" package_path_1
-    ];
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "import | %S" package_path_1
-    ]
-  in
-  let test_single_aliased ctxt =
-    let import_clause = Ast.import_clause Loc.dummy [aliased_package_clause_1] in
-    let import_stmt = Ast.import_stmt None import_clause in
-
-    let expected = Ast.file package_stmt [import_stmt] in
-
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "import %S -> %s" package_path_1 local_alias_1
-    ];
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-              "import";
-      sprintf "  | %S -> %s" package_path_1 local_alias_1
-    ]
-  in
-  let test_multiple_unaliased ctxt =
-    let package_clauses = [package_clause_1; package_clause_2] in
-    let import_clause = Ast.import_clause Loc.dummy package_clauses in
-    let import_stmt = Ast.import_stmt None import_clause in
-
-    let expected = Ast.file package_stmt [import_stmt] in
-
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "import %S" package_path_1;
-      sprintf "  | %S" package_path_2
-    ];
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-              "import";
-      sprintf "  | %S" package_path_1;
-      sprintf "  | %S" package_path_2
-    ]
-  in
-  let test_multiple_aliased ctxt =
-    let package_clauses = [aliased_package_clause_1; aliased_package_clause_2] in
-    let import_clause = Ast.import_clause Loc.dummy package_clauses in
-    let import_stmt = Ast.import_stmt None import_clause in
-
-    let expected = Ast.file package_stmt [import_stmt] in
-
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "import %S -> %s" package_path_1 local_alias_1;
-      sprintf "  | %S -> %s" package_path_2 local_alias_2
-    ];
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-              "import";
-      sprintf "  | %S -> %s" package_path_1 local_alias_1;
-      sprintf "  | %S -> %s" package_path_2 local_alias_2
-    ]
-  in
-  let test_mixed_aliases =
-    let test_alias_first ctxt =
-      let package_clauses = [aliased_package_clause_1; package_clause_2] in
-      let import_clause = Ast.import_clause Loc.dummy package_clauses in
-      let import_stmt = Ast.import_stmt None import_clause in
-
-      let expected = Ast.file package_stmt [import_stmt] in
-
-      assert_parses ~ctxt expected [
-        sprintf "package %s" pkg_name;
-                "";
-        sprintf "import %S -> %s" package_path_1 local_alias_1;
-        sprintf "  | %S" package_path_2
-      ];
-      assert_parses ~ctxt expected [
-        sprintf "package %s" pkg_name;
-                "";
-                "import";
-        sprintf "  | %S -> %s" package_path_1 local_alias_1;
-        sprintf "  | %S" package_path_2
-      ]
-    in
-    let test_alias_last ctxt =
-      let package_clauses = [package_clause_1; aliased_package_clause_2] in
-      let import_clause = Ast.import_clause Loc.dummy package_clauses in
-      let import_stmt = Ast.import_stmt None import_clause in
-
-      let expected = Ast.file package_stmt [import_stmt] in
-
-      assert_parses ~ctxt expected [
-        sprintf "package %s" pkg_name;
-                "";
-        sprintf "import %S" package_path_1;
-        sprintf "  | %S -> %s" package_path_2 local_alias_2
-      ];
-      assert_parses ~ctxt expected [
-        sprintf "package %s" pkg_name;
-                "";
-                "import";
-        sprintf "  | %S" package_path_1;
-        sprintf "  | %S -> %s" package_path_2 local_alias_2
-      ]
-    in
-    "Mixed Aliases" >::: [
-      "Alias First" >:: test_alias_first;
-      "Alias Last"  >:: test_alias_last
-    ]
-  in
-  let test_from_clause ctxt =
-    let import_clause = Ast.import_clause Loc.dummy [package_clause_1] in
-    let import_stmt = Ast.import_stmt (Some from_clause) import_clause in
-
-    let expected = Ast.file package_stmt [import_stmt] in
-
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "from %S import %S" import_path package_path_1
-    ];
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-      sprintf "from %S import | %S" import_path package_path_1
-    ]
-  in
-  let test_multiple_imports ctxt =
-    let import_stmts =
-      let import_stmt_1 =
-        let package_clauses = [aliased_package_clause_1; package_clause_3] in
-        let import_clause = Ast.import_clause Loc.dummy package_clauses in
-        Ast.import_stmt None import_clause
+  let pkgs =
+    let alias =
+      let pkg =
+        let loc = LocTest.make (1, 20, 20) (1, 27, 27) in
+        seq
+          |> Sym.gen ~id:pkg
+          |> Ast.name loc
       in
-      let import_stmt_2 =
-      let package_clauses = [package_clause_4; aliased_package_clause_2] in
-        let import_clause = Ast.import_clause Loc.dummy package_clauses in
-        Ast.import_stmt (Some from_clause) import_clause
-      in
-      [import_stmt_1; import_stmt_2]
+      let loc = LocTest.make (1, 20, 20) (1, 27, 27) in
+      Ast.alias loc pkg None
     in
-
-    let expected = Ast.file package_stmt import_stmts in
-
-    assert_parses ~ctxt expected [
-      sprintf "package %s" pkg_name;
-              "";
-              "import";
-      sprintf "  | %S -> %s" package_path_1 local_alias_1;
-      sprintf "  | %S" package_path_3;
-      sprintf "from %S import" import_path;
-      sprintf "  | %S" package_path_4;
-      sprintf "  | %S -> %s" package_path_2 local_alias_2
-    ]
+    let loc = LocTest.make (1, 13, 13) (1, 27, 27) in
+    Ast.pkgs loc [alias]
   in
-  "Imports" >::: [
-    "Single Unaliased Package"    >:: test_single_unaliased;
-    "Single Aliased Package"      >:: test_single_aliased;
-    "Multiple Unaliased Packages" >:: test_multiple_unaliased;
-    "Multiple Aliased Packages"   >:: test_multiple_aliased;
-    test_mixed_aliases;
-    "From Clause"                 >:: test_from_clause;
-    "Multiple Imports"            >:: test_multiple_imports
-  ]
+  let from =
+    let src =
+      let loc = LocTest.make (1, 5, 5) (1, 12, 12) in
+      seq
+        |> Sym.gen ~id:src
+        |> Ast.name loc
+        |> Ast.src loc
+    in
+    let loc = LocTest.make (1, 0, 0) (1, 12, 12) in
+    Ast.from loc src
+  in
+  let loc = LocTest.make (1, 0, 0) (1, 27, 27) in
+  Ast.import loc (Some from) pkgs
+    |> assert_parses_import ~ctxt env [
+         sprintf "from %s import %s" src pkg
+       ]
 
-let test_imports_only =
-  let _ = assert_imports_only in
-  "Imports Only" >::: [
-  ]
+let test_parse_import_pipe ctxt =
+  let pkg = "testpkg" in
+  let seq = Sym.seq () in
+  let env = EnvTest.fresh () in
 
-(* Files *)
-let test_file =
-  "File" >::: [
+  let pkgs =
+    let alias =
+      let pkg =
+        let loc = LocTest.make (1, 9, 9) (1, 16, 16) in
+        seq
+          |> Sym.gen ~id:pkg
+          |> Ast.name loc
+      in
+      let loc = LocTest.make (1, 9, 9) (1, 16, 16) in
+      Ast.alias loc pkg None
+    in
+    let loc = LocTest.make (1, 0, 0) (1, 16, 16) in
+    Ast.pkgs loc [alias]
+  in
+  let loc = LocTest.make (1, 0, 0) (1, 16, 16) in
+  Ast.import loc None pkgs
+    |> assert_parses_import ~ctxt env [
+         sprintf "import | %s" pkg
+       ]
+
+let test_parse_import_no_pipe ctxt =
+  let pkg = "testpkg" in
+  let seq = Sym.seq () in
+  let env = EnvTest.fresh () in
+
+  let pkgs =
+    let alias =
+      let pkg =
+        let loc = LocTest.make (1, 7, 7) (1, 14, 14) in
+        seq
+          |> Sym.gen ~id:pkg
+          |> Ast.name loc
+      in
+      let loc = LocTest.make (1, 7, 7) (1, 14, 14) in
+      Ast.alias loc pkg None
+    in
+    let loc = LocTest.make (1, 0, 0) (1, 14, 14) in
+    Ast.pkgs loc [alias]
+  in
+  let loc = LocTest.make (1, 0, 0) (1, 14, 14) in
+  Ast.import loc None pkgs
+    |> assert_parses_import ~ctxt env [
+         sprintf "import %s" pkg
+       ]
+
+let test_parse_import_alias ctxt =
+  let pkg = "testpkg" in
+  let local = "testalias" in
+  let seq = Sym.seq () in
+
+  let pkgs =
+    let alias =
+      let pkg =
+        let loc = LocTest.make (1, 7, 7) (1, 14, 14) in
+        seq
+          |> Sym.gen ~id:pkg
+          |> Ast.name loc
+      in
+      let local =
+        let loc = LocTest.make (1, 18, 18) (1, 27, 27) in
+        seq
+          |> Sym.gen ~id:local
+          |> Ast.name loc
+      in
+      let loc = LocTest.make (1, 7, 7) (1, 27, 27) in
+      Ast.alias loc pkg (Some local)
+    in
+    let loc = LocTest.make (1, 0, 0) (1, 27, 27) in
+    Ast.pkgs loc [alias]
+  in
+  let loc = LocTest.make (1, 0, 0) (1, 27, 27) in
+
+  let env = EnvTest.fresh () in
+  Ast.import loc None pkgs
+    |> assert_parses_import ~ctxt env [
+         sprintf "import %s -> %s" pkg local
+       ]
+
+let test_parse_file_package_only ctxt =
+  let id = "testpackage" in
+
+  let loc = LocTest.make (1, 0, 0) (1, 19, 19) in
+  let id_loc = LocTest.make (1, 8, 8) (1, 19, 19) in
+  let pkg =
+    ()
+      |> Sym.seq
+      |> Sym.gen ~id:id
+      |> Ast.name id_loc
+      |> Ast.pkg loc
+  in
+
+  let env = EnvTest.fresh () in
+  Ast.file pkg []
+    |> assert_parses_package_only ~ctxt env [
+         sprintf "package %s" id
+       ];
+
+  let env = EnvTest.fresh () in
+  Ast.file pkg []
+    |> assert_parses_package_only ~ctxt env [
+         sprintf "package %s" id;
+         "";
+         "from ignored import";
+         "  | ignored_path -> ignoredalias";
+         "  | another_ignored_path"
+       ]
+
+let test_parse_file_imports_only ctxt =
+  let id = "testpackage" in
+
+  let loc = LocTest.make (1, 0, 0) (1, 19, 19) in
+  let id_loc = LocTest.make (1, 8, 8) (1, 19, 19) in
+  let pkg =
+    ()
+      |> Sym.seq
+      |> Sym.gen ~id:id
+      |> Ast.name id_loc
+      |> Ast.pkg loc
+  in
+
+  let env = EnvTest.fresh () in
+  Ast.file pkg []
+    |> assert_parses_imports_only ~ctxt env [
+         sprintf "package %s" id
+       ];
+
+  let env = EnvTest.fresh () in
+  Ast.file pkg []
+    |> assert_parses_imports_only ~ctxt env [
+         sprintf "package %s" id;
+         "";
+         "from ignored import";
+         "  | ignored_path -> ignoredalias";
+         "  | another_ignored_path"
+       ]
+
+let test_parse_file_file ctxt =
+  let id = "testpackage" in
+
+  let loc = LocTest.make (1, 0, 0) (1, 19, 19) in
+  let id_loc = LocTest.make (1, 8, 8) (1, 19, 19) in
+  let pkg =
+    ()
+      |> Sym.seq
+      |> Sym.gen ~id:id
+      |> Ast.name id_loc
+      |> Ast.pkg loc
+  in
+
+  let env = EnvTest.fresh () in
+  Ast.file pkg []
+    |> assert_parses_file ~ctxt env [
+         sprintf "package %s" id
+       ];
+
+  let env = EnvTest.fresh () in
+  Ast.file pkg []
+    |> assert_parses_file ~ctxt env [
+         sprintf "package %s" id;
+         "";
+         "from ignored import";
+         "  | ignored_path -> ignoredalias";
+         "  | another_ignored_path"
+       ]
+
+let test_parses =
+  "Parses" >::: [
+    "Package Statement" >:: test_parse_pkg;
+    "Import Statements" >::: [
+      "From Clause" >:: test_parse_import_from;
+      "Packages" >::: [
+        "Leading Pipe"    >:: test_parse_import_pipe;
+        "No Leading Pipe" >:: test_parse_import_no_pipe;
+        "With Alias"      >:: test_parse_import_alias;
+      ]
+    ];
+    "Files" >::: [
+      "Package Only" >:: test_parse_file_package_only;
+      "Imports Only" >:: test_parse_file_imports_only;
+      "Whole File"   >:: test_parse_file_file;
+    ]
   ]
 
 let suite =
   "Parser" >::: [
-    "Package Statement" >:: test_package_stmt;
-    test_package_only;
-    test_imports;
-    test_imports_only;
-    test_file
-]
+    test_parses;
+  ]

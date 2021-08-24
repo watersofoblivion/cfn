@@ -60,14 +60,14 @@ val equal : t -> t -> bool
  * {3 Pretty-Printing}
  *)
 
-val pp : t -> formatter -> unit
-(** [pp sym fmt] pretty-prints the symbol [sym] to the formatter [fmt]. If the
+val pp : formatter -> t -> unit
+(** [pp fmt sym] pretty-prints the symbol [sym] to the formatter [fmt]. If the
     symbol has an associated identifier, the symbol is formatted as
     [<name>$<symbol>] where [symbol] is a number.  Otherwise, the symbol is
     formatted as [$<symbol>]. *)
 
-val pp_id : t -> formatter -> unit
-(** [pp_id sym fmt] pretty-prints the identifier associated with symbol [sym] to
+val pp_id : formatter -> t -> unit
+(** [pp_id fmt sym] pretty-prints the identifier associated with symbol [sym] to
     the formatter [fmt].  Raises {!Invalid_argument} if the symbol does not have
     an associated identifier. *)
 

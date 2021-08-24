@@ -6,33 +6,32 @@
 
 open Format
 
+(** {2 Imports} *)
+
+val name : formatter -> Ast.name -> unit
+(** [name fmt name] pretty-prints the import name [name] to [fmt]. *)
+
+val src : formatter -> Ast.src -> unit
+(** [src fmt src] pretty-prints the import source [src] to [fmt]. *)
+
+val from : formatter -> Ast.from -> unit
+(** [from fmt from] pretty-prints the from clause [from] to [fmt]. *)
+
+val alias : formatter -> Ast.alias -> unit
+(** [alias fmt alias] pretty-prints the import alias [alias] to [fmt]. *)
+
+val pkgs : formatter -> Ast.pkgs -> unit
+(** [pkgs fmt pkgs] pretty-prints the package list [pkgs] to [fmt]. *)
+
+val import : formatter -> Ast.import -> unit
+(** [import fmt import] pretty-prints the import statement [import] to [fmt]. *)
+
 (** {2 Package Statement} *)
 
-val package_stmt : formatter -> Ast.package_stmt -> unit
-(** [package_stmt fmt stmt] pretty-prints [stmt] to [fmt]. *)
+val pkg : formatter -> Ast.pkg -> unit
+(** [pkg fmt pkg] pretty-prints the pkg statement [pkg] to [fmt]. *)
 
-(**
- {2 Imports}
- *)
-
-val from_clause : formatter -> Ast.from_clause -> unit
-(** [from_clause fmt from] pretty-prints [from] to [fmt]. *)
-
-val package_alias : formatter -> Ast.package_alias -> unit
-(** [package_alias fmt alias] pretty-prints [alias] to [fmt]. *)
-
-val package_clause : formatter -> Ast.package_clause -> unit
-(** [package_clause fmt pkg] pretty-prints [pkg] to [fmt]. *)
-
-val import_clause : formatter -> Ast.import_clause -> unit
-(** [import_clause fmt import] pretty-prints [import] to [fmt]. *)
-
-val import_stmt : formatter -> Ast.import_stmt -> unit
-(** [import_stmt fmt stmt] pretty-prints [stmt] to [fmt]. *)
-
-(**
- {2 Files}
- *)
+(** {2 Files} *)
 
 val file : formatter -> Ast.file -> unit
-(** [file fmt f] pretty-prints [f] to [fmt]. *)
+(** [file fmt f] pretty-prints the file [f] to [fmt]. *)

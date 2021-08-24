@@ -12,7 +12,7 @@ let fresh_sym ?id:(id="") _ = Sym.gen ~id seq
 (* Assertions *)
 
 let printer sym =
-  Sym.pp sym str_formatter
+  Sym.pp str_formatter sym
     |> flush_str_formatter
 
 let assert_sym_equal ~ctxt expected actual =
@@ -151,7 +151,7 @@ let test_pp_id_without_id _ =
     Invalid_argument msg
   in
   assert_raises exn (fun _ ->
-    Sym.pp_id sym str_formatter)
+    Sym.pp_id str_formatter sym)
 
 let test_pp =
   "Pretty Printing" >::: [

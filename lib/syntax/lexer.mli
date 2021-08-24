@@ -27,16 +27,12 @@ val lex : lexbuf -> Parser.token
  {2 Tokens}
  *)
 
-val deloc : Parser.token -> Parser.token
-(** [deloc tok] replaces the location tracking information in [tok] with
-    {!Ast.dummy_loc}. *)
-
 (**
  {3 Non-printable Tokens}
  *)
 
-val eof : lexbuf -> Parser.token
-(** [eof lexbuf] constructs an end-of-file token. *)
+val punct_eof : Parser.token
+(** [punct_eof] constructs an end-of-file token. *)
 
 val new_line : (lexbuf -> Parser.token) -> lexbuf -> Parser.token
 (** [new_line lex lexbuf] processes a new line in the input stream and continues
@@ -46,31 +42,32 @@ val new_line : (lexbuf -> Parser.token) -> lexbuf -> Parser.token
  {3 Punctuation}
  *)
 
-val pipe : lexbuf -> Parser.token
-(** [pipe lexbuf] constructs a token for the [|] symbol. *)
+val punct_pipe : Parser.token
+(** [punct_pipe] constructs a token for the [|] symbol. *)
 
-val arrow : lexbuf -> Parser.token
-(** [arrow lexbuf] constructs a token for the [->] symbol. *)
+val punct_arrow : Parser.token
+(** [punct_arrow] constructs a token for the [->] symbol. *)
 
 (**
  {3 Keywords}
  *)
 
-val package : lexbuf -> Parser.token
-(** [package lexbuf] constructs a token for the [package] keyword. *)
+val kwd_package : Parser.token
+(** [kwd_package] constructs a token for the [package] keyword. *)
 
-val from : lexbuf -> Parser.token
-(** [from lexbuf] constructs a token for the [from] keyword. *)
+val kwd_from : Parser.token
+(** [kwd_from] constructs a token for the [from] keyword. *)
 
-val import : lexbuf -> Parser.token
-(** [import lexbuf] constructs a token for the [import] keyword. *)
+val kwd_import : Parser.token
+(** [kwd_import] constructs a token for the [import] keyword. *)
 
 (**
  {3 Syntactic Values}
  *)
 
-val lident : lexbuf -> Parser.token
-(** [lident lexbuf] constructs a lower-case identifier token. *)
+val lit_lident : string -> Parser.token
+(** [lit_lident id] constructs a lower-case identifier token with [id] as the
+    value. *)
 
-val string : lexbuf -> Parser.token
-(** [string lexbuf] constructs a string token. *)
+(* val lit_string : lexbuf -> Parser.token *)
+(** [lit_string lexbuf] constructs a string token. *)

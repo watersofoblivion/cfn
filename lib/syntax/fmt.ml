@@ -1,61 +1,61 @@
 open Format
 
-(* Package Statment *)
-
-let package_stmt fmt stmt =
-  fprintf fmt "package %s" stmt.Ast.pkg_name
+open Common
 
 (* Imports *)
 
-let from_clause fmt from =
-  fprintf fmt "@[from@ %S@ @]" from.Ast.import_path
+let name fmt = function
+  | Ast.Name name -> fprintf fmt "%a" Sym.pp_id name.id
 
-let package_alias fmt alias =
-  fprintf fmt "@[@ ->@ %s@]" alias.Ast.local_alias
+let src fmt = function
+  | Ast.Source src -> fprintf fmt "%a" name src.name
 
-let package_clause fmt pkg =
-  fprintf fmt "@[%S" pkg.Ast.package_path;
-  let _ =
-    match pkg.alias with
-      | Some alias -> package_alias fmt alias
+let from fmt = function
+  | Ast.From from -> fprintf fmt "@[from@ \"%a\"@ @]" src from.src
+
+let alias fmt = function
+  | Ast.Alias alias ->
+    fprintf fmt "@[\"%a\"" name alias.pkg;
+    let _ =
+      match alias.alias with
+        | Some alias -> fprintf fmt "@[@ ->@ %a@]" name alias
+        | None -> ()
+    in
+    fprintf fmt "@]"
+
+let pkgs fmt = function
+  | Ast.Packages pkgs ->
+    fprintf fmt "@[<v>";
+    let pp_sep fmt _ = fprintf fmt "@ | " in
+    pp_sep fmt ();
+    pp_print_list ~pp_sep alias fmt pkgs.pkgs;
+    fprintf fmt "@]"
+
+let import fmt = function
+  | Ast.Import stmt ->
+    fprintf fmt "@[";
+    let _ = match stmt.from with
+      | Some clause -> from fmt clause
       | None -> ()
-  in
-  fprintf fmt "@]"
+    in
+    pkgs fmt stmt.pkgs;
+    fprintf fmt "@]"
 
-let import_clause fmt import =
-  fprintf fmt "@[import";
-  let _ =
-    match import.Ast.packages with
-      | [] -> ()
-      | [package] ->
-        fprintf fmt "@ ";
-        package_clause fmt package
-      | packages ->
-        let pp_sep fmt _ = fprintf fmt "@.  | " in
-        pp_sep fmt ();
-        pp_print_list ~pp_sep package_clause fmt packages
-  in
-  fprintf fmt "@]"
+(* Package Statment *)
 
-let import_stmt fmt stmt =
-  fprintf fmt "@[";
-  let _ = match stmt.Ast.from with
-    | Some from -> from_clause fmt from
-    | None -> ()
-  in
-  import_clause fmt stmt.import;
-  fprintf fmt "@]"
+let pkg fmt = function
+  | Ast.Package pkg -> fprintf fmt "package %a" name pkg.id
 
 (* Files *)
 
-let file fmt f =
-  fprintf fmt "@[%a" package_stmt f.Ast.package_stmt;
-  let _ = match f.import_stmts with
-    | [] -> ()
-    | import_stmts ->
-      fprintf fmt "@.@.@[";
-      let pp_sep fmt _ = fprintf fmt "@." in
-      pp_print_list ~pp_sep import_stmt fmt import_stmts;
-      fprintf fmt "@]";
-  in
-  fprintf fmt "@]"
+let file fmt = function
+  | Ast.File file ->
+    fprintf fmt "@[<v>%a" pkg file.pkg;
+    let _ = match file.imports with
+      | [] -> ()
+      | _ ->
+        fprintf fmt "@ @ ";
+        let pp_sep fmt _ = fprintf fmt "@ " in
+        pp_print_list ~pp_sep import fmt file.imports;
+    in
+    fprintf fmt "@]"
