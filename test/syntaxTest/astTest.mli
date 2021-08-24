@@ -22,30 +22,36 @@ val suite : test
  * lower-level fixtures generated as part of a higher-level fixture.
  *)
 
-val fresh_name : ?seq:Sym.seq -> unit -> Ast.name
-(** [fresh_name ?seq ()] constructs a fresh name. *)
+val fresh_name : ?seq:Sym.seq -> ?id:string -> unit -> Ast.name
+(** [fresh_name ?seq ?id ()] constructs a fresh name using [id] as the name.  If
+     not provided, [id] defaults to [""]. *)
 
-val fresh_src : ?seq:Sym.seq -> unit -> Ast.src
-(** [fresh_srq ?seq ()] constructs a fresh import source. *)
+val fresh_src : ?seq:Sym.seq -> ?name:string -> unit -> Ast.src
+(** [fresh_srq ?seq ?name ()] constructs a fresh import source using [name] as
+    the source's name.  If not given, [name] defaults to [""]. *)
 
-val fresh_from : ?seq:Sym.seq -> unit -> Ast.from
-(** [fresh_from ?seq ()] generates a fresh from clause. *)
+val fresh_from : ?seq:Sym.seq -> ?src:string -> unit -> Ast.from
+(** [fresh_from ?seq ?src ()] generates a fresh from clause using [src] as the
+    source name.  If not given, [src] defaults to [""]. *)
 
-val fresh_alias : ?seq:Sym.seq -> ?local:bool -> unit -> Ast.alias
-(** [fresh_alias ?seq ?local ()] generates a fresh alias clause.  If [local] is
-    true, a local alias is generated.  (Defaults to [false].) *)
+val fresh_alias : ?seq:Sym.seq -> ?pkg:string -> ?local:string -> unit -> Ast.alias
+(** [fresh_alias ?seq ?pkg ?local ()] generates a fresh alias clause using [pkg]
+    as the package name.  If [local] is not [""], it is used as the local alias.
+    (Defaults to [""].) *)
 
-val fresh_pkgs : ?seq:Sym.seq -> unit -> Ast.pkgs
-(** [fresh_pkgs ?seq ()] generates a fresh list of packages.  The list has two
-    elements: the first without a local alias, and the second with. *)
+val fresh_pkgs : ?seq:Sym.seq -> ?local:string -> unit -> Ast.pkgs
+(** [fresh_pkgs ?seq ?local ()] generates a fresh list of packages.  The list
+    has two elements: the first without a local alias, and the second with.  The
+    value of [local] is used as the local alias.  Defaults to [localname]. *)
 
 val fresh_import : ?seq:Sym.seq -> ?from:bool -> ?pkgs:bool -> unit -> Ast.import
 (** [fresh_import ?seq ?from ?pkgs ()] generates a fresh import statement.  If
     [from] is [true], then a from clause is included.  If [pkgs] is [true], then
     a list of packages is included.  Both default to [false]. *)
 
-val fresh_pkg : ?seq:Sym.seq -> unit -> Ast.pkg
-(** [fresh_pkg ?seq ()] generates a fresh package clause. *)
+val fresh_pkg : ?seq:Sym.seq -> ?id:string -> unit -> Ast.pkg
+(** [fresh_pkg ?seq ?id ()] generates a fresh package clause using [id] as the
+    package name.  If not provided, [id] defaults to [""]. *)
 
 (** {2 Utilities} *)
 

@@ -11,11 +11,11 @@ let src fmt = function
   | Ast.Source src -> fprintf fmt "%a" name src.name
 
 let from fmt = function
-  | Ast.From from -> fprintf fmt "@[from@ \"%a\"@ @]" src from.src
+  | Ast.From from -> fprintf fmt "@[from@ %a@ @]" src from.src
 
 let alias fmt = function
   | Ast.Alias alias ->
-    fprintf fmt "@[\"%a\"" name alias.pkg;
+    fprintf fmt "@[%a" name alias.pkg;
     let _ =
       match alias.alias with
         | Some alias -> fprintf fmt "@[@ ->@ %a@]" name alias
@@ -38,6 +38,7 @@ let import fmt = function
       | Some clause -> from fmt clause
       | None -> ()
     in
+    fprintf fmt "import";
     pkgs fmt stmt.pkgs;
     fprintf fmt "@]"
 

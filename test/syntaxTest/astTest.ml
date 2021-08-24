@@ -7,39 +7,39 @@ open CommonTest
 
 (* Fixtures *)
 
-let fresh_name ?seq:(seq = Sym.seq ()) _ =
+let fresh_name ?seq:(seq = Sym.seq ()) ?id:(id = "") _ =
   let loc = LocTest.gen () in
   seq
-    |> Sym.gen
+    |> Sym.gen ~id
     |> Ast.name loc
 
-let fresh_src ?seq:(seq = Sym.seq ()) _ =
+let fresh_src ?seq:(seq = Sym.seq ()) ?name:(name = "") _ =
   let loc = LocTest.gen () in
   ()
-    |> fresh_name ~seq
+    |> fresh_name ~seq ~id:name
     |> Ast.src loc
 
-let fresh_from ?seq:(seq = Sym.seq ()) _ =
+let fresh_from ?seq:(seq = Sym.seq ()) ?src:(src = "") _ =
   let loc = LocTest.gen () in
   ()
-    |> fresh_src ~seq
+    |> fresh_src ~seq ~name:src
     |> Ast.from loc
 
-let fresh_alias ?seq:(seq = Sym.seq ()) ?local:(local = false) _ =
+let fresh_alias ?seq:(seq = Sym.seq ()) ?pkg:(pkg = "") ?local:(local = "") _ =
   let loc = LocTest.gen () in
-  let pkg = fresh_name ~seq () in
+  let pkg = fresh_name ~seq ~id:pkg () in
   let local =
-    if local
-    then Some (fresh_name ~seq ())
+    if local <> ""
+    then Some (fresh_name ~seq ~id:local ())
     else None
   in
   Ast.alias loc pkg local
 
-let fresh_pkgs ?seq:(seq = Sym.seq ()) _ =
+let fresh_pkgs ?seq:(seq = Sym.seq ()) ?local:(local = "localname") _ =
   let loc = LocTest.gen () in
   Ast.pkgs loc [
-    fresh_alias ~seq ~local:false ();
-    fresh_alias ~seq ~local:true ()
+    fresh_alias ~seq ();
+    fresh_alias ~seq ~local ()
   ]
 
 let fresh_import ?seq:(seq = Sym.seq ()) ?from:(from = false) ?pkgs:(pkgs = false) _ =
@@ -58,9 +58,9 @@ let fresh_import ?seq:(seq = Sym.seq ()) ?from:(from = false) ?pkgs:(pkgs = fals
   in
   Ast.import loc from pkgs
 
-let fresh_pkg ?seq:(seq = Sym.seq ()) _ =
+let fresh_pkg ?seq:(seq = Sym.seq ()) ?id:(id = "") _ =
   let loc = LocTest.gen () in
-  fresh_name ~seq ()
+  fresh_name ~seq ~id ()
     |> Ast.pkg loc
 
 (* Utilities *)
@@ -212,8 +212,8 @@ let test_pkgs ctxt =
   let seq = Sym.seq () in
   let loc = LocTest.gen () in
   let aliases = [
-    fresh_alias ~seq ~local:false ();
-    fresh_alias ~seq ~local:true ()
+    fresh_alias ~seq ();
+    fresh_alias ~seq ~local:"localname" ()
   ] in
   match Ast.pkgs loc aliases with
     | Ast.Packages pkgs ->

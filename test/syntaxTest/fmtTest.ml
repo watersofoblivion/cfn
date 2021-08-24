@@ -1,301 +1,184 @@
-(* open Format *)
+open Format
 
 open OUnit2
 
-(* open Syntax *)
+open Syntax
 
-(* open CommonTest *)
+open CommonTest
 
 (* Assertions *)
 
-(* let assert_pp_pkg = PrettyTest.assert_pp Fmt.pkg *)
-(* let assert_pp_import = PrettyTest.assert_pp Fmt.import *)
+let assert_pp_name = PrettyTest.assert_pp Fmt.name
+let assert_pp_src = PrettyTest.assert_pp Fmt.src
+let assert_pp_from = PrettyTest.assert_pp Fmt.from
+let assert_pp_alias = PrettyTest.assert_pp Fmt.alias
+let assert_pp_pkgs = PrettyTest.assert_pp Fmt.pkgs
+let assert_pp_import = PrettyTest.assert_pp Fmt.import
+let assert_pp_pkg = PrettyTest.assert_pp Fmt.pkg
+let assert_pp_file = PrettyTest.assert_pp Fmt.file
 
+(* Pretty Printing *)
 
+let test_name ctxt =
+  let id = "testpackage" in
+  AstTest.fresh_name ~id ()
+    |> assert_pp_name ~ctxt [id]
 
-(*
-(* Package Statement *)
-let test_package ctxt =
-  let pkg_name = "foo" in
-  let pkg = Ast.package_stmt Loc.dummy Loc.dummy pkg_name in
+let test_src ctxt =
+  let name = "testsource" in
+  AstTest.fresh_src ~name ()
+    |> assert_pp_src ~ctxt [name]
 
-  assert_pp ~ctxt Fmt.package_stmt pkg [
-    sprintf "package %s" pkg_name
-  ]
+let test_from ctxt =
+  let src = "testsource" in
+  AstTest.fresh_from ~src ()
+    |> assert_pp_from ~ctxt [
+         sprintf "from %s " src
+       ]
 
-(* Imports *)
-let test_imports =
-  let test_from_clause ctxt =
-    let import_path = "import/path" in
-    let from = Ast.from_clause Loc.dummy Loc.dummy import_path in
+let test_alias_no_local_name ctxt =
+  let pkg = "testpkg" in
+  AstTest.fresh_alias ~pkg ()
+    |> assert_pp_alias ~ctxt [pkg]
 
-    assert_pp ~ctxt Fmt.from_clause from [
-      sprintf "from %S " import_path
+let test_alias_local_name ctxt =
+  let pkg = "testpkg" in
+  let local = "testlocal" in
+  AstTest.fresh_alias ~pkg ~local ()
+    |> assert_pp_alias ~ctxt [
+         sprintf "%s -> %s" pkg local
+       ]
+
+let test_pkgs ctxt =
+  let pkg = "testpkg" in
+  let local = "testlocal" in
+  let pkg' = "anotherpkg" in
+
+  let pkgs =
+    Ast.pkgs LocTest.dummy [
+      AstTest.fresh_alias ~pkg ~local ();
+      AstTest.fresh_alias ~pkg:pkg' ()
     ]
   in
-  let test_package_alias ctxt =
-    let alias_name = "alias" in
-    let alias = Ast.package_alias Loc.dummy alias_name in
+  pkgs
+    |> assert_pp_pkgs ~ctxt [
+         "";
+         sprintf "| %s -> %s" pkg local;
+         sprintf "| %s" pkg'
+       ]
 
-    assert_pp ~ctxt Fmt.package_alias alias [
-      sprintf " -> %s" alias_name
+let test_import_from ctxt =
+  let src = "testsrc" in
+  let pkg = "testpkg" in
+  let local = "testlocal" in
+  let pkg' = "anotherpkg" in
+
+  let from = AstTest.fresh_from ~src () in
+  let pkgs =
+    Ast.pkgs LocTest.dummy [
+      AstTest.fresh_alias ~pkg ~local ();
+      AstTest.fresh_alias ~pkg:pkg' ()
     ]
   in
-  let test_package_clause =
-    let package_path = "package/path" in
 
-    let test_with_alias ctxt =
-      let alias_name = "alias" in
-      let alias = Ast.package_alias Loc.dummy alias_name in
+  Ast.import LocTest.dummy (Some from) pkgs
+    |> assert_pp_import ~ctxt [
+         sprintf "from %s import" src;
+         sprintf "                   | %s -> %s" pkg local;
+         sprintf "                   | %s" pkg'
+       ]
 
-      let package_clause = Ast.package_clause Loc.dummy package_path (Some alias) in
+let test_import ctxt =
+  let pkg = "testpkg" in
+  let local = "testlocal" in
+  let pkg' = "anotherpkg" in
 
-      assert_pp ~ctxt Fmt.package_clause package_clause [
-        sprintf "%S -> %s" package_path alias_name
-      ]
-    in
-    let test_without_alias ctxt =
-      let package_clause = Ast.package_clause Loc.dummy package_path None in
-
-      assert_pp ~ctxt Fmt.package_clause package_clause [
-        sprintf "%S" package_path
-      ]
-    in
-    "Package Clause" >::: [
-      "With Alias"    >:: test_with_alias;
-      "Without Alias" >:: test_without_alias
+  let pkgs =
+    Ast.pkgs LocTest.dummy [
+      AstTest.fresh_alias ~pkg ~local ();
+      AstTest.fresh_alias ~pkg:pkg' ()
     ]
   in
-  let test_import_clause =
-    let test_with_no_packages ctxt =
-      let import_clause = Ast.import_clause Loc.dummy [] in
 
-      assert_pp ~ctxt Fmt.import_clause import_clause [
-        "import"
+  Ast.import LocTest.dummy None pkgs
+    |> assert_pp_import ~ctxt [
+         sprintf "import";
+         sprintf "      | %s -> %s" pkg local;
+         sprintf "      | %s" pkg'
+       ]
+
+let test_pkg ctxt =
+  let id = "testpackage" in
+  ()
+    |> AstTest.fresh_pkg ~id
+    |> assert_pp_pkg ~ctxt [
+         sprintf "package %s" id
+       ]
+
+let test_file_no_imports ctxt =
+  let id = "testpackage" in
+
+  let pkg = AstTest.fresh_pkg ~id () in
+  Ast.file pkg []
+    |> assert_pp_file ~ctxt [
+         sprintf "package %s" id
+       ]
+
+let test_file_with_imports ctxt =
+  let id = "testpackage" in
+  let src = "testsrc" in
+  let pkg = "testpkg" in
+  let local = "testlocal" in
+  let pkg' = "anotherpkg" in
+
+  let pkg_stmt = AstTest.fresh_pkg ~id () in
+  let imports =
+    let pkgs =
+      Ast.pkgs LocTest.dummy [
+        AstTest.fresh_alias ~pkg ~local ();
+        AstTest.fresh_alias ~pkg:pkg' ()
       ]
     in
-    let test_with_one_package =
-      let package_path = "package/path" in
-      let alias_name = "alias" in
 
-      let test_with_alias ctxt =
-        let alias = Ast.package_alias Loc.dummy alias_name in
-        let package_clause = Ast.package_clause Loc.dummy package_path (Some alias) in
-        let import_clause = Ast.import_clause Loc.dummy [package_clause] in
-
-        assert_pp ~ctxt Fmt.import_clause import_clause [
-          sprintf "import %S -> %s" package_path alias_name
-        ]
-      in
-      let test_without_alias ctxt =
-        let package_clause = Ast.package_clause Loc.dummy package_path None in
-        let import_clause = Ast.import_clause Loc.dummy [package_clause] in
-
-        assert_pp ~ctxt Fmt.import_clause import_clause [
-          sprintf "import %S" package_path
-        ]
-      in
-      "With One Package" >::: [
-        "With Alias"    >:: test_with_alias;
-        "Without Alias" >:: test_without_alias
-      ]
+    let import =
+      let from = AstTest.fresh_from ~src () in
+      Ast.import LocTest.dummy (Some from) pkgs
     in
-    let test_with_multiple_packages =
-      let package_path_1 = "package/one" in
-      let package_path_2 = "package/two" in
-
-      let alias_name_1 = "foo" in
-      let alias_name_2 = "bar" in
-
-      let alias_1 = Ast.package_alias Loc.dummy alias_name_1 in
-      let alias_2 = Ast.package_alias Loc.dummy alias_name_2 in
-
-      let test_with_aliases ctxt =
-        let package_clauses =
-          let package_one = Ast.package_clause Loc.dummy package_path_1 (Some alias_1) in
-          let package_two = Ast.package_clause Loc.dummy package_path_2 (Some alias_2) in
-          [package_one; package_two]
-        in
-        let import_clause = Ast.import_clause Loc.dummy package_clauses in
-
-        assert_pp ~ctxt Fmt.import_clause import_clause [
-                  "import";
-          sprintf "  | %S -> %s" package_path_1 alias_name_1;
-          sprintf "  | %S -> %s" package_path_2 alias_name_2
-        ]
-      in
-      let test_without_aliases ctxt =
-        let package_clauses =
-          let package_one = Ast.package_clause Loc.dummy package_path_1 None in
-          let package_two = Ast.package_clause Loc.dummy package_path_2 None in
-          [package_one; package_two]
-        in
-
-        let import_clause = Ast.import_clause Loc.dummy package_clauses in
-
-        assert_pp ~ctxt Fmt.import_clause import_clause [
-                  "import";
-          sprintf "  | %S" package_path_1;
-          sprintf "  | %S" package_path_2
-        ]
-      in
-      let test_with_mixed_aliases =
-        let test_alias_first ctxt =
-          let package_clauses =
-            let package_one = Ast.package_clause Loc.dummy package_path_1 (Some alias_1) in
-            let package_two = Ast.package_clause Loc.dummy package_path_2 None in
-            [package_one; package_two]
-          in
-
-          let import_clause = Ast.import_clause Loc.dummy package_clauses in
-
-          assert_pp ~ctxt Fmt.import_clause import_clause [
-                    "import";
-            sprintf "  | %S -> %s" package_path_1 alias_name_1;
-            sprintf "  | %S" package_path_2;
-          ]
-        in
-        let test_alias_last ctxt =
-          let package_clauses =
-            let package_one = Ast.package_clause Loc.dummy package_path_1 None in
-            let package_two = Ast.package_clause Loc.dummy package_path_2 (Some alias_2) in
-            [package_one; package_two]
-          in
-
-          let import_clause = Ast.import_clause Loc.dummy package_clauses in
-
-          assert_pp ~ctxt Fmt.import_clause import_clause [
-                    "import";
-            sprintf "  | %S" package_path_1;
-            sprintf "  | %S -> %s" package_path_2 alias_name_2
-          ]
-        in
-        "With Mixed Aliases" >::: [
-          "Alias First" >:: test_alias_first;
-          "Alias Last"  >:: test_alias_last
-        ]
-      in
-      "With Multiple Packages" >::: [
-        "With Aliases"    >:: test_with_aliases;
-        "Without Aliases" >:: test_without_aliases;
-        test_with_mixed_aliases
-      ]
-    in
-    "Import Clause" >::: [
-      "With No Packages" >:: test_with_no_packages;
-      test_with_one_package;
-      test_with_multiple_packages
-    ]
+    let import' = Ast.import LocTest.dummy None pkgs in
+    [import; import']
   in
-  let test_import_stmt =
-    let import_path = "import/path" in
-
-    let package_path_1 = "package/one" in
-    let package_path_2 = "package/two" in
-
-    let alias_name_1 = "foo" in
-    let alias_1 = Ast.package_alias Loc.dummy alias_name_1 in
-
-    let package_clauses =
-      let package_one = Ast.package_clause Loc.dummy package_path_1 (Some alias_1) in
-      let package_two = Ast.package_clause Loc.dummy package_path_2 None in
-      [package_one; package_two]
-    in
-
-    let import_clause = Ast.import_clause Loc.dummy package_clauses in
-
-    let test_with_import_path ctxt =
-      let from_clause = Ast.from_clause Loc.dummy Loc.dummy import_path in
-      let import_stmt = Ast.import_stmt (Some from_clause) import_clause in
-
-      assert_pp ~ctxt Fmt.import_stmt import_stmt [
-        sprintf "from %S import" import_path;
-        sprintf "  | %S -> %s" package_path_1 alias_name_1;
-        sprintf "  | %S" package_path_2
-      ]
-    in
-    let test_without_import_path ctxt =
-      let import_stmt = Ast.import_stmt None import_clause in
-
-      assert_pp ~ctxt Fmt.import_stmt import_stmt [
-                "import";
-        sprintf "  | %S -> %s" package_path_1 alias_name_1;
-        sprintf "  | %S" package_path_2
-      ]
-    in
-    "Import Statement" >::: [
-      "With Import Path"    >:: test_with_import_path;
-      "Without Import Path" >:: test_without_import_path
-    ]
-  in
-  "Imports" >::: [
-    "From Clause"   >:: test_from_clause;
-    "Package Alias" >:: test_package_alias;
-    test_package_clause;
-    test_import_clause;
-    test_import_stmt
-  ]
-
-(* Files *)
-let test_file =
-  let pkg_name = "foo" in
-  let pkg = Ast.package_stmt Loc.dummy Loc.dummy pkg_name in
-
-
-  let alias_name_1 = "foo" in
-  let alias_1 = Ast.package_alias Loc.dummy alias_name_1 in
-  let package_path_1 = "package/one" in
-  let package_path_2 = "package/two" in
-  let package_clauses_1 =
-    let package_one = Ast.package_clause Loc.dummy package_path_1 (Some alias_1) in
-    let package_two = Ast.package_clause Loc.dummy package_path_2 None in
-    [package_one; package_two]
-  in
-  let import_clause_1 = Ast.import_clause Loc.dummy package_clauses_1 in
-  let import_stmt_1 = Ast.import_stmt None import_clause_1 in
-
-  let import_path = "import/path" in
-  let from_clause = Ast.from_clause Loc.dummy Loc.dummy import_path in
-  let alias_name_2 = "bar" in
-  let alias_2 = Ast.package_alias Loc.dummy alias_name_2 in
-  let package_path_3 = "package/three" in
-  let package_path_4 = "package/four" in
-  let package_clauses_2 =
-    let package_one = Ast.package_clause Loc.dummy package_path_3 None in
-    let package_two = Ast.package_clause Loc.dummy package_path_4 (Some alias_2) in
-    [package_one; package_two]
-  in
-  let import_clause_2 = Ast.import_clause Loc.dummy package_clauses_2 in
-  let import_stmt_2 = Ast.import_stmt (Some from_clause) import_clause_2 in
-
-  let test_package_only ctxt =
-    let file = Ast.file pkg [] in
-    assert_pp ~ctxt Fmt.file file [
-      sprintf "package %s" pkg_name
-    ]
-  in
-  let test_package_and_imports ctxt =
-    let file = Ast.file pkg [import_stmt_1; import_stmt_2] in
-    assert_pp ~ctxt Fmt.file file [
-      sprintf "package %s" pkg_name;
-              "";
-              "import";
-      sprintf "  | %S -> %s" package_path_1 alias_name_1;
-      sprintf "  | %S" package_path_2;
-      sprintf "from %S import" import_path;
-      sprintf "  | %S" package_path_3;
-      sprintf "  | %S -> %s" package_path_4 alias_name_2;
-    ]
-  in
-  "Files" >::: [
-    "Package Only"        >:: test_package_only;
-    "Package and Imports" >:: test_package_and_imports
-  ] *)
+  Ast.file pkg_stmt imports
+    |> assert_pp_file ~ctxt [
+         sprintf "package %s" id;
+         "";
+         sprintf "from %s import" src;
+         sprintf "                   | %s -> %s" pkg local;
+         sprintf "                   | %s" pkg';
+         sprintf "import";
+         sprintf "      | %s -> %s" pkg local;
+         sprintf "      | %s" pkg'
+       ]
 
 (* Test Suite *)
 let suite =
   "Pretty Printing" >::: [
-    (* "Package Statement" >:: test_package;
-    test_imports;
-    test_file *)
+    "Names" >:: test_name;
+    "Imports" >::: [
+      "Sources"     >:: test_src;
+      "From Clause" >:: test_from;
+      "Alias Clause" >::: [
+        "With Local Name"    >:: test_alias_local_name;
+        "Without Local Name" >:: test_alias_no_local_name;
+      ];
+      "Package List" >:: test_pkgs;
+      "Import Statement" >::: [
+        "From"  >:: test_import_from;
+        "Local" >:: test_import;
+      ];
+    ];
+    "Package Statements" >:: test_pkg;
+    "Files" >::: [
+      "With Imports" >:: test_file_with_imports;
+      "No Imports"   >:: test_file_no_imports;
+    ];
   ]
