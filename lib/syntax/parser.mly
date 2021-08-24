@@ -1,51 +1,126 @@
 %{
   open Common
 
-  let make_package_stmt kwd_loc (name_loc, pkg_name) =
-    Ast.package_stmt kwd_loc name_loc pkg_name
+  let make_name (start_loc, end_loc) id env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    Env.rename id env (fun env sym ->
+      Ast.name loc sym
+        |> kontinue env)
 
-  let make_from_clause kwd_loc (ip_loc, import_path) =
-    Ast.from_clause kwd_loc ip_loc import_path
+  let make_src (start_loc, end_loc) name env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    name env (fun env name ->
+      Ast.src loc name
+        |> kontinue env)
 
-  let make_package_alias (loc, alias) =
-    Ast.package_alias loc alias
+  let make_from (start_loc, end_loc) src env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    src env (fun env src ->
+      Ast.from loc src
+        |> kontinue env)
 
-  let make_package_clause (pp_loc, package_path) alias =
-    Ast.package_clause pp_loc package_path alias
+  let make_alias (start_loc, end_loc) pkg alias env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    pkg env (fun env pkg ->
+      match alias with
+        | Some alias ->
+          alias env (fun env alias ->
+            let alias = Some alias in
+            Ast.alias loc pkg alias
+              |> kontinue env)
+        | None ->
+          Ast.alias loc pkg None
+            |> kontinue env)
 
-  let make_import_clause kwd_loc packages =
-    Ast.import_clause kwd_loc packages
+  let make_pkgs (start_loc, end_loc) pkgs env kontinue =
+    let rec make_pkgs pkgs env kontinue = match pkgs with
+        | [] -> kontinue env []
+        | pkg :: pkgs ->
+          pkg env (fun env pkg ->
+            make_pkgs pkgs env (fun env pkgs ->
+              pkg :: pkgs
+                |> kontinue env))
+    in
+    let loc = Loc.loc start_loc end_loc in
+    make_pkgs pkgs env (fun env pkgs ->
+      Ast.pkgs loc pkgs
+        |> kontinue env)
 
-  let make_import_stmt from_clause import_clause =
-    Ast.import_stmt from_clause import_clause
+  let make_import (start_loc, end_loc) from pkgs env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    pkgs env (fun env pkgs ->
+      match from with
+        | Some from ->
+          from env (fun env from ->
+            let from = Some from in
+            Ast.import loc from pkgs
+              |> kontinue env)
+        | None ->
+          Ast.import loc None pkgs
+            |> kontinue env)
 
-  let make_file pkg imports =
-    Ast.file pkg imports
+  let make_pkg (start_loc, end_loc) id env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    id env (fun env id ->
+      Ast.pkg loc id
+        |> kontinue env)
+
+  let make_file pkg imports env kontinue =
+    let rec make_imports imports env kontinue = match imports with
+      | [] -> kontinue env []
+      | import :: imports ->
+        import env (fun env import ->
+          make_imports imports env (fun env imports ->
+            import :: imports
+              |> kontinue env))
+    in
+    pkg env (fun env pkg ->
+      make_imports imports env (fun env imports ->
+        Ast.file pkg imports
+          |> kontinue env))
 %}
 
-%token <Common.Loc.t> EOF
-%token <Common.Loc.t> PACKAGE "package"
-%token <Common.Loc.t> FROM "from"
-%token <Common.Loc.t> IMPORT "import"
-%token <Common.Loc.t> PIPE "|"
-%token <Common.Loc.t> ARROW "->"
-%token <Common.Loc.t * string> LIDENT
-%token <Common.Loc.t * string> STRING
+%token EOF
+%token PACKAGE "package"
+%token FROM "from"
+%token IMPORT "import"
+%token PIPE "|"
+%token ARROW "->"
+%token <string> LIDENT
+/* %token <string> STRING */
 
-%type <Ast.file> package_only imports_only file
+/* Main Entry Points */
+%type <'a Env.t -> ('a Env.t -> Ast.file -> 'b) -> 'b> package_only imports_only file
 
 %start package_only
 %start imports_only
 %start file
 
+/* Testing Entry Points */
+%type <'a Env.t -> ('a Env.t -> Ast.pkg -> 'b) -> 'b>    pkg_test
+%type <'a Env.t -> ('a Env.t -> Ast.import -> 'b) -> 'b> import_test
+
+%start pkg_test
+%start import_test
+
 %%
+
+/*
+ * Test Entry Points
+ */
+
+pkg_test:
+| pkg = pkg; EOF { pkg }
+
+import_test:
+| import = import; EOF { import }
 
 /*
  * Source Files
  */
 
 package_only:
-| pkg_stmt = package_stmt; end_of_package_only { make_file pkg_stmt [] }
+| pkg = pkg; end_of_package_only { make_file pkg [] }
 
 end_of_package_only:
 | "from"              { () }
@@ -53,53 +128,49 @@ end_of_package_only:
 | end_of_imports_only { () }
 
 imports_only:
-| pkg_stmt = package_stmt; import_stmts = import_stmt_list; end_of_imports_only { make_file pkg_stmt import_stmts }
+| pkg = pkg; imports = list(import); end_of_imports_only { make_file pkg imports }
 
 end_of_imports_only:
 | end_of_file { () }
 
 file:
-| pkg_stmt = package_stmt; import_stmts = import_stmt_list; end_of_file { make_file pkg_stmt import_stmts }
+| pkg = pkg; imports = list(import); end_of_file { make_file pkg imports }
 
 end_of_file:
 | EOF { () }
 
 /*
+ * Common
+ */
+
+name:
+| id = LIDENT { make_name $sloc id }
+
+/*
  * Package Statement
  */
 
-package_stmt:
-| stmt_loc = "package"; id = LIDENT { make_package_stmt stmt_loc id }
+pkg:
+| "package"; id = name { make_pkg $sloc id }
 
 /*
  * Imports
  */
 
-import_stmt_list:
-|                                             { [] }
-| stmt = import_stmt; rest = import_stmt_list { stmt :: rest }
+import:
+| from = from?; pkgs = pkgs { make_import $sloc from pkgs }
 
-import_stmt:
-| from = from_clause; import = import_clause { make_import_stmt from import }
+from:
+| "from"; src = src { make_from $sloc src }
 
-from_clause:
-|                                 { None }
-| from_loc = "from"; pkg = STRING { Some (make_from_clause from_loc pkg) }
+src:
+| src = name { make_src $sloc src }
 
-import_clause:
-| import_loc = "import"; clauses = package_clause_list { make_import_clause import_loc clauses }
+pkgs:
+| "import"; "|"?; pkgs = separated_nonempty_list("|", alias) { make_pkgs $sloc pkgs }
 
-package_clause_list:
-| hd = package_clause; tl = package_clause_list_tl { hd :: tl }
-| tl = package_clause_list_tl                      { tl }
+alias:
+| pkg = name; alias = local? { make_alias $sloc pkg alias }
 
-package_clause_list_tl:
-|                                                       { [] }
-| "|"; hd = package_clause; tl = package_clause_list_tl { hd :: tl }
-
-package_clause:
-| pkg = STRING; alias = package_alias { make_package_clause pkg alias }
-
-package_alias:
-|                      { None }
-| "->"; alias = LIDENT { Some (make_package_alias alias) }
+local:
+| "->"; local = name { local }

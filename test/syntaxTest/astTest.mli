@@ -4,12 +4,13 @@
 
 open OUnit2
 
+open Common
 open Syntax
 
 (** {2 Test Suite} *)
 
-val suite : OUnit2.test
-(** [suite] is the test suite. *)
+val suite : test
+(** [suite] is the unit test suite. *)
 
 (**
  * {2 Fixtures}
@@ -43,6 +44,9 @@ val fresh_import : ?seq:Sym.seq -> ?from:bool -> ?pkgs:bool -> unit -> Ast.impor
     [from] is [true], then a from clause is included.  If [pkgs] is [true], then
     a list of packages is included.  Both default to [false]. *)
 
+val fresh_pkg : ?seq:Sym.seq -> unit -> Ast.pkg
+(** [fresh_pkg ?seq ()] generates a fresh package clause. *)
+
 (** {2 Utilities} *)
 
 (**
@@ -52,7 +56,7 @@ val fresh_import : ?seq:Sym.seq -> ?from:bool -> ?pkgs:bool -> unit -> Ast.impor
  * for normalizing parsed syntax with hand-constructed syntax in tests.
  *)
 
-val deloc_optional : ('a option -> 'a option) -> 'a option -> 'a option
+val deloc_optional : ('a -> 'a) -> 'a option -> 'a option
 (** [deloc_optional deloc value] strips location information from [value] using
     [deloc] if the value is [Some]. *)
 

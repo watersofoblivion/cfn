@@ -33,4 +33,5 @@ depends: [
   "bisect_ppx"
   "ctypes-foreign"
   "uri"
+  "sedlex"
 ]

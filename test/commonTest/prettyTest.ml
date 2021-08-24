@@ -15,7 +15,7 @@ let assert_pp ~ctxt pp output value =
 (* Tests *)
 
 let test_ground ctxt =
-  let pp _ = Pretty.ground in
+  let pp fmt _ = Pretty.ground fmt in
   ()
     |> assert_pp ~ctxt pp ["_"]
 
@@ -29,17 +29,6 @@ let test_int ctxt =
   42
     |> assert_pp ~ctxt Pretty.int ["42"]
 
-let test_tops ctxt =
-  let pp x fmt = fprintf fmt "%s" x in
-  ["one"; "two"; "three"]
-    |> assert_pp ~ctxt (Pretty.tops pp) [
-         "one";
-         "";
-         "two";
-         "";
-         "three"
-       ]
-
 (* Suite *)
 
 let suite =
@@ -47,5 +36,4 @@ let suite =
     "Ground"                >:: test_ground;
     "Boolean"               >:: test_bool;
     "Integer"               >:: test_int;
-    "Top-Level Expressions" >:: test_tops;
   ]

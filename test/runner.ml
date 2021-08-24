@@ -42,15 +42,11 @@ let test_common =
     CommonTest.SymTest.suite;
     CommonTest.PrettyTest.suite;
     CommonTest.EnvTest.suite;
-    CommonTest.LintTest.suite;
-    CommonTest.DocTest.suite;
     CommonTest.LexTest.suite;
-    CommonTest.CliTest.suite;
   ]
 
 let test_syntax =
   "Abstract Syntax" >::: [
-    SyntaxTest.LocTest.suite;
     SyntaxTest.TypeTest.suite;
     SyntaxTest.AstTest.suite;
     SyntaxTest.FmtTest.suite;

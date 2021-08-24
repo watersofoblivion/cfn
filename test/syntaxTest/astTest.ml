@@ -1,5 +1,3 @@
-open Format
-
 open OUnit2
 
 open Common
@@ -60,6 +58,11 @@ let fresh_import ?seq:(seq = Sym.seq ()) ?from:(from = false) ?pkgs:(pkgs = fals
   in
   Ast.import loc from pkgs
 
+let fresh_pkg ?seq:(seq = Sym.seq ()) _ =
+  let loc = LocTest.gen () in
+  fresh_name ~seq ()
+    |> Ast.pkg loc
+
 (* Utilities *)
 
 (* Location Stripping *)
@@ -75,7 +78,7 @@ let deloc_src = function
   | Ast.Source source ->
     source.name
       |> deloc_name
-      |> Ast.source LocTest.dummy
+      |> Ast.src LocTest.dummy
 
 let deloc_from = function
   | Ast.From from ->
@@ -86,7 +89,7 @@ let deloc_from = function
 let deloc_alias = function
   | Ast.Alias alias ->
     let pkg = deloc_name alias.pkg in
-    alias
+    alias.alias
       |> deloc_optional deloc_name
       |> Ast.alias LocTest.dummy pkg
 
@@ -99,7 +102,7 @@ let deloc_pkgs = function
 let deloc_import = function
   | Ast.Import import ->
     let from = deloc_optional deloc_from import.from in
-    import.import
+    import.pkgs
       |> deloc_pkgs
       |> Ast.import LocTest.dummy from
 
@@ -148,7 +151,7 @@ let assert_import_equal ~ctxt expected actual = match (expected, actual) with
   | Ast.Import expected, Ast.Import actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     TestUtils.assert_optional_equal ~ctxt "from clause" assert_from_equal expected.from actual.from;
-    assert_pkgs_equal ~ctxt expected.import actual.import
+    assert_pkgs_equal ~ctxt expected.pkgs actual.pkgs
 
 let assert_pkg_equal ~ctxt expected actual = match (expected, actual) with
   | Ast.Package expected, Ast.Package actual ->
@@ -217,19 +220,19 @@ let test_pkgs ctxt =
       LocTest.assert_loc_equal ~ctxt loc pkgs.loc;
       List.iter2 (assert_alias_equal ~ctxt) aliases pkgs.pkgs
 
-let test_import _ =
+let test_import ctxt =
   let seq = Sym.seq () in
   let loc = LocTest.gen () in
 
   let from = None in
-  let pkgs = [] in
+  let pkgs = Ast.pkgs LocTest.dummy [] in
   match Ast.import loc from pkgs with
     | Ast.Import import ->
       LocTest.assert_loc_equal ~ctxt loc import.loc;
       TestUtils.assert_optional_equal ~ctxt "from clause" assert_from_equal from import.from;
       assert_pkgs_equal ~ctxt pkgs import.pkgs;
 
-  let from = fresh_from ~seq () in
+  let from = Some (fresh_from ~seq ()) in
   let pkgs = fresh_pkgs ~seq () in
   match Ast.import loc from pkgs with
     | Ast.Import import ->
@@ -240,7 +243,7 @@ let test_import _ =
 let test_pkg ctxt =
   let loc = LocTest.gen () in
   let id = fresh_name () in
-  match Ast.pkg loc name with
+  match Ast.pkg loc id with
     | Ast.Package pkg ->
       LocTest.assert_loc_equal ~ctxt loc pkg.loc;
       assert_name_equal ~ctxt id pkg.id
@@ -256,8 +259,8 @@ let test_file ctxt =
       List.iter2 (assert_import_equal ~ctxt) imports file.imports;
 
   let imports = [
-    fresh_import ~seq ~from:false ~pkgs:false;
-    fresh_import ~seq ~from:true ~pkgs:true
+    fresh_import ~seq ~from:false ~pkgs:false ();
+    fresh_import ~seq ~from:true ~pkgs:true ()
   ] in
   match Ast.file pkg imports with
     | Ast.File file ->
@@ -269,12 +272,13 @@ let test_constructor =
     "Imports" >::: [
       "Names" >:: test_name;
       "Statements" >::: [
-        "Sources"      >:: test_src;
-        "From Clauses" >:: test_from;
-        "Alias"        >:: test_alias;
-        "Package List" >:: test_pkgs;
+        "Sources"          >:: test_src;
+        "From Clauses"     >:: test_from;
+        "Alias"            >:: test_alias;
+        "Package List"     >:: test_pkgs;
+        "Import Statement" >:: test_import;
       ]
-    ]
+    ];
     "Package Statement" >:: test_pkg;
     "Source Files"      >:: test_file;
   ]
