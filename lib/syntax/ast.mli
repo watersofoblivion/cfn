@@ -8,6 +8,39 @@ open Common
  * {2 Syntax}
  *)
 
+(** {3 Expressions} *)
+
+type expr = private
+  | Bool of {
+      loc:   Loc.t; (** Location *)
+      value: bool   (** Value *)
+    } (** Boolean literal *)
+  | Int of {
+      loc:    Loc.t; (** Location *)
+      lexeme: string (** Lexeme *)
+    } (** Integer literal *)
+  | Long of {
+      loc:    Loc.t; (** Location *)
+      lexeme: string (** Lexeme *)
+    } (** Long literal *)
+  | Float of {
+      loc:    Loc.t; (** Location *)
+      lexeme: string (** Lexeme *)
+    } (** Float literal *)
+  | Double of {
+      loc:    Loc.t; (** Location *)
+      lexeme: string (** Lexeme *)
+    } (** Double literal *)
+  | Rune of {
+      loc: Loc.t;    (** Location *)
+      value: Uchar.t (** Value *)
+    } (** Rune literal *)
+  | String of {
+      loc: Loc.t;         (** Location *)
+      value: Uchar.t list (** Value *)
+    } (** String literal *)
+(** Expressions *)
+
 type name = private
   | Name of {
       loc: Loc.t; (** Location *)
@@ -76,10 +109,40 @@ type file = private
  * {2 Constructors}
  *)
 
-val name : Loc.t -> Sym.t -> name
-(** [name loc id] constructs a name at location [loc] of the identifier [id]. *)
+(** {3 Expressions} *)
+
+val bool : Loc.t -> bool -> expr
+(** [bool loc value] constructs a boolean literal at location [loc] with value
+    [value]. *)
+
+val int : Loc.t -> string -> expr
+(** [int loc lexeme] constructs an integer literal at location [loc] with lexeme
+    [lexeme]. *)
+
+val long : Loc.t -> string -> expr
+(** [long loc lexeme] constructs a long literal at location [loc] with lexeme
+    [lexeme]. *)
+
+val float : Loc.t -> string -> expr
+(** [float loc lexeme] constructs a float literal at location [loc] with lexeme
+    [lexeme]. *)
+
+val double : Loc.t -> string -> expr
+(** [double loc lexeme] constructs a double literal at location [loc] with
+    lexeme [lexeme]. *)
+
+val rune : Loc.t -> Uchar.t -> expr
+(** [rune loc value] constructs a rune literal at location [loc] with value
+    [value]. *)
+
+val string : Loc.t -> Uchar.t list -> expr
+(** [string loc value] constructs a string literal at location [loc] with value
+    [value]. *)
 
 (** {3 Imports} *)
+
+val name : Loc.t -> Sym.t -> name
+(** [name loc id] constructs a name at location [loc] of the identifier [id]. *)
 
 val src : Loc.t -> name -> src
 (** [src loc name] constructs a source reference at location [loc] with the name

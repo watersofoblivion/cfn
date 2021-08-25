@@ -65,9 +65,27 @@ val kwd_import : Parser.token
  {3 Syntactic Values}
  *)
 
-val lit_lident : string -> Parser.token
-(** [lit_lident id] constructs a lower-case identifier token with [id] as the
-    value. *)
+val lit_bool : bool -> Parser.token
+(** [lit_bool b] constructs a boolean literal with the value [b]. *)
 
-(* val lit_string : lexbuf -> Parser.token *)
-(** [lit_string lexbuf] constructs a string token. *)
+val lit_int : string -> Parser.token
+(** [lit_int lexeme] constructs an integer literal with the lexeme [lexeme]. *)
+
+val lit_long : string -> Parser.token
+(** [lit_long lexeme] constructs a long literal with the lexeme [lexeme]. *)
+
+val lit_float : string -> Parser.token
+(** [lit_float lexeme] constructs a float literal with the lexeme [lexeme]. *)
+
+val lit_double : string -> Parser.token
+(** [lit_double lexeme] constructs a double literal with the lexeme [lexeme]. *)
+
+val lit_rune : Uchar.t -> Parser.token
+(** [lit_rune cp] constructs a rune literal of the codepoint [cp]. *)
+
+val lit_string : Uchar.t list -> Parser.token
+(** [lit_string cps] constructs a string literal of the codepoints [cps]. *)
+
+val lit_lident : string -> Parser.token
+(** [lit_lident lexeme] constructs a lower-case identifier with the lexeme
+    [lexeme]. *)

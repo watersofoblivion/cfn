@@ -66,6 +66,9 @@ val deloc_optional : ('a -> 'a) -> 'a option -> 'a option
 (** [deloc_optional deloc value] strips location information from [value] using
     [deloc] if the value is [Some]. *)
 
+val deloc_expr : Ast.expr -> Ast.expr
+(** [deloc_expr expr] strips location information from the expression [expr]. *)
+
 val deloc_name : Ast.name -> Ast.name
 (** [deloc_name name] strips location information from the name [name]. *)
 
@@ -103,6 +106,10 @@ val deloc_file : Ast.file -> Ast.file
  *
  * The test context passed in is passed down to all internal assertions.
  *)
+
+val assert_expr_equal : ctxt:test_ctxt -> Ast.expr -> Ast.expr -> unit
+(** [assert_expr_equal ~ctxt expected actual] asserts that the expression
+    [actual] is equal to the expression [expected]. *)
 
 val assert_name_equal : ctxt:test_ctxt -> Ast.name -> Ast.name -> unit
 (** [assert_name_equal ~ctxt expected actual] asserts that the name [actual] is

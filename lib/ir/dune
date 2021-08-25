@@ -2,4 +2,5 @@
   (name ir)
   (modes native)
   (instrumentation (backend bisect_ppx))
-  )
+  (libraries
+    common))

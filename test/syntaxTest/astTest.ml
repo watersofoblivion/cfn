@@ -1,3 +1,5 @@
+open Format
+
 open OUnit2
 
 open Common
@@ -71,6 +73,15 @@ let deloc_optional deloc = function
   | Some value -> Some (deloc value)
   | None -> None
 
+let deloc_expr = function
+  | Ast.Bool b -> Ast.bool LocTest.dummy b.value
+  | Ast.Int i -> Ast.int LocTest.dummy i.lexeme
+  | Ast.Long l -> Ast.long LocTest.dummy l.lexeme
+  | Ast.Float f -> Ast.float LocTest.dummy f.lexeme
+  | Ast.Double d -> Ast.double LocTest.dummy d.lexeme
+  | Ast.Rune r -> Ast.rune LocTest.dummy r.value
+  | Ast.String s -> Ast.string LocTest.dummy s.value
+
 let deloc_name = function
   | Ast.Name name -> Ast.name LocTest.dummy name.id
 
@@ -121,6 +132,34 @@ let deloc_file = function
 
 (* Assertions *)
 
+let expr_not_equal = TestUtils.not_equal "Expressions" Fmt.expr
+
+let assert_expr_equal ~ctxt expected actual = match (expected, actual) with
+  | Ast.Bool expected, Ast.Bool actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" expected.value actual.value
+  | Ast.Int expected, Ast.Int actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"Integer lexemes are not equal" expected.lexeme actual.lexeme
+  | Ast.Long expected, Ast.Long actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"Long lexemes are not equal" expected.lexeme actual.lexeme
+  | Ast.Float expected, Ast.Float actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"Float lexemes are not equal" expected.lexeme actual.lexeme
+  | Ast.Double expected, Ast.Double actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"Double lexemes are not equal" expected.lexeme actual.lexeme
+  | Ast.Rune expected, Ast.Rune actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    let printer r = sprintf "%c" (Uchar.to_char r) in
+    assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" expected.value actual.value
+  | Ast.String expected, Ast.String actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    let printer r = sprintf "%c" (Uchar.to_char r) in
+    List.iter2 (assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"String values are not equal") expected.value actual.value
+  | expected, actual -> expr_not_equal ~ctxt expected actual
+
 let assert_name_equal ~ctxt expected actual = match (expected, actual) with
   | Ast.Name expected, Ast.Name actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
@@ -164,6 +203,87 @@ let assert_file_equal ~ctxt expected actual = match (expected, actual) with
     List.iter2 (assert_import_equal ~ctxt) expected.imports actual.imports
 
 (* Constructors *)
+
+let test_expr_bool ctxt =
+  let loc = LocTest.gen () in
+  let expected = Ast.bool loc true in
+  match expected with
+    | Ast.Bool actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc;
+      assert_equal ~ctxt ~msg:"Boolean values are not equal" ~printer:string_of_bool true actual.value
+    | actual -> expr_not_equal ~ctxt expected actual
+
+let test_expr_int ctxt =
+  let loc = LocTest.gen () in
+  let lexeme = "+42i" in
+  let expected = Ast.int loc lexeme in
+  match expected with
+    | Ast.Int actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc;
+      assert_equal ~ctxt ~msg:"Int lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+    | actual -> expr_not_equal ~ctxt expected actual
+
+let test_expr_long ctxt =
+  let loc = LocTest.gen () in
+  let lexeme = "+42L" in
+  let expected = Ast.long loc lexeme in
+  match expected with
+    | Ast.Long actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc;
+      assert_equal ~ctxt ~msg:"Long lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+    | actual -> expr_not_equal ~ctxt expected actual
+
+let test_expr_float ctxt =
+  let loc = LocTest.gen () in
+  let lexeme = "+1.2e-3.4f" in
+  let expected = Ast.float loc lexeme in
+  match expected with
+    | Ast.Float actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc;
+      assert_equal ~ctxt ~msg:"Float lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+    | actual -> expr_not_equal ~ctxt expected actual
+
+let test_expr_double ctxt =
+  let loc = LocTest.gen () in
+  let lexeme = "+1.2e-3.4D" in
+  let expected = Ast.double loc lexeme in
+  match expected with
+    | Ast.Double actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc;
+      assert_equal ~ctxt ~msg:"Double lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+    | actual -> expr_not_equal ~ctxt expected actual
+
+let test_expr_rune ctxt =
+  let loc = LocTest.gen () in
+  let value = Uchar.of_char 'a' in
+  let expected = Ast.rune loc value in
+  match expected with
+    | Ast.Rune actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc;
+      let printer r = sprintf "%c" (Uchar.to_char r) in
+      assert_equal ~cmp:Uchar.equal ~msg:"Rune values are not equal" ~printer value actual.value
+    | actual -> expr_not_equal ~ctxt expected actual
+
+let test_expr_string ctxt =
+  let loc = LocTest.gen () in
+  let value =
+    "asdf"
+      |> String.to_seq
+      |> List.of_seq
+      |> List.map Uchar.of_char
+  in
+  let expected = Ast.string loc value in
+  match expected with
+    | Ast.String actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc;
+      let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
+      let printer s =
+        s
+          |> List.map (fun c -> sprintf "%c" (Uchar.to_char c))
+          |> String.concat ""
+      in
+      assert_equal ~cmp ~printer ~msg:"String values are not equal" value actual.value
+    | actual -> expr_not_equal ~ctxt expected actual
 
 let test_name ctxt =
   let loc = LocTest.gen () in
@@ -269,6 +389,15 @@ let test_file ctxt =
 
 let test_constructor =
   "Constructors" >::: [
+    "Expressions" >::: [
+      "Booleans" >:: test_expr_bool;
+      "Integers" >:: test_expr_int;
+      "Longs"    >:: test_expr_long;
+      "Floats"   >:: test_expr_float;
+      "Doubles"  >:: test_expr_double;
+      "Runes"    >:: test_expr_rune;
+      "Strings"  >:: test_expr_string;
+    ];
     "Imports" >::: [
       "Names" >:: test_name;
       "Statements" >::: [

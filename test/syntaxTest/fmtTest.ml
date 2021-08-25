@@ -8,6 +8,7 @@ open CommonTest
 
 (* Assertions *)
 
+let assert_pp_expr = PrettyTest.assert_pp Fmt.expr
 let assert_pp_name = PrettyTest.assert_pp Fmt.name
 let assert_pp_src = PrettyTest.assert_pp Fmt.src
 let assert_pp_from = PrettyTest.assert_pp Fmt.from
@@ -18,6 +19,42 @@ let assert_pp_pkg = PrettyTest.assert_pp Fmt.pkg
 let assert_pp_file = PrettyTest.assert_pp Fmt.file
 
 (* Pretty Printing *)
+
+let test_expr_bool ctxt =
+  Ast.bool LocTest.dummy true
+    |> assert_pp_expr ~ctxt ["true"];
+  Ast.bool LocTest.dummy false
+    |> assert_pp_expr ~ctxt ["false"]
+
+let test_expr_int ctxt =
+  Ast.int LocTest.dummy "+42i"
+    |> assert_pp_expr ~ctxt ["+42i"]
+
+let test_expr_long ctxt =
+  Ast.long LocTest.dummy "+42L"
+    |> assert_pp_expr ~ctxt ["+42L"]
+
+let test_expr_float ctxt =
+  Ast.float LocTest.dummy "+1.2e-3.4f"
+    |> assert_pp_expr ~ctxt ["+1.2e-3.4f"]
+
+let test_expr_double ctxt =
+  Ast.double LocTest.dummy "+1.2e-3.4D"
+    |> assert_pp_expr ~ctxt ["+1.2e-3.4D"]
+
+let test_expr_rune ctxt =
+  'a'
+    |> Uchar.of_char
+    |> Ast.rune LocTest.dummy
+    |> assert_pp_expr ~ctxt ["'a'"]
+
+let test_expr_string ctxt =
+  "asdf"
+    |> String.to_seq
+    |> List.of_seq
+    |> List.map Uchar.of_char
+    |> Ast.string LocTest.dummy
+    |> assert_pp_expr ~ctxt ["\"asdf\""]
 
 let test_name ctxt =
   let id = "testpackage" in
@@ -162,6 +199,15 @@ let test_file_with_imports ctxt =
 (* Test Suite *)
 let suite =
   "Pretty Printing" >::: [
+    "Expressions" >::: [
+      "Booleans" >:: test_expr_bool;
+      "Integers" >:: test_expr_int;
+      "Longs"    >:: test_expr_long;
+      "Floats"   >:: test_expr_float;
+      "Doubles"  >:: test_expr_double;
+      "Runes"    >:: test_expr_rune;
+      "Strings"  >:: test_expr_string;
+    ];
     "Names" >:: test_name;
     "Imports" >::: [
       "Sources"     >:: test_src;

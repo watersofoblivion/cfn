@@ -86,8 +86,12 @@
 %token IMPORT "import"
 %token PIPE "|"
 %token ARROW "->"
+
+%token <bool> BOOL
+%token <string> INT LONG FLOAT DOUBLE
+%token <Uchar.t> RUNE
+%token <Uchar.t list> STRING
 %token <string> LIDENT
-/* %token <string> STRING */
 
 /* Main Entry Points */
 %type <'a Env.t -> ('a Env.t -> Ast.file -> 'b) -> 'b> package_only imports_only file
@@ -99,9 +103,11 @@
 /* Testing Entry Points */
 %type <'a Env.t -> ('a Env.t -> Ast.pkg -> 'b) -> 'b>    pkg_test
 %type <'a Env.t -> ('a Env.t -> Ast.import -> 'b) -> 'b> import_test
+%type <unit> lit_test
 
 %start pkg_test
 %start import_test
+%start lit_test
 
 %%
 
@@ -114,6 +120,9 @@ pkg_test:
 
 import_test:
 | import = import; EOF { import }
+
+lit_test:
+| lit = lit; EOF { lit }
 
 /*
  * Source Files
@@ -174,3 +183,16 @@ alias:
 
 local:
 | "->"; local = name { local }
+
+/*
+ * Expressions
+ */
+
+lit:
+| BOOL   { () }
+| INT    { () }
+| LONG   { () }
+| FLOAT  { () }
+| DOUBLE { () }
+| RUNE   { () }
+| STRING { () }

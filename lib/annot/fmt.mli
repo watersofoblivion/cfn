@@ -1,9 +1,11 @@
-open Format
 
 (**
- {1 Pretty Printing}
+ * {1 Pretty Printing}
  *)
 
-val pkg : formatter -> Pkg.t -> unit
+open Format
+
+(** {2 Expressions} *)
 
 val expr : formatter -> Ast.expr -> unit
+(** [expr fmt expr] pretty-prints [expr] to [fmt]. *)

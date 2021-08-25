@@ -58,7 +58,6 @@ let test_desug =
   "Annotated" >::: [
     AnnotTest.TypeTest.suite;
     AnnotTest.AstTest.suite;
-    AnnotTest.PkgTest.suite;
     AnnotTest.FmtTest.suite
   ]
 
@@ -78,7 +77,6 @@ let test_mono =
   "Monomorphic" >::: [
     MonoTest.TypeTest.suite;
     MonoTest.AstTest.suite;
-    MonoTest.PkgTest.suite;
     MonoTest.FmtTest.suite
   ]
 
@@ -86,7 +84,6 @@ let test_clos =
   "Closure Converted" >::: [
     ClosTest.TypeTest.suite;
     ClosTest.AstTest.suite;
-    ClosTest.PkgTest.suite;
     ClosTest.FmtTest.suite
   ]
 

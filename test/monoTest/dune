@@ -3,4 +3,5 @@
  (modes native)
  (libraries
     ounit2
-    mono))
+    mono
+    commonTest))

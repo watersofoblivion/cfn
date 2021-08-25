@@ -6,6 +6,11 @@
 
 open Format
 
+(** {2 Expressions} *)
+
+val expr : formatter -> Ast.expr -> unit
+(** [expr fmt expr] pretty-prints the expression [expr] to [fmt]. *)
+
 (** {2 Imports} *)
 
 val name : formatter -> Ast.name -> unit
