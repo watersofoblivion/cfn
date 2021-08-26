@@ -26,4 +26,5 @@ let expr fmt = function
     s.value
       |> List.map Uchar.to_char
       |> List.iter (fprintf fmt "%c");
-    fprintf fmt "\"";
+    fprintf fmt "\""
+  | Ast.Ident ident -> Sym.pp fmt ident.id

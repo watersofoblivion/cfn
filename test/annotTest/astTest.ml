@@ -2,6 +2,7 @@ open Format
 
 open OUnit2
 
+open Common
 open Annot
 
 open CommonTest
@@ -33,6 +34,8 @@ let assert_expr_equal ~ctxt expected actual = match (expected, actual) with
         |> String.concat ""
     in
     assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" expected.value actual.value
+  | Ast.Ident expected, Ast.Ident actual ->
+    SymTest.assert_sym_equal ~ctxt expected.id actual.id
   | expected, actual -> expr_not_equal ~ctxt expected actual
 
 (* Constructors *)
@@ -106,19 +109,28 @@ let test_expr_string ctxt =
       assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
+let test_expr_ident ctxt =
+  let id = () |> Sym.seq |> Sym.gen in
+  let expected = Ast.ident id in
+  match expected with
+    | Ast.Ident actual ->
+      SymTest.assert_sym_equal ~ctxt id actual.id
+    | actual -> expr_not_equal ~ctxt expected actual
+
 (* Test Suite *)
 
 let suite =
   "Abstract Syntax" >::: [
     "Constructors" >::: [
       "Expressions" >::: [
-        "Booleans" >:: test_expr_bool;
-        "Integers" >:: test_expr_int;
-        "Longs"    >:: test_expr_long;
-        "Floats"   >:: test_expr_float;
-        "Doubles"  >:: test_expr_double;
-        "Runes"    >:: test_expr_rune;
-        "Strings"  >:: test_expr_string;
+        "Booleans"    >:: test_expr_bool;
+        "Integers"    >:: test_expr_int;
+        "Longs"       >:: test_expr_long;
+        "Floats"      >:: test_expr_float;
+        "Doubles"     >:: test_expr_double;
+        "Runes"       >:: test_expr_rune;
+        "Strings"     >:: test_expr_string;
+        "Identifiers" >:: test_expr_ident;
       ];
     ];
   ]

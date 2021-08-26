@@ -28,6 +28,9 @@ type expr = private
   | String of {
       value: Uchar.t list (** Value *)
     } (** Strings *)
+  | Ident of {
+      id: Sym.t (** Identifier *)
+    } (** Identifiers *)
 (** Expressions *)
 
 (** {3 Patterns} *)
@@ -81,6 +84,9 @@ val rune : Uchar.t -> expr
 
 val string : Uchar.t list -> expr
 (** [string value] constructs a string literal with value [value]. *)
+
+val ident : Sym.t -> expr
+(** [ident id] constructs an identifier literal with the identifier [id]. *)
 
 (** {3 Patterns} *)
 
