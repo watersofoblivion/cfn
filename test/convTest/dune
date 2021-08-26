@@ -1,0 +1,7 @@
+(library
+ (name convTest)
+ (modes native)
+ (libraries
+    ounit2
+    conv
+    commonTest))

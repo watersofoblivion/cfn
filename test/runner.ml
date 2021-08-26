@@ -54,7 +54,7 @@ let test_syntax =
     SyntaxTest.ParserTest.suite
   ]
 
-let test_desug =
+let test_annot =
   "Annotated" >::: [
     AnnotTest.TypeTest.suite;
     AnnotTest.AstTest.suite;
@@ -90,6 +90,22 @@ let test_clos =
     ClosTest.CheckTest.suite;
   ]
 
+let test_desug =
+  "Desugaring" >::: [
+  ]
+
+let test_norm =
+  "Normalization" >::: [
+  ]
+
+let test_monomorph =
+  "Monomorphization" >::: [
+  ]
+
+let test_conv =
+  "Closure Conversion" >::: [
+  ]
+
 let test_codegen =
   let runtime =
     "Runtime" >::: [
@@ -120,11 +136,15 @@ let suite =
     test_source;
     test_common;
     test_syntax;
-    test_desug;
+    test_annot;
     test_ir;
     test_opt;
     test_mono;
     test_clos;
+    test_desug;
+    test_norm;
+    test_monomorph;
+    test_conv;
     test_codegen;
     test_cli
   ]

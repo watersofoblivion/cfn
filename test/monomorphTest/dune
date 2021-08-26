@@ -1,0 +1,7 @@
+(library
+ (name monomorphTest)
+ (modes native)
+ (libraries
+    ounit2
+    monomorph
+    commonTest))

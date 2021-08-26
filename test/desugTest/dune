@@ -1,0 +1,7 @@
+(library
+ (name desugTest)
+ (modes native)
+ (libraries
+    ounit2
+    desug
+    commonTest))
