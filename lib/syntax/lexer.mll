@@ -28,12 +28,17 @@
 
   let punct_pipe = PIPE
   let punct_arrow = ARROW
+  let punct_colon = COLON
+  let punct_bind = BIND
+  let punct_ground = GROUND
 
   (* Keywords *)
 
   let kwd_package = PACKAGE
   let kwd_from = FROM
   let kwd_import = IMPORT
+  let kwd_let = LET
+  let kwd_val = VAL
 
   (* Syntactic Values *)
 
@@ -43,9 +48,20 @@
   let lit_float lexeme = FLOAT lexeme
   let lit_double lexeme = DOUBLE lexeme
   let lit_rune cp = RUNE cp
-  let lit_string cps = STRING cps
+
+  let quote_regex = Str.regexp_string "\\\""
+  let lit_string s =
+    let cps =
+      s
+        |> Str.global_replace quote_regex "\""
+        |> String.to_seq
+        |> List.of_seq
+        |> List.map Uchar.of_char
+    in
+    STRING cps
 
   let lit_lident lexeme = LIDENT lexeme
+  let lit_uident lexeme = UIDENT lexeme
 }
 
 let sign = ['+' '-']
@@ -81,14 +97,16 @@ rule lex = parse
 (* Punctuation *)
 | '|'                      { punct_pipe }
 | "->"                     { punct_arrow }
+| ':'                      { punct_colon }
+| '='                      { punct_bind }
+| '_'                      { punct_ground }
 
 (* Keywords *)
 | "package"                { kwd_package }
 | "from"                   { kwd_from }
 | "import"                 { kwd_import }
-
-(* Syntactic Values *)
-| (lower ident*)           { lexbuf |> Lexing.lexeme |> lit_lident }
+| "let"                    { kwd_let }
+| "val"                    { kwd_val }
 
 (*
  * Literals
@@ -121,10 +139,8 @@ rule lex = parse
 | "'" ("\\'") "'"             { lit_rune (Uchar.of_char '\'') }
 
 (* Strings *)
-(* | '"' (([^'"']|"\\\"")* as lexeme) '"' { lit_string lexeme } *)
-| '"' { str [] lexbuf }
+| '"' (("\\\"" | [^'"'])* as lexeme) '"' { lit_string lexeme }
 
-and str buf = parse
-| '"'         { buf |> List.rev_map Uchar.of_char |> lit_string }
-| "\\\""      { str ('"' :: buf) lexbuf }
-| [^'"'] as c { str (c :: buf) lexbuf }
+(* Identifiers *)
+| (lower ident*)           { lexbuf |> Lexing.lexeme |> lit_lident }
+| (upper ident*)           { lexbuf |> Lexing.lexeme |> lit_uident }

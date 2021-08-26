@@ -10,6 +10,7 @@ type expr =
   | Double of { loc: Loc.t; lexeme: string }
   | Rune of { loc: Loc.t; value: Uchar.t }
   | String of { loc: Loc.t; value: Uchar.t list }
+  | Ident of { loc: Loc.t; id: Sym.t }
 
 type patt =
   | PattGround of { loc: Loc.t }
@@ -32,7 +33,7 @@ type import = Import of { loc: Loc.t; from: from option; pkgs: pkgs }
 
 type pkg = Package of { loc: Loc.t; id: name }
 
-type file = File of { pkg: pkg; imports: import list }
+type file = File of { pkg: pkg; imports: import list; tops: top list }
 
 (* Constructors *)
 
@@ -43,6 +44,7 @@ let float loc lexeme = Float { loc; lexeme }
 let double loc lexeme = Double { loc; lexeme }
 let rune loc value = Rune { loc; value }
 let string loc value = String { loc; value }
+let ident loc id = Ident { loc; id }
 
 let patt_ground loc = PattGround { loc }
 let patt_var loc id = PattVar { loc; id }
@@ -62,4 +64,4 @@ let import loc from pkgs = Import { loc; from; pkgs }
 
 let pkg loc id = Package { loc; id }
 
-let file pkg imports = File { pkg; imports }
+let file pkg imports tops = File { pkg; imports; tops }

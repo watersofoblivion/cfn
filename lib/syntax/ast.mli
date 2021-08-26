@@ -32,13 +32,17 @@ type expr = private
       lexeme: string (** Lexeme *)
     } (** Double literal *)
   | Rune of {
-      loc: Loc.t;    (** Location *)
+      loc:   Loc.t;  (** Location *)
       value: Uchar.t (** Value *)
     } (** Rune literal *)
   | String of {
-      loc: Loc.t;         (** Location *)
+      loc:   Loc.t;       (** Location *)
       value: Uchar.t list (** Value *)
     } (** String literal *)
+  | Ident of {
+      loc: Loc.t; (** Location *)
+      id:  Sym.t  (** Identifier *)
+    } (** Identifier *)
 (** Expressions *)
 
 (** {3 Patterns} *)
@@ -133,8 +137,9 @@ type pkg = private
 
 type file = private
   | File of {
-      pkg:     pkg;        (** Package statement *)
-      imports: import list (** Import statements *)
+      pkg:     pkg;         (** Package statement *)
+      imports: import list; (** Import statements *)
+      tops:    top list     (** Top-level expressions *)
     } (** A source file *)
 (** Source Files *)
 
@@ -171,6 +176,10 @@ val rune : Loc.t -> Uchar.t -> expr
 val string : Loc.t -> Uchar.t list -> expr
 (** [string loc value] constructs a string literal at location [loc] with value
     [value]. *)
+
+val ident : Loc.t -> Sym.t -> expr
+(** [ident loc id] constructs an identifier at location [loc] with identifier
+    [id]. *)
 
 (** {3 Patterns} *)
 
@@ -229,6 +238,7 @@ val pkg : Loc.t -> name -> pkg
 
 (** {3 Source Files} *)
 
-val file : pkg -> import list -> file
-(** [file pkg imports] constructs a source file where [pkg] is the package
-    statement and [imports] is the list of import statements. *)
+val file : pkg -> import list -> top list -> file
+(** [file pkg imports tops] constructs a source file where [pkg] is the package
+    statement, [imports] is the list of import statements, and [tops] is the
+    list of top-level statements. *)

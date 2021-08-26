@@ -22,6 +22,49 @@ val suite : test
  * lower-level fixtures generated as part of a higher-level fixture.
  *)
 
+val fresh_ty : ?seq:Sym.seq -> ?id:string -> unit -> Type.t
+(** [fresh_ty ?seq ?id ()] constructs a fresh type constructor.  If not
+    provided, [id] defaults to {!Common.Prim.id_bool}. *)
+
+val fresh_bool : ?value:bool -> unit -> Ast.expr
+(** [fresh_bool ?value ()] constructs a fresh boolean expression with value
+    [value].  If not provided, [value] defaults to [true]. *)
+
+val fresh_int : ?value:int32 -> unit -> Ast.expr
+(** [fresh_int ?value ()] constructs a fresh integer expression with value
+    [value].  If not provided, [value] defaults to [42l]. *)
+
+val fresh_long : ?value:int64 -> unit -> Ast.expr
+(** [fresh_long ?value ()] constructs a fresh long expression with value
+    [value].  If not provided, [value] defaults to [42L]. *)
+
+val fresh_float : ?value:float -> unit -> Ast.expr
+(** [fresh_float ?value ()] constructs a fresh float expression with value
+    [value].  If not provided, [value] defaults to [4.2]. *)
+
+val fresh_double : ?value:float -> unit -> Ast.expr
+(** [fresh_double ?value ()] constructs a fresh double expression with value
+    [value].  If not provided, [value] defaults to [4.2]. *)
+
+val fresh_rune : ?value:char -> unit -> Ast.expr
+(** [fresh_rune ?value ()] constructs a fresh rune expression with value
+    [value].  If not provided, [value] defaults to ['a']. *)
+
+val fresh_string : ?value:string -> unit -> Ast.expr
+(** [fresh_string ?value ()] constructs a fresh string expression with value
+    [value].  If not provided, [value] defaults to ["foo bar"]. *)
+
+val fresh_patt_ground : unit -> Ast.patt
+(** [fresh_patt_ground ()] constructs a fresh ground pattern. *)
+
+val fresh_patt_var : ?seq:Sym.seq -> ?id:string -> unit -> Ast.patt
+(** [fresh_patt_var ?seq ?id ()] constructs a fresh identifier pattern. *)
+
+val fresh_value_binding : ?explicit:bool -> ?seq:Sym.seq -> ?id:string -> unit -> Ast.binding
+(** [fresh_value_binding ?explicit ?seq ?id ()] constructs a fresh value
+    binding.  If [explicit] is true, a type annotation is generated.  If not
+    provided, [explicit] defaults to [false]. *)
+
 val fresh_name : ?seq:Sym.seq -> ?id:string -> unit -> Ast.name
 (** [fresh_name ?seq ?id ()] constructs a fresh name using [id] as the name.  If
      not provided, [id] defaults to [""]. *)
@@ -66,8 +109,22 @@ val deloc_optional : ('a -> 'a) -> 'a option -> 'a option
 (** [deloc_optional deloc value] strips location information from [value] using
     [deloc] if the value is [Some]. *)
 
+val deloc_ty : Type.t -> Type.t
+(** [deloc_ty ty] strips location information from the type [ty]. *)
+
 val deloc_expr : Ast.expr -> Ast.expr
 (** [deloc_expr expr] strips location information from the expression [expr]. *)
+
+val deloc_patt : Ast.patt -> Ast.patt
+(** [deloc_patt patt] strips location information from the pattern [patt]. *)
+
+val deloc_binding : Ast.binding -> Ast.binding
+(** [deloc_binding binding] strips location information from the binding
+    [binding]. *)
+
+val deloc_top : Ast.top -> Ast.top
+(** [deloc_top top] strips location information from the top-level expression
+    [top]. *)
 
 val deloc_name : Ast.name -> Ast.name
 (** [deloc_name name] strips location information from the name [name]. *)
@@ -110,6 +167,18 @@ val deloc_file : Ast.file -> Ast.file
 val assert_expr_equal : ctxt:test_ctxt -> Ast.expr -> Ast.expr -> unit
 (** [assert_expr_equal ~ctxt expected actual] asserts that the expression
     [actual] is equal to the expression [expected]. *)
+
+val assert_patt_equal : ctxt:test_ctxt -> Ast.patt -> Ast.patt -> unit
+(** [assert_patt_equal ~ctxt expected actual] asserts that the pattern [actual]
+    is equal to the pattern [expected]. *)
+
+val assert_binding_equal : ctxt:test_ctxt -> Ast.binding -> Ast.binding -> unit
+(** [assert_binding_equal ~ctxt expected actual] asserts that the binding
+    [actual] is equal to the binding [expected]. *)
+
+val assert_top_equal : ctxt:test_ctxt -> Ast.top -> Ast.top -> unit
+(** [assert_top_equal ~ctxt expected actual] asserts that the top-level
+    expression [actual] is equal to the top-level expression [expected]. *)
 
 val assert_name_equal : ctxt:test_ctxt -> Ast.name -> Ast.name -> unit
 (** [assert_name_equal ~ctxt expected actual] asserts that the name [actual] is

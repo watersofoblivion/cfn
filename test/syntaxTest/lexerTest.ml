@@ -12,9 +12,14 @@ let assert_token_equal ~ctxt expected actual = match (expected, actual) with
   | Parser.EOF, Parser.EOF
   | Parser.PIPE, Parser.PIPE
   | Parser.ARROW, Parser.ARROW
+  | Parser.COLON, Parser.COLON
+  | Parser.BIND, Parser.BIND
+  | Parser.GROUND, Parser.GROUND
   | Parser.PACKAGE, Parser.PACKAGE
   | Parser.FROM, Parser.FROM
-  | Parser.IMPORT, Parser.IMPORT -> ()
+  | Parser.IMPORT, Parser.IMPORT
+  | Parser.LET, Parser.LET
+  | Parser.VAL, Parser.VAL -> ()
   | Parser.BOOL expected, Parser.BOOL actual ->
     assert_equal ~ctxt ~msg:"Boolean literals are not equal" ~printer:string_of_bool expected actual
   | Parser.INT expected, Parser.INT actual ->
@@ -39,6 +44,8 @@ let assert_token_equal ~ctxt expected actual = match (expected, actual) with
     assert_equal ~ctxt ~cmp ~msg:"String literals are not equal" ~printer expected actual
   | Parser.LIDENT expected, Parser.LIDENT actual ->
     assert_equal ~ctxt ~msg:"Lower-case identifier values are not equal" ~printer:Fun.id expected actual
+  | Parser.UIDENT expected, Parser.UIDENT actual ->
+    assert_equal ~ctxt ~msg:"Upper-case identifier values are not equal" ~printer:Fun.id expected actual
   | _ -> assert_failure "Tokens are not equal"
 
 let assert_lexes = LexTest.assert_lexes Lexer.lex assert_token_equal
@@ -58,6 +65,18 @@ let test_lex_punct_arrow ctxt =
   Lexer.punct_arrow
     |> assert_lexes ~ctxt "->"
 
+let test_lex_punct_colon ctxt =
+  Lexer.punct_colon
+    |> assert_lexes ~ctxt ":"
+
+let test_lex_punct_bind ctxt =
+  Lexer.punct_bind
+    |> assert_lexes ~ctxt "="
+
+let test_lex_punct_ground ctxt =
+  Lexer.punct_ground
+    |> assert_lexes ~ctxt "_"
+
 let test_lex_kwd_package ctxt =
   Lexer.kwd_package
     |> assert_lexes ~ctxt "package"
@@ -69,6 +88,14 @@ let test_lex_kwd_from ctxt =
 let test_lex_kwd_import ctxt =
   Lexer.kwd_import
     |> assert_lexes ~ctxt "import"
+
+let test_lex_kwd_let ctxt =
+  Lexer.kwd_let
+    |> assert_lexes ~ctxt "let"
+
+let test_lex_kwd_val ctxt =
+  Lexer.kwd_val
+    |> assert_lexes ~ctxt "val"
 
 let test_lex_lit_bool ctxt =
   Lexer.lit_bool true
@@ -147,23 +174,21 @@ let test_lex_lit_rune ctxt =
     |> assert_lexes ~ctxt "'\\''"
 
 let test_lex_lit_string ctxt =
-  let lit_string s =
-    s
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-      |> Lexer.lit_string
-  in
-  lit_string ""
+  Lexer.lit_string ""
     |> assert_lexes ~ctxt "\"\"";
-  lit_string "foo bar"
+  Lexer.lit_string "foo bar"
     |> assert_lexes ~ctxt "\"foo bar\"";
-  lit_string "foo\"bar"
+  Lexer.lit_string "foo\"bar"
     |> assert_lexes ~ctxt "\"foo\\\"bar\""
 
 let test_lex_lit_lident ctxt =
   assert_lex_lit ~ctxt ~printer:Fun.id Lexer.lit_lident [
     "foo"; "fooBar"; "foo_bar"; "fooBar42";
+  ]
+
+let test_lex_lit_uident ctxt =
+  assert_lex_lit ~ctxt ~printer:Fun.id Lexer.lit_uident [
+    "Foo"; "FooBar"; "Foo_bar"; "FooBar42";
   ]
 
 let test_lex =
@@ -172,13 +197,18 @@ let test_lex =
       "End-of-File" >:: test_lex_punct_eof;
     ];
     "Punctuation" >::: [
-      "Pipe"  >:: test_lex_punct_pipe;
-      "Arrow" >:: test_lex_punct_arrow;
+      "Pipe"   >:: test_lex_punct_pipe;
+      "Arrow"  >:: test_lex_punct_arrow;
+      "Colon"  >:: test_lex_punct_colon;
+      "Bind"   >:: test_lex_punct_bind;
+      "Ground" >:: test_lex_punct_ground;
     ];
     "Keywords" >::: [
       "Package" >:: test_lex_kwd_package;
       "From"    >:: test_lex_kwd_from;
       "Import"  >:: test_lex_kwd_import;
+      "Let"     >:: test_lex_kwd_let;
+      "Val"     >:: test_lex_kwd_val;
     ];
     "Literals" >::: [
       "Booleans"               >:: test_lex_lit_bool;
@@ -189,6 +219,7 @@ let test_lex =
       "Runes"                  >:: test_lex_lit_rune;
       "Strings"                >:: test_lex_lit_string;
       "Lower-Case Identifiers" >:: test_lex_lit_lident;
+      "Upper-Case Identifiers" >:: test_lex_lit_uident;
     ];
   ]
 
