@@ -58,7 +58,8 @@ let test_annot =
   "Annotated" >::: [
     AnnotTest.TypeTest.suite;
     AnnotTest.AstTest.suite;
-    AnnotTest.FmtTest.suite
+    AnnotTest.FmtTest.suite;
+    AnnotTest.CheckTest.suite;
   ]
 
 let test_ir =

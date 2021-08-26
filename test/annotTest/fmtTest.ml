@@ -1,3 +1,5 @@
+open Format
+
 open OUnit2
 
 open Common
@@ -9,6 +11,9 @@ open CommonTest
 
 let assert_pp_ty = PrettyTest.assert_pp Fmt.ty
 let assert_pp_expr = PrettyTest.assert_pp Fmt.expr
+let assert_pp_patt = PrettyTest.assert_pp Fmt.patt
+let assert_pp_binding = PrettyTest.assert_pp Fmt.binding
+let assert_pp_top = PrettyTest.assert_pp Fmt.top
 
 (* Types *)
 
@@ -78,6 +83,43 @@ let test_expr_string ctxt =
     |> Ast.string
     |> assert_pp_expr ~ctxt ["\"foo bar\""]
 
+(* Patterns *)
+
+let test_patt_ground ctxt =
+  Ast.patt_ground
+    |> assert_pp_patt ~ctxt ["_"]
+
+let test_patt_var ctxt =
+  ()
+    |> Sym.seq
+    |> Sym.gen
+    |> Ast.patt_var
+    |> assert_pp_patt ~ctxt ["$0"]
+
+(* Bindings *)
+
+let test_binding ctxt =
+  let patt = Ast.patt_ground in
+  let ty = Type.bool in
+  let value = Ast.bool true in
+  Ast.binding patt ty value
+    |> assert_pp_binding ~ctxt [
+         fprintf str_formatter "%a: %a = %a" Fmt.patt patt Fmt.ty ty Fmt.expr value |> flush_str_formatter
+       ]
+
+(* Top-Level Expressions *)
+
+let test_top_let ctxt =
+  let binding =
+    true
+      |> Ast.bool
+      |> Ast.binding Ast.patt_ground Type.bool
+  in
+  Ast.top_let binding
+    |> assert_pp_top ~ctxt [
+         fprintf str_formatter "let %a" Fmt.binding binding |> flush_str_formatter
+       ]
+
 (* Test Suite *)
 
 let suite =
@@ -99,5 +141,13 @@ let suite =
       "Doubles"  >:: test_expr_double;
       "Runes"    >:: test_expr_rune;
       "Strings"  >:: test_expr_string;
+    ];
+    "Patterns" >::: [
+      "Ground"     >:: test_patt_ground;
+      "Identifier" >:: test_patt_var;
+    ];
+    "Bindings" >:: test_binding;
+    "Top-Level Expressions" >::: [
+      "Let Bindings" >:: test_top_let;
     ];
   ]

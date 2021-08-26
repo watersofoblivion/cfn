@@ -28,3 +28,15 @@ let expr fmt = function
       |> List.iter (fprintf fmt "%c");
     fprintf fmt "\""
   | Ast.Ident ident -> Sym.pp fmt ident.id
+
+let patt fmt = function
+  | Ast.PattGround -> Pretty.ground fmt
+  | Ast.PattVar patt -> Sym.pp fmt patt.id
+
+let binding fmt = function
+  | Ast.Binding binding ->
+    fprintf fmt "%a: %a = %a" patt binding.patt ty binding.ty expr binding.value
+
+let top fmt = function
+  | Ast.Let top ->
+    fprintf fmt "let %a" binding top.binding
