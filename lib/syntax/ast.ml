@@ -11,6 +11,17 @@ type expr =
   | Rune of { loc: Loc.t; value: Uchar.t }
   | String of { loc: Loc.t; value: Uchar.t list }
 
+type patt =
+  | PattGround of { loc: Loc.t }
+  | PattVar of { loc: Loc.t; id: Sym.t }
+
+type binding =
+  | ValueBinding of { loc: Loc.t; patt: patt; ty: Type.t option; value: expr }
+
+type top =
+  | Let of { loc: Loc.t; binding: binding }
+  | Val of { loc: Loc.t; binding: binding }
+
 type name = Name of { loc: Loc.t; id: Sym.t }
 
 type src = Source of { loc: Loc.t; name: name }
@@ -32,6 +43,14 @@ let float loc lexeme = Float { loc; lexeme }
 let double loc lexeme = Double { loc; lexeme }
 let rune loc value = Rune { loc; value }
 let string loc value = String { loc; value }
+
+let patt_ground loc = PattGround { loc }
+let patt_var loc id = PattVar { loc; id }
+
+let value_binding loc patt ty value = ValueBinding { loc; patt; ty; value }
+
+let top_let loc binding = Let { loc; binding }
+let top_val loc binding = Val { loc; binding }
 
 let name loc id = Name { loc; id }
 

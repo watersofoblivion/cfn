@@ -1,12 +1,44 @@
 open OUnit2
 
+open Common
 open Annot
 
 open CommonTest
 
 (* Assertions *)
 
+let assert_pp_ty = PrettyTest.assert_pp Fmt.ty
 let assert_pp_expr = PrettyTest.assert_pp Fmt.expr
+
+(* Types *)
+
+let test_ty_bool ctxt =
+  Type.bool
+    |> assert_pp_ty ~ctxt [Prim.id_bool]
+
+let test_ty_int ctxt =
+  Type.int
+    |> assert_pp_ty ~ctxt [Prim.id_int]
+
+let test_ty_long ctxt =
+  Type.long
+    |> assert_pp_ty ~ctxt [Prim.id_long]
+
+let test_ty_float ctxt =
+  Type.float
+    |> assert_pp_ty ~ctxt [Prim.id_float]
+
+let test_ty_double ctxt =
+  Type.double
+    |> assert_pp_ty ~ctxt [Prim.id_double]
+
+let test_ty_rune ctxt =
+  Type.rune
+    |> assert_pp_ty ~ctxt [Prim.id_rune]
+
+let test_ty_string ctxt =
+  Type.string
+    |> assert_pp_ty ~ctxt [Prim.id_string]
 
 (* Expressions *)
 
@@ -50,6 +82,15 @@ let test_expr_string ctxt =
 
 let suite =
   "Pretty Printing" >::: [
+    "Types" >::: [
+      "Boolean" >:: test_ty_bool;
+      "Integer" >:: test_ty_int;
+      "Long"    >:: test_ty_long;
+      "Float"   >:: test_ty_float;
+      "Double"  >:: test_ty_double;
+      "Rune"    >:: test_ty_rune;
+      "String"  >:: test_ty_string;
+    ];
     "Expressions" >::: [
       "Booleans" >:: test_expr_bool;
       "Integers" >:: test_expr_int;

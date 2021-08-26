@@ -66,7 +66,8 @@ let test_ir =
     IrTest.TypeTest.suite;
     IrTest.AstTest.suite;
     IrTest.PkgTest.suite;
-    IrTest.FmtTest.suite
+    IrTest.FmtTest.suite;
+    IrTest.CheckTest.suite;
   ]
 
 let test_opt =
@@ -77,14 +78,16 @@ let test_mono =
   "Monomorphic" >::: [
     MonoTest.TypeTest.suite;
     MonoTest.AstTest.suite;
-    MonoTest.FmtTest.suite
+    MonoTest.FmtTest.suite;
+    MonoTest.CheckTest.suite;
   ]
 
 let test_clos =
   "Closure Converted" >::: [
     ClosTest.TypeTest.suite;
     ClosTest.AstTest.suite;
-    ClosTest.FmtTest.suite
+    ClosTest.FmtTest.suite;
+    ClosTest.CheckTest.suite;
   ]
 
 let test_codegen =

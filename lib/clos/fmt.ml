@@ -1,5 +1,16 @@
 open Format
 
+open Common
+
+let ty fmt = function
+  | Type.Bool -> fprintf fmt "%s" Prim.id_bool
+  | Type.Int -> fprintf fmt "%s" Prim.id_int
+  | Type.Long -> fprintf fmt "%s" Prim.id_long
+  | Type.Float -> fprintf fmt "%s" Prim.id_float
+  | Type.Double -> fprintf fmt "%s" Prim.id_double
+  | Type.Rune -> fprintf fmt "%s" Prim.id_rune
+  | Type.String -> fprintf fmt "%s" Prim.id_string
+
 let atom fmt = function
   | Ast.Bool b -> fprintf fmt "%B" b.value
   | Ast.Int i -> fprintf fmt "%ld" i.value
@@ -16,9 +27,22 @@ let atom fmt = function
       |> List.map Uchar.to_char
       |> List.iter (fprintf fmt "%c");
     fprintf fmt "\""
+  | Ast.Ident ident -> Sym.pp fmt ident.id
 
 let expr fmt = function
   | Ast.Atom a -> atom fmt a.atom
 
 let block fmt = function
   | Ast.Expr e -> expr fmt e.expr
+
+let patt fmt = function
+  | Ast.PattGround -> Pretty.ground fmt
+  | Ast.PattVar patt -> Sym.pp fmt patt.id
+
+let binding fmt = function
+  | Ast.Binding binding ->
+    fprintf fmt "%a: %a = %a" patt binding.patt ty binding.ty expr binding.value
+
+let top fmt = function
+  | Ast.Let top ->
+    fprintf fmt "let %a" binding top.binding

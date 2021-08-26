@@ -2,6 +2,7 @@ open Format
 
 open OUnit2
 
+open Common
 open Clos
 
 open CommonTest
@@ -35,6 +36,8 @@ let assert_atom_equal ~ctxt expected actual = match (expected, actual) with
         |> String.concat ""
     in
     assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" expected.value actual.value
+  | Ast.Ident expected, Ast.Ident actual ->
+    SymTest.assert_sym_equal ~ctxt expected.id actual.id
   | expected, actual -> atom_not_equal ~ctxt expected actual
 
 let assert_expr_equal ~ctxt expected actual = match (expected, actual) with
@@ -118,6 +121,14 @@ let test_atom_string ctxt =
       assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
+let test_atom_ident ctxt =
+  let id = () |> Sym.seq |> Sym.gen in
+  let expected = Ast.atom_ident id in
+  match expected with
+    | Ast.Ident actual ->
+      SymTest.assert_sym_equal ~ctxt id actual.id
+    | actual -> atom_not_equal ~ctxt expected actual
+
 (* Expressions *)
 
 let test_expr_atom ctxt =
@@ -145,13 +156,14 @@ let suite =
   "Abstract Syntax" >::: [
     "Constructors" >::: [
       "Atoms" >::: [
-        "Booleans" >:: test_atom_bool;
-        "Integers" >:: test_atom_int;
-        "Longs"    >:: test_atom_long;
-        "Floats"   >:: test_atom_float;
-        "Doubles"  >:: test_atom_double;
-        "Runes"    >:: test_atom_rune;
-        "Strings"  >:: test_atom_string;
+        "Booleans"    >:: test_atom_bool;
+        "Integers"    >:: test_atom_int;
+        "Longs"       >:: test_atom_long;
+        "Floats"      >:: test_atom_float;
+        "Doubles"     >:: test_atom_double;
+        "Runes"       >:: test_atom_rune;
+        "Strings"     >:: test_atom_string;
+        "Identifiers" >:: test_atom_ident;
       ];
       "Expressions" >::: [
         "Atoms" >:: test_expr_atom;

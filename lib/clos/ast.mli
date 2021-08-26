@@ -1,5 +1,7 @@
 (** {1 Abstract Syntax} *)
 
+open Common
+
 (** {2 Syntax} *)
 
 (** {3 Atoms} *)
@@ -26,6 +28,9 @@ type atom = private
   | String of {
       value: Uchar.t list (** Value *)
     } (** Strings *)
+  | Ident of {
+      id: Sym.t (** Identifier *)
+    } (** Identifier *)
 (** Atomic Values *)
 
 (** {3 Expressions} *)
@@ -43,6 +48,33 @@ type block = private
       expr: expr (** Expression *)
     } (** Expression Block *)
 (** Block Values *)
+
+(** {3 Patterns} *)
+
+type patt = private
+  | PattGround (** Ground *)
+  | PattVar of {
+      id: Sym.t (** Identifier *)
+    } (** Variable *)
+(** Patterns *)
+
+(** {3 Bindings} *)
+
+type binding = private
+  | Binding of {
+      patt:  patt;   (** Pattern *)
+      ty:    Type.t; (** Type annotation *)
+      value: expr    (** Value expression *)
+    } (** Binding *)
+(** Bindings *)
+
+(** {3 Top-Level Bindings} *)
+
+type top = private
+  | Let of {
+      binding: binding (** Binding *)
+    } (** Let Binding *)
+(** Top-Level Bindings *)
 
 (** {2 Constructors} *)
 
@@ -69,6 +101,9 @@ val atom_rune : Uchar.t -> atom
 val atom_string : Uchar.t list -> atom
 (** [atom_string value] constructs a string literal atom with value [value]. *)
 
+val atom_ident : Sym.t -> atom
+(** [atom_ident id] constructs an identifier atom with identifier [id]. *)
+
 (** {3 Expressions} *)
 
 val expr_atom : atom -> expr
@@ -78,3 +113,23 @@ val expr_atom : atom -> expr
 
 val block_expr : expr -> block
 (** [block_expr expr] constructs an expression block of the expression [expr]. *)
+
+(** {3 Patterns} *)
+
+val patt_ground : patt
+(** [patt_ground] constructs a ground pattern. *)
+
+val patt_var : Sym.t -> patt
+(** [patt_var id] constructs a variable pattern binding [id]. *)
+
+(** {3 Bindings} *)
+
+val binding : patt -> Type.t -> expr -> binding
+(** [binding patt ty value] constructs a binding that binds the value [value] of
+    type [ty] to the pattern [patt]. *)
+
+(** {3 Top-Level Bindings} *)
+
+val top_let : binding -> top
+(** [top_let binding] constructs a top-level value binding of the binding
+    [binding]. *)

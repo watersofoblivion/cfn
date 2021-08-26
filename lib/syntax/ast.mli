@@ -41,14 +41,47 @@ type expr = private
     } (** String literal *)
 (** Expressions *)
 
+(** {3 Patterns} *)
+
+type patt = private
+  | PattGround of {
+      loc: Loc.t (** Location *)
+    } (** Ground *)
+  | PattVar of {
+      loc: Loc.t; (** Location *)
+      id:  Sym.t  (** Identifier *)
+    } (** Variable *)
+(** Patterns *)
+
+type binding = private
+  | ValueBinding of {
+      loc:   Loc.t;         (** Location *)
+      patt:  patt;          (** Pattern *)
+      ty:    Type.t option; (** Optional type annotation *)
+      value: expr           (** Value expression *)
+    } (** Value Binding *)
+(** Bindings *)
+(** {3 Top-Level Bindings} *)
+
+type top = private
+  | Let of {
+      loc:    Loc.t;   (** Location *)
+      binding: binding (** Binding *)
+    } (** Let Binding *)
+  | Val of {
+      loc:    Loc.t;   (** Location *)
+      binding: binding (** Binding *)
+    } (** Value Binding *)
+(** Top-Level Bindings *)
+
+(** {3 Imports} *)
+
 type name = private
   | Name of {
       loc: Loc.t; (** Location *)
       id:  Sym.t  (** Identifier *)
     } (** A name *)
 (** Import Names *)
-
-(** {3 Imports} *)
 
 type src = private
   | Source of {
@@ -138,6 +171,31 @@ val rune : Loc.t -> Uchar.t -> expr
 val string : Loc.t -> Uchar.t list -> expr
 (** [string loc value] constructs a string literal at location [loc] with value
     [value]. *)
+
+(** {3 Patterns} *)
+
+val patt_ground : Loc.t -> patt
+(** [patt_ground loc] constructs a ground pattern at location [loc]. *)
+
+val patt_var : Loc.t -> Sym.t -> patt
+(** [patt_var loc id] constructs a variable pattern at location [loc] binding
+    the identifier [id]. *)
+
+(** {3 Bindings} *)
+
+val value_binding : Loc.t -> patt -> Type.t option -> expr -> binding
+(** [value_binding loc patt ty value] constructs a value binding at location
+    [loc] binding the [value] of type [ty] to the pattern [pattern]. *)
+
+(** {3 Top-Level Bindings} *)
+
+val top_let : Loc.t -> binding -> top
+(** [top_let loc binding] constructs a top-level let binding at location [loc]
+    with binding [binding]. *)
+
+val top_val : Loc.t -> binding -> top
+(** [top_val loc binding] constructs a top-level value binding at location [loc]
+    with binding [binding]. *)
 
 (** {3 Imports} *)
 
