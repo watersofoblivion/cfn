@@ -20,6 +20,10 @@
     optTest
     monoTest
     closTest
+    desugTest
+    normTest
+    monomorphTest
+    convTest
     codegenTest
     runtimeTest
     sourceTest

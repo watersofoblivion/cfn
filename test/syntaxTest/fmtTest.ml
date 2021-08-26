@@ -2,12 +2,18 @@ open Format
 
 open OUnit2
 
+open Common
 open Syntax
 
 open CommonTest
 
 (* Assertions *)
 
+let assert_pp_ty = PrettyTest.assert_pp Fmt.ty
+let assert_pp_expr = PrettyTest.assert_pp Fmt.expr
+let assert_pp_patt = PrettyTest.assert_pp Fmt.patt
+let assert_pp_binding = PrettyTest.assert_pp Fmt.binding
+let assert_pp_top = PrettyTest.assert_pp Fmt.top
 let assert_pp_name = PrettyTest.assert_pp Fmt.name
 let assert_pp_src = PrettyTest.assert_pp Fmt.src
 let assert_pp_from = PrettyTest.assert_pp Fmt.from
@@ -18,6 +24,89 @@ let assert_pp_pkg = PrettyTest.assert_pp Fmt.pkg
 let assert_pp_file = PrettyTest.assert_pp Fmt.file
 
 (* Pretty Printing *)
+
+let test_ty_constr ctxt =
+  let constr =
+    ()
+      |> Sym.seq
+      |> Sym.gen ~id:Prim.id_bool
+  in
+  Type.constr LocTest.dummy constr
+    |> assert_pp_ty ~ctxt [Prim.id_bool]
+
+let test_expr_bool ctxt =
+  Ast.bool LocTest.dummy true
+    |> assert_pp_expr ~ctxt ["true"];
+  Ast.bool LocTest.dummy false
+    |> assert_pp_expr ~ctxt ["false"]
+
+let test_expr_int ctxt =
+  Ast.int LocTest.dummy "+42i"
+    |> assert_pp_expr ~ctxt ["+42i"]
+
+let test_expr_long ctxt =
+  Ast.long LocTest.dummy "+42L"
+    |> assert_pp_expr ~ctxt ["+42L"]
+
+let test_expr_float ctxt =
+  Ast.float LocTest.dummy "+1.2e-3.4f"
+    |> assert_pp_expr ~ctxt ["+1.2e-3.4f"]
+
+let test_expr_double ctxt =
+  Ast.double LocTest.dummy "+1.2e-3.4D"
+    |> assert_pp_expr ~ctxt ["+1.2e-3.4D"]
+
+let test_expr_rune ctxt =
+  let value = 'a' in
+  AstTest.fresh_rune ~value ()
+    |> assert_pp_expr ~ctxt [
+         sprintf "'%c'" value
+       ]
+
+let test_expr_string ctxt =
+  let value = "asdf" in
+  AstTest.fresh_string ~value ()
+    |> assert_pp_expr ~ctxt [
+         sprintf "%S" value
+       ]
+
+let test_patt_ground ctxt =
+  AstTest.fresh_patt_ground ()
+    |> assert_pp_patt ~ctxt ["_"]
+
+let test_patt_var ctxt =
+  let id = "testId" in
+  AstTest.fresh_patt_var ~id ()
+    |> assert_pp_patt ~ctxt [id]
+
+let test_binding_value_binding ctxt =
+  let id = "testId" in
+  AstTest.fresh_value_binding ~explicit:true ~id ()
+    |> assert_pp_binding ~ctxt [
+         sprintf "%s: %s = %B" id Prim.id_bool true
+       ];
+  AstTest.fresh_value_binding ~explicit:false ~id ()
+    |> assert_pp_binding ~ctxt [
+         sprintf "%s = %B" id true
+       ]
+
+let test_top_let ctxt =
+  let loc = LocTest.gen () in
+  let id = "testId" in
+  let binding = AstTest.fresh_value_binding ~id () in
+  Ast.top_let loc binding
+    |> assert_pp_top ~ctxt [
+         fprintf str_formatter "let %a" Fmt.binding binding |> flush_str_formatter
+       ]
+
+let test_top_val ctxt =
+  let loc = LocTest.gen () in
+  let id = "testId" in
+  let binding = AstTest.fresh_value_binding ~id () in
+  Ast.top_val loc binding
+    |> assert_pp_top ~ctxt [
+         fprintf str_formatter "val %a" Fmt.binding binding |> flush_str_formatter
+       ]
 
 let test_name ctxt =
   let id = "testpackage" in
@@ -119,7 +208,7 @@ let test_file_no_imports ctxt =
   let id = "testpackage" in
 
   let pkg = AstTest.fresh_pkg ~id () in
-  Ast.file pkg []
+  Ast.file pkg [] []
     |> assert_pp_file ~ctxt [
          sprintf "package %s" id
        ]
@@ -147,7 +236,7 @@ let test_file_with_imports ctxt =
     let import' = Ast.import LocTest.dummy None pkgs in
     [import; import']
   in
-  Ast.file pkg_stmt imports
+  Ast.file pkg_stmt imports []
     |> assert_pp_file ~ctxt [
          sprintf "package %s" id;
          "";
@@ -162,6 +251,27 @@ let test_file_with_imports ctxt =
 (* Test Suite *)
 let suite =
   "Pretty Printing" >::: [
+    "Types" >:: test_ty_constr;
+    "Expressions" >::: [
+      "Booleans" >:: test_expr_bool;
+      "Integers" >:: test_expr_int;
+      "Longs"    >:: test_expr_long;
+      "Floats"   >:: test_expr_float;
+      "Doubles"  >:: test_expr_double;
+      "Runes"    >:: test_expr_rune;
+      "Strings"  >:: test_expr_string;
+    ];
+    "Patterns" >::: [
+      "Ground"     >:: test_patt_ground;
+      "Identifier" >:: test_patt_var;
+    ];
+    "Bindings" >::: [
+      "Value Bindings" >:: test_binding_value_binding;
+    ];
+    "Top-Level Expressions" >::: [
+      "Let Bindings" >:: test_top_let;
+      "Val Bindings" >:: test_top_val;
+    ];
     "Names" >:: test_name;
     "Imports" >::: [
       "Sources"     >:: test_src;

@@ -12,6 +12,10 @@
    opt
    mono
    clos
+   desug
+   norm
+   monomorph
+   conv
    codegen
    runtime
    source

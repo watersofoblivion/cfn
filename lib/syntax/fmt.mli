@@ -6,6 +6,31 @@
 
 open Format
 
+(** {2 Types} *)
+
+val ty : formatter -> Type.t -> unit
+(** [ty fmt ty] pretty-prints the type [ty] to [fmt]. *)
+
+(** {2 Expressions} *)
+
+val expr : formatter -> Ast.expr -> unit
+(** [expr fmt expr] pretty-prints the expression [expr] to [fmt]. *)
+
+(** {2 Patterns} *)
+
+val patt : formatter -> Ast.patt -> unit
+(** [patt fmt patt] pretty-prints the pattern [patt] to [fmt]. *)
+
+(** {2 Bindings} *)
+
+val binding : formatter -> Ast.binding -> unit
+(** [binding fmt binding] pretty-prints the binding [binding] to [fmt]. *)
+
+(** {2 Top-Level Expressions} *)
+
+val top : formatter -> Ast.top -> unit
+(** [top fmt top] pretty-prints the top-level expression [top] to [fmt]. *)
+
 (** {2 Imports} *)
 
 val name : formatter -> Ast.name -> unit

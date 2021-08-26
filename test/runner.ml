@@ -54,12 +54,12 @@ let test_syntax =
     SyntaxTest.ParserTest.suite
   ]
 
-let test_desug =
+let test_annot =
   "Annotated" >::: [
     AnnotTest.TypeTest.suite;
     AnnotTest.AstTest.suite;
-    AnnotTest.PkgTest.suite;
-    AnnotTest.FmtTest.suite
+    AnnotTest.FmtTest.suite;
+    AnnotTest.CheckTest.suite;
   ]
 
 let test_ir =
@@ -67,7 +67,8 @@ let test_ir =
     IrTest.TypeTest.suite;
     IrTest.AstTest.suite;
     IrTest.PkgTest.suite;
-    IrTest.FmtTest.suite
+    IrTest.FmtTest.suite;
+    IrTest.CheckTest.suite;
   ]
 
 let test_opt =
@@ -78,16 +79,32 @@ let test_mono =
   "Monomorphic" >::: [
     MonoTest.TypeTest.suite;
     MonoTest.AstTest.suite;
-    MonoTest.PkgTest.suite;
-    MonoTest.FmtTest.suite
+    MonoTest.FmtTest.suite;
+    MonoTest.CheckTest.suite;
   ]
 
 let test_clos =
   "Closure Converted" >::: [
     ClosTest.TypeTest.suite;
     ClosTest.AstTest.suite;
-    ClosTest.PkgTest.suite;
-    ClosTest.FmtTest.suite
+    ClosTest.FmtTest.suite;
+    ClosTest.CheckTest.suite;
+  ]
+
+let test_desug =
+  "Desugaring" >::: [
+  ]
+
+let test_norm =
+  "Normalization" >::: [
+  ]
+
+let test_monomorph =
+  "Monomorphization" >::: [
+  ]
+
+let test_conv =
+  "Closure Conversion" >::: [
   ]
 
 let test_codegen =
@@ -120,11 +137,15 @@ let suite =
     test_source;
     test_common;
     test_syntax;
-    test_desug;
+    test_annot;
     test_ir;
     test_opt;
     test_mono;
     test_clos;
+    test_desug;
+    test_norm;
+    test_monomorph;
+    test_conv;
     test_codegen;
     test_cli
   ]
