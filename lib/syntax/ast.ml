@@ -65,3 +65,47 @@ let import loc from pkgs = Import { loc; from; pkgs }
 let pkg loc id = Package { loc; id }
 
 let file pkg imports tops = File { pkg; imports; tops }
+
+(* Locations *)
+
+let loc_expr = function
+  | Bool expr -> expr.loc
+  | Int expr -> expr.loc
+  | Long expr -> expr.loc
+  | Float expr -> expr.loc
+  | Double expr -> expr.loc
+  | Rune expr -> expr.loc
+  | String expr -> expr.loc
+  | Ident expr -> expr.loc
+
+let loc_patt = function
+  | PattGround patt -> patt.loc
+  | PattVar patt -> patt.loc
+
+let loc_binding = function
+  | ValueBinding binding -> binding.loc
+
+let loc_top = function
+  | Let top -> top.loc
+  | Val top -> top.loc
+
+let loc_name = function
+  | Name name -> name.loc
+
+let loc_src = function
+  | Source src -> src.loc
+
+let loc_from = function
+  | From from -> from.loc
+
+let loc_alias = function
+  | Alias alias -> alias.loc
+
+let loc_pkgs = function
+  | Packages pkgs -> pkgs.loc
+
+let loc_import = function
+  | Import import -> import.loc
+
+let loc_pkg = function
+  | Package pkg -> pkg.loc

@@ -93,6 +93,7 @@ let test_clos =
 
 let test_desug =
   "Desugaring" >::: [
+    DesugTest.suite;
   ]
 
 let test_norm =
