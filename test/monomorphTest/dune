@@ -3,5 +3,9 @@
  (modes native)
  (libraries
     ounit2
+    common
+    ir
+    mono
     monomorph
-    commonTest))
+    commonTest
+    monoTest))

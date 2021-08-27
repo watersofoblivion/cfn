@@ -101,10 +101,12 @@ let test_norm =
 
 let test_monomorph =
   "Monomorphization" >::: [
+    MonomorphTest.suite;
   ]
 
 let test_conv =
   "Closure Conversion" >::: [
+    ConvTest.suite;
   ]
 
 let test_codegen =
