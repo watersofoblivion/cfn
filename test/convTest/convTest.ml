@@ -21,44 +21,50 @@ let test_convert_atom_bool ctxt =
   let env = EnvTest.fresh () in
   let mono = Mono.Ast.atom_bool true in
   let clos = Clos.Ast.atom_bool true in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Conv.convert_atom env mono (fun ty atom ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.bool ty;
+    ClosTest.AstTest.assert_atom_equal ~ctxt clos atom)
 
 let test_convert_atom_int ctxt =
   let env = EnvTest.fresh () in
   let mono = Mono.Ast.atom_int 42l in
   let clos = Clos.Ast.atom_int 42l in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Conv.convert_atom env mono (fun ty atom ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.int ty;
+    ClosTest.AstTest.assert_atom_equal ~ctxt clos atom)
 
 let test_convert_atom_long ctxt =
   let env = EnvTest.fresh () in
   let mono = Mono.Ast.atom_long 42L in
   let clos = Clos.Ast.atom_long 42L in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Conv.convert_atom env mono (fun ty atom ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.long ty;
+    ClosTest.AstTest.assert_atom_equal ~ctxt clos atom)
 
 let test_convert_atom_float ctxt =
   let env = EnvTest.fresh () in
   let mono = Mono.Ast.atom_float 4.2 in
   let clos = Clos.Ast.atom_float 4.2 in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Conv.convert_atom env mono (fun ty atom ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.float ty;
+    ClosTest.AstTest.assert_atom_equal ~ctxt clos atom)
 
 let test_convert_atom_double ctxt =
   let env = EnvTest.fresh () in
   let mono = Mono.Ast.atom_double 4.2 in
   let clos = Clos.Ast.atom_double 4.2 in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Conv.convert_atom env mono (fun ty atom ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.double ty;
+    ClosTest.AstTest.assert_atom_equal ~ctxt clos atom)
 
 let test_convert_atom_rune ctxt =
   let env = EnvTest.fresh () in
   let value = Uchar.of_char 'a' in
   let mono = Mono.Ast.atom_rune value in
   let clos = Clos.Ast.atom_rune value in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Conv.convert_atom env mono (fun ty atom ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.rune ty;
+    ClosTest.AstTest.assert_atom_equal ~ctxt clos atom)
 
 let test_convert_atom_string ctxt =
   let env = EnvTest.fresh () in
@@ -70,71 +76,104 @@ let test_convert_atom_string ctxt =
   in
   let mono = Mono.Ast.atom_string value in
   let clos = Clos.Ast.atom_string value in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Conv.convert_atom env mono (fun ty atom ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.string ty;
+    ClosTest.AstTest.assert_atom_equal ~ctxt clos atom)
 
 let test_convert_atom_ident ctxt =
-  let env = EnvTest.fresh () in
   let value = () |> Sym.seq |> Sym.gen in
+  let bound = Clos.Type.bool in
+  let env = EnvTest.fresh () in
   let mono = Mono.Ast.atom_ident value in
   let clos = Clos.Ast.atom_ident value in
-  ClosTest.AstTest.assert_atom_equal ~ctxt clos
-    |> Conv.convert_atom env mono
+  Env.bind value bound env (fun env ->
+    Conv.convert_atom env mono (fun ty atom ->
+      ClosTest.TypeTest.assert_ty_equal ~ctxt bound ty;
+      ClosTest.AstTest.assert_atom_equal ~ctxt clos atom))
+
+let test_convert_atom_ident_unbound _ =
+  let value = () |> Sym.seq |> Sym.gen in
+  let env = EnvTest.fresh () in
+  let mono = Mono.Ast.atom_ident value in
+  let exn = Conv.UnboundIdentifier value in
+  assert_raises exn (fun _ ->
+    Conv.convert_atom env mono (fun _ _ ->
+      assert_failure "Expected exception"))
 
 let test_convert_expr_atom ctxt =
   let env = EnvTest.fresh () in
   let mono = true |> Mono.Ast.atom_bool |> Mono.Ast.expr_atom in
   let clos = true |> Clos.Ast.atom_bool |> Clos.Ast.expr_atom in
-  ClosTest.AstTest.assert_expr_equal ~ctxt clos
-    |> Conv.convert_expr env mono
+  Conv.convert_expr env mono (fun ty expr ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.bool ty;
+    ClosTest.AstTest.assert_expr_equal ~ctxt clos expr)
 
 let test_convert_block_expr ctxt =
   let env = EnvTest.fresh () in
   let mono = true |> Mono.Ast.atom_bool |> Mono.Ast.expr_atom |> Mono.Ast.block_expr in
   let clos = true |> Clos.Ast.atom_bool |> Clos.Ast.expr_atom |> Clos.Ast.block_expr in
-  ClosTest.AstTest.assert_block_equal ~ctxt clos
-    |> Conv.convert_block env mono
+  Conv.convert_block env mono (fun ty block ->
+    ClosTest.TypeTest.assert_ty_equal ~ctxt Clos.Type.bool ty;
+    ClosTest.AstTest.assert_block_equal ~ctxt clos block)
 
 let test_convert_patt_ground ctxt =
   let env = EnvTest.fresh () in
   let mono = Mono.Ast.patt_ground in
   let clos = Clos.Ast.patt_ground in
-  ClosTest.AstTest.assert_patt_equal ~ctxt clos
-    |> Conv.convert_patt env mono
+  Conv.convert_patt env mono Clos.Type.bool (fun _ patt ->
+    ClosTest.AstTest.assert_patt_equal ~ctxt clos patt)
 
 let test_convert_patt_var ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
+  let ty = Clos.Type.bool in
   let mono = Mono.Ast.patt_var id in
   let clos = Clos.Ast.patt_var id in
-  ClosTest.AstTest.assert_patt_equal ~ctxt clos
-    |> Conv.convert_patt env mono
+  Conv.convert_patt env mono ty (fun env patt ->
+    EnvTest.assert_bound ~ctxt ClosTest.TypeTest.assert_ty_equal id env ty;
+    ClosTest.AstTest.assert_patt_equal ~ctxt clos patt)
 
 let test_convert_binding ctxt =
   let env = EnvTest.fresh () in
   let mono =
-    let patt = Mono.Ast.patt_ground in
+    let patt =
+      ()
+        |> Sym.seq
+        |> Sym.gen
+        |> Mono.Ast.patt_var
+    in
     let ty = Mono.Type.bool in
     true
       |> Mono.Ast.atom_bool
       |> Mono.Ast.expr_atom
       |> Mono.Ast.binding patt ty
   in
+  let id =
+    ()
+      |> Sym.seq
+      |> Sym.gen
+  in
+  let ty = Clos.Type.bool in
   let clos =
-    let patt = Clos.Ast.patt_ground in
-    let ty = Clos.Type.bool in
+    let patt = Clos.Ast.patt_var id in
     true
       |> Clos.Ast.atom_bool
       |> Clos.Ast.expr_atom
       |> Clos.Ast.binding patt ty
   in
-  ClosTest.AstTest.assert_binding_equal ~ctxt clos
-    |> Conv.convert_binding env mono
+  Conv.convert_binding env mono (fun env binding ->
+    EnvTest.assert_bound ~ctxt ClosTest.TypeTest.assert_ty_equal id env ty;
+    ClosTest.AstTest.assert_binding_equal ~ctxt clos binding)
 
 let test_convert_top_let ctxt =
   let env = EnvTest.fresh () in
   let mono =
-    let patt = Mono.Ast.patt_ground in
+    let patt =
+      ()
+        |> Sym.seq
+        |> Sym.gen
+        |> Mono.Ast.patt_var
+    in
     let ty = Mono.Type.bool in
     true
       |> Mono.Ast.atom_bool
@@ -142,17 +181,23 @@ let test_convert_top_let ctxt =
       |> Mono.Ast.binding patt ty
       |> Mono.Ast.top_let
   in
+  let id =
+    ()
+      |> Sym.seq
+      |> Sym.gen
+  in
+  let ty = Clos.Type.bool in
   let clos =
-    let patt = Clos.Ast.patt_ground in
-    let ty = Clos.Type.bool in
+    let patt = Clos.Ast.patt_var id in
     true
       |> Clos.Ast.atom_bool
       |> Clos.Ast.expr_atom
       |> Clos.Ast.binding patt ty
       |> Clos.Ast.top_let
   in
-  ClosTest.AstTest.assert_top_equal ~ctxt clos
-    |> Conv.convert_top env mono
+  Conv.convert_top env mono (fun env top ->
+    EnvTest.assert_bound ~ctxt ClosTest.TypeTest.assert_ty_equal id env ty;
+    ClosTest.AstTest.assert_top_equal ~ctxt clos top)
 
 let suite =
   "Closure Conversion" >::: [
@@ -173,7 +218,10 @@ let suite =
       "Doubles"     >:: test_convert_atom_double;
       "Runes"       >:: test_convert_atom_rune;
       "Strings"     >:: test_convert_atom_string;
-      "Identifiers" >:: test_convert_atom_ident;
+      "Identifiers" >::: [
+        "Bound"   >:: test_convert_atom_ident;
+        "Unbound" >:: test_convert_atom_ident_unbound;
+      ];
     ];
     "Expressions" >::: [
       "Atomic Values" >:: test_convert_expr_atom;
