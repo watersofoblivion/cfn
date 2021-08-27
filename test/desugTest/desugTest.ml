@@ -321,16 +321,6 @@ let test_desug_file ctxt =
     Env.constr_of Prim.id_int env (fun env int_constr ->
       let syntax =
         let seq = Sym.seq () in
-        let pkg =
-          let name =
-            let loc = LocTest.gen () in
-            seq
-              |> Sym.gen
-              |> Syntax.Ast.name loc
-          in
-          let loc = LocTest.gen () in
-          Syntax.Ast.pkg loc name
-        in
         let top =
           let patt =
             let loc = LocTest.gen () in
@@ -375,6 +365,16 @@ let test_desug_file ctxt =
           let loc = LocTest.gen () in
           Syntax.Ast.top_val loc binding
         in
+        let pkg =
+          let name =
+            let loc = LocTest.gen () in
+            seq
+              |> Sym.gen
+              |> Syntax.Ast.name loc
+          in
+          let loc = LocTest.gen () in
+          Syntax.Ast.pkg loc name
+        in
         Syntax.Ast.file pkg [] [top; top']
       in
       let seq = Sym.seq () in
@@ -399,15 +399,11 @@ let test_desug_file ctxt =
         in
         [top; top']
       in
-      Desug.desug_file env syntax (fun _ tops ->
-        (* let iter_ty (id, ty) =
+      Desug.desug_file env syntax (fun env tops ->
+        List.iter (fun (id, ty) ->
           EnvTest.assert_bound ~ctxt AnnotTest.TypeTest.assert_ty_equal id env ty
-        in *)
-        let iter_annot annot top =
-          AnnotTest.AstTest.assert_top_equal ~ctxt annot top
-        in
-        (* List.iter iter_ty [(id, ty); (id', ty')]; *)
-        List.iter2 iter_annot annot tops)))
+        ) [(id, ty); (id', ty')];
+        List.iter2 (AnnotTest.AstTest.assert_top_equal ~ctxt) annot tops)))
 
 let suite =
   "Desugaring" >::: [
