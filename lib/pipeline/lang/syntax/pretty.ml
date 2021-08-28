@@ -5,7 +5,7 @@ open Common
 (* Types *)
 
 let pp_ty fmt = function
-  | Type.Constr constr -> Sym.pp_id fmt constr.id
+  | Type.TyConstr constr -> Sym.pp_id fmt constr.id
 
 (* Expressions *)
 

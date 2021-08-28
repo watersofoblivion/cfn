@@ -44,13 +44,13 @@ val hash_code : hash_block -> int
 (** {2 Syntax} *)
 
 type ty = private
-  | Bool   (** Boolean *)
-  | Int    (** Integer *)
-  | Long   (** Long *)
-  | Float  (** Float *)
-  | Double (** Double *)
-  | Rune   (** Rune *)
-  | String (** String *)
+  | TyBool   (** Boolean *)
+  | TyInt    (** Integer *)
+  | TyLong   (** Long *)
+  | TyFloat  (** Float *)
+  | TyDouble (** Double *)
+  | TyRune   (** Rune *)
+  | TyString (** String *)
 (** Types *)
 
 type atom = private

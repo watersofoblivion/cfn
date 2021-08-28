@@ -7,7 +7,7 @@ open Common
 (** {2 Syntax} *)
 
 type ty = private
-  | Constr of {
+  | TyConstr of {
       loc: Loc.t; (** Location *)
       id:  Sym.t  (** Constructor *)
     } (** Type Constructor *)

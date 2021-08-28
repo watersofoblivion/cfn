@@ -5,13 +5,13 @@ open Format
 open Common
 
 let pp_ty fmt = function
-  | Type.Bool -> fprintf fmt "%s" Prim.id_bool
-  | Type.Int -> fprintf fmt "%s" Prim.id_int
-  | Type.Long -> fprintf fmt "%s" Prim.id_long
-  | Type.Float -> fprintf fmt "%s" Prim.id_float
-  | Type.Double -> fprintf fmt "%s" Prim.id_double
-  | Type.Rune -> fprintf fmt "%s" Prim.id_rune
-  | Type.String -> fprintf fmt "%s" Prim.id_string
+  | Type.TyBool -> fprintf fmt "%s" Prim.id_bool
+  | Type.TyInt -> fprintf fmt "%s" Prim.id_int
+  | Type.TyLong -> fprintf fmt "%s" Prim.id_long
+  | Type.TyFloat -> fprintf fmt "%s" Prim.id_float
+  | Type.TyDouble -> fprintf fmt "%s" Prim.id_double
+  | Type.TyRune -> fprintf fmt "%s" Prim.id_rune
+  | Type.TyString -> fprintf fmt "%s" Prim.id_string
 
 let pp_atom fmt = function
   | Ast.Bool b -> fprintf fmt "%B" b.value
