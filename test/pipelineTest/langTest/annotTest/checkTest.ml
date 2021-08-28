@@ -1,7 +1,6 @@
 open OUnit2
 
 open Common
-open Annot
 
 open CommonTest
 
@@ -13,43 +12,43 @@ let assert_ty_bound = EnvTest.assert_bound TypeTest.assert_ty_equal
 
 let test_check_expr_bool ctxt =
   let env = EnvTest.fresh () in
-  let b = Ast.bool true in
-  TypeTest.assert_ty_equal ~ctxt Type.bool
-    |> Check.check_expr env b
+  let b = Annot.expr_bool true in
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_bool
+    |> Annot.check_expr env b
 
 let test_check_expr_int ctxt =
   let env = EnvTest.fresh () in
-  let i = Ast.int 42l in
-  TypeTest.assert_ty_equal ~ctxt Type.int
-    |> Check.check_expr env i
+  let i = Annot.expr_int 42l in
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_int
+    |> Annot.check_expr env i
 
 let test_check_expr_long ctxt =
   let env = EnvTest.fresh () in
-  let l = Ast.long 42L in
-  TypeTest.assert_ty_equal ~ctxt Type.long
-    |> Check.check_expr env l
+  let l = Annot.expr_long 42L in
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_long
+    |> Annot.check_expr env l
 
 let test_check_expr_float ctxt =
   let env = EnvTest.fresh () in
-  let f = Ast.float 4.2 in
-  TypeTest.assert_ty_equal ~ctxt Type.float
-    |> Check.check_expr env f
+  let f = Annot.expr_float 4.2 in
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_float
+    |> Annot.check_expr env f
 
 let test_check_expr_double ctxt =
   let env = EnvTest.fresh () in
-  let d = Ast.double 4.2 in
-  TypeTest.assert_ty_equal ~ctxt Type.double
-    |> Check.check_expr env d
+  let d = Annot.expr_double 4.2 in
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_double
+    |> Annot.check_expr env d
 
 let test_check_expr_rune ctxt =
   let env = EnvTest.fresh () in
   let r =
     'a'
       |> Uchar.of_char
-      |> Ast.rune
+      |> Annot.expr_rune
   in
-  TypeTest.assert_ty_equal ~ctxt Type.rune
-    |> Check.check_expr env r
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_rune
+    |> Annot.check_expr env r
 
 let test_check_expr_string ctxt =
   let env = EnvTest.fresh () in
@@ -58,78 +57,78 @@ let test_check_expr_string ctxt =
       |> String.to_seq
       |> List.of_seq
       |> List.map Uchar.of_char
-      |> Ast.string
+      |> Annot.expr_string
   in
-  TypeTest.assert_ty_equal ~ctxt Type.string
-    |> Check.check_expr env s
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_string
+    |> Annot.check_expr env s
 
 let test_check_expr_ident ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let ident = Ast.ident id in
-  let ty = Type.bool in
+  let ident = Annot.expr_ident id in
+  let ty = Annot.ty_bool in
   Env.bind id ty env (fun env ->
     TypeTest.assert_ty_equal ~ctxt ty
-      |> Check.check_expr env ident)
+      |> Annot.check_expr env ident)
 
 let test_check_expr_ident_unbound _ =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let ident = Ast.ident id in
-  let exn = Check.UnboundIdentifier id in
+  let ident = Annot.expr_ident id in
+  let exn = Annot.UnboundIdentifier id in
   assert_raises exn (fun _ ->
-    Check.check_expr env ident (fun _ ->
+    Annot.check_expr env ident (fun _ ->
       assert_failure "Expected exception"))
 
 let test_check_patt_ground _ =
   let env = EnvTest.fresh () in
-  let patt = Ast.patt_ground in
-  let ty = Type.bool in
-  Check.check_patt env patt ty (fun _ -> ())
+  let patt = Annot.patt_ground in
+  let ty = Annot.ty_bool in
+  Annot.check_patt env patt ty (fun _ -> ())
 
 let test_check_patt_var ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let patt = Ast.patt_var id in
-  let ty = Type.bool in
-  Check.check_patt env patt ty (fun env ->
+  let patt = Annot.patt_var id in
+  let ty = Annot.ty_bool in
+  Annot.check_patt env patt ty (fun env ->
     assert_ty_bound ~ctxt id env ty)
 
 let test_check_binding ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let patt = Ast.patt_var id in
-  let ty = Type.bool in
-  let value = Ast.bool true in
-  let binding = Ast.binding patt ty value in
-  Check.check_binding env binding (fun env ->
+  let patt = Annot.patt_var id in
+  let ty = Annot.ty_bool in
+  let value = Annot.expr_bool true in
+  let binding = Annot.binding patt ty value in
+  Annot.check_binding env binding (fun env ->
     assert_ty_bound ~ctxt id env ty)
 
 let test_check_binding_mismatched_types _ =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let patt = Ast.patt_var id in
-  let inferred = Type.bool in
-  let annotated = Type.int in
-  let value = Ast.bool true in
-  let binding = Ast.binding patt annotated value in
-  let exn = Check.MismatchedTypes (inferred, annotated) in
+  let patt = Annot.patt_var id in
+  let inferred = Annot.ty_bool in
+  let annotated = Annot.ty_int in
+  let value = Annot.expr_bool true in
+  let binding = Annot.binding patt annotated value in
+  let exn = Annot.MismatchedTypes (inferred, annotated) in
   assert_raises exn (fun _ ->
-    Check.check_binding env binding (fun _ ->
+    Annot.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))
 
 let test_check_top_let ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let ty = Type.bool in
+  let ty = Annot.ty_bool in
   let top =
-    let patt = Ast.patt_var id in
+    let patt = Annot.patt_var id in
     true
-      |> Ast.bool
-      |> Ast.binding patt ty
-      |> Ast.top_let
+      |> Annot.expr_bool
+      |> Annot.binding patt ty
+      |> Annot.top_let
   in
-  Check.check_top env top (fun env ->
+  Annot.check_top env top (fun env ->
     assert_ty_bound ~ctxt id env ty)
 
 let suite =

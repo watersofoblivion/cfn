@@ -2,66 +2,64 @@ open Format
 
 open OUnit2
 
-open Ir
-
 open CommonTest
 
 (* Assertions *)
 
-let type_not_equal = TestUtils.not_equal "Types" Fmt.ty
+let type_not_equal = TestUtils.not_equal "Types" Ir.pp_ty
 
 let assert_ty_equal ~ctxt expected actual = match (expected, actual) with
-  | Type.Bool, Type.Bool
-  | Type.Int, Type.Int
-  | Type.Long, Type.Long
-  | Type.Float, Type.Float
-  | Type.Double, Type.Double
-  | Type.Rune, Type.Rune
-  | Type.String, Type.String -> ()
+  | Ir.TyBool, Ir.TyBool
+  | Ir.TyInt, Ir.TyInt
+  | Ir.TyLong, Ir.TyLong
+  | Ir.TyFloat, Ir.TyFloat
+  | Ir.TyDouble, Ir.TyDouble
+  | Ir.TyRune, Ir.TyRune
+  | Ir.TyString, Ir.TyString -> ()
   | expected, actual -> type_not_equal ~ctxt expected actual
 
 (* Constructors *)
 
 let test_bool ctxt =
-  let expected = Type.bool in
+  let expected = Ir.ty_bool in
   match expected with
-    | Type.Bool -> ()
+    | Ir.TyBool -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_int ctxt =
-  let expected = Type.int in
+  let expected = Ir.ty_int in
   match expected with
-    | Type.Int -> ()
+    | Ir.TyInt -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_long ctxt =
-  let expected = Type.long in
+  let expected = Ir.ty_long in
   match expected with
-    | Type.Long -> ()
+    | Ir.TyLong -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_float ctxt =
-  let expected = Type.float in
+  let expected = Ir.ty_float in
   match expected with
-    | Type.Float -> ()
+    | Ir.TyFloat -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_double ctxt =
-  let expected = Type.double in
+  let expected = Ir.ty_double in
   match expected with
-    | Type.Double -> ()
+    | Ir.TyDouble -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_rune ctxt =
-  let expected = Type.rune in
+  let expected = Ir.ty_rune in
   match expected with
-    | Type.Rune -> ()
+    | Ir.TyRune -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_string ctxt =
-  let expected = Type.string in
+  let expected = Ir.ty_string in
   match expected with
-    | Type.String -> ()
+    | Ir.TyString -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_constructors =
@@ -81,10 +79,10 @@ let test_constructors =
 
 let test_equal_equal ctxt =
   List.iter (fun ty -> assert_ty_equal ~ctxt ty ty) [
-    Type.bool;
-    Type.int; Type.long;
-    Type.float; Type.double;
-    Type.rune; Type.string;
+    Ir.ty_bool;
+    Ir.ty_int; Ir.ty_long;
+    Ir.ty_float; Ir.ty_double;
+    Ir.ty_rune; Ir.ty_string;
   ]
 
 let test_equal_not_equal ctxt =
@@ -92,9 +90,9 @@ let test_equal_not_equal ctxt =
     | [] -> ()
     | hd :: tl ->
       let assert_not_equal ty =
-        let cmp ty ty' = Type.equal ty ty' |> not in
+        let cmp ty ty' = Ir.ty_equal ty ty' |> not in
         let printer ty =
-          fprintf str_formatter"%a" Fmt.ty ty
+          fprintf str_formatter "%a" Ir.pp_ty ty
             |> flush_str_formatter
         in
         assert_equal ~ctxt ~cmp ~printer ~msg:"Types are equal" hd ty
@@ -104,10 +102,10 @@ let test_equal_not_equal ctxt =
       not_this (hd :: acc) tl
   in
   not_this [] [
-    Type.bool;
-    Type.int; Type.long;
-    Type.float; Type.double;
-    Type.rune; Type.string;
+    Ir.ty_bool;
+    Ir.ty_int; Ir.ty_long;
+    Ir.ty_float; Ir.ty_double;
+    Ir.ty_rune; Ir.ty_string;
   ]
 
 let test_operations =

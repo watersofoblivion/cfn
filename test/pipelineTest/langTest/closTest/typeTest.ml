@@ -2,77 +2,75 @@ open Format
 
 open OUnit2
 
-open Clos
-
 open CommonTest
 
 (* Assertions *)
 
-let type_not_equal = TestUtils.not_equal "Types" Fmt.ty
+let type_not_equal = TestUtils.not_equal "Types" Clos.pp_ty
 
 let assert_ty_equal ~ctxt expected actual = match (expected, actual) with
-  | Type.Bool, Type.Bool
-  | Type.Int, Type.Int
-  | Type.Long, Type.Long
-  | Type.Float, Type.Float
-  | Type.Double, Type.Double
-  | Type.Rune, Type.Rune
-  | Type.String, Type.String -> ()
+  | Clos.TyBool, Clos.TyBool
+  | Clos.TyInt, Clos.TyInt
+  | Clos.TyLong, Clos.TyLong
+  | Clos.TyFloat, Clos.TyFloat
+  | Clos.TyDouble, Clos.TyDouble
+  | Clos.TyRune, Clos.TyRune
+  | Clos.TyString, Clos.TyString -> ()
   | expected, actual -> type_not_equal ~ctxt expected actual
 
 (* Constructors *)
 
-let test_bool ctxt =
-  let expected = Type.bool in
+let test_ty_bool ctxt =
+  let expected = Clos.ty_bool in
   match expected with
-    | Type.Bool -> ()
+    | Clos.TyBool -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_int ctxt =
-  let expected = Type.int in
+let test_ty_int ctxt =
+  let expected = Clos.ty_int in
   match expected with
-    | Type.Int -> ()
+    | Clos.TyInt -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_long ctxt =
-  let expected = Type.long in
+let test_ty_long ctxt =
+  let expected = Clos.ty_long in
   match expected with
-    | Type.Long -> ()
+    | Clos.TyLong -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_float ctxt =
-  let expected = Type.float in
+let test_ty_float ctxt =
+  let expected = Clos.ty_float in
   match expected with
-    | Type.Float -> ()
+    | Clos.TyFloat -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_double ctxt =
-  let expected = Type.double in
+let test_ty_double ctxt =
+  let expected = Clos.ty_double in
   match expected with
-    | Type.Double -> ()
+    | Clos.TyDouble -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_rune ctxt =
-  let expected = Type.rune in
+let test_ty_rune ctxt =
+  let expected = Clos.ty_rune in
   match expected with
-    | Type.Rune -> ()
+    | Clos.TyRune -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_string ctxt =
-  let expected = Type.string in
+let test_ty_string ctxt =
+  let expected = Clos.ty_string in
   match expected with
-    | Type.String -> ()
+    | Clos.TyString -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_constructors =
   "Constructors" >::: [
-    "Boolean" >:: test_bool;
-    "Integer" >:: test_int;
-    "Long"    >:: test_long;
-    "Float"   >:: test_float;
-    "Double"  >:: test_double;
-    "Rune"    >:: test_rune;
-    "String"  >:: test_string;
+    "Boolean" >:: test_ty_bool;
+    "Integer" >:: test_ty_int;
+    "Long"    >:: test_ty_long;
+    "Float"   >:: test_ty_float;
+    "Double"  >:: test_ty_double;
+    "Rune"    >:: test_ty_rune;
+    "String"  >:: test_ty_string;
   ]
 
 (* Operations *)
@@ -81,10 +79,10 @@ let test_constructors =
 
 let test_equal_equal ctxt =
   List.iter (fun ty -> assert_ty_equal ~ctxt ty ty) [
-    Type.bool;
-    Type.int; Type.long;
-    Type.float; Type.double;
-    Type.rune; Type.string;
+    Clos.ty_bool;
+    Clos.ty_int; Clos.ty_long;
+    Clos.ty_float; Clos.ty_double;
+    Clos.ty_rune; Clos.ty_string;
   ]
 
 let test_equal_not_equal ctxt =
@@ -92,9 +90,9 @@ let test_equal_not_equal ctxt =
     | [] -> ()
     | hd :: tl ->
       let assert_not_equal ty =
-        let cmp ty ty' = Type.equal ty ty' |> not in
+        let cmp ty ty' = Clos.ty_equal ty ty' |> not in
         let printer ty =
-          fprintf str_formatter"%a" Fmt.ty ty
+          fprintf str_formatter"%a" Clos.pp_ty ty
             |> flush_str_formatter
         in
         assert_equal ~ctxt ~cmp ~printer ~msg:"Types are equal" hd ty
@@ -104,10 +102,10 @@ let test_equal_not_equal ctxt =
       not_this (hd :: acc) tl
   in
   not_this [] [
-    Type.bool;
-    Type.int; Type.long;
-    Type.float; Type.double;
-    Type.rune; Type.string;
+    Clos.ty_bool;
+    Clos.ty_int; Clos.ty_long;
+    Clos.ty_float; Clos.ty_double;
+    Clos.ty_rune; Clos.ty_string;
   ]
 
 let test_operations =

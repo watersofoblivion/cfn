@@ -3,25 +3,24 @@ open Format
 open OUnit2
 
 open Common
-open Syntax
 
 open CommonTest
 
 (* Assertions *)
 
-let assert_pp_ty = PrettyTest.assert_pp Fmt.ty
-let assert_pp_expr = PrettyTest.assert_pp Fmt.expr
-let assert_pp_patt = PrettyTest.assert_pp Fmt.patt
-let assert_pp_binding = PrettyTest.assert_pp Fmt.binding
-let assert_pp_top = PrettyTest.assert_pp Fmt.top
-let assert_pp_name = PrettyTest.assert_pp Fmt.name
-let assert_pp_src = PrettyTest.assert_pp Fmt.src
-let assert_pp_from = PrettyTest.assert_pp Fmt.from
-let assert_pp_alias = PrettyTest.assert_pp Fmt.alias
-let assert_pp_pkgs = PrettyTest.assert_pp Fmt.pkgs
-let assert_pp_import = PrettyTest.assert_pp Fmt.import
-let assert_pp_pkg = PrettyTest.assert_pp Fmt.pkg
-let assert_pp_file = PrettyTest.assert_pp Fmt.file
+let assert_pp_ty = PrettyTest.assert_pp Syntax.pp_ty
+let assert_pp_expr = PrettyTest.assert_pp Syntax.pp_expr
+let assert_pp_patt = PrettyTest.assert_pp Syntax.pp_patt
+let assert_pp_binding = PrettyTest.assert_pp Syntax.pp_binding
+let assert_pp_top = PrettyTest.assert_pp Syntax.pp_top
+let assert_pp_name = PrettyTest.assert_pp Syntax.pp_name
+let assert_pp_src = PrettyTest.assert_pp Syntax.pp_src
+let assert_pp_from = PrettyTest.assert_pp Syntax.pp_from
+let assert_pp_alias = PrettyTest.assert_pp Syntax.pp_alias
+let assert_pp_pkgs = PrettyTest.assert_pp Syntax.pp_pkgs
+let assert_pp_import = PrettyTest.assert_pp Syntax.pp_import
+let assert_pp_pkg = PrettyTest.assert_pp Syntax.pp_pkg
+let assert_pp_file = PrettyTest.assert_pp Syntax.pp_file
 
 (* Pretty Printing *)
 
@@ -31,41 +30,41 @@ let test_ty_constr ctxt =
       |> Sym.seq
       |> Sym.gen ~id:Prim.id_bool
   in
-  Type.constr LocTest.dummy constr
+  Syntax.ty_constr LocTest.dummy constr
     |> assert_pp_ty ~ctxt [Prim.id_bool]
 
 let test_expr_bool ctxt =
-  Ast.bool LocTest.dummy true
+  Syntax.expr_bool LocTest.dummy true
     |> assert_pp_expr ~ctxt ["true"];
-  Ast.bool LocTest.dummy false
+  Syntax.expr_bool LocTest.dummy false
     |> assert_pp_expr ~ctxt ["false"]
 
 let test_expr_int ctxt =
-  Ast.int LocTest.dummy "+42i"
+  Syntax.expr_int LocTest.dummy "+42i"
     |> assert_pp_expr ~ctxt ["+42i"]
 
 let test_expr_long ctxt =
-  Ast.long LocTest.dummy "+42L"
+  Syntax.expr_long LocTest.dummy "+42L"
     |> assert_pp_expr ~ctxt ["+42L"]
 
 let test_expr_float ctxt =
-  Ast.float LocTest.dummy "+1.2e-3.4f"
+  Syntax.expr_float LocTest.dummy "+1.2e-3.4f"
     |> assert_pp_expr ~ctxt ["+1.2e-3.4f"]
 
 let test_expr_double ctxt =
-  Ast.double LocTest.dummy "+1.2e-3.4D"
+  Syntax.expr_double LocTest.dummy "+1.2e-3.4D"
     |> assert_pp_expr ~ctxt ["+1.2e-3.4D"]
 
 let test_expr_rune ctxt =
   let value = 'a' in
-  AstTest.fresh_rune ~value ()
+  AstTest.fresh_expr_rune ~value ()
     |> assert_pp_expr ~ctxt [
          sprintf "'%c'" value
        ]
 
 let test_expr_string ctxt =
   let value = "asdf" in
-  AstTest.fresh_string ~value ()
+  AstTest.fresh_expr_string ~value ()
     |> assert_pp_expr ~ctxt [
          sprintf "%S" value
        ]
@@ -94,18 +93,18 @@ let test_top_let ctxt =
   let loc = LocTest.gen () in
   let id = "testId" in
   let binding = AstTest.fresh_value_binding ~id () in
-  Ast.top_let loc binding
+  Syntax.top_let loc binding
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Fmt.binding binding |> flush_str_formatter
+         fprintf str_formatter "let %a" Syntax.pp_binding binding |> flush_str_formatter
        ]
 
 let test_top_val ctxt =
   let loc = LocTest.gen () in
   let id = "testId" in
   let binding = AstTest.fresh_value_binding ~id () in
-  Ast.top_val loc binding
+  Syntax.top_val loc binding
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "val %a" Fmt.binding binding |> flush_str_formatter
+         fprintf str_formatter "val %a" Syntax.pp_binding binding |> flush_str_formatter
        ]
 
 let test_name ctxt =
@@ -144,7 +143,7 @@ let test_pkgs ctxt =
   let pkg' = "anotherpkg" in
 
   let pkgs =
-    Ast.pkgs LocTest.dummy [
+    Syntax.pkgs LocTest.dummy [
       AstTest.fresh_alias ~pkg ~local ();
       AstTest.fresh_alias ~pkg:pkg' ()
     ]
@@ -164,13 +163,13 @@ let test_import_from ctxt =
 
   let from = AstTest.fresh_from ~src () in
   let pkgs =
-    Ast.pkgs LocTest.dummy [
+    Syntax.pkgs LocTest.dummy [
       AstTest.fresh_alias ~pkg ~local ();
       AstTest.fresh_alias ~pkg:pkg' ()
     ]
   in
 
-  Ast.import LocTest.dummy (Some from) pkgs
+  Syntax.import LocTest.dummy (Some from) pkgs
     |> assert_pp_import ~ctxt [
          sprintf "from %s import" src;
          sprintf "                   | %s -> %s" pkg local;
@@ -183,13 +182,13 @@ let test_import ctxt =
   let pkg' = "anotherpkg" in
 
   let pkgs =
-    Ast.pkgs LocTest.dummy [
+    Syntax.pkgs LocTest.dummy [
       AstTest.fresh_alias ~pkg ~local ();
       AstTest.fresh_alias ~pkg:pkg' ()
     ]
   in
 
-  Ast.import LocTest.dummy None pkgs
+  Syntax.import LocTest.dummy None pkgs
     |> assert_pp_import ~ctxt [
          sprintf "import";
          sprintf "      | %s -> %s" pkg local;
@@ -208,7 +207,7 @@ let test_file_no_imports ctxt =
   let id = "testpackage" in
 
   let pkg = AstTest.fresh_pkg ~id () in
-  Ast.file pkg [] []
+  Syntax.file pkg [] []
     |> assert_pp_file ~ctxt [
          sprintf "package %s" id
        ]
@@ -223,7 +222,7 @@ let test_file_with_imports ctxt =
   let pkg_stmt = AstTest.fresh_pkg ~id () in
   let imports =
     let pkgs =
-      Ast.pkgs LocTest.dummy [
+      Syntax.pkgs LocTest.dummy [
         AstTest.fresh_alias ~pkg ~local ();
         AstTest.fresh_alias ~pkg:pkg' ()
       ]
@@ -231,12 +230,12 @@ let test_file_with_imports ctxt =
 
     let import =
       let from = AstTest.fresh_from ~src () in
-      Ast.import LocTest.dummy (Some from) pkgs
+      Syntax.import LocTest.dummy (Some from) pkgs
     in
-    let import' = Ast.import LocTest.dummy None pkgs in
+    let import' = Syntax.import LocTest.dummy None pkgs in
     [import; import']
   in
-  Ast.file pkg_stmt imports []
+  Syntax.file pkg_stmt imports []
     |> assert_pp_file ~ctxt [
          sprintf "package %s" id;
          "";

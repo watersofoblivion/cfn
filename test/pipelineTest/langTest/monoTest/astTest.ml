@@ -3,34 +3,33 @@ open Format
 open OUnit2
 
 open Common
-open Mono
 
 open CommonTest
 
 (* Assertions *)
 
-let atom_not_equal = TestUtils.not_equal "Atomic values" Fmt.atom
-(* let expr_not_equal = TestUtils.not_equal "Expressions" Fmt.expr *)
-(* let block_not_equal = TestUtils.not_equal "Block values" Fmt.block *)
-let patt_not_equal = TestUtils.not_equal "Patterns" Fmt.patt
-(* let binding_not_equal = TestUtils.not_equal "Bindings" Fmt.binding *)
-(* let top_not_equal = TestUtils.not_equal "Top-level expressions" Fmt.top *)
+let atom_not_equal = TestUtils.not_equal "Atomic values" Mono.pp_atom
+(* let expr_not_equal = TestUtils.not_equal "Expressions" Mono.pp_expr *)
+(* let block_not_equal = TestUtils.not_equal "Block values" Mono.pp_block *)
+let patt_not_equal = TestUtils.not_equal "Patterns" Mono.pp_patt
+(* let binding_not_equal = TestUtils.not_equal "Bindings" Mono.pp_binding *)
+(* let top_not_equal = TestUtils.not_equal "Top-level expressions" Mono.pp_top *)
 
 let assert_atom_equal ~ctxt expected actual = match (expected, actual) with
-  | Ast.Bool expected, Ast.Bool actual ->
+  | Mono.Bool expected, Mono.Bool actual ->
     assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" expected.value actual.value
-  | Ast.Int expected, Ast.Int actual ->
+  | Mono.Int expected, Mono.Int actual ->
     assert_equal ~ctxt ~cmp:Int32.equal ~printer:Int32.to_string ~msg:"Integer values are not equal" expected.value actual.value
-  | Ast.Long expected, Ast.Long actual ->
+  | Mono.Long expected, Mono.Long actual ->
     assert_equal ~ctxt ~cmp:Int64.equal ~printer:Int64.to_string ~msg:"Long values are not equal" expected.value actual.value
-  | Ast.Float expected, Ast.Float actual ->
+  | Mono.Float expected, Mono.Float actual ->
     assert_equal ~ctxt ~printer:string_of_float ~msg:"Float values are not equal" expected.value actual.value
-  | Ast.Double expected, Ast.Double actual ->
+  | Mono.Double expected, Mono.Double actual ->
     assert_equal ~ctxt ~printer:string_of_float ~msg:"Double values are not equal" expected.value actual.value
-  | Ast.Rune expected, Ast.Rune actual ->
+  | Mono.Rune expected, Mono.Rune actual ->
     let printer c = sprintf "%c" (Uchar.to_char c) in
     assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" expected.value actual.value
-  | Ast.String expected, Ast.String actual ->
+  | Mono.String expected, Mono.String actual ->
     let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
     let printer s =
       s
@@ -39,32 +38,32 @@ let assert_atom_equal ~ctxt expected actual = match (expected, actual) with
         |> String.concat ""
     in
     assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" expected.value actual.value
-  | Ast.Ident expected, Ast.Ident actual ->
+  | Mono.Ident expected, Mono.Ident actual ->
     SymTest.assert_sym_equal ~ctxt expected.id actual.id
   | expected, actual -> atom_not_equal ~ctxt expected actual
 
 let assert_expr_equal ~ctxt expected actual = match (expected, actual) with
-  | Ast.Atom expected, Ast.Atom actual ->
+  | Mono.Atom expected, Mono.Atom actual ->
     assert_atom_equal ~ctxt expected.atom actual.atom
 
 let assert_block_equal ~ctxt expected actual = match (expected, actual) with
-  | Ast.Expr expected, Ast.Expr actual ->
+  | Mono.Expr expected, Mono.Expr actual ->
     assert_expr_equal ~ctxt expected.expr actual.expr
 
 let assert_patt_equal ~ctxt expected actual = match (expected, actual) with
-  | Ast.PattGround, Ast.PattGround -> ()
-  | Ast.PattVar expected, Ast.PattVar actual ->
+  | Mono.PattGround, Mono.PattGround -> ()
+  | Mono.PattVar expected, Mono.PattVar actual ->
     SymTest.assert_sym_equal ~ctxt expected.id actual.id
   | expected, actual -> patt_not_equal ~ctxt expected actual
 
 let assert_binding_equal ~ctxt expected actual = match (expected, actual) with
-  | Ast.Binding expected, Ast.Binding actual ->
+  | Mono.Binding expected, Mono.Binding actual ->
     assert_patt_equal ~ctxt expected.patt actual.patt;
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty;
     assert_expr_equal ~ctxt expected.value actual.value
 
 let assert_top_equal ~ctxt expected actual = match (expected, actual) with
-  | Ast.Let expected, Ast.Let actual ->
+  | Mono.Let expected, Mono.Let actual ->
     assert_binding_equal ~ctxt expected.binding actual.binding
 
 (* Constructors *)
@@ -73,49 +72,49 @@ let assert_top_equal ~ctxt expected actual = match (expected, actual) with
 
 let test_atom_bool ctxt =
   let value = true in
-  let expected = Ast.atom_bool value in
+  let expected = Mono.atom_bool value in
   match expected with
-    | Ast.Bool actual ->
+    | Mono.Bool actual ->
       assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
 let test_atom_int ctxt =
   let value = 42l in
-  let expected = Ast.atom_int value in
+  let expected = Mono.atom_int value in
   match expected with
-    | Ast.Int actual ->
+    | Mono.Int actual ->
       assert_equal ~ctxt ~cmp:Int32.equal ~printer:Int32.to_string ~msg:"Integer values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
 let test_atom_long ctxt =
   let value = 42L in
-  let expected = Ast.atom_long value in
+  let expected = Mono.atom_long value in
   match expected with
-    | Ast.Long actual ->
+    | Mono.Long actual ->
       assert_equal ~ctxt ~cmp:Int64.equal ~printer:Int64.to_string ~msg:"Long values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
 let test_atom_float ctxt =
   let value = 4.2 in
-  let expected = Ast.atom_float value in
+  let expected = Mono.atom_float value in
   match expected with
-    | Ast.Float actual ->
+    | Mono.Float actual ->
       assert_equal ~ctxt ~printer:string_of_float ~msg:"Float values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
 let test_atom_double ctxt =
   let value = 4.2 in
-  let expected = Ast.atom_double value in
+  let expected = Mono.atom_double value in
   match expected with
-    | Ast.Double actual ->
+    | Mono.Double actual ->
       assert_equal ~ctxt ~printer:string_of_float ~msg:"Double values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
 let test_atom_rune ctxt =
   let value = Uchar.of_char 'a' in
-  let expected = Ast.atom_rune value in
+  let expected = Mono.atom_rune value in
   match expected with
-    | Ast.Rune actual ->
+    | Mono.Rune actual ->
       let printer c = sprintf "%c" (Uchar.to_char c) in
       assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
@@ -127,9 +126,9 @@ let test_atom_string ctxt =
       |> List.of_seq
       |> List.map Uchar.of_char
   in
-  let expected = Ast.atom_string value in
+  let expected = Mono.atom_string value in
   match expected with
-    | Ast.String actual ->
+    | Mono.String actual ->
       let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
       let printer s =
         s
@@ -142,62 +141,62 @@ let test_atom_string ctxt =
 
 let test_atom_ident ctxt =
   let id = () |> Sym.seq |> Sym.gen in
-  let expected = Ast.atom_ident id in
+  let expected = Mono.atom_ident id in
   match expected with
-    | Ast.Ident actual ->
+    | Mono.Ident actual ->
       SymTest.assert_sym_equal ~ctxt id actual.id
     | actual -> atom_not_equal ~ctxt expected actual
 
 (* Expressions *)
 
 let test_expr_atom ctxt =
-  let atom = Ast.atom_bool true in
-  let expected = Ast.expr_atom atom in
+  let atom = Mono.atom_bool true in
+  let expected = Mono.expr_atom atom in
   match expected with
-    | Ast.Atom actual ->
+    | Mono.Atom actual ->
       assert_atom_equal ~ctxt atom actual.atom
 
 (* Blocks *)
 
 let test_block_expr ctxt =
   let expr =
-    Ast.atom_bool true
-      |> Ast.expr_atom
+    Mono.atom_bool true
+      |> Mono.expr_atom
   in
-  let expected = Ast.block_expr expr in
+  let expected = Mono.block_expr expr in
   match expected with
-    | Ast.Expr actual ->
+    | Mono.Expr actual ->
       assert_expr_equal ~ctxt expr actual.expr
 
 (* Patterns *)
 
 let test_patt_ground ctxt =
-  let expected = Ast.patt_ground in
+  let expected = Mono.patt_ground in
   match expected with
-    | Ast.PattGround -> ()
+    | Mono.PattGround -> ()
     | actual -> patt_not_equal ~ctxt expected actual
 
 let test_patt_var ctxt =
   let id = () |> Sym.seq |> Sym.gen in
-  let expected = Ast.patt_var id in
+  let expected = Mono.patt_var id in
   match expected with
-    | Ast.PattVar actual ->
+    | Mono.PattVar actual ->
       SymTest.assert_sym_equal ~ctxt id actual.id
     | actual -> patt_not_equal ~ctxt expected actual
 
 (* Bindings *)
 
 let test_binding ctxt =
-  let patt = Ast.patt_ground in
-  let ty = Type.bool in
+  let patt = Mono.patt_ground in
+  let ty = Mono.ty_bool in
   let value =
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
+      |> Mono.atom_bool
+      |> Mono.expr_atom
   in
-  let expected = Ast.binding patt ty value in
+  let expected = Mono.binding patt ty value in
   match expected with
-    | Ast.Binding actual ->
+    | Mono.Binding actual ->
       assert_patt_equal ~ctxt patt actual.patt;
       TypeTest.assert_ty_equal ~ctxt ty actual.ty;
       assert_expr_equal ~ctxt value actual.value
@@ -207,13 +206,13 @@ let test_binding ctxt =
 let test_top_let ctxt =
   let binding =
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
-      |> Ast.binding Ast.patt_ground Type.bool
+      |> Mono.atom_bool
+      |> Mono.expr_atom
+      |> Mono.binding Mono.patt_ground Mono.ty_bool
   in
-  let expected = Ast.top_let binding in
+  let expected = Mono.top_let binding in
   match expected with
-    | Ast.Let actual ->
+    | Mono.Let actual ->
       assert_binding_equal ~ctxt binding actual.binding
 
 (* Test Suite *)

@@ -1,7 +1,6 @@
 open OUnit2
 
 open Common
-open Clos
 
 open CommonTest
 
@@ -13,43 +12,43 @@ let assert_ty_bound = EnvTest.assert_bound TypeTest.assert_ty_equal
 
 let test_check_atom_bool ctxt =
   let env = EnvTest.fresh () in
-  let b = Ast.atom_bool true in
-  TypeTest.assert_ty_equal ~ctxt Type.bool
-    |> Check.check_atom env b
+  let b = Clos.atom_bool true in
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_bool
+    |> Clos.check_atom env b
 
 let test_check_atom_int ctxt =
   let env = EnvTest.fresh () in
-  let i = Ast.atom_int 42l in
-  TypeTest.assert_ty_equal ~ctxt Type.int
-    |> Check.check_atom env i
+  let i = Clos.atom_int 42l in
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_int
+    |> Clos.check_atom env i
 
 let test_check_atom_long ctxt =
   let env = EnvTest.fresh () in
-  let l = Ast.atom_long 42L in
-  TypeTest.assert_ty_equal ~ctxt Type.long
-    |> Check.check_atom env l
+  let l = Clos.atom_long 42L in
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_long
+    |> Clos.check_atom env l
 
 let test_check_atom_float ctxt =
   let env = EnvTest.fresh () in
-  let f = Ast.atom_float 4.2 in
-  TypeTest.assert_ty_equal ~ctxt Type.float
-    |> Check.check_atom env f
+  let f = Clos.atom_float 4.2 in
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_float
+    |> Clos.check_atom env f
 
 let test_check_atom_double ctxt =
   let env = EnvTest.fresh () in
-  let d = Ast.atom_double 4.2 in
-  TypeTest.assert_ty_equal ~ctxt Type.double
-    |> Check.check_atom env d
+  let d = Clos.atom_double 4.2 in
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_double
+    |> Clos.check_atom env d
 
 let test_check_atom_rune ctxt =
   let env = EnvTest.fresh () in
   let r =
     'a'
       |> Uchar.of_char
-      |> Ast.atom_rune
+      |> Clos.atom_rune
   in
-  TypeTest.assert_ty_equal ~ctxt Type.rune
-    |> Check.check_atom env r
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_rune
+    |> Clos.check_atom env r
 
 let test_check_atom_string ctxt =
   let env = EnvTest.fresh () in
@@ -58,108 +57,108 @@ let test_check_atom_string ctxt =
       |> String.to_seq
       |> List.of_seq
       |> List.map Uchar.of_char
-      |> Ast.atom_string
+      |> Clos.atom_string
   in
-  TypeTest.assert_ty_equal ~ctxt Type.string
-    |> Check.check_atom env s
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_string
+    |> Clos.check_atom env s
 
 let test_check_atom_ident ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let ident = Ast.atom_ident id in
-  let ty = Type.bool in
+  let ident = Clos.atom_ident id in
+  let ty = Clos.ty_bool in
   Env.bind id ty env (fun env ->
     TypeTest.assert_ty_equal ~ctxt ty
-      |> Check.check_atom env ident)
+      |> Clos.check_atom env ident)
 
 let test_check_atom_ident_unbound _ =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let ident = Ast.atom_ident id in
-  let exn = Check.UnboundIdentifier id in
+  let ident = Clos.atom_ident id in
+  let exn = Clos.UnboundIdentifier id in
   assert_raises exn (fun _ ->
-    Check.check_atom env ident (fun _ ->
+    Clos.check_atom env ident (fun _ ->
       assert_failure "Expected exception"))
 
 let test_check_expr_atom ctxt =
   let env = EnvTest.fresh () in
   let expr =
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
+      |> Clos.atom_bool
+      |> Clos.expr_atom
   in
-  TypeTest.assert_ty_equal ~ctxt Type.bool
-    |> Check.check_expr env expr
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_bool
+    |> Clos.check_expr env expr
 
 let test_check_block_expr ctxt =
   let env = EnvTest.fresh () in
   let block =
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
-      |> Ast.block_expr
+      |> Clos.atom_bool
+      |> Clos.expr_atom
+      |> Clos.block_expr
   in
-  TypeTest.assert_ty_equal ~ctxt Type.bool
-    |> Check.check_block env block
+  TypeTest.assert_ty_equal ~ctxt Clos.ty_bool
+    |> Clos.check_block env block
 
 let test_check_patt_ground _ =
   let env = EnvTest.fresh () in
-  let patt = Ast.patt_ground in
-  let ty = Type.bool in
-  Check.check_patt env patt ty (fun _ -> ())
+  let patt = Clos.patt_ground in
+  let ty = Clos.ty_bool in
+  Clos.check_patt env patt ty (fun _ -> ())
 
 let test_check_patt_var ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let patt = Ast.patt_var id in
-  let ty = Type.bool in
-  Check.check_patt env patt ty (fun env ->
+  let patt = Clos.patt_var id in
+  let ty = Clos.ty_bool in
+  Clos.check_patt env patt ty (fun env ->
     assert_ty_bound ~ctxt id env ty)
 
 let test_check_binding ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let patt = Ast.patt_var id in
-  let ty = Type.bool in
+  let patt = Clos.patt_var id in
+  let ty = Clos.ty_bool in
   let value =
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
+      |> Clos.atom_bool
+      |> Clos.expr_atom
   in
-  let binding = Ast.binding patt ty value in
-  Check.check_binding env binding (fun env ->
+  let binding = Clos.binding patt ty value in
+  Clos.check_binding env binding (fun env ->
     assert_ty_bound ~ctxt id env ty)
 
 let test_check_binding_mismatched_types _ =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let patt = Ast.patt_var id in
-  let inferred = Type.bool in
-  let annotated = Type.int in
+  let patt = Clos.patt_var id in
+  let inferred = Clos.ty_bool in
+  let annotated = Clos.ty_int in
   let value =
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
+      |> Clos.atom_bool
+      |> Clos.expr_atom
   in
-  let binding = Ast.binding patt annotated value in
-  let exn = Check.MismatchedTypes (inferred, annotated) in
+  let binding = Clos.binding patt annotated value in
+  let exn = Clos.MismatchedTypes (inferred, annotated) in
   assert_raises exn (fun _ ->
-    Check.check_binding env binding (fun _ ->
+    Clos.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))
 
 let test_check_top_let ctxt =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
-  let ty = Type.bool in
+  let ty = Clos.ty_bool in
   let top =
-    let patt = Ast.patt_var id in
+    let patt = Clos.patt_var id in
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
-      |> Ast.binding patt ty
-      |> Ast.top_let
+      |> Clos.atom_bool
+      |> Clos.expr_atom
+      |> Clos.binding patt ty
+      |> Clos.top_let
   in
-  Check.check_top env top (fun env ->
+  Clos.check_top env top (fun env ->
     assert_ty_bound ~ctxt id env ty)
 
 let suite =

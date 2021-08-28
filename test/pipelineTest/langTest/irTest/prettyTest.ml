@@ -3,78 +3,77 @@ open Format
 open OUnit2
 
 open Common
-open Ir
 
 open CommonTest
 
 (* Assertions *)
 
-let assert_pp_ty = PrettyTest.assert_pp Fmt.ty
-let assert_pp_atom = PrettyTest.assert_pp Fmt.atom
-let assert_pp_expr = PrettyTest.assert_pp Fmt.expr
-let assert_pp_block = PrettyTest.assert_pp Fmt.block
-let assert_pp_patt = PrettyTest.assert_pp Fmt.patt
-let assert_pp_binding = PrettyTest.assert_pp Fmt.binding
-let assert_pp_top = PrettyTest.assert_pp Fmt.top
+let assert_pp_ty = PrettyTest.assert_pp Ir.pp_ty
+let assert_pp_atom = PrettyTest.assert_pp Ir.pp_atom
+let assert_pp_expr = PrettyTest.assert_pp Ir.pp_expr
+let assert_pp_block = PrettyTest.assert_pp Ir.pp_block
+let assert_pp_patt = PrettyTest.assert_pp Ir.pp_patt
+let assert_pp_binding = PrettyTest.assert_pp Ir.pp_binding
+let assert_pp_top = PrettyTest.assert_pp Ir.pp_top
 
 (* Types *)
 
 let test_ty_bool ctxt =
-  Type.bool
+  Ir.ty_bool
     |> assert_pp_ty ~ctxt [Prim.id_bool]
 
 let test_ty_int ctxt =
-  Type.int
+  Ir.ty_int
     |> assert_pp_ty ~ctxt [Prim.id_int]
 
 let test_ty_long ctxt =
-  Type.long
+  Ir.ty_long
     |> assert_pp_ty ~ctxt [Prim.id_long]
 
 let test_ty_float ctxt =
-  Type.float
+  Ir.ty_float
     |> assert_pp_ty ~ctxt [Prim.id_float]
 
 let test_ty_double ctxt =
-  Type.double
+  Ir.ty_double
     |> assert_pp_ty ~ctxt [Prim.id_double]
 
 let test_ty_rune ctxt =
-  Type.rune
+  Ir.ty_rune
     |> assert_pp_ty ~ctxt [Prim.id_rune]
 
 let test_ty_string ctxt =
-  Type.string
+  Ir.ty_string
     |> assert_pp_ty ~ctxt [Prim.id_string]
 
 (* Atoms *)
 
 let test_atom_bool ctxt =
-  Ast.atom_bool true
+  Ir.atom_bool true
     |> assert_pp_atom ~ctxt ["true"];
-  Ast.atom_bool false
+  Ir.atom_bool false
     |> assert_pp_atom ~ctxt ["false"]
 
 let test_atom_int ctxt =
-  Ast.atom_int 42l
+  Ir.atom_int 42l
     |> assert_pp_atom ~ctxt ["42"]
 
 let test_atom_long ctxt =
-  Ast.atom_long 42L
+  Ir.atom_long 42L
     |> assert_pp_atom ~ctxt ["42"]
 
 let test_atom_float ctxt =
-  Ast.atom_float 4.2
+  Ir.atom_float 4.2
     |> assert_pp_atom ~ctxt ["4.2"]
 
 let test_atom_double ctxt =
-  Ast.atom_double 4.2
+  Ir.atom_double 4.2
     |> assert_pp_atom ~ctxt ["4.2"]
 
 let test_atom_rune ctxt =
   'a'
     |> Uchar.of_char
-    |> Ast.atom_rune
+    |> Ir.atom_rune
     |> assert_pp_atom ~ctxt ["'a'"]
 
 let test_atom_string ctxt =
@@ -82,73 +81,73 @@ let test_atom_string ctxt =
     |> String.to_seq
     |> List.of_seq
     |> List.map Uchar.of_char
-    |> Ast.atom_string
+    |> Ir.atom_string
     |> assert_pp_atom ~ctxt ["\"foo bar\""]
 
 let test_atom_ident ctxt =
   ()
     |> Sym.seq
     |> Sym.gen
-    |> Ast.atom_ident
+    |> Ir.atom_ident
     |> assert_pp_atom ~ctxt ["$0"]
 
 (* Expressions *)
 
 let test_expr_atom ctxt =
   true
-    |> Ast.atom_bool
-    |> Ast.expr_atom
+    |> Ir.atom_bool
+    |> Ir.expr_atom
     |> assert_pp_expr ~ctxt ["true"]
 
 (* Blocks *)
 
 let test_block_expr ctxt =
   true
-    |> Ast.atom_bool
-    |> Ast.expr_atom
-    |> Ast.block_expr
+    |> Ir.atom_bool
+    |> Ir.expr_atom
+    |> Ir.block_expr
     |> assert_pp_block ~ctxt ["true"]
 
 (* Patterns *)
 
 let test_patt_ground ctxt =
-  Ast.patt_ground
+  Ir.patt_ground
     |> assert_pp_patt ~ctxt ["_"]
 
 let test_patt_var ctxt =
   ()
     |> Sym.seq
     |> Sym.gen
-    |> Ast.patt_var
+    |> Ir.patt_var
     |> assert_pp_patt ~ctxt ["$0"]
 
 (* Bindings *)
 
 let test_binding ctxt =
-  let patt = Ast.patt_ground in
-  let ty = Type.bool in
+  let patt = Ir.patt_ground in
+  let ty = Ir.ty_bool in
   let value =
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
+      |> Ir.atom_bool
+      |> Ir.expr_atom
   in
-  Ast.binding patt ty value
+  Ir.binding patt ty value
     |> assert_pp_binding ~ctxt [
-         fprintf str_formatter "%a: %a = %a" Fmt.patt patt Fmt.ty ty Fmt.expr value |> flush_str_formatter
+         fprintf str_formatter "%a: %a = %a" Ir.pp_patt patt Ir.pp_ty ty Ir.pp_expr value |> flush_str_formatter
        ]
 
 let test_top_let ctxt =
   let binding =
-    let patt = Ast.patt_ground in
-    let ty = Type.bool in
+    let patt = Ir.patt_ground in
+    let ty = Ir.ty_bool in
     true
-      |> Ast.atom_bool
-      |> Ast.expr_atom
-      |> Ast.binding patt ty
+      |> Ir.atom_bool
+      |> Ir.expr_atom
+      |> Ir.binding patt ty
   in
-  Ast.top_let binding
+  Ir.top_let binding
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Fmt.binding binding |> flush_str_formatter
+         fprintf str_formatter "let %a" Ir.pp_binding binding |> flush_str_formatter
        ]
 
 (* Test Suite *)

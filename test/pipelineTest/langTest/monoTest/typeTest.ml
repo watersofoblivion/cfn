@@ -2,66 +2,64 @@ open Format
 
 open OUnit2
 
-open Mono
-
 open CommonTest
 
 (* Assertions *)
 
-let type_not_equal = TestUtils.not_equal "Types" Fmt.ty
+let type_not_equal = TestUtils.not_equal "Types" Mono.pp_ty
 
 let assert_ty_equal ~ctxt expected actual = match (expected, actual) with
-  | Type.Bool, Type.Bool
-  | Type.Int, Type.Int
-  | Type.Long, Type.Long
-  | Type.Float, Type.Float
-  | Type.Double, Type.Double
-  | Type.Rune, Type.Rune
-  | Type.String, Type.String -> ()
+  | Mono.TyBool, Mono.TyBool
+  | Mono.TyInt, Mono.TyInt
+  | Mono.TyLong, Mono.TyLong
+  | Mono.TyFloat, Mono.TyFloat
+  | Mono.TyDouble, Mono.TyDouble
+  | Mono.TyRune, Mono.TyRune
+  | Mono.TyString, Mono.TyString -> ()
   | expected, actual -> type_not_equal ~ctxt expected actual
 
 (* Constructors *)
 
 let test_bool ctxt =
-  let expected = Type.bool in
+  let expected = Mono.ty_bool in
   match expected with
-    | Type.Bool -> ()
+    | Mono.TyBool -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_int ctxt =
-  let expected = Type.int in
+  let expected = Mono.ty_int in
   match expected with
-    | Type.Int -> ()
+    | Mono.TyInt -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_long ctxt =
-  let expected = Type.long in
+  let expected = Mono.ty_long in
   match expected with
-    | Type.Long -> ()
+    | Mono.TyLong -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_float ctxt =
-  let expected = Type.float in
+  let expected = Mono.ty_float in
   match expected with
-    | Type.Float -> ()
+    | Mono.TyFloat -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_double ctxt =
-  let expected = Type.double in
+  let expected = Mono.ty_double in
   match expected with
-    | Type.Double -> ()
+    | Mono.TyDouble -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_rune ctxt =
-  let expected = Type.rune in
+  let expected = Mono.ty_rune in
   match expected with
-    | Type.Rune -> ()
+    | Mono.TyRune -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_string ctxt =
-  let expected = Type.string in
+  let expected = Mono.ty_string in
   match expected with
-    | Type.String -> ()
+    | Mono.TyString -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
 let test_constructors =
@@ -81,10 +79,10 @@ let test_constructors =
 
 let test_equal_equal ctxt =
   List.iter (fun ty -> assert_ty_equal ~ctxt ty ty) [
-    Type.bool;
-    Type.int; Type.long;
-    Type.float; Type.double;
-    Type.rune; Type.string;
+    Mono.ty_bool;
+    Mono.ty_int; Mono.ty_long;
+    Mono.ty_float; Mono.ty_double;
+    Mono.ty_rune; Mono.ty_string;
   ]
 
 let test_equal_not_equal ctxt =
@@ -92,9 +90,9 @@ let test_equal_not_equal ctxt =
     | [] -> ()
     | hd :: tl ->
       let assert_not_equal ty =
-        let cmp ty ty' = Type.equal ty ty' |> not in
+        let cmp ty ty' = Mono.ty_equal ty ty' |> not in
         let printer ty =
-          fprintf str_formatter"%a" Fmt.ty ty
+          fprintf str_formatter"%a" Mono.pp_ty ty
             |> flush_str_formatter
         in
         assert_equal ~ctxt ~cmp ~printer ~msg:"Types are equal" hd ty
@@ -104,10 +102,10 @@ let test_equal_not_equal ctxt =
       not_this (hd :: acc) tl
   in
   not_this [] [
-    Type.bool;
-    Type.int; Type.long;
-    Type.float; Type.double;
-    Type.rune; Type.string;
+    Mono.ty_bool;
+    Mono.ty_int; Mono.ty_long;
+    Mono.ty_float; Mono.ty_double;
+    Mono.ty_rune; Mono.ty_string;
   ]
 
 let test_operations =

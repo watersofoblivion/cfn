@@ -53,42 +53,13 @@ let test_syntax =
     SyntaxTest.LexerTest.suite;
     SyntaxTest.ParserTest.suite
   ]
-
-let test_annot =
-  "Annotated" >::: [
-    AnnotTest.TypeTest.suite;
-    AnnotTest.AstTest.suite;
-    AnnotTest.FmtTest.suite;
-    AnnotTest.CheckTest.suite;
-  ]
-
-let test_ir =
-  "ANF Intermediate Representation" >::: [
-    IrTest.TypeTest.suite;
-    IrTest.AstTest.suite;
-    IrTest.PkgTest.suite;
-    IrTest.FmtTest.suite;
-    IrTest.CheckTest.suite;
-  ]
+let test_annot = AnnotTest.suite
+let test_ir = IrTest.suite
+let test_mono = MonoTest.suite
+let test_clos = ClosTest.suite
 
 let test_opt =
   "Optimizer" >::: [
-  ]
-
-let test_mono =
-  "Monomorphic" >::: [
-    MonoTest.TypeTest.suite;
-    MonoTest.AstTest.suite;
-    MonoTest.FmtTest.suite;
-    MonoTest.CheckTest.suite;
-  ]
-
-let test_clos =
-  "Closure Converted" >::: [
-    ClosTest.TypeTest.suite;
-    ClosTest.AstTest.suite;
-    ClosTest.FmtTest.suite;
-    ClosTest.CheckTest.suite;
   ]
 
 let test_desug =

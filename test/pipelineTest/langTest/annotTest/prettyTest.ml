@@ -3,76 +3,75 @@ open Format
 open OUnit2
 
 open Common
-open Annot
 
 open CommonTest
 
 (* Assertions *)
 
-let assert_pp_ty = PrettyTest.assert_pp Fmt.ty
-let assert_pp_expr = PrettyTest.assert_pp Fmt.expr
-let assert_pp_patt = PrettyTest.assert_pp Fmt.patt
-let assert_pp_binding = PrettyTest.assert_pp Fmt.binding
-let assert_pp_top = PrettyTest.assert_pp Fmt.top
+let assert_pp_ty = PrettyTest.assert_pp Annot.pp_ty
+let assert_pp_expr = PrettyTest.assert_pp Annot.pp_expr
+let assert_pp_patt = PrettyTest.assert_pp Annot.pp_patt
+let assert_pp_binding = PrettyTest.assert_pp Annot.pp_binding
+let assert_pp_top = PrettyTest.assert_pp Annot.pp_top
 
 (* Types *)
 
-let test_ty_bool ctxt =
-  Type.bool
+let test_pp_ty_bool ctxt =
+  Annot.ty_bool
     |> assert_pp_ty ~ctxt [Prim.id_bool]
 
-let test_ty_int ctxt =
-  Type.int
+let test_pp_ty_int ctxt =
+  Annot.ty_int
     |> assert_pp_ty ~ctxt [Prim.id_int]
 
-let test_ty_long ctxt =
-  Type.long
+let test_pp_ty_long ctxt =
+  Annot.ty_long
     |> assert_pp_ty ~ctxt [Prim.id_long]
 
-let test_ty_float ctxt =
-  Type.float
+let test_pp_ty_float ctxt =
+  Annot.ty_float
     |> assert_pp_ty ~ctxt [Prim.id_float]
 
-let test_ty_double ctxt =
-  Type.double
+let test_pp_ty_double ctxt =
+  Annot.ty_double
     |> assert_pp_ty ~ctxt [Prim.id_double]
 
-let test_ty_rune ctxt =
-  Type.rune
+let test_pp_ty_rune ctxt =
+  Annot.ty_rune
     |> assert_pp_ty ~ctxt [Prim.id_rune]
 
-let test_ty_string ctxt =
-  Type.string
+let test_pp_ty_string ctxt =
+  Annot.ty_string
     |> assert_pp_ty ~ctxt [Prim.id_string]
 
 (* Expressions *)
 
 let test_expr_bool ctxt =
-  Ast.bool true
+  Annot.expr_bool true
     |> assert_pp_expr ~ctxt ["true"];
-  Ast.bool false
+  Annot.expr_bool false
     |> assert_pp_expr ~ctxt ["false"]
 
 let test_expr_int ctxt =
-  Ast.int 42l
+  Annot.expr_int 42l
     |> assert_pp_expr ~ctxt ["42"]
 
 let test_expr_long ctxt =
-  Ast.long 42L
+  Annot.expr_long 42L
     |> assert_pp_expr ~ctxt ["42"]
 
 let test_expr_float ctxt =
-  Ast.float 4.2
+  Annot.expr_float 4.2
     |> assert_pp_expr ~ctxt ["4.2"]
 
 let test_expr_double ctxt =
-  Ast.double 4.2
+  Annot.expr_double 4.2
     |> assert_pp_expr ~ctxt ["4.2"]
 
 let test_expr_rune ctxt =
   'a'
     |> Uchar.of_char
-    |> Ast.rune
+    |> Annot.expr_rune
     |> assert_pp_expr ~ctxt ["'a'"]
 
 let test_expr_string ctxt =
@@ -80,31 +79,31 @@ let test_expr_string ctxt =
     |> String.to_seq
     |> List.of_seq
     |> List.map Uchar.of_char
-    |> Ast.string
+    |> Annot.expr_string
     |> assert_pp_expr ~ctxt ["\"foo bar\""]
 
 (* Patterns *)
 
 let test_patt_ground ctxt =
-  Ast.patt_ground
+  Annot.patt_ground
     |> assert_pp_patt ~ctxt ["_"]
 
 let test_patt_var ctxt =
   ()
     |> Sym.seq
     |> Sym.gen
-    |> Ast.patt_var
+    |> Annot.patt_var
     |> assert_pp_patt ~ctxt ["$0"]
 
 (* Bindings *)
 
 let test_binding ctxt =
-  let patt = Ast.patt_ground in
-  let ty = Type.bool in
-  let value = Ast.bool true in
-  Ast.binding patt ty value
+  let patt = Annot.patt_ground in
+  let ty = Annot.ty_bool in
+  let value = Annot.expr_bool true in
+  Annot.binding patt ty value
     |> assert_pp_binding ~ctxt [
-         fprintf str_formatter "%a: %a = %a" Fmt.patt patt Fmt.ty ty Fmt.expr value |> flush_str_formatter
+         fprintf str_formatter "%a: %a = %a" Annot.pp_patt patt Annot.pp_ty ty Annot.pp_expr value |> flush_str_formatter
        ]
 
 (* Top-Level Expressions *)
@@ -112,12 +111,12 @@ let test_binding ctxt =
 let test_top_let ctxt =
   let binding =
     true
-      |> Ast.bool
-      |> Ast.binding Ast.patt_ground Type.bool
+      |> Annot.expr_bool
+      |> Annot.binding Annot.patt_ground Annot.ty_bool
   in
-  Ast.top_let binding
+  Annot.top_let binding
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Fmt.binding binding |> flush_str_formatter
+         fprintf str_formatter "let %a" Annot.pp_binding binding |> flush_str_formatter
        ]
 
 (* Test Suite *)
@@ -125,13 +124,13 @@ let test_top_let ctxt =
 let suite =
   "Pretty Printing" >::: [
     "Types" >::: [
-      "Boolean" >:: test_ty_bool;
-      "Integer" >:: test_ty_int;
-      "Long"    >:: test_ty_long;
-      "Float"   >:: test_ty_float;
-      "Double"  >:: test_ty_double;
-      "Rune"    >:: test_ty_rune;
-      "String"  >:: test_ty_string;
+      "Boolean" >:: test_pp_ty_bool;
+      "Integer" >:: test_pp_ty_int;
+      "Long"    >:: test_pp_ty_long;
+      "Float"   >:: test_pp_ty_float;
+      "Double"  >:: test_pp_ty_double;
+      "Rune"    >:: test_pp_ty_rune;
+      "String"  >:: test_pp_ty_string;
     ];
     "Expressions" >::: [
       "Booleans" >:: test_expr_bool;
