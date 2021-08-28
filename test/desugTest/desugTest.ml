@@ -188,6 +188,30 @@ let test_desug_expr_string ctxt =
     AnnotTest.TypeTest.assert_ty_equal ~ctxt Annot.Type.string ty;
     AnnotTest.AstTest.assert_expr_equal ~ctxt annot expr)
 
+let test_desug_expr_ident ctxt =
+  let env = EnvTest.fresh () in
+  let value = () |> Sym.seq |> Sym.gen in
+  let bound = Annot.Type.bool in
+  let syntax =
+    let loc = LocTest.gen () in
+    Syntax.Ast.ident loc value
+  in
+  let annot = Annot.Ast.ident value in
+  Env.bind value bound env (fun env ->
+    Desug.desug_expr env syntax (fun ty expr ->
+      AnnotTest.TypeTest.assert_ty_equal ~ctxt bound ty;
+      AnnotTest.AstTest.assert_expr_equal ~ctxt annot expr))
+
+let test_desug_expr_ident_unbound _ =
+  let env = EnvTest.fresh () in
+  let loc = LocTest.gen () in
+  let id = () |> Sym.seq |> Sym.gen in
+  let syntax = Syntax.Ast.ident loc id in
+  let exn = Desug.UnboundIdentifier (loc, id) in
+  assert_raises exn (fun _ ->
+    Desug.desug_expr env syntax (fun _ _ ->
+      assert_failure "Expected exception"))
+
 let test_desug_patt_ground ctxt =
   let env = EnvTest.fresh () in
   let syntax =
@@ -436,6 +460,10 @@ let suite =
       ];
       "Runes"    >:: test_desug_expr_rune;
       "Strings"  >:: test_desug_expr_string;
+      "Identifiers" >::: [
+        "Bound"   >:: test_desug_expr_ident;
+        "Unbound" >:: test_desug_expr_ident_unbound;
+      ]
     ];
     "Patterns" >::: [
       "Ground"      >:: test_desug_patt_ground;

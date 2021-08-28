@@ -98,6 +98,7 @@ let test_desug =
 
 let test_norm =
   "Normalization" >::: [
+    NormTest.suite;
   ]
 
 let test_monomorph =

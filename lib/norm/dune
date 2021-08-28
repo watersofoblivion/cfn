@@ -3,5 +3,6 @@
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries
+    common
     annot
     ir))
