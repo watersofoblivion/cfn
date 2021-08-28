@@ -242,3 +242,40 @@ val file : pkg -> import list -> top list -> file
 (** [file pkg imports tops] constructs a source file where [pkg] is the package
     statement, [imports] is the list of import statements, and [tops] is the
     list of top-level statements. *)
+
+(** {2 Operations} *)
+
+(** {3 Location} *)
+
+val loc_expr : expr -> Loc.t
+(** [loc_expr expr] returns the location of the expression [expr]. *)
+
+val loc_patt : patt -> Loc.t
+(** [loc_patt patt] returns the location of the pattern [patt]. *)
+
+val loc_binding : binding -> Loc.t
+(** [loc_binding binding] returns the location of the binding [binding]. *)
+
+val loc_top : top -> Loc.t
+(** [loc_top top] returns the location of the top-level expression [top]. *)
+
+val loc_name : name -> Loc.t
+(** [loc_name name] returns the location of the import name [name]. *)
+
+val loc_src : src -> Loc.t
+(** [loc_src src] returns the location of the import source [src]. *)
+
+val loc_from : from -> Loc.t
+(** [loc_from from] returns the location of the from clause [from]. *)
+
+val loc_alias : alias -> Loc.t
+(** [loc_alias alias] returns the location of the alias clause [alias]. *)
+
+val loc_pkgs : pkgs -> Loc.t
+(** [loc_pkgs pkgs] returns the location of the alias list [pkgs]. *)
+
+val loc_import : import -> Loc.t
+(** [loc_import import] returns the location of the import statement [import]. *)
+
+val loc_pkg : pkg -> Loc.t
+(** [loc_pkg pkg] returns the location of the package statement [pkg]. *)
