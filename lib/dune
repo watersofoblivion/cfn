@@ -12,6 +12,7 @@
    opt
    mono
    clos
+   parse
    desug
    norm
    monomorph
