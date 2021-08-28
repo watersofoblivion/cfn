@@ -1,4 +1,4 @@
-(** {1 A-Normalization} *)
+(** {1 A-Normalization Test} *)
 
 open OUnit2
 

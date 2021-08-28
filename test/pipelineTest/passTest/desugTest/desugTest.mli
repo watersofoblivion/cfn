@@ -1,4 +1,4 @@
-(** {1 Desugaring} *)
+(** {1 Desugaring Tests} *)
 
 open OUnit2
 

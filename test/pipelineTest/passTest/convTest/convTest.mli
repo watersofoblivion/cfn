@@ -1,4 +1,4 @@
-(** {1 Closure Conversion} *)
+(** {1 Closure Conversion Tests} *)
 
 open OUnit2
 

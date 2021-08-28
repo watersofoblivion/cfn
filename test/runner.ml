@@ -45,14 +45,7 @@ let test_common =
     CommonTest.LexTest.suite;
   ]
 
-let test_syntax =
-  "Abstract Syntax" >::: [
-    SyntaxTest.TypeTest.suite;
-    SyntaxTest.AstTest.suite;
-    SyntaxTest.FmtTest.suite;
-    SyntaxTest.LexerTest.suite;
-    SyntaxTest.ParserTest.suite
-  ]
+let test_syntax = SyntaxTest.suite
 let test_annot = AnnotTest.suite
 let test_ir = IrTest.suite
 let test_mono = MonoTest.suite
@@ -62,25 +55,10 @@ let test_opt =
   "Optimizer" >::: [
   ]
 
-let test_desug =
-  "Desugaring" >::: [
-    DesugTest.suite;
-  ]
-
-let test_norm =
-  "Normalization" >::: [
-    NormTest.suite;
-  ]
-
-let test_monomorph =
-  "Monomorphization" >::: [
-    MonomorphTest.suite;
-  ]
-
-let test_conv =
-  "Closure Conversion" >::: [
-    ConvTest.suite;
-  ]
+let test_desug = DesugTest.suite
+let test_norm = NormTest.suite
+let test_monomorph = MonomorphTest.suite
+let test_conv = ConvTest.suite
 
 let test_codegen =
   let runtime =

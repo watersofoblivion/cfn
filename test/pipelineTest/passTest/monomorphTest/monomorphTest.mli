@@ -1,4 +1,4 @@
-(** {1 Monomorphization} *)
+(** {1 Monomorphization Tests} *)
 
 open OUnit2
 
