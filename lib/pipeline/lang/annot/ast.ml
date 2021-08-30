@@ -7,7 +7,7 @@ type expr =
   | Float of { value: float }
   | Double of { value: float }
   | Rune of { value: Uchar.t }
-  | String of { value: Uchar.t list }
+  | String of { value: string; len: int }
   | Ident of { id: Sym.t }
 
 type patt =
@@ -26,7 +26,9 @@ let expr_long value = Long { value }
 let expr_float value = Float { value }
 let expr_double value = Double { value }
 let expr_rune value = Rune { value }
-let expr_string value = String { value }
+let expr_string value =
+  let value = Utf8.normalize value in
+  String { value; len = Utf8.length value }
 let expr_ident id = Ident { id }
 
 let patt_ground = PattGround

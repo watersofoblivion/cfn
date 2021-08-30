@@ -4,7 +4,7 @@ open OUnit2
 
 (* Helpers *)
 
-let fresh _ = () |> Sym.seq |> Env.env
+let fresh ?seq:(seq = Sym.seq ()) _ = Env.env seq
 
 (* Assertions *)
 

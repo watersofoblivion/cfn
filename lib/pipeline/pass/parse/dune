@@ -1,4 +1,3 @@
-(ocamllex lexer)
 (menhir
  (modules parser)
  (flags
@@ -6,17 +5,18 @@
    --explain
    --dump
    --dump-resolved
-   --no-dollars))
+   --no-dollars
+   --table
+   --inspection))
 
 (library
   (name parse)
   (modes native)
   (instrumentation (backend bisect_ppx))
-; TODO - Wire up Sedlex once I get to rune/string.
-;  (preprocess
-;    (pps sedlex.ppx))
+  (preprocess
+    (pps sedlex.ppx))
   (libraries
-    unix
-    str
+    sedlex
+    menhirLib
     syntax
     common))

@@ -9,7 +9,7 @@ type expr =
   | Float of { loc: Loc.t; lexeme: string }
   | Double of { loc: Loc.t; lexeme: string }
   | Rune of { loc: Loc.t; value: Uchar.t }
-  | String of { loc: Loc.t; value: Uchar.t list }
+  | String of { loc: Loc.t; value: string; len: int }
   | Ident of { loc: Loc.t; id: Sym.t }
 
 type patt =
@@ -43,7 +43,9 @@ let expr_long loc lexeme = Long { loc; lexeme }
 let expr_float loc lexeme = Float { loc; lexeme }
 let expr_double loc lexeme = Double { loc; lexeme }
 let expr_rune loc value = Rune { loc; value }
-let expr_string loc value = String { loc; value }
+let expr_string loc value =
+  let value = Utf8.normalize value in
+  String { loc; value; len = Utf8.length value }
 let expr_ident loc id = Ident { loc; id }
 
 let patt_ground loc = PattGround { loc }

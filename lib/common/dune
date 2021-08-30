@@ -3,4 +3,7 @@
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries
-    cmdliner))
+    cmdliner
+    uutf
+    uunf
+    uunf.string))

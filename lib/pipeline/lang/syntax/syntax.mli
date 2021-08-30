@@ -39,8 +39,9 @@ type expr = private
       value: Uchar.t (** Value *)
     } (** Rune literal *)
   | String of {
-      loc:   Loc.t;       (** Location *)
-      value: Uchar.t list (** Value *)
+      loc:   Loc.t;  (** Location *)
+      value: string; (** UTF-8 encoded value *)
+      len:   int     (** Length (in runes) *)
     } (** String literal *)
   | Ident of {
       loc: Loc.t; (** Location *)
@@ -171,9 +172,9 @@ val expr_rune : Loc.t -> Uchar.t -> expr
 (** [expr_rune loc value] constructs a rune literal at location [loc] with value
     [value]. *)
 
-val expr_string : Loc.t -> Uchar.t list -> expr
+val expr_string : Loc.t -> string -> expr
 (** [expr_string loc value] constructs a string literal at location [loc] with
-    value [value]. *)
+    value [value].  The value is normalized and the length is computed. *)
 
 val expr_ident : Loc.t -> Sym.t -> expr
 (** [expr_ident loc id] constructs an identifier at location [loc] with

@@ -7,7 +7,7 @@ type atom =
   | Float of { value: float }
   | Double of { value: float }
   | Rune of { value: Uchar.t }
-  | String of { value: Uchar.t list }
+  | String of { value: string; len: int }
   | Ident of { id: Sym.t }
 
 type expr =
@@ -32,7 +32,9 @@ let atom_long value = Long { value }
 let atom_float value = Float { value }
 let atom_double value = Double { value }
 let atom_rune value = Rune { value }
-let atom_string value = String { value }
+let atom_string value =
+  let value = Utf8.normalize value in
+  String { value; len = Utf8.length value }
 let atom_ident id = Ident { id }
 
 let expr_atom atom = Atom { atom }

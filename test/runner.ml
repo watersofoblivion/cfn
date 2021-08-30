@@ -42,23 +42,25 @@ let test_common =
     CommonTest.SymTest.suite;
     CommonTest.PrettyTest.suite;
     CommonTest.EnvTest.suite;
-    CommonTest.LexTest.suite;
   ]
 
-let test_syntax = SyntaxTest.suite
-let test_annot = AnnotTest.suite
-let test_ir = IrTest.suite
-let test_mono = MonoTest.suite
-let test_clos = ClosTest.suite
-
-let test_opt =
-  "Optimizer" >::: [
+let test_pipeline =
+  "Pipeline" >::: [
+    "Languages" >::: [
+      SyntaxTest.suite;
+      AnnotTest.suite;
+      IrTest.suite;
+      MonoTest.suite;
+      ClosTest.suite;
+    ];
+    "Passes" >::: [
+      ParseTest.suite;
+      DesugTest.suite;
+      NormTest.suite;
+      MonomorphTest.suite;
+      ConvTest.suite;
+    ];
   ]
-
-let test_desug = DesugTest.suite
-let test_norm = NormTest.suite
-let test_monomorph = MonomorphTest.suite
-let test_conv = ConvTest.suite
 
 let test_codegen =
   let runtime =
@@ -79,6 +81,10 @@ let test_codegen =
     CodegenTest.TmplTest.suite;
   ]
 
+let test_opt =
+  "Optimizer" >::: [
+  ]
+
 let test_cli =
   "Command-Line Interface" >::: [
   ]
@@ -89,16 +95,8 @@ let suite =
     test_system;
     test_source;
     test_common;
-    test_syntax;
-    test_annot;
-    test_ir;
+    test_pipeline;
     test_opt;
-    test_mono;
-    test_clos;
-    test_desug;
-    test_norm;
-    test_monomorph;
-    test_conv;
     test_codegen;
     test_cli
   ]

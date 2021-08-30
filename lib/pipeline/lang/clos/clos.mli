@@ -36,7 +36,8 @@ type atom = private
       value: Uchar.t (** Value *)
     } (** Runes *)
   | String of {
-      value: Uchar.t list (** Value *)
+      value: string; (** UTF-8 encoded value *)
+      len:   int     (** Length in runes *)
     } (** Strings *)
   | Ident of {
       id: Sym.t (** Identifier *)
@@ -121,8 +122,9 @@ val atom_double : float -> atom
 val atom_rune : Uchar.t -> atom
 (** [atom_rune value] constructs a rune literal atom with value [value]. *)
 
-val atom_string : Uchar.t list -> atom
-(** [atom_string value] constructs a string literal atom with value [value]. *)
+val atom_string : string -> atom
+(** [atom_string value] constructs a string literal atom with value [value].
+    The value is normalized and the length is computed. *)
 
 val atom_ident : Sym.t -> atom
 (** [atom_ident id] constructs an identifier atom with identifier [id]. *)

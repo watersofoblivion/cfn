@@ -12,22 +12,17 @@ let pp_ty fmt = function
   | Type.TyString -> fprintf fmt "%s" Prim.id_string
 
 let pp_atom fmt = function
-  | Ast.Bool b -> fprintf fmt "%B" b.value
-  | Ast.Int i -> fprintf fmt "%ld" i.value
-  | Ast.Long l -> fprintf fmt "%Ld" l.value
-  | Ast.Float f -> fprintf fmt "%g" f.value
-  | Ast.Double d -> fprintf fmt "%g" d.value
-  | Ast.Rune r ->
-    r.value
+  | Ast.Bool atom -> fprintf fmt "%B" atom.value
+  | Ast.Int atom -> fprintf fmt "%ld" atom.value
+  | Ast.Long atom -> fprintf fmt "%Ld" atom.value
+  | Ast.Float atom -> fprintf fmt "%g" atom.value
+  | Ast.Double atom -> fprintf fmt "%g" atom.value
+  | Ast.Rune atom ->
+    atom.value
       |> Uchar.to_char
       |> fprintf fmt "'%c'"
-  | Ast.String s ->
-    fprintf fmt "\"";
-    s.value
-      |> List.map Uchar.to_char
-      |> List.iter (fprintf fmt "%c");
-    fprintf fmt "\""
-  | Ast.Ident ident -> Sym.pp fmt ident.id
+  | Ast.String atom ->fprintf fmt "%S" atom.value
+  | Ast.Ident atom -> Sym.pp fmt atom.id
 
 let pp_expr fmt = function
   | Ast.Atom expr -> pp_atom fmt expr.atom

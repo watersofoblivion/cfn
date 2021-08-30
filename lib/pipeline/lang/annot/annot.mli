@@ -36,7 +36,8 @@ type expr = private
       value: Uchar.t (** Value *)
     } (** Runes *)
   | String of {
-      value: Uchar.t list (** Value *)
+      value: string; (** UTF-8 encoded value *)
+      len:   int     (** Length in runes *)
     } (** Strings *)
   | Ident of {
       id: Sym.t (** Identifier *)
@@ -109,8 +110,9 @@ val expr_double : float -> expr
 val expr_rune : Uchar.t -> expr
 (** [expr_rune value] constructs a rune literal with value [value]. *)
 
-val expr_string : Uchar.t list -> expr
-(** [expr_string value] constructs a string literal with value [value]. *)
+val expr_string : string -> expr
+(** [expr_string value] constructs a string literal with value [value].  The
+    value is normalized and the length is computed. *)
 
 val expr_ident : Sym.t -> expr
 (** [expr_ident id] constructs an identifier literal with the identifier [id]. *)

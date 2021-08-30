@@ -13,8 +13,9 @@ val suite : test
  * {2 Helpers}
  *)
 
-val fresh : unit -> 'a Env.t
-(** [fresh _] returns an empty environment using a fresh symbol sequence. *)
+val fresh : ?seq:Sym.seq -> unit -> 'a Env.t
+(** [fresh _] returns an empty environment.  If given, the environment is
+    created using [seq].  Otherwise, it is created with a fresh symbol sequence. *)
 
 (**
  * {2 Assertions}

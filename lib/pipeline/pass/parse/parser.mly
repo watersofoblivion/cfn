@@ -4,59 +4,59 @@
   let make_ty_constr (start_loc, end_loc) constr env kontinue =
     let loc = Loc.loc start_loc end_loc in
     Env.constr_of constr env (fun env sym ->
-      Type.constr loc sym
+      Syntax.ty_constr loc sym
         |> kontinue env)
 
   let make_lit_bool (start_loc, end_loc) b env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Ast.bool loc b
+    Syntax.expr_bool loc b
       |> kontinue env
 
   let make_lit_int (start_loc, end_loc) i env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Ast.int loc i
+    Syntax.expr_int loc i
       |> kontinue env
 
   let make_lit_long (start_loc, end_loc) l env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Ast.long loc l
+    Syntax.expr_long loc l
       |> kontinue env
 
   let make_lit_float (start_loc, end_loc) f env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Ast.float loc f
+    Syntax.expr_float loc f
       |> kontinue env
 
   let make_lit_double (start_loc, end_loc) d env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Ast.double loc d
+    Syntax.expr_double loc d
       |> kontinue env
 
   let make_lit_rune (start_loc, end_loc) r env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Ast.rune loc r
+    Syntax.expr_rune loc r
       |> kontinue env
 
   let make_lit_string (start_loc, end_loc) s env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Ast.string loc s
+    Syntax.expr_string loc s
       |> kontinue env
 
   let make_ident (start_loc, end_loc) id env kontinue =
     let loc = Loc.loc start_loc end_loc in
     Env.rename id env (fun env sym ->
-      Ast.ident loc sym
+      Syntax.expr_ident loc sym
         |> kontinue env)
 
   let make_patt_ground (start_loc, end_loc) env kontinue =
     Loc.loc start_loc end_loc
-      |> Ast.patt_ground
+      |> Syntax.patt_ground
       |> kontinue env
 
   let make_patt_var (start_loc, end_loc) id env kontinue =
     let loc = Loc.loc start_loc end_loc in
     Env.rename id env (fun env sym ->
-      Ast.patt_var loc sym
+      Syntax.patt_var loc sym
         |> kontinue env)
 
   let make_value_binding (start_loc, end_loc) patt ty value env kontinue =
@@ -65,23 +65,23 @@
       patt env (fun env patt ->
         match ty with
           | None ->
-            Ast.value_binding loc patt None value
+            Syntax.value_binding loc patt None value
               |> kontinue env
           | Some ty ->
             ty env (fun env ty ->
-              Ast.value_binding loc patt (Some ty) value
+              Syntax.value_binding loc patt (Some ty) value
                 |> kontinue env)))
 
   let make_top_let (start_loc, end_loc) binding env kontinue =
     let loc = Loc.loc start_loc end_loc in
     binding env (fun env binding ->
-      Ast.top_let loc binding
+      Syntax.top_let loc binding
         |> kontinue env)
 
   let make_top_val (start_loc, end_loc) binding env kontinue =
     let loc = Loc.loc start_loc end_loc in
     binding env (fun env binding ->
-      Ast.top_val loc binding
+      Syntax.top_val loc binding
         |> kontinue env)
 
   let rec make_tops tops env kontinue = match tops with
@@ -95,19 +95,19 @@
   let make_name (start_loc, end_loc) id env kontinue =
     let loc = Loc.loc start_loc end_loc in
     Env.rename id env (fun env sym ->
-      Ast.name loc sym
+      Syntax.name loc sym
         |> kontinue env)
 
   let make_src (start_loc, end_loc) name env kontinue =
     let loc = Loc.loc start_loc end_loc in
     name env (fun env name ->
-      Ast.src loc name
+      Syntax.src loc name
         |> kontinue env)
 
   let make_from (start_loc, end_loc) src env kontinue =
     let loc = Loc.loc start_loc end_loc in
     src env (fun env src ->
-      Ast.from loc src
+      Syntax.from loc src
         |> kontinue env)
 
   let make_alias (start_loc, end_loc) pkg alias env kontinue =
@@ -117,10 +117,10 @@
         | Some alias ->
           alias env (fun env alias ->
             let alias = Some alias in
-            Ast.alias loc pkg alias
+            Syntax.alias loc pkg alias
               |> kontinue env)
         | None ->
-          Ast.alias loc pkg None
+          Syntax.alias loc pkg None
             |> kontinue env)
 
   let make_pkgs (start_loc, end_loc) pkgs env kontinue =
@@ -134,7 +134,7 @@
     in
     let loc = Loc.loc start_loc end_loc in
     make_pkgs pkgs env (fun env pkgs ->
-      Ast.pkgs loc pkgs
+      Syntax.pkgs loc pkgs
         |> kontinue env)
 
   let make_import (start_loc, end_loc) from pkgs env kontinue =
@@ -144,10 +144,10 @@
         | Some from ->
           from env (fun env from ->
             let from = Some from in
-            Ast.import loc from pkgs
+            Syntax.import loc from pkgs
               |> kontinue env)
         | None ->
-          Ast.import loc None pkgs
+          Syntax.import loc None pkgs
             |> kontinue env)
 
   let rec make_imports imports env kontinue = match imports with
@@ -161,14 +161,14 @@
   let make_pkg (start_loc, end_loc) id env kontinue =
     let loc = Loc.loc start_loc end_loc in
     id env (fun env id ->
-      Ast.pkg loc id
+      Syntax.pkg loc id
         |> kontinue env)
 
   let make_file pkg imports tops env kontinue =
     pkg env (fun env pkg ->
       make_imports imports env (fun env imports ->
         make_tops tops env (fun env tops ->
-          Ast.file pkg imports tops
+          Syntax.file pkg imports tops
             |> kontinue env)))
 %}
 
@@ -181,6 +181,8 @@
 %token COLON ":"
 %token BIND "="
 %token GROUND "_"
+%token SQUOTE "'"
+%token DQUOTE
 
 /* Keywords */
 %token PACKAGE "package"
@@ -193,44 +195,87 @@
 %token <bool> BOOL
 %token <string> INT LONG FLOAT DOUBLE
 %token <Uchar.t> RUNE
-%token <Uchar.t list> STRING
+%token <string> STRING
 
 /* Identifiers */
 %token <string> UIDENT LIDENT
 
 /* Main Entry Points */
-%type <'a Env.t -> ('a Env.t -> Ast.file -> 'b) -> 'b> package_only imports_only file
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.file -> 'a) -> 'a> package_only imports_only file
 
 %start package_only
 %start imports_only
 %start file
 
 /* Testing Entry Points */
-%type <'a Env.t -> ('a Env.t -> Ast.pkg -> 'b) -> 'b>     pkg_test
-%type <'a Env.t -> ('a Env.t -> Ast.import -> 'b) -> 'b>  import_test
-%type <'a Env.t -> ('a Env.t -> Ast.top -> 'b) -> 'b>     top_test
-%type <'a Env.t -> ('a Env.t -> Ast.binding -> 'b) -> 'b> binding_test
-%type <'a Env.t -> ('a Env.t -> Ast.patt -> 'b) -> 'b>    patt_test
-%type <'a Env.t -> ('a Env.t -> Ast.expr -> 'b) -> 'b>    expr_test
-%type <'a Env.t -> ('a Env.t -> Type.t -> 'b) -> 'b>      ty_test
 
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.name -> 'a) -> 'a> name_test
+%start name_test
+
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.pkg -> 'a) -> 'a> pkg_test
 %start pkg_test
+
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.import -> 'a) -> 'a> import_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.from -> 'a) -> 'a>   from_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.src -> 'a) -> 'a>    src_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.pkgs -> 'a) -> 'a>   pkgs_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.alias -> 'a) -> 'a>  alias_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.name -> 'a) -> 'a>   local_test
 %start import_test
+%start from_test
+%start src_test
+%start pkgs_test
+%start alias_test
+%start local_test
+
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.top -> 'a) -> 'a> top_test
 %start top_test
+
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.binding -> 'a) -> 'a> binding_test
 %start binding_test
+
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.patt -> 'a) -> 'a> patt_test
 %start patt_test
+
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> expr_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> ident_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> lit_test
 %start expr_test
+%start ident_test
+%start lit_test
+
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.ty -> 'a) -> 'a> annot_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.ty -> 'a) -> 'a> ty_test
+%start annot_test
 %start ty_test
 
 %%
 
 /* Test Entry Points */
 
+name_test:
+| name = name; EOF { name }
+
 pkg_test:
 | pkg = pkg; EOF { pkg }
 
 import_test:
 | import = import; EOF { import }
+
+from_test:
+| from = from; EOF { from }
+
+src_test:
+| src = src; EOF { src }
+
+pkgs_test:
+| pkgs = pkgs; EOF { pkgs }
+
+alias_test:
+| alias = alias; EOF { alias }
+
+local_test:
+| local = local; EOF { local }
 
 top_test:
 | top = top; EOF { top }
@@ -243,6 +288,15 @@ patt_test:
 
 expr_test:
 | expr = expr; EOF { expr }
+
+ident_test:
+| ident = ident; EOF { ident }
+
+lit_test:
+| lit = lit; EOF { lit }
+
+annot_test:
+| annot = annot; EOF { annot }
 
 ty_test:
 | ty = ty; EOF { ty }
@@ -322,20 +376,23 @@ patt:
 
 expr:
 | lit = lit  { lit }
-| id = ident { make_ident $sloc id }
+| id = ident { id }
 
 ident:
-| id = UIDENT { id }
-| id = LIDENT { id }
+| id = UIDENT { make_ident $sloc id }
+| id = LIDENT { make_ident $sloc id }
 
 lit:
-| b = BOOL   { make_lit_bool $sloc b }
-| i = INT    { make_lit_int $sloc i }
-| l = LONG   { make_lit_long $sloc l }
-| f = FLOAT  { make_lit_float $sloc f }
-| d = DOUBLE { make_lit_double $sloc d }
-| r = RUNE   { make_lit_rune $sloc r }
-| s = STRING { make_lit_string $sloc s }
+| b = BOOL                       { make_lit_bool $sloc b }
+| i = INT                        { make_lit_int $sloc i }
+| l = LONG                       { make_lit_long $sloc l }
+| f = FLOAT                      { make_lit_float $sloc f }
+| d = DOUBLE                     { make_lit_double $sloc d }
+| "'"; r = RUNE; "'"             { make_lit_rune $sloc r }
+| DQUOTE; segs = str_seg; DQUOTE { make_lit_string $sloc segs }
+
+str_seg:
+| { () }
 
 /* Types */
 

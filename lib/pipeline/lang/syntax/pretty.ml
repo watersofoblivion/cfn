@@ -10,19 +10,17 @@ let pp_ty fmt = function
 (* Expressions *)
 
 let pp_expr fmt = function
-  | Ast.Bool b -> fprintf fmt "%B" b.value
-  | Ast.Int i -> fprintf fmt "%s" i.lexeme
-  | Ast.Long l -> fprintf fmt "%s" l.lexeme
-  | Ast.Float f -> fprintf fmt "%s" f.lexeme
-  | Ast.Double d -> fprintf fmt "%s" d.lexeme
-  | Ast.Rune r -> fprintf fmt "'%c'" (Uchar.to_char r.value)
-  | Ast.String s ->
-    s.value
-      |> List.map Uchar.to_char
-      |> List.map (sprintf "%c")
-      |> String.concat ""
-      |> fprintf fmt "%S"
-  | Ast.Ident ident -> Sym.pp_id fmt ident.id
+  | Ast.Bool expr -> fprintf fmt "%B" expr.value
+  | Ast.Int expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.Long expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.Float expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.Double expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.Rune expr ->
+    expr.value
+      |> Uchar.to_char
+      |> fprintf fmt "'%c'"
+  | Ast.String expr -> fprintf fmt "%S" expr.value
+  | Ast.Ident expr -> Sym.pp_id fmt expr.id
 
 (* Patterns *)
 
