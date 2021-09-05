@@ -1,3 +1,5 @@
+(* Abstract Syntax *)
+
 open Common
 
 type atom =
@@ -11,10 +13,8 @@ type atom =
   | Ident of { id: Sym.t }
 
 type expr =
+  | Builtin of { fn: Builtin.builtin; args: atom list }
   | Atom of { atom: atom }
-
-type block =
-  | Expr of { expr: expr }
 
 type patt =
   | PattGround
@@ -22,6 +22,10 @@ type patt =
 
 type binding =
   | Binding of { patt: patt; ty: Type.ty; value: expr }
+
+type block =
+  | Bind of { binding: binding; scope: block }
+  | Expr of { expr: expr }
 
 type top =
   | Let of { binding: binding }
@@ -37,13 +41,15 @@ let atom_string value =
   String { value; len = Utf8.length value }
 let atom_ident id = Ident { id }
 
+let expr_builtin fn args = Builtin { fn; args }
 let expr_atom atom = Atom { atom }
-
-let block_expr expr = Expr { expr }
 
 let patt_ground = PattGround
 let patt_var id = PattVar { id }
 
 let binding patt ty value = Binding { patt; ty; value }
+
+let block_bind binding scope = Bind { binding; scope }
+let block_expr expr = Expr { expr }
 
 let top_let binding = Let { binding }

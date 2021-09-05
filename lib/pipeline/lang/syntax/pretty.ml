@@ -7,20 +7,52 @@ open Common
 let pp_ty fmt = function
   | Type.TyConstr constr -> Sym.pp_id fmt constr.id
 
+(* Runes *)
+
+let rec pp_rune fmt = function
+  | Ast.RuneLit rune -> pp_rune_lit fmt rune.value
+  | Ast.RuneEscape rune -> fprintf fmt "%s" rune.lexeme
+
+and pp_rune_lit fmt r =
+  if r = Utf8.single_quote
+  then fprintf fmt "'\\''"
+  else
+    r
+      |> Utf8.to_string
+      |> fprintf fmt "%s"
+
+(* Strings *)
+
+let pp_str fmt = function
+  | Ast.StringLit str -> fprintf fmt "%s" str.lexeme
+  | Ast.StringEscape str -> fprintf fmt "%s" str.lexeme
+
+(* Operators *)
+
+let pp_un fmt = function
+  | Op.OpNeg _ -> fprintf fmt "-"
+
+let pp_bin fmt = function
+  | Op.OpAdd _ -> fprintf fmt "+"
+  | Op.OpSub _ -> fprintf fmt "-"
+  | Op.OpMul _ -> fprintf fmt "*"
+  | Op.OpDiv _ -> fprintf fmt "/"
+  | Op.OpMod _ -> fprintf fmt "%%"
+  | Op.OpExp _ -> fprintf fmt "^"
+
 (* Expressions *)
 
-let pp_expr fmt = function
+let rec pp_expr fmt = function
   | Ast.Bool expr -> fprintf fmt "%B" expr.value
   | Ast.Int expr -> fprintf fmt "%s" expr.lexeme
   | Ast.Long expr -> fprintf fmt "%s" expr.lexeme
   | Ast.Float expr -> fprintf fmt "%s" expr.lexeme
   | Ast.Double expr -> fprintf fmt "%s" expr.lexeme
-  | Ast.Rune expr ->
-    expr.value
-      |> Uchar.to_char
-      |> fprintf fmt "'%c'"
-  | Ast.String expr -> fprintf fmt "%S" expr.value
+  | Ast.Rune expr -> pp_rune fmt expr.value
+  | Ast.String expr -> List.iter (pp_str fmt) expr.value
   | Ast.Ident expr -> Sym.pp_id fmt expr.id
+  | Ast.UnOp expr -> fprintf fmt "%a%a" pp_un expr.op pp_expr expr.operand
+  | Ast.BinOp expr -> fprintf fmt "%a %a %a" pp_expr expr.lhs pp_bin expr.op pp_expr expr.rhs
 
 (* Patterns *)
 

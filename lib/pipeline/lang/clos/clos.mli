@@ -16,6 +16,34 @@ type ty = private
   | TyString (** String *)
 (** Types *)
 
+type builtin = private
+  | Add of {
+      ty: ty (** Operand type *)
+    } (** Addition *)
+  | Sub of {
+      ty: ty (** Operand type *)
+    } (** Subtraction *)
+  | Mul of {
+      ty: ty (** Operand type *)
+    } (** Multiplication *)
+  | Div of {
+      ty: ty (** Operand type *)
+    } (** Division *)
+  | Mod of {
+      ty: ty (** Operand type *)
+    } (** Modulus *)
+  | Exp of {
+      ty: ty (** Operand type *)
+    } (** Exponentiation *)
+  | Promote of {
+      sub: ty; (** Subtype *)
+      sup: ty  (** Supertype *)
+    } (** Type Promotion *)
+  | Concat of {
+      ty: ty (** The type of values being concatenated. *)
+    } (** Concatenation *)
+(** Built-in Functions *)
+
 type atom = private
   | Bool of {
       value: bool (** Value *)
@@ -45,16 +73,14 @@ type atom = private
 (** Atomic Values *)
 
 type expr = private
+  | Builtin of {
+      fn:   builtin;  (** Built-in function *)
+      args: atom list (** Arguments *)
+    } (** Built-in Function Application *)
   | Atom of {
       atom: atom (** Atomic Value *)
     } (** Atomic Expression *)
 (** Expressions *)
-
-type block = private
-  | Expr of {
-      expr: expr (** Expression *)
-    } (** Expression Block *)
-(** Block Values *)
 
 type patt = private
   | PattGround (** Ground *)
@@ -70,6 +96,16 @@ type binding = private
       value: expr  (** Value expression *)
     } (** Binding *)
 (** Bindings *)
+
+type block = private
+  | Bind of {
+      binding: binding; (** Binding *)
+      scope:   block    (** Scope *)
+    } (** Let Binding *)
+  | Expr of {
+      expr: expr (** Expression *)
+    } (** Expression Block *)
+(** Block Values *)
 
 type top = private
   | Let of {
@@ -102,6 +138,68 @@ val ty_rune : ty
 val ty_string : ty
 (** [ty_string] constructs a string type. *)
 
+(** {3 Built-in Functions} *)
+
+exception NotIntegral of ty
+(** [NotIntegral ty] is raised when the type [ty] is not an integral type as
+    determined by {!Type.ty_is_numeric}. *)
+
+exception NotFloatingPoint of ty
+(** [NotFloatingPoint ty] is raised when the type [ty] is not a floating-point
+    type as determined by {!Type.ty_is_floating_point}. *)
+
+exception NotNumeric of ty
+(** [NotNumeric ty] is raised when the type [ty] is not a numeric type as
+    determined by {!Type.ty_is_numeric}. *)
+
+exception UnsupportedPromotion of ty * ty
+(** [UnsupportedPromotion (sub, sup)] is raised when the promotion from the
+    subtype [sub] to the supertype [sup] cannot be performed. *)
+
+exception UnsupportedConcatType of ty
+(** [UnsupportedConcatType ty] is raised when the type of a {!Concat} call is
+    not one of the supported types. *)
+
+val builtin_add : ty -> builtin
+(** [builtin_add ty] constructs an addition builtin operating on values of type
+    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
+    {!Type.ty_is_numeric}. *)
+
+val builtin_sub : ty -> builtin
+(** [builtin_sub ty] constructs a subtration builtin operating on values of type
+    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
+    {!Type.ty_is_numeric}. *)
+
+val builtin_mul : ty -> builtin
+(** [builtin_mul ty] constructs a multiplication builtin operating on values of
+    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
+    by {!Type.ty_is_numeric}. *)
+
+val builtin_div : ty -> builtin
+(** [builtin_div ty] constructs a division builtin operating on values of type
+    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
+    {!Type.ty_is_numeric}. *)
+
+val builtin_mod : ty -> builtin
+(** [builtin_mod ty] constructs a modulus builtin operating on values of type
+    [ty].  Raises {!NotIntegral} if [ty] is not an integral type as determined
+    by {!Type.ty_is_integral}. *)
+
+val builtin_exp : ty -> builtin
+(** [builtin_exp ty] constructs an exponentiation builtin operating on values of
+    type [ty].  Raises {!NotFloatingPoint} if [ty] is not a floating-point type
+    as determined by {!Type.ty_is_floating_point}. *)
+
+val builtin_promote : ty -> ty -> builtin
+(** [builtin_promote sub sup] constructs a promotion builtin promoting values of
+    the subtype [sub] to values of the supertype [sup].  Raises
+    {!UnsupportedPromotion} if promoting from [sub] to [sup] is not supported. *)
+
+val builtin_concat : ty -> builtin
+(** [builtin_concat ty] constructs a concatenation builtin operating on values
+    of type [ty].  Raises {!UnsupportedConcatType} if [ty] is not one of the
+    allowed types for concatenation. *)
+
 (** {3 Atoms} *)
 
 val atom_bool : bool -> atom
@@ -131,13 +229,12 @@ val atom_ident : Sym.t -> atom
 
 (** {3 Expressions} *)
 
+val expr_builtin : builtin -> atom list -> expr
+(** [expr_builtin fn args] constructs an application of the built-in function
+    [fn] to the atomic arguments [args]. *)
+
 val expr_atom : atom -> expr
 (** [expr_atom atom] constructs an atomic value expression of the atom [atom]. *)
-
-(** {3 Blocks} *)
-
-val block_expr : expr -> block
-(** [block_expr expr] constructs an expression block of the expression [expr]. *)
 
 (** {3 Patterns} *)
 
@@ -153,6 +250,15 @@ val binding : patt -> ty -> expr -> binding
 (** [binding patt ty value] constructs a binding that binds the value [value] of
     type [ty] to the pattern [patt]. *)
 
+(** {3 Blocks} *)
+
+val block_bind : binding -> block -> block
+(** [block_bind binding scope] constructs a [let] binding which binds [binding]
+    in [scope]. *)
+
+val block_expr : expr -> block
+(** [block_expr expr] constructs an expression block of the expression [expr]. *)
+
 (** {3 Top-Level Bindings} *)
 
 val top_let : binding -> top
@@ -161,15 +267,31 @@ val top_let : binding -> top
 
 (** {2 Operations} *)
 
-(** {3 Type Equality} *)
+(** {3 Types} *)
 
 val ty_equal : ty -> ty -> bool
 (** [ty_equal ty ty'] tests if type [ty] is equal to type [ty']. *)
+
+val ty_is_integral : ty -> bool
+(** [ty_is_integral ty] tests if type [ty] is an integral ([Int] or [Long])
+    type. *)
+
+val ty_is_floating_point : ty -> bool
+(** [ty_is_floating_point ty] tests if type [ty] is a floating-point ([Float] or
+    [Double]) type. *)
+
+val ty_is_numeric : ty -> bool
+(** [ty_is_numeric ty] tests if type [ty] is a numeric (integral or
+    floating-point) type. *)
 
 (** {3 Pretty Printing} *)
 
 val pp_ty : formatter -> ty -> unit
 (** [pp_ty fmt ty] pretty-prints the type [ty] to the formatter [fmt]. *)
+
+val pp_builtin : formatter -> builtin -> unit
+(** [pp_builtin fmt builtin] pretty-prints the application of the built-in
+    function [builtin] to the formatter [fmt]. *)
 
 val pp_atom : formatter -> atom -> unit
 (** [pp_atom fmt atom] pretty-prints the atomic value [atom] to the formatter
@@ -201,6 +323,21 @@ exception UnboundIdentifier of Sym.t
 exception MismatchedTypes of ty * ty
 (** [MismatchedTypes (inferred, annotated)] is raised when the [inferred] type
     and the [annotated] type disagree. *)
+
+exception InvalidArity of int * int
+(** [InvalidArity (expected, actual)] is raised when a built-in function of
+    arity [expected] is applied to [actual] arguments. *)
+
+exception UnsupportedConcatArg of atom * ty * ty
+(** [UnsupportedConcatArg (expr, inferred, expected)] is raised when the
+    argument [expr] to a {!Concat} call is of type [inferred] instead of the
+    type [expected]. *)
+
+val check_builtin : ty Env.t -> builtin -> atom list -> (ty -> 'a) -> 'a
+(** [check_builtin env builtin args kontinue] type-checks the application of the
+    built-in function [builtin] to the arguments [args] in the environment
+    [env].  The result type of the application is passed to the continuation
+    [kontinue]. *)
 
 val check_atom : ty Env.t -> atom -> (ty -> 'a) -> 'a
 (** [check_atom env atom kontinue] type-checks the atomic value [atom] in the

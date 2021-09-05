@@ -7,40 +7,70 @@
       Syntax.ty_constr loc sym
         |> kontinue env)
 
+  let make_rune_lit (start_loc, end_loc) uchar env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    Syntax.rune_lit loc uchar
+      |> kontinue env
+
+  let make_rune_escape (start_loc, end_loc) lexeme env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    Syntax.rune_escape loc lexeme
+      |> kontinue env
+
+  let make_str_lit (start_loc, end_loc) lexeme env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    Syntax.str_lit loc lexeme
+      |> kontinue env
+
+  let make_str_escape (start_loc, end_loc) lexeme env kontinue =
+    let loc = Loc.loc start_loc end_loc in
+    Syntax.str_escape loc lexeme
+      |> kontinue env
+
   let make_lit_bool (start_loc, end_loc) b env kontinue =
     let loc = Loc.loc start_loc end_loc in
     Syntax.expr_bool loc b
       |> kontinue env
 
-  let make_lit_int (start_loc, end_loc) i env kontinue =
+  let make_lit_int (start_loc, end_loc) lexeme env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Syntax.expr_int loc i
+    Syntax.expr_int loc lexeme
       |> kontinue env
 
-  let make_lit_long (start_loc, end_loc) l env kontinue =
+  let make_lit_long (start_loc, end_loc) lexeme env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Syntax.expr_long loc l
+    Syntax.expr_long loc lexeme
       |> kontinue env
 
-  let make_lit_float (start_loc, end_loc) f env kontinue =
+  let make_lit_float (start_loc, end_loc) lexeme env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Syntax.expr_float loc f
+    Syntax.expr_float loc lexeme
       |> kontinue env
 
-  let make_lit_double (start_loc, end_loc) d env kontinue =
+  let make_lit_double (start_loc, end_loc) lexeme env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Syntax.expr_double loc d
+    Syntax.expr_double loc lexeme
       |> kontinue env
 
   let make_lit_rune (start_loc, end_loc) r env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Syntax.expr_rune loc r
-      |> kontinue env
+    r env (fun env r ->
+      Syntax.expr_rune loc r
+        |> kontinue env)
 
-  let make_lit_string (start_loc, end_loc) s env kontinue =
+  let rec make_str_segs segs env kontinue = match segs with
+    | [] -> kontinue env []
+    | seg :: segs ->
+      seg env (fun env seg ->
+        make_str_segs segs env (fun env segs ->
+          seg :: segs
+            |> kontinue env))
+
+  let make_lit_string (start_loc, end_loc) segs env kontinue =
     let loc = Loc.loc start_loc end_loc in
-    Syntax.expr_string loc s
-      |> kontinue env
+    make_str_segs segs env (fun env segs ->
+      Syntax.expr_string loc segs
+        |> kontinue env)
 
   let make_ident (start_loc, end_loc) id env kontinue =
     let loc = Loc.loc start_loc end_loc in
@@ -194,7 +224,14 @@
 /* Literals */
 %token <bool> BOOL
 %token <string> INT LONG FLOAT DOUBLE
+
+/* Unicode */
+%token <string> UESC
+
+/* Runes */
 %token <Uchar.t> RUNE
+
+/* Strings */
 %token <string> STRING
 
 /* Identifiers */
@@ -383,16 +420,21 @@ ident:
 | id = LIDENT { make_ident $sloc id }
 
 lit:
-| b = BOOL                       { make_lit_bool $sloc b }
-| i = INT                        { make_lit_int $sloc i }
-| l = LONG                       { make_lit_long $sloc l }
-| f = FLOAT                      { make_lit_float $sloc f }
-| d = DOUBLE                     { make_lit_double $sloc d }
-| "'"; r = RUNE; "'"             { make_lit_rune $sloc r }
-| DQUOTE; segs = str_seg; DQUOTE { make_lit_string $sloc segs }
+| b = BOOL                             { make_lit_bool $sloc b }
+| i = INT                              { make_lit_int $sloc i }
+| l = LONG                             { make_lit_long $sloc l }
+| f = FLOAT                            { make_lit_float $sloc f }
+| d = DOUBLE                           { make_lit_double $sloc d }
+| "'"; r = rune; "'"                   { make_lit_rune $sloc r }
+| DQUOTE; segs = list(str_seg); DQUOTE { make_lit_string $sloc segs }
+
+rune:
+| r = RUNE    { make_rune_lit $sloc r }
+| uesc = UESC { make_rune_escape $sloc uesc }
 
 str_seg:
-| { () }
+| s = STRING  { make_str_lit $sloc s }
+| uesc = UESC { make_str_escape $sloc uesc }
 
 /* Types */
 

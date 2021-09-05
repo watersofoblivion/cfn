@@ -28,3 +28,17 @@ let ty_equal ty ty' = match (ty, ty') with
   | TyRune, TyRune
   | TyString, TyString -> true
   | _ -> false
+
+(* Operations *)
+
+let ty_is_integral = function
+  | TyInt
+  | TyLong -> true
+  | _ -> false
+
+let ty_is_floating_point = function
+  | TyFloat
+  | TyDouble -> true
+  | _ -> false
+
+let ty_is_numeric ty = ty_is_integral ty || ty_is_floating_point ty

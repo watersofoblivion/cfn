@@ -2,6 +2,13 @@
 
 (** {2 Runes} *)
 
+val single_quote : Uchar.t
+(** [single_quote] is the Unicode character for a single quote [']. *)
+
+val to_string : Uchar.t -> string
+(** [to_string uchar] converts the unicode character [uchar] into a UTF-8
+    encoded string. *)
+
 (** {2 Strings} *)
 
 val length : string -> int

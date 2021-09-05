@@ -1,5 +1,6 @@
 open Printf
 
+open Common
 open Parser
 
 (* Initializers *)
@@ -62,8 +63,7 @@ let lit_double lexbuf =
   let lexeme = Sedlexing.Utf8.lexeme lexbuf in
   DOUBLE lexeme
 
-let lit_esc_squote =
-  RUNE (Uchar.of_char '\'')
+let lit_esc_squote = RUNE Utf8.single_quote
 
 let cp_prefix = Str.regexp "\\[Uu]\\+?"
 let lit_codepoint lexbuf =
@@ -115,8 +115,20 @@ let ident = [%sedlex.regexp? uppercase|lowercase|'0'..'9'|'_']
 
 let unicode_radix = [%sedlex.regexp? 'u'|'U']
 
+let squote = [%sedlex.regexp? "'"]
+let dquote = [%sedlex.regexp? '"']
+
+let esc_squote = [%sedlex.regexp? "\\'"]
+let esc_dquote = [%sedlex.regexp? "\\\""]
+let esc_nl = [%sedlex.regexp? "\\n"]
+let esc_cr = [%sedlex.regexp? "\\r"]
+let esc_tab = [%sedlex.regexp? "\\t"]
+
 (* Lexers *)
 
+(*
+ * Main lexer
+ *)
 let rec lex_main lexbuf =
   match%sedlex lexbuf with
     (* Non-printable *)
@@ -125,13 +137,13 @@ let rec lex_main lexbuf =
     | newline         -> new_line lex_main lexbuf
 
     (* Punctuation *)
-    | '|'  -> punct_pipe
-    | "->" -> punct_arrow
-    | ':'  -> punct_colon
-    | '='  -> punct_bind
-    | '_'  -> punct_ground
-    | "'"  -> punct_squote
-    | '"'  -> punct_dquote
+    | '|'    -> punct_pipe
+    | "->"   -> punct_arrow
+    | ':'    -> punct_colon
+    | '='    -> punct_bind
+    | '_'    -> punct_ground
+    | squote -> punct_squote
+    | dquote -> punct_dquote
 
     (* Keywords *)
     | "package" -> kwd_package
@@ -167,7 +179,7 @@ let rec lex_main lexbuf =
     | Opt sign, Plus decimal_digit, decimal, Plus decimal_digit, Opt (exponent, Opt sign, Plus decimal_digit), double_suffix -> lit_double lexbuf
 
     (* Strings *)
-    | '"', Star ("\\\"" | Compl '"'), '"' -> lit_string lexbuf
+    (* | '"', Star ("\\\"" | Compl '"'), '"' -> lit_string lexbuf *)
 
     (* Identifiers *)
     | lowercase, Star ident -> lit_lident lexbuf
@@ -176,15 +188,46 @@ let rec lex_main lexbuf =
     (* Error *)
     | _ -> failwith "Lexing error"
 
-let rec lex_rune lexbuf =
+(*
+ * Lexes the body of a rune.  Allowed syntaxes are:
+ *
+ * {ul
+ *   {li Unicode Escape - [\U+0A].  The 'U' and the hexadecimal digits are case-insensitive and the [+] is optional.}
+ *   {li Escape Sequences - Specifically, [\'], [\n], [\r], [\t], [\0]}
+ *   {li Literal - Any unicode character that is not a single quote and does not match any of the above. For example, [a] or [ß].}
+ * }
+ *
+ * Also lexes the closing single quote.
+ *)
+let lex_rune lexbuf =
   match%sedlex lexbuf with
-    | "\\'"                                                 -> lit_esc_squote
+    | esc_squote                                            -> lit_esc_squote
+    | esc_nl                                                -> lit_esc_squote
+    | esc_cr                                                -> lit_esc_squote
+    | esc_tab                                               -> lit_esc_squote
     | '\\', unicode_radix, Opt '+', Rep (hex_digit, 2 .. 6) -> lit_codepoint lexbuf
-    | Compl "'"                                             -> lit_rune lexbuf
-    | "'"                                                   -> punct_squote
-    | _ -> failwith "Lexing error (rune)"
+    (* | Compl ("'" | "\\", ('n' | 't' | 'r'))                 -> lit_rune lexbuf *)
+    | squote                                                -> punct_squote
+    | _                                                     -> failwith "Lexing error (rune)"
 
-let rec lex_str_seg lexbuf =
+(**
+ * Lexes the body of a string.  Allowed syntaxes are:
+ *
+ * {ul
+ *   {li Unicode Escape - [\U+0A].  The 'U' and the hexadecimal digits are case-insensitive and the [+] is optional.}
+ *   {li Escape Sequences - Specifically, <double-quote>, [\n], [\r], [\t], [\0]}
+ *   {li Literal - A sequence of unicode characters that are not a double quote and do not match any of the above.  For example, [foo bar].}
+ * }
+ *
+ * Also lexes the closing double quote.
+ *)
+let lex_str lexbuf =
   match%sedlex lexbuf with
-    | '"' -> punct_dquote
-    | _ -> failwith "Lexing error (string segment)"
+    | esc_dquote                                            -> lit_esc_squote
+    | esc_nl                                                -> lit_esc_squote
+    | esc_cr                                                -> lit_esc_squote
+    | esc_tab                                               -> lit_esc_squote
+    | '\\', unicode_radix, Opt '+', Rep (hex_digit, 2 .. 6) -> punct_dquote
+    (* | Plus (Compl "\\'")                                    -> punct_dquote *)
+    | dquote                                                -> punct_dquote
+    | _                                                     -> failwith "Lexing error (string segment)"

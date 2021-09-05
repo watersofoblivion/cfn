@@ -13,6 +13,55 @@ type ty = private
     } (** Type Constructor *)
 (** Types *)
 
+type rune =
+  | RuneLit of {
+      loc:   Loc.t;  (** Location *)
+      value: Uchar.t (** Codepoint *)
+    } (** A unicode rune *)
+  | RuneEscape of {
+      loc: Loc.t;    (** Location *)
+      lexeme: string (** Lexeme *)
+    } (** A unicode escape sequence *)
+(** Runes *)
+
+type str =
+  | StringLit of {
+      loc:    Loc.t; (** Location *)
+      lexeme: string (** Lexeme *)
+    } (** A string literal *)
+  | StringEscape of {
+      loc:    Loc.t; (** Location *)
+      lexeme: string (** Lexeme *)
+    } (** A unicode escape sequence. *)
+(** Strings *)
+
+type un =
+  | OpNeg of {
+      loc: Loc.t (** Location *)
+    } (** Negation *)
+(** Unary Operators *)
+
+type bin =
+  | OpAdd of {
+      loc: Loc.t (** Location *)
+    } (** Addition *)
+  | OpSub of {
+      loc: Loc.t (** Location *)
+    } (** Subtraction *)
+  | OpMul of {
+      loc: Loc.t (** Location *)
+    } (** Multiplication *)
+  | OpDiv of {
+      loc: Loc.t (** Location *)
+    } (** Division *)
+  | OpMod of {
+      loc: Loc.t (** Location *)
+    } (** Modulus *)
+  | OpExp of {
+      loc: Loc.t (** Location *)
+    } (** Exponentiation *)
+(** Binary Operators *)
+
 type expr = private
   | Bool of {
       loc:   Loc.t; (** Location *)
@@ -35,18 +84,28 @@ type expr = private
       lexeme: string (** Lexeme *)
     } (** Double literal *)
   | Rune of {
-      loc:   Loc.t;  (** Location *)
-      value: Uchar.t (** Value *)
+      loc:   Loc.t; (** Location *)
+      value: rune   (** Value *)
     } (** Rune literal *)
   | String of {
-      loc:   Loc.t;  (** Location *)
-      value: string; (** UTF-8 encoded value *)
-      len:   int     (** Length (in runes) *)
+      loc:   Loc.t;   (** Location *)
+      value: str list (** UTF-8 encoded value *)
     } (** String literal *)
   | Ident of {
       loc: Loc.t; (** Location *)
       id:  Sym.t  (** Identifier *)
     } (** Identifier *)
+  | UnOp of {
+      loc:     Loc.t; (** Location *)
+      op:      un;    (** Operator *)
+      operand: expr   (** Operand *)
+    } (** Unary Operation *)
+  | BinOp of {
+      loc: Loc.t; (** Location *)
+      op:  bin;   (** Operator *)
+      lhs: expr;  (** Left-hand operand *)
+      rhs: expr   (** Right-hand operand *)
+    } (** Binary Operation *)
 (** Expressions *)
 
 type patt = private
@@ -146,6 +205,49 @@ val ty_constr : Loc.t -> Sym.t -> ty
 (** [ty_constr loc id] constructs a type constructor at location [loc] for the
     type [id]. *)
 
+(** {3 Runes} *)
+
+val rune_lit : Loc.t -> Uchar.t -> rune
+(** [rune_lit loc value] constructs a unicode rune at location [loc] with the
+    value [value]. *)
+
+val rune_escape : Loc.t -> string -> rune
+(** [rune_escape loc lexeme] constructs a unicode escape sequence rune at
+    location [loc] with lexeme [lexeme]. *)
+
+(** {3 Strings} *)
+
+val str_lit : Loc.t -> string -> str
+(** [str_lit loc lexeme] constructs a string literal string segment at location
+    [loc] with lexeme [lexeme]. *)
+
+val str_escape : Loc.t -> string -> str
+(** [str_escape loc lexeme] constructs a unicode escape sequence string segment
+    at location [loc] with lexeme [lexeme]. *)
+
+(** {3 Operators} *)
+
+val un_neg : Loc.t -> un
+(** [un_neg loc] constructs a unary negation operator at location [loc]. *)
+
+val bin_add : Loc.t -> bin
+(** [bin_add loc] constructs a binary addition operator at location [loc]. *)
+
+val bin_sub : Loc.t -> bin
+(** [bin_sub loc] constructs a binary subtraction operator at location [loc]. *)
+
+val bin_mul : Loc.t -> bin
+(** [bin_mul loc] constructs a binary multiplication operator at location [loc]. *)
+
+val bin_div : Loc.t -> bin
+(** [bin_div loc] constructs a binary division operator at location [loc]. *)
+
+val bin_mod : Loc.t -> bin
+(** [bin_mod loc] constructs a binary modulus operator at location [loc]. *)
+
+val bin_exp : Loc.t -> bin
+(** [bin_exp loc] constructs a binary exponentiation operator at location [loc]. *)
+
 (** {3 Expressions} *)
 
 val expr_bool : Loc.t -> bool -> expr
@@ -168,17 +270,25 @@ val expr_double : Loc.t -> string -> expr
 (** [expr_double loc lexeme] constructs a double literal at location [loc] with
     lexeme [lexeme]. *)
 
-val expr_rune : Loc.t -> Uchar.t -> expr
+val expr_rune : Loc.t -> rune -> expr
 (** [expr_rune loc value] constructs a rune literal at location [loc] with value
     [value]. *)
 
-val expr_string : Loc.t -> string -> expr
+val expr_string : Loc.t -> str list -> expr
 (** [expr_string loc value] constructs a string literal at location [loc] with
-    value [value].  The value is normalized and the length is computed. *)
+    value [value]. *)
 
 val expr_ident : Loc.t -> Sym.t -> expr
 (** [expr_ident loc id] constructs an identifier at location [loc] with
     identifier [id]. *)
+
+val expr_un_op : Loc.t -> un -> expr -> expr
+(** [expr_un_op loc op operand] constructs a unary operation at location [loc]
+    applying the unary operator [op] to the operand [operand]. *)
+
+val expr_bin_op : Loc.t -> bin -> expr -> expr -> expr
+(** [expr_bin_op loc op lhs rhs] constructs a binary operation at location [loc]
+    applying the binary operator [op] to the operands [lhs] and [rhs]. *)
 
 (** {3 Patterns} *)
 
@@ -249,6 +359,12 @@ val file : pkg -> import list -> top list -> file
 val loc_ty : ty -> Loc.t
 (** [loc_ty ty] returns the location of the type [ty]. *)
 
+val loc_un : un -> Loc.t
+(** [loc_un op] returns the location of the unary operator [op]. *)
+
+val loc_bin : bin -> Loc.t
+(** [loc_bin op] returns the location of the binary operator [op]. *)
+
 val loc_expr : expr -> Loc.t
 (** [loc_expr expr] returns the location of the expression [expr]. *)
 
@@ -291,6 +407,13 @@ val ty_equal : ty -> ty -> bool
 
 val pp_ty : formatter -> ty -> unit
 (** [pp_ty fmt ty] pretty-prints the type [ty] to the formatter [fmt]. *)
+
+val pp_un : formatter -> un -> unit
+(** [pp_un fmt op] pretty-prints the unary operator [op] to the formatter [fmt]. *)
+
+val pp_bin : formatter -> bin -> unit
+(** [pp_bin fmt op] pretty-prints the binary operator [op] to the formatter
+    [fmt]. *)
 
 val pp_expr : formatter -> expr -> unit
 (** [pp_expr fmt expr] pretty-prints the expression [expr] to the formatter
