@@ -1,5 +1,7 @@
 open Common
 
+(* Exceptions *)
+
 exception UnboundIdentifier of Sym.t
 exception MismatchedTypes of Mono.ty * Mono.ty
 
@@ -11,6 +13,8 @@ let mismatched_types inferred annotated =
   MismatchedTypes (inferred, annotated)
     |> raise
 
+(* Types *)
+
 let convert_ty _ ty kontinue = match ty with
   | Ir.TyBool -> kontinue Mono.ty_bool
   | Ir.TyInt -> kontinue Mono.ty_int
@@ -20,66 +24,91 @@ let convert_ty _ ty kontinue = match ty with
   | Ir.TyRune -> kontinue Mono.ty_rune
   | Ir.TyString -> kontinue Mono.ty_string
 
-let convert_atom env atom kontinue = match atom with
-  | Ir.Bool atom ->
-    atom.value
-      |> Mono.atom_bool
-      |> kontinue Mono.ty_bool
-  | Ir.Int atom ->
-    atom.value
-      |> Mono.atom_int
-      |> kontinue Mono.ty_int
-  | Ir.Long atom ->
-    atom.value
-      |> Mono.atom_long
-      |> kontinue Mono.ty_long
-  | Ir.Float atom ->
-    atom.value
-      |> Mono.atom_float
-      |> kontinue Mono.ty_float
-  | Ir.Double atom ->
-    atom.value
-      |> Mono.atom_double
-      |> kontinue Mono.ty_double
-  | Ir.Rune atom ->
-    atom.value
-      |> Mono.atom_rune
-      |> kontinue Mono.ty_rune
-  | Ir.String atom ->
-    atom.value
-      |> Mono.atom_string
-      |> kontinue Mono.ty_string
-  | Ir.Ident atom ->
-    try
-      let ty = Env.lookup atom.id env in
-      atom.id
-        |> Mono.atom_ident
-        |> kontinue ty
-    with Not_found -> unbound_identifier atom.id
+(* Builtins *)
 
-let convert_expr env expr kontinue = match expr with
-  | Ir.Atom expr ->
-    convert_atom env expr.atom (fun ty atom ->
-      atom
-        |> Mono.expr_atom
-        |> kontinue ty)
+let convert_builtin_un constr env ty kontinue =
+  convert_ty env ty (fun ty ->
+    constr ty
+      |> kontinue)
 
-let convert_block env block kontinue = match block with
-  | Ir.Expr block ->
-    convert_expr env block.expr (fun ty expr ->
-      expr
-        |> Mono.block_expr
-        |> kontinue ty)
+let rec convert_builtin env builtin kontinue = match builtin with
+  | Ir.Add builtin -> convert_builtin_un Mono.builtin_add env builtin.ty kontinue
+  | Ir.Sub builtin -> convert_builtin_un Mono.builtin_sub env builtin.ty kontinue
+  | Ir.Mul builtin -> convert_builtin_un Mono.builtin_mul env builtin.ty kontinue
+  | Ir.Div builtin -> convert_builtin_un Mono.builtin_div env builtin.ty kontinue
+  | Ir.Mod builtin -> convert_builtin_un Mono.builtin_mod env builtin.ty kontinue
+  | Ir.Exp builtin -> convert_builtin_un Mono.builtin_exp env builtin.ty kontinue
+  | Ir.Promote builtin -> convert_builtin_promote env builtin.sub builtin.sup kontinue
+  | Ir.Concat builtin -> convert_builtin_un Mono.builtin_concat env builtin.ty kontinue
 
-let convert_patt env patt ty kontinue = match patt with
-  | Ir.PattGround ->
-    Mono.patt_ground
-      |> kontinue env
-  | Ir.PattVar patt ->
-    Env.bind patt.id ty env (fun env ->
-      patt.id
-        |> Mono.patt_var
-        |> kontinue env)
+and convert_builtin_promote env sub sup kontinue =
+  convert_ty env sub (fun sub ->
+    convert_ty env sup (fun sup ->
+      Mono.builtin_promote sub sup
+        |> kontinue))
+
+(* Atoms *)
+
+let convert_atom_value constr ty value kontinue =
+  value
+    |> constr
+    |> kontinue ty
+
+let rec convert_atom env atom kontinue = match atom with
+  | Ir.Bool atom -> convert_atom_value Mono.atom_bool Mono.ty_bool atom.value kontinue
+  | Ir.Int atom -> convert_atom_value Mono.atom_int Mono.ty_int atom.value kontinue
+  | Ir.Long atom -> convert_atom_value Mono.atom_long Mono.ty_long atom.value kontinue
+  | Ir.Float atom -> convert_atom_value Mono.atom_float Mono.ty_float atom.value kontinue
+  | Ir.Double atom -> convert_atom_value Mono.atom_double Mono.ty_double atom.value kontinue
+  | Ir.Rune atom -> convert_atom_value Mono.atom_rune Mono.ty_rune atom.value kontinue
+  | Ir.String atom -> convert_atom_value Mono.atom_string Mono.ty_string atom.value kontinue
+  | Ir.Ident atom -> convert_atom_ident env atom.id kontinue
+
+and convert_atom_ident env id kontinue =
+  try
+    let ty = Env.lookup id env in
+    id
+      |> Mono.atom_ident
+      |> kontinue ty
+  with Not_found -> unbound_identifier id
+
+(* Expressions *)
+
+let rec convert_expr env expr kontinue = match expr with
+  | Ir.Builtin expr -> convert_expr_builtin env expr.fn expr.args kontinue
+  | Ir.Atom expr -> convert_expr_atom env expr.atom kontinue
+
+and convert_expr_builtin env fn args kontinue =
+  convert_builtin env fn (fun fn ->
+    let _ = failwith "TODO" in
+    let _ = args in
+    []
+      |> Mono.expr_builtin fn
+      |> kontinue Mono.ty_bool)
+
+and convert_expr_atom env atom kontinue =
+  convert_atom env atom (fun ty atom ->
+    atom
+      |> Mono.expr_atom
+      |> kontinue ty)
+
+(* Patterns *)
+
+let rec convert_patt env patt ty kontinue = match patt with
+  | Ir.PattGround -> convert_patt_ground env kontinue
+  | Ir.PattVar patt -> convert_patt_var env patt.id ty kontinue
+
+and convert_patt_ground env kontinue =
+  Mono.patt_ground
+    |> kontinue env
+
+and convert_patt_var env id ty kontinue =
+  Env.bind id ty env (fun env ->
+    id
+      |> Mono.patt_var
+      |> kontinue env)
+
+(* Bindings *)
 
 let convert_binding env binding kontinue = match binding with
   | Ir.Binding binding ->
@@ -91,6 +120,26 @@ let convert_binding env binding kontinue = match binding with
             Mono.binding patt inferred value
               |> kontinue env)
         else mismatched_types inferred annotated))
+
+(* Blocks *)
+
+let rec convert_block env block kontinue = match block with
+  | Ir.Bind block -> convert_block_bind env block.binding block.scope kontinue
+  | Ir.Expr block -> convert_block_expr env block.expr kontinue
+
+and convert_block_bind env binding scope kontinue =
+  convert_binding env binding (fun env binding ->
+    convert_block env scope (fun env scope ->
+      Mono.block_bind binding scope
+        |> kontinue env))
+
+and convert_block_expr env expr kontinue =
+    convert_expr env expr (fun ty expr ->
+      expr
+        |> Mono.block_expr
+        |> kontinue ty)
+
+(* Top-Level Expressions *)
 
 let convert_top env top kontinue = match top with
   | Ir.Let top ->

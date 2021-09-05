@@ -1,9 +1,12 @@
 open Common
 
+(* Exceptions *)
+
 exception InvalidNumberFormat of Loc.t * string * Sym.t * string
 exception UnboundConstructor of Loc.t * Sym.t
 exception UnboundIdentifier of Loc.t * Sym.t
 exception MismatchedTypes of Annot.ty * Loc.t * Annot.ty
+exception UnsupportedBinOpPromotion of Loc.t * Syntax.bin * Loc.t * Annot.ty * Loc.t * Annot.ty
 
 let invalid_number_format loc lexeme constr msg =
   InvalidNumberFormat (loc, lexeme, constr, msg)
@@ -20,6 +23,8 @@ let unbound_identifier loc id =
 let mismatched_types inferred loc annotated =
   MismatchedTypes (inferred, loc, annotated)
     |> raise
+
+(* Types *)
 
 let with_constructors env kontinue =
   let constrs = [
@@ -50,6 +55,18 @@ let desug_ty env ty kontinue =
             |> kontinue
         with Not_found -> unbound_constructor constr.loc constr.id)
 
+(* Runes *)
+
+let desug_rune env r kontinue = match r with
+  | _ -> let _ = env in let _ = kontinue in failwith "TODO"
+
+(* Strings *)
+
+let desug_str env s kontinue = match s with
+  | _ -> let _ = env in let _ = kontinue in failwith "TODO"
+
+(* Expressions *)
+
 let number_suffix = Str.regexp "[iIlLfFdD]$"
 let normalize_number constr conv env loc lexeme =
   try
@@ -66,55 +83,171 @@ let normalize_long = normalize_number Prim.id_long Int64.of_string
 let normalize_float = normalize_number Prim.id_float Float.of_string
 let normalize_double = normalize_number Prim.id_double Float.of_string
 
-let desug_expr env expr kontinue = match expr with
-  | Syntax.Bool expr ->
-    expr.value
-      |> Annot.expr_bool
-      |> kontinue Annot.ty_bool
-  | Syntax.Int expr ->
-    expr.lexeme
-      |> normalize_int env expr.loc
-      |> Annot.expr_int
-      |> kontinue Annot.ty_int
-  | Syntax.Long expr ->
-    expr.lexeme
-      |> normalize_long env expr.loc
-      |> Annot.expr_long
-      |> kontinue Annot.ty_long
-  | Syntax.Float expr ->
-    expr.lexeme
-      |> normalize_float env expr.loc
-      |> Annot.expr_float
-      |> kontinue Annot.ty_float
-  | Syntax.Double expr ->
-    expr.lexeme
-      |> normalize_double env expr.loc
-      |> Annot.expr_double
-      |> kontinue Annot.ty_double
-  | Syntax.Rune expr ->
-    expr.value
-      |> Annot.expr_rune
-      |> kontinue Annot.ty_rune
-  | Syntax.String expr ->
-    expr.value
-      |> Annot.expr_string
-      |> kontinue Annot.ty_string
-  | Syntax.Ident expr ->
-    try
-      let ty = Env.lookup expr.id env in
-      expr.id
-        |> Annot.expr_ident
-        |> kontinue ty
-    with Not_found -> unbound_identifier expr.loc expr.id
+let rec desug_expr env expr kontinue = match expr with
+  | Syntax.Bool expr -> desug_expr_bool env expr.value kontinue
+  | Syntax.Int expr -> desug_expr_int env expr.loc expr.lexeme kontinue
+  | Syntax.Long expr -> desug_expr_long env expr.loc expr.lexeme kontinue
+  | Syntax.Float expr -> desug_expr_float env expr.loc expr.lexeme kontinue
+  | Syntax.Double expr -> desug_expr_double env expr.loc expr.lexeme kontinue
+  | Syntax.Rune expr -> desug_expr_rune env expr.value kontinue
+  | Syntax.String expr -> desug_expr_string env expr.value kontinue
+  | Syntax.Ident expr -> desug_expr_ident env expr.loc expr.id kontinue
+  | Syntax.UnOp _ -> failwith "TODO"
+  | Syntax.BinOp expr -> desug_expr_bin_op env expr.op expr.lhs expr.rhs kontinue
 
-let desug_patt env patt ty kontinue = match patt with
-  | Syntax.PattGround _ ->
-    Annot.patt_ground
-      |> kontinue env
-  | Syntax.PattVar patt ->
-    Env.bind patt.id ty env (fun env ->
-      Annot.patt_var patt.id
-        |> kontinue env)
+and desug_expr_bool _ b kontinue =
+  b
+    |> Annot.expr_bool
+    |> kontinue Annot.ty_bool
+
+and desug_expr_int env loc lexeme kontinue =
+  lexeme
+    |> normalize_int env loc
+    |> Annot.expr_int
+    |> kontinue Annot.ty_int
+
+and desug_expr_long env loc lexeme kontinue =
+  lexeme
+    |> normalize_long env loc
+    |> Annot.expr_long
+    |> kontinue Annot.ty_long
+
+and desug_expr_float env loc lexeme kontinue =
+  lexeme
+    |> normalize_float env loc
+    |> Annot.expr_float
+    |> kontinue Annot.ty_float
+
+and desug_expr_double env loc lexeme kontinue =
+  lexeme
+    |> normalize_double env loc
+    |> Annot.expr_double
+    |> kontinue Annot.ty_double
+
+and desug_expr_rune env value kontinue =
+  desug_rune env value (fun r ->
+    r
+      |> Annot.expr_rune
+      |> kontinue Annot.ty_rune)
+
+and desug_expr_string env value kontinue =
+  desug_str env value (fun str ->
+    str
+      |> Annot.expr_string
+      |> kontinue Annot.ty_string)
+
+and desug_expr_ident env loc id kontinue =
+  try
+    let ty = Env.lookup id env in
+    id
+      |> Annot.expr_ident
+      |> kontinue ty
+  with Not_found -> unbound_identifier loc id
+
+and desug_expr_bin_op env op lhs rhs kontinue =
+  desug_expr env lhs (fun lty lhs ->
+    desug_expr env rhs (fun rty rhs ->
+      match op with
+        | Syntax.OpAdd _ -> desug_expr_bin_op_numeric env Annot.builtin_add lty rty lhs rhs kontinue
+        | Syntax.OpSub _ -> desug_expr_bin_op_numeric env Annot.builtin_sub lty rty lhs rhs kontinue
+        | Syntax.OpMul _ -> desug_expr_bin_op_numeric env Annot.builtin_mul lty rty lhs rhs kontinue
+        | Syntax.OpDiv _ -> desug_expr_bin_op_numeric env Annot.builtin_div lty rty lhs rhs kontinue
+        | Syntax.OpMod _ -> desug_expr_bin_op_integral env Annot.builtin_mod lty rty lhs rhs kontinue
+        | Syntax.OpExp _ -> desug_expr_bin_op_floating_point env Annot.builtin_exp lty rty lhs rhs kontinue
+      ))
+
+and desug_expr_bin_op_numeric _ builtin lty rty lhs rhs kontinue =
+  let promote sub sup expr =
+    let builtin = Annot.builtin_promote sub sup in
+    Annot.expr_builtin builtin [expr]
+  in
+  let promote_int_long = promote Annot.ty_int Annot.ty_long in
+  let promote_int_double = promote Annot.ty_int Annot.ty_double in
+  let promote_float_double = promote Annot.ty_float Annot.ty_double in
+
+  let (ty, lhs_promote, rhs_promote) = match (lty, rty) with
+    | Annot.TyInt, Annot.TyInt -> Annot.ty_int, Fun.id, Fun.id
+    | Annot.TyLong, Annot.TyLong -> Annot.ty_long, Fun.id, Fun.id
+    | Annot.TyFloat, Annot.TyFloat -> Annot.ty_float, Fun.id, Fun.id
+    | Annot.TyDouble, Annot.TyDouble -> Annot.ty_double, Fun.id, Fun.id
+    | Annot.TyInt, Annot.TyLong -> Annot.ty_long, Fun.id, promote_int_long
+    | Annot.TyLong, Annot.TyInt -> Annot.ty_long, promote_int_long, Fun.id
+    | Annot.TyInt, Annot.TyFloat -> Annot.ty_double, promote_int_double, promote_float_double
+    | Annot.TyFloat, Annot.TyInt -> Annot.ty_double, promote_float_double, promote_int_double
+    | Annot.TyInt, Annot.TyDouble -> Annot.ty_double, promote_int_double, Fun.id
+    | Annot.TyDouble, Annot.TyInt -> Annot.ty_double, Fun.id, promote_int_double
+    | Annot.TyFloat, Annot.TyDouble -> Annot.ty_double, promote_float_double, Fun.id
+    | Annot.TyDouble, Annot.TyFloat -> Annot.ty_double, Fun.id, promote_float_double
+    | _ -> failwith "TODO"
+  in
+  let builtin = builtin ty in
+  let lhs = lhs_promote lhs in
+  let rhs = rhs_promote rhs in
+  Annot.expr_builtin builtin [lhs; rhs]
+    |> kontinue ty
+
+and desug_expr_bin_op_integral _ builtin lty rty lhs rhs kontinue =
+  let promote sub sup expr =
+    let builtin = Annot.builtin_promote sub sup in
+    Annot.expr_builtin builtin [expr]
+  in
+  let promote_int_long = promote Annot.ty_int Annot.ty_long in
+
+  let (ty, lhs_promote, rhs_promote) = match (lty, rty) with
+    | Annot.TyInt, Annot.TyInt -> Annot.ty_int, Fun.id, Fun.id
+    | Annot.TyLong, Annot.TyLong -> Annot.ty_long, Fun.id, Fun.id
+    | Annot.TyInt, Annot.TyLong -> Annot.ty_long, Fun.id, promote_int_long
+    | Annot.TyLong, Annot.TyInt -> Annot.ty_long, promote_int_long, Fun.id
+    | _ -> failwith "TODO"
+  in
+  let builtin = builtin ty in
+  let lhs = lhs_promote lhs in
+  let rhs = rhs_promote rhs in
+  Annot.expr_builtin builtin [lhs; rhs]
+    |> kontinue ty
+
+and desug_expr_bin_op_floating_point _ builtin lty rty lhs rhs kontinue =
+  let promote sub sup expr =
+    let builtin = Annot.builtin_promote sub sup in
+    Annot.expr_builtin builtin [expr]
+  in
+  let promote_int_double = promote Annot.ty_int Annot.ty_double in
+  let promote_float_double = promote Annot.ty_float Annot.ty_double in
+
+  let (ty, lhs_promote, rhs_promote) = match (lty, rty) with
+    | Annot.TyInt, Annot.TyInt -> Annot.ty_double, promote_int_double, promote_int_double
+    | Annot.TyFloat, Annot.TyFloat -> Annot.ty_float, Fun.id, Fun.id
+    | Annot.TyDouble, Annot.TyDouble -> Annot.ty_double, Fun.id, Fun.id
+    | Annot.TyInt, Annot.TyFloat -> Annot.ty_double, promote_int_double, promote_float_double
+    | Annot.TyFloat, Annot.TyInt -> Annot.ty_double, promote_float_double, promote_int_double
+    | Annot.TyInt, Annot.TyDouble -> Annot.ty_double, promote_int_double, Fun.id
+    | Annot.TyDouble, Annot.TyInt -> Annot.ty_double, Fun.id, promote_int_double
+    | Annot.TyFloat, Annot.TyDouble -> Annot.ty_double, promote_float_double, Fun.id
+    | Annot.TyDouble, Annot.TyFloat -> Annot.ty_double, Fun.id, promote_float_double
+    | _ -> failwith "TODO"
+  in
+  let builtin = builtin ty in
+  let lhs = lhs_promote lhs in
+  let rhs = rhs_promote rhs in
+  Annot.expr_builtin builtin [lhs; rhs]
+    |> kontinue ty
+
+(* Patterns *)
+
+let rec desug_patt env patt ty kontinue = match patt with
+  | Syntax.PattGround _ -> desug_patt_ground env kontinue
+  | Syntax.PattVar patt -> desug_patt_var env patt.id ty kontinue
+
+and desug_patt_ground env kontinue =
+  Annot.patt_ground
+    |> kontinue env
+
+and desug_patt_var env id ty kontinue =
+  Env.bind id ty env (fun env ->
+    Annot.patt_var id
+      |> kontinue env)
+
+(* Bindings *)
 
 let desug_binding env binding kontinue = match binding with
   | Syntax.ValueBinding binding ->
@@ -135,15 +268,23 @@ let desug_binding env binding kontinue = match binding with
             Annot.binding patt inferred value
               |> kontinue env))
 
-let desug_top env top kontinue = match top with
-  | Syntax.Let top ->
-    desug_binding env top.binding (fun env binding ->
-      Annot.top_let binding
-        |> kontinue env)
-  | Syntax.Val top ->
-    desug_binding env top.binding (fun env binding ->
-      Annot.top_let binding
-        |> kontinue env)
+(* Top-Level Expressions *)
+
+let rec desug_top env top kontinue = match top with
+  | Syntax.Let top -> desug_top_let env top.binding kontinue
+  | Syntax.Val top -> desug_top_val env top.binding kontinue
+
+and desug_top_let env binding kontinue =
+  desug_binding env binding (fun env binding ->
+    Annot.top_let binding
+      |> kontinue env)
+
+and desug_top_val env binding kontinue =
+  desug_binding env binding (fun env binding ->
+    Annot.top_let binding
+      |> kontinue env)
+
+(* Files *)
 
 let rec desug_tops env tops kontinue = match tops with
   | [] -> kontinue env []

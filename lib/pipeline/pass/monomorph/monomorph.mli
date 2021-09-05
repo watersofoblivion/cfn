@@ -18,6 +18,11 @@ val convert_ty : Mono.ty Env.t -> Ir.ty -> (Mono.ty -> 'a) -> 'a
     environment [env].  The monomorphic type is passed to the continuation
     [kontinue]. *)
 
+val convert_builtin : Mono.ty Env.t -> Ir.builtin -> (Mono.builtin -> 'a) -> 'a
+(** [convert_builtin env builtin kontinue] monomorphizes the ANF builtin
+    function [builtin] in the environment [env].  The monomorphic builtin
+    function is passed to the continuation [kontinue]. *)
+
 val convert_atom : Mono.ty Env.t -> Ir.atom -> (Mono.ty -> Mono.atom -> 'a) -> 'a
 (** [convert_atom env atom kontinue] monomorphizes the ANF atomic value [atom]
     in the environment [env].  The monomorphic atomic value and its type are

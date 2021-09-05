@@ -21,11 +21,22 @@ exception MismatchedTypes of Annot.ty * Loc.t * Annot.ty
 (** [MismatchedTypes (inferred, loc, annotated)] is raised when the [inferred]
     type and the [annotated] type at [loc] disagree. *)
 
+exception UnsupportedBinOpPromotion of Loc.t * Syntax.bin * Loc.t * Annot.ty * Loc.t * Annot.ty
+
 (** {2 Desugaring} *)
 
 val desug_ty : Annot.ty Env.t -> Syntax.ty -> (Annot.ty -> 'a) -> 'a
 (** [desug_ty env ty kontinue] desugars the syntax type [ty] in the environment
     [env].  The desugared type is passed to the continuation [kontinue]. *)
+
+val desug_rune : Annot.ty Env.t -> Syntax.rune -> (Annot.expr -> 'a) -> 'a
+(** [desug_rune env r kontinue] desugars the syntax rune [r] in the environment
+    [env].  The desugared rune is passed to the continuation [kontinue]. *)
+
+val desug_str : Annot.ty Env.t -> Syntax.str list -> (Annot.expr -> 'a) -> 'a
+(** [desug_str env str kontinue] desugars the syntax string segment [str] in the
+    environment [env].  The desugared string segment is passed to the
+    continuation [kontinue]. *)
 
 val desug_expr : Annot.ty Env.t -> Syntax.expr -> (Annot.ty -> Annot.expr -> 'a) -> 'a
 (** [desug_expr env expr kontinue] desugars the syntax expression [expr] in the

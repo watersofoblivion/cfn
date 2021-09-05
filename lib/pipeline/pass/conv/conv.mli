@@ -18,6 +18,11 @@ val convert_ty : Clos.ty Env.t -> Mono.ty -> (Clos.ty -> 'a) -> 'a
     the environment [env].  The closure-converted type is passed to the
     continuation [kontinue]. *)
 
+val convert_builtin : Clos.ty Env.t -> Mono.builtin -> (Clos.builtin -> 'a) -> 'a
+(** [convert_builtin env builtin kontinue] closure-converts the monomorphic
+    builtin function [builtin] in the environment [env].  The closure-converted
+    builtin function is passed to the continuation [kontinue]. *)
+
 val convert_atom : Clos.ty Env.t -> Mono.atom -> (Clos.ty -> Clos.atom -> 'a) -> 'a
 (** [convert_atom env atom kontinue] closure-converts the monomorphic atomic
     value [atom] in the environment [env].  The closure-converted atomic value

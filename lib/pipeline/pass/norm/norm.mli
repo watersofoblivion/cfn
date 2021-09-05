@@ -18,6 +18,11 @@ val norm_ty : Ir.ty Env.t -> Annot.ty -> (Ir.ty -> 'a) -> 'a
     environment [env].  The normalized type is passed to the continutation
     [kontinue]. *)
 
+val norm_builtin : Ir.ty Env.t -> Annot.builtin -> (Ir.builtin -> 'a) -> 'a
+(** [norm_builtin env builtin kontinue] normalizes the annotated builtin
+    function [builtin] in the environment [env].  The normalized builtin
+    function is passed to the continuation [kontinue]. *)
+
 val norm_expr : Ir.ty Env.t -> Annot.expr -> (Ir.ty -> Ir.block -> 'a) -> 'a
 (** [norm_expr env expr kontinue] normalizes the annotated expression [expr] in
     the environment [env].  The normalized block and its type are passed to the
