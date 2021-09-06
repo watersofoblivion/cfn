@@ -69,7 +69,7 @@ let test_builtin_mod ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_exp ctxt =
-  let ty = Mono.ty_int in
+  let ty = Mono.ty_float in
   let expected = Mono.builtin_exp ty in
   match expected with
     | Mono.BuiltinExp actual ->
@@ -87,7 +87,7 @@ let test_builtin_promote ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_concat ctxt =
-  let ty = Mono.ty_int in
+  let ty = Mono.ty_string in
   let expected = Mono.builtin_concat ty in
   match expected with
     | Mono.BuiltinConcat actual ->

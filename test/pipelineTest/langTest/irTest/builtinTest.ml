@@ -69,7 +69,7 @@ let test_builtin_mod ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_exp ctxt =
-  let ty = Ir.ty_int in
+  let ty = Ir.ty_float in
   let expected = Ir.builtin_exp ty in
   match expected with
     | Ir.BuiltinExp actual ->
@@ -87,7 +87,7 @@ let test_builtin_promote ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_concat ctxt =
-  let ty = Ir.ty_int in
+  let ty = Ir.ty_string in
   let expected = Ir.builtin_concat ty in
   match expected with
     | Ir.BuiltinConcat actual ->

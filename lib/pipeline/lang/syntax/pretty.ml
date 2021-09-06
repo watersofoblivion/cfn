@@ -15,7 +15,7 @@ let rec pp_rune fmt = function
 
 and pp_rune_lit fmt r =
   if r = Utf8.single_quote
-  then fprintf fmt "'\\''"
+  then fprintf fmt "\\'"
   else
     r
       |> Utf8.to_string
@@ -48,11 +48,15 @@ let rec pp_expr fmt = function
   | Ast.ExprLong expr -> fprintf fmt "%s" expr.lexeme
   | Ast.ExprFloat expr -> fprintf fmt "%s" expr.lexeme
   | Ast.ExprDouble expr -> fprintf fmt "%s" expr.lexeme
-  | Ast.ExprRune expr -> pp_rune fmt expr.value
-  | Ast.ExprString expr -> List.iter (pp_str fmt) expr.value
+  | Ast.ExprRune expr -> fprintf fmt "'%a'" pp_rune expr.value
+  | Ast.ExprString expr -> pp_expr_string fmt expr.value
   | Ast.ExprIdent expr -> Sym.pp_id fmt expr.id
   | Ast.ExprUnOp expr -> fprintf fmt "%a%a" pp_un expr.op pp_expr expr.operand
   | Ast.ExprBinOp expr -> fprintf fmt "%a %a %a" pp_expr expr.lhs pp_bin expr.op pp_expr expr.rhs
+
+and pp_expr_string fmt segs =
+  let pp_sep _ _ = () in
+  fprintf fmt "\"%a\"" (pp_print_list ~pp_sep pp_str) segs
 
 (* Patterns *)
 
