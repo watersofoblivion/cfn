@@ -52,13 +52,7 @@ let test_check_atom_rune ctxt =
 
 let test_check_atom_string ctxt =
   let env = EnvTest.fresh () in
-  let s =
-    "foo bar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-      |> Ir.atom_string
-  in
+  let s = Ir.atom_string "foo bar" in
   TypeTest.assert_ty_equal ~ctxt Ir.ty_string
     |> Ir.check_atom env s
 
@@ -98,8 +92,8 @@ let test_check_block_expr ctxt =
       |> Ir.expr_atom
       |> Ir.block_expr
   in
-  TypeTest.assert_ty_equal ~ctxt Ir.ty_bool
-    |> Ir.check_block env block
+  Ir.check_block env block (fun _ ty ->
+    TypeTest.assert_ty_equal ~ctxt Ir.ty_bool ty)
 
 let test_check_patt_ground _ =
   let env = EnvTest.fresh () in

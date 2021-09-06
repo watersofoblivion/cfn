@@ -134,12 +134,7 @@ let test_norm_expr_rune ctxt =
 
 let test_norm_expr_string ctxt =
   let env = EnvTest.fresh () in
-  let value =
-    "foo bar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-  in
+  let value = "foo bar" in
   let annot = Annot.expr_string value in
   let ir =
     value

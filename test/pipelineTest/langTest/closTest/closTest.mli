@@ -22,6 +22,10 @@ val assert_ty_equal : ctxt:test_ctxt -> Clos.ty -> Clos.ty -> unit
 (** [assert_ty_equal ~ctxt expected actual] asserts that the type [actual] is
     equal to the type [expected]. *)
 
+val assert_builtin_equal : ctxt:test_ctxt -> Clos.builtin -> Clos.builtin -> unit
+(** [assert_builtin_equal ~ctxt expected actual] asserts that the built-in
+    function [actual] is equal to the built-in function [expected]. *)
+
 val assert_atom_equal : ctxt:test_ctxt -> Clos.atom -> Clos.atom -> unit
 (** [assert_atom_equal ~ctxt expected actual] asserts that the atomic value
     [actual] is equal to the atomic value [expected]. *)

@@ -22,6 +22,10 @@ val assert_ty_equal : ctxt:test_ctxt -> Annot.ty -> Annot.ty -> unit
 (** [assert_ty_equal ~ctxt expected actual] asserts that the type [actual] is
     equal to the type [expected]. *)
 
+val assert_builtin_equal : ctxt:test_ctxt -> Annot.builtin -> Annot.builtin -> unit
+(** [assert_builtin_equal ~ctxt expected actual] asserts that the built-in
+    function [actual] is equal to the built-in function [expected]. *)
+
 val assert_expr_equal : ctxt:test_ctxt -> Annot.expr -> Annot.expr -> unit
 (** [assert_expr_equal ~ctxt expected actual] asserts that the expression
     [actual] is equal to the expression [expected]. *)

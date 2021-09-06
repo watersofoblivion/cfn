@@ -37,14 +37,14 @@ let check_builtin_binop test check err env ty args kontinue =
   else err ty
 
 let rec check_builtin env fn args kontinue = match fn with
-  | Builtin.Add builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Sub builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Mul builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Div builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Mod builtin -> check_builtin_binop_integral env builtin.ty args kontinue
-  | Builtin.Exp builtin -> check_builtin_binop_floating_point env builtin.ty args kontinue
-  | Builtin.Promote builtin -> check_builtin_promote env builtin.sub builtin.sup args kontinue
-  | Builtin.Concat builtin -> check_builtin_concat env builtin.ty args kontinue
+  | Builtin.BuiltinAdd builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinSub builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinMul builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinDiv builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinMod builtin -> check_builtin_binop_integral env builtin.ty args kontinue
+  | Builtin.BuiltinExp builtin -> check_builtin_binop_floating_point env builtin.ty args kontinue
+  | Builtin.BuiltinPromote builtin -> check_builtin_promote env builtin.sub builtin.sup args kontinue
+  | Builtin.BuiltinConcat builtin -> check_builtin_concat env builtin.ty args kontinue
 
 and check_builtin_binop_args env ty lhs rhs kontinue =
   check_atom env lhs (fun inferred ->
@@ -83,14 +83,14 @@ and check_builtin_concat_args env ty args kontinue = match args with
 (* Atoms *)
 
 and check_atom env atom kontinue = match atom with
-  | Ast.Bool _ -> kontinue Type.ty_bool
-  | Ast.Int _ -> kontinue Type.ty_int
-  | Ast.Long _ -> kontinue Type.ty_long
-  | Ast.Float _ -> kontinue Type.ty_float
-  | Ast.Double _ -> kontinue Type.ty_double
-  | Ast.Rune _ -> kontinue Type.ty_rune
-  | Ast.String _ -> kontinue Type.ty_string
-  | Ast.Ident atom -> check_atom_ident env atom.id kontinue
+  | Ast.AtomBool _ -> kontinue Type.ty_bool
+  | Ast.AtomInt _ -> kontinue Type.ty_int
+  | Ast.AtomLong _ -> kontinue Type.ty_long
+  | Ast.AtomFloat _ -> kontinue Type.ty_float
+  | Ast.AtomDouble _ -> kontinue Type.ty_double
+  | Ast.AtomRune _ -> kontinue Type.ty_rune
+  | Ast.AtomString _ -> kontinue Type.ty_string
+  | Ast.AtomIdent atom -> check_atom_ident env atom.id kontinue
 
 and check_atom_ident env id kontinue =
   try
@@ -101,8 +101,8 @@ and check_atom_ident env id kontinue =
 (* Expressions *)
 
 let check_expr env expr kontinue = match expr with
-  | Ast.Builtin expr -> check_builtin env expr.fn expr.args kontinue
-  | Ast.Atom expr -> check_atom env expr.atom kontinue
+  | Ast.ExprBuiltin expr -> check_builtin env expr.fn expr.args kontinue
+  | Ast.ExprAtom expr -> check_atom env expr.atom kontinue
 
 (* Patterns *)
 
@@ -122,10 +122,10 @@ let check_binding env binding kontinue = match binding with
 (* Blocks *)
 
 let rec check_block env block kontinue = match block with
-  | Ast.Bind block -> check_block_bind env block.binding block.scope kontinue
-  | Ast.Expr block -> check_expr env block.expr kontinue
+  | Ast.BlockLet block -> check_block_let env block.binding block.scope kontinue
+  | Ast.BlockExpr block -> check_expr env block.expr kontinue
 
-and check_block_bind env binding scope kontinue =
+and check_block_let env binding scope kontinue =
   check_binding env binding (fun env ->
     check_block env scope kontinue)
 
@@ -137,4 +137,4 @@ and check_block_expr env expr kontinue =
 (* Top-Level Expressions *)
 
 let check_top env top kontinue = match top with
-  | Ast.Let top -> check_binding env top.binding kontinue
+  | Ast.TopLet top -> check_binding env top.binding kontinue

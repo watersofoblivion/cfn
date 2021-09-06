@@ -32,14 +32,14 @@ let convert_builtin_un constr env ty kontinue =
       |> kontinue)
 
 let rec convert_builtin env builtin kontinue = match builtin with
-  | Ir.Add builtin -> convert_builtin_un Mono.builtin_add env builtin.ty kontinue
-  | Ir.Sub builtin -> convert_builtin_un Mono.builtin_sub env builtin.ty kontinue
-  | Ir.Mul builtin -> convert_builtin_un Mono.builtin_mul env builtin.ty kontinue
-  | Ir.Div builtin -> convert_builtin_un Mono.builtin_div env builtin.ty kontinue
-  | Ir.Mod builtin -> convert_builtin_un Mono.builtin_mod env builtin.ty kontinue
-  | Ir.Exp builtin -> convert_builtin_un Mono.builtin_exp env builtin.ty kontinue
-  | Ir.Promote builtin -> convert_builtin_promote env builtin.sub builtin.sup kontinue
-  | Ir.Concat builtin -> convert_builtin_un Mono.builtin_concat env builtin.ty kontinue
+  | Ir.BuiltinAdd builtin -> convert_builtin_un Mono.builtin_add env builtin.ty kontinue
+  | Ir.BuiltinSub builtin -> convert_builtin_un Mono.builtin_sub env builtin.ty kontinue
+  | Ir.BuiltinMul builtin -> convert_builtin_un Mono.builtin_mul env builtin.ty kontinue
+  | Ir.BuiltinDiv builtin -> convert_builtin_un Mono.builtin_div env builtin.ty kontinue
+  | Ir.BuiltinMod builtin -> convert_builtin_un Mono.builtin_mod env builtin.ty kontinue
+  | Ir.BuiltinExp builtin -> convert_builtin_un Mono.builtin_exp env builtin.ty kontinue
+  | Ir.BuiltinPromote builtin -> convert_builtin_promote env builtin.sub builtin.sup kontinue
+  | Ir.BuiltinConcat builtin -> convert_builtin_un Mono.builtin_concat env builtin.ty kontinue
 
 and convert_builtin_promote env sub sup kontinue =
   convert_ty env sub (fun sub ->
@@ -55,14 +55,14 @@ let convert_atom_value constr ty value kontinue =
     |> kontinue ty
 
 let rec convert_atom env atom kontinue = match atom with
-  | Ir.Bool atom -> convert_atom_value Mono.atom_bool Mono.ty_bool atom.value kontinue
-  | Ir.Int atom -> convert_atom_value Mono.atom_int Mono.ty_int atom.value kontinue
-  | Ir.Long atom -> convert_atom_value Mono.atom_long Mono.ty_long atom.value kontinue
-  | Ir.Float atom -> convert_atom_value Mono.atom_float Mono.ty_float atom.value kontinue
-  | Ir.Double atom -> convert_atom_value Mono.atom_double Mono.ty_double atom.value kontinue
-  | Ir.Rune atom -> convert_atom_value Mono.atom_rune Mono.ty_rune atom.value kontinue
-  | Ir.String atom -> convert_atom_value Mono.atom_string Mono.ty_string atom.value kontinue
-  | Ir.Ident atom -> convert_atom_ident env atom.id kontinue
+  | Ir.AtomBool atom -> convert_atom_value Mono.atom_bool Mono.ty_bool atom.value kontinue
+  | Ir.AtomInt atom -> convert_atom_value Mono.atom_int Mono.ty_int atom.value kontinue
+  | Ir.AtomLong atom -> convert_atom_value Mono.atom_long Mono.ty_long atom.value kontinue
+  | Ir.AtomFloat atom -> convert_atom_value Mono.atom_float Mono.ty_float atom.value kontinue
+  | Ir.AtomDouble atom -> convert_atom_value Mono.atom_double Mono.ty_double atom.value kontinue
+  | Ir.AtomRune atom -> convert_atom_value Mono.atom_rune Mono.ty_rune atom.value kontinue
+  | Ir.AtomString atom -> convert_atom_value Mono.atom_string Mono.ty_string atom.value kontinue
+  | Ir.AtomIdent atom -> convert_atom_ident env atom.id kontinue
 
 and convert_atom_ident env id kontinue =
   try
@@ -75,8 +75,8 @@ and convert_atom_ident env id kontinue =
 (* Expressions *)
 
 let rec convert_expr env expr kontinue = match expr with
-  | Ir.Builtin expr -> convert_expr_builtin env expr.fn expr.args kontinue
-  | Ir.Atom expr -> convert_expr_atom env expr.atom kontinue
+  | Ir.ExprBuiltin expr -> convert_expr_builtin env expr.fn expr.args kontinue
+  | Ir.ExprAtom expr -> convert_expr_atom env expr.atom kontinue
 
 and convert_expr_builtin env fn args kontinue =
   convert_builtin env fn (fun fn ->
@@ -124,13 +124,13 @@ let convert_binding env binding kontinue = match binding with
 (* Blocks *)
 
 let rec convert_block env block kontinue = match block with
-  | Ir.Bind block -> convert_block_bind env block.binding block.scope kontinue
-  | Ir.Expr block -> convert_block_expr env block.expr kontinue
+  | Ir.BlockLet block -> convert_block_let env block.binding block.scope kontinue
+  | Ir.BlockExpr block -> convert_block_expr env block.expr kontinue
 
-and convert_block_bind env binding scope kontinue =
+and convert_block_let env binding scope kontinue =
   convert_binding env binding (fun env binding ->
     convert_block env scope (fun env scope ->
-      Mono.block_bind binding scope
+      Mono.block_let binding scope
         |> kontinue env))
 
 and convert_block_expr env expr kontinue =
@@ -142,7 +142,7 @@ and convert_block_expr env expr kontinue =
 (* Top-Level Expressions *)
 
 let convert_top env top kontinue = match top with
-  | Ir.Let top ->
+  | Ir.TopLet top ->
     convert_binding env top.binding (fun env binding ->
       Mono.top_let binding
         |> kontinue env)

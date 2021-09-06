@@ -1,12 +1,12 @@
 type builtin =
-  | Add of { ty: Type.ty }
-  | Sub of { ty: Type.ty }
-  | Mul of { ty: Type.ty }
-  | Div of { ty: Type.ty }
-  | Mod of { ty: Type.ty }
-  | Exp of { ty: Type.ty }
-  | Promote of { sub: Type.ty; sup: Type.ty }
-  | Concat of { ty: Type.ty }
+  | BuiltinAdd of { ty: Type.ty }
+  | BuiltinSub of { ty: Type.ty }
+  | BuiltinMul of { ty: Type.ty }
+  | BuiltinDiv of { ty: Type.ty }
+  | BuiltinMod of { ty: Type.ty }
+  | BuiltinExp of { ty: Type.ty }
+  | BuiltinPromote of { sub: Type.ty; sup: Type.ty }
+  | BuiltinConcat of { ty: Type.ty }
 
 exception UnsupportedConcatType of Type.ty
 exception NotIntegral of Type.ty
@@ -43,19 +43,19 @@ let builtin_integral = builtin Type.ty_is_integral not_integral
 let builtin_floating_point = builtin Type.ty_is_floating_point not_floating_point
 let builtin_numeric = builtin Type.ty_is_numeric not_numeric
 
-let builtin_add = builtin_numeric (fun ty -> Add { ty })
-let builtin_sub = builtin_numeric (fun ty -> Sub { ty })
-let builtin_mul = builtin_numeric (fun ty -> Mul { ty })
-let builtin_div = builtin_numeric (fun ty -> Div { ty })
-let builtin_mod = builtin_integral (fun ty -> Mod { ty })
-let builtin_exp = builtin_floating_point (fun ty -> Exp { ty })
+let builtin_add = builtin_numeric (fun ty -> BuiltinAdd { ty })
+let builtin_sub = builtin_numeric (fun ty -> BuiltinSub { ty })
+let builtin_mul = builtin_numeric (fun ty -> BuiltinMul { ty })
+let builtin_div = builtin_numeric (fun ty -> BuiltinDiv { ty })
+let builtin_mod = builtin_integral (fun ty -> BuiltinMod { ty })
+let builtin_exp = builtin_floating_point (fun ty -> BuiltinExp { ty })
 
 let builtin_promote sub sup = match (sub, sup) with
   | Type.TyInt, Type.TyLong
   | Type.TyInt, Type.TyDouble
-  | Type.TyFloat, Type.TyFloat -> Promote { sub; sup }
+  | Type.TyFloat, Type.TyFloat -> BuiltinPromote { sub; sup }
   | _ -> unsupported_promotion sub sup
 
 let builtin_concat ty = match ty with
-  | Type.TyString -> Concat { ty }
+  | Type.TyString -> BuiltinConcat { ty }
   | _ -> unsupported_concat_type ty

@@ -9,6 +9,7 @@ open CommonTest
 (* Assertions *)
 
 let assert_pp_ty = PrettyTest.assert_pp Ir.pp_ty
+let assert_pp_builtin = PrettyTest.assert_pp Ir.pp_builtin
 let assert_pp_atom = PrettyTest.assert_pp Ir.pp_atom
 let assert_pp_expr = PrettyTest.assert_pp Ir.pp_expr
 let assert_pp_block = PrettyTest.assert_pp Ir.pp_block
@@ -78,9 +79,6 @@ let test_atom_rune ctxt =
 
 let test_atom_string ctxt =
   "foo bar"
-    |> String.to_seq
-    |> List.of_seq
-    |> List.map Uchar.of_char
     |> Ir.atom_string
     |> assert_pp_atom ~ctxt ["\"foo bar\""]
 

@@ -4,6 +4,19 @@ open Common
 
 open CommonTest
 
+(* Fixtures *)
+
+let fresh_ty_constr ?seq:(seq = Sym.seq ()) ?id:(id = Prim.id_bool) _ =
+  let loc = LocTest.gen () in
+  seq
+    |> Sym.gen ~id
+    |> Syntax.ty_constr loc
+
+(* Utilities *)
+
+let deloc_ty = function
+  | Syntax.TyConstr constr -> Syntax.ty_constr LocTest.dummy constr.id
+
 (* Assertions *)
 
 let assert_ty_equal ~ctxt expected actual = match (expected, actual) with

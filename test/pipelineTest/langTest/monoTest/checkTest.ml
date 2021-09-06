@@ -52,13 +52,7 @@ let test_check_atom_rune ctxt =
 
 let test_check_atom_string ctxt =
   let env = EnvTest.fresh () in
-  let s =
-    "foo bar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-      |> Mono.atom_string
-  in
+  let s = Mono.atom_string "foo bar" in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_string
     |> Mono.check_atom env s
 
@@ -98,8 +92,8 @@ let test_check_block_expr ctxt =
       |> Mono.expr_atom
       |> Mono.block_expr
   in
-  TypeTest.assert_ty_equal ~ctxt Mono.ty_bool
-    |> Mono.check_block env block
+  Mono.check_block env block (fun _ ty ->
+    TypeTest.assert_ty_equal ~ctxt Mono.ty_bool ty)
 
 let test_check_patt_ground _ =
   let env = EnvTest.fresh () in

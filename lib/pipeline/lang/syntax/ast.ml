@@ -11,16 +11,16 @@ type str =
   | StringEscape of { loc: Loc.t; lexeme: string }
 
 type expr =
-  | Bool of { loc: Loc.t; value: bool }
-  | Int of { loc: Loc.t; lexeme: string }
-  | Long of { loc: Loc.t; lexeme: string }
-  | Float of { loc: Loc.t; lexeme: string }
-  | Double of { loc: Loc.t; lexeme: string }
-  | Rune of { loc: Loc.t; value: rune }
-  | String of { loc: Loc.t; value: str list }
-  | Ident of { loc: Loc.t; id: Sym.t }
-  | UnOp of { loc: Loc.t; op: Op.un; operand: expr }
-  | BinOp of { loc: Loc.t; op: Op.bin; lhs: expr; rhs: expr }
+  | ExprBool of { loc: Loc.t; value: bool }
+  | ExprInt of { loc: Loc.t; lexeme: string }
+  | ExprLong of { loc: Loc.t; lexeme: string }
+  | ExprFloat of { loc: Loc.t; lexeme: string }
+  | ExprDouble of { loc: Loc.t; lexeme: string }
+  | ExprRune of { loc: Loc.t; value: rune }
+  | ExprString of { loc: Loc.t; value: str list }
+  | ExprIdent of { loc: Loc.t; id: Sym.t }
+  | ExprUnOp of { loc: Loc.t; op: Op.un; operand: expr }
+  | ExprBinOp of { loc: Loc.t; op: Op.bin; lhs: expr; rhs: expr }
 
 type patt =
   | PattGround of { loc: Loc.t }
@@ -30,8 +30,8 @@ type binding =
   | ValueBinding of { loc: Loc.t; patt: patt; ty: Type.ty option; value: expr }
 
 type top =
-  | Let of { loc: Loc.t; binding: binding }
-  | Val of { loc: Loc.t; binding: binding }
+  | TopLet of { loc: Loc.t; binding: binding }
+  | TopVal of { loc: Loc.t; binding: binding }
 
 type name = Name of { loc: Loc.t; id: Sym.t }
 
@@ -53,24 +53,24 @@ let rune_escape loc lexeme = RuneEscape { loc; lexeme }
 let str_lit loc lexeme = StringLit { loc; lexeme }
 let str_escape loc lexeme = StringEscape { loc; lexeme }
 
-let expr_bool loc value = Bool { loc; value }
-let expr_int loc lexeme = Int { loc; lexeme }
-let expr_long loc lexeme = Long { loc; lexeme }
-let expr_float loc lexeme = Float { loc; lexeme }
-let expr_double loc lexeme = Double { loc; lexeme }
-let expr_rune loc value = Rune { loc; value }
-let expr_string loc value = String { loc; value }
-let expr_ident loc id = Ident { loc; id }
-let expr_un_op loc op operand = UnOp { loc; op; operand }
-let expr_bin_op loc op lhs rhs = BinOp { loc; op; lhs; rhs }
+let expr_bool loc value = ExprBool { loc; value }
+let expr_int loc lexeme = ExprInt { loc; lexeme }
+let expr_long loc lexeme = ExprLong { loc; lexeme }
+let expr_float loc lexeme = ExprFloat { loc; lexeme }
+let expr_double loc lexeme = ExprDouble { loc; lexeme }
+let expr_rune loc value = ExprRune { loc; value }
+let expr_string loc value = ExprString { loc; value }
+let expr_ident loc id = ExprIdent { loc; id }
+let expr_un_op loc op operand = ExprUnOp { loc; op; operand }
+let expr_bin_op loc op lhs rhs = ExprBinOp { loc; op; lhs; rhs }
 
 let patt_ground loc = PattGround { loc }
 let patt_var loc id = PattVar { loc; id }
 
 let value_binding loc patt ty value = ValueBinding { loc; patt; ty; value }
 
-let top_let loc binding = Let { loc; binding }
-let top_val loc binding = Val { loc; binding }
+let top_let loc binding = TopLet { loc; binding }
+let top_val loc binding = TopVal { loc; binding }
 
 let name loc id = Name { loc; id }
 
@@ -87,16 +87,16 @@ let file pkg imports tops = File { pkg; imports; tops }
 (* Locations *)
 
 let loc_expr = function
-  | Bool expr -> expr.loc
-  | Int expr -> expr.loc
-  | Long expr -> expr.loc
-  | Float expr -> expr.loc
-  | Double expr -> expr.loc
-  | Rune expr -> expr.loc
-  | String expr -> expr.loc
-  | Ident expr -> expr.loc
-  | UnOp expr -> expr.loc
-  | BinOp expr -> expr.loc
+  | ExprBool expr -> expr.loc
+  | ExprInt expr -> expr.loc
+  | ExprLong expr -> expr.loc
+  | ExprFloat expr -> expr.loc
+  | ExprDouble expr -> expr.loc
+  | ExprRune expr -> expr.loc
+  | ExprString expr -> expr.loc
+  | ExprIdent expr -> expr.loc
+  | ExprUnOp expr -> expr.loc
+  | ExprBinOp expr -> expr.loc
 
 let loc_patt = function
   | PattGround patt -> patt.loc
@@ -106,8 +106,8 @@ let loc_binding = function
   | ValueBinding binding -> binding.loc
 
 let loc_top = function
-  | Let top -> top.loc
-  | Val top -> top.loc
+  | TopLet top -> top.loc
+  | TopVal top -> top.loc
 
 let loc_name = function
   | Name name -> name.loc

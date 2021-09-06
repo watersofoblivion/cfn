@@ -23,6 +23,12 @@ val fresh_ty_constr : ?seq:Sym.seq -> ?id:string -> unit -> Syntax.ty
 (** [fresh_ty_constr ?seq ?id ()] constructs a fresh type constructor.  If not
     provided, [id] defaults to {!Common.Prim.id_bool}. *)
 
+val fresh_un : unit -> Syntax.un
+(** [fresh_un ()] constructs a fresh unary operator. *)
+
+val fresh_bin : unit -> Syntax.bin
+(** [fresh_bin ()] constructs a fresh binary operator. *)
+
 val fresh_expr_bool : ?value:bool -> unit -> Syntax.expr
 (** [fresh_expr_bool ?value ()] constructs a fresh boolean expression with value
     [value].  If not provided, [value] defaults to [true]. *)
@@ -112,6 +118,12 @@ val deloc_optional : ('a -> 'a) -> 'a option -> 'a option
 val deloc_ty : Syntax.ty -> Syntax.ty
 (** [deloc_ty ty] strips location information from the type [ty]. *)
 
+val deloc_un : Syntax.un -> Syntax.un
+(** [deloc_un op] strips location information from the unary operator [op]. *)
+
+val deloc_bin : Syntax.bin -> Syntax.bin
+(** [deloc_bin op] strips location information from the binary operator [op]. *)
+
 val deloc_expr : Syntax.expr -> Syntax.expr
 (** [deloc_expr expr] strips location information from the expression [expr]. *)
 
@@ -167,6 +179,22 @@ val deloc_file : Syntax.file -> Syntax.file
 val assert_ty_equal : ctxt:test_ctxt -> Syntax.ty -> Syntax.ty -> unit
 (** [assert_ty_equal ~ctxt expected actual] asserts that the type [actual] is
     equal to the type [expected]. *)
+
+val assert_un_equal : ctxt:test_ctxt -> Syntax.un -> Syntax.un -> unit
+(** [assert_un_equal ~ctxt expected actual] asserts that the unary operator
+    [actual] is equal to the unary operator [expected]. *)
+
+val assert_bin_equal : ctxt:test_ctxt -> Syntax.bin -> Syntax.bin -> unit
+(** [assert_bin_equal ~ctxt expected actual] asserts that the binary operator
+    [actual] is equal to the binary operator [expected]. *)
+
+val assert_rune_equal : ctxt:test_ctxt -> Syntax.rune -> Syntax.rune -> unit
+(** [assert_rune_equal ~ctxt expected actual] asserts that the rune [actual] is
+    equal to the rune operator [expected]. *)
+
+val assert_str_equal : ctxt:test_ctxt -> Syntax.str -> Syntax.str -> unit
+(** [assert_str_equal ~ctxt expected actual] asserts that the string segment
+    [actual] is equal to the string segment operator [expected]. *)
 
 val assert_expr_equal : ctxt:test_ctxt -> Syntax.expr -> Syntax.expr -> unit
 (** [assert_expr_equal ~ctxt expected actual] asserts that the expression

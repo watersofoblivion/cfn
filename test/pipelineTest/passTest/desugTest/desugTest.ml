@@ -163,6 +163,10 @@ let test_desug_expr_rune ctxt =
   let env = EnvTest.fresh () in
   let value = Uchar.of_char 'a' in
   let syntax =
+    let value =
+      let loc = LocTest.gen () in
+      Syntax.rune_lit loc value
+    in
     let loc = LocTest.gen () in
     Syntax.expr_rune loc value
   in
@@ -173,15 +177,14 @@ let test_desug_expr_rune ctxt =
 
 let test_desug_expr_string ctxt =
   let env = EnvTest.fresh () in
-  let value =
-    "foo bar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-  in
+  let value = "foo bar" in
   let syntax =
+    let value =
+      let loc = LocTest.gen () in
+      Syntax.str_lit loc value
+    in
     let loc = LocTest.gen () in
-    Syntax.expr_string loc value
+    Syntax.expr_string loc [value]
   in
   let annot = Annot.expr_string value in
   Desug.desug_expr env syntax (fun ty expr ->

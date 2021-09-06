@@ -52,13 +52,7 @@ let test_check_atom_rune ctxt =
 
 let test_check_atom_string ctxt =
   let env = EnvTest.fresh () in
-  let s =
-    "foo bar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-      |> Clos.atom_string
-  in
+  let s = Clos.atom_string "foo bar" in
   TypeTest.assert_ty_equal ~ctxt Clos.ty_string
     |> Clos.check_atom env s
 

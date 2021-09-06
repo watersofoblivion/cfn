@@ -52,13 +52,7 @@ let test_check_expr_rune ctxt =
 
 let test_check_expr_string ctxt =
   let env = EnvTest.fresh () in
-  let s =
-    "foo bar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-      |> Annot.expr_string
-  in
+  let s = Annot.expr_string "foo bar" in
   TypeTest.assert_ty_equal ~ctxt Annot.ty_string
     |> Annot.check_expr env s
 
@@ -112,7 +106,7 @@ let test_check_binding_mismatched_types _ =
   let annotated = Annot.ty_int in
   let value = Annot.expr_bool true in
   let binding = Annot.binding patt annotated value in
-  let exn = Annot.MismatchedTypes (inferred, annotated) in
+  let exn = Annot.MismatchedTypes (value, inferred, annotated) in
   assert_raises exn (fun _ ->
     Annot.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))

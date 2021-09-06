@@ -1,3 +1,5 @@
+(* Abstract Syntax *)
+
 open Common
 
 (* Syntax *)
@@ -7,21 +9,21 @@ type patt =
   | PattVar of { id: Sym.t }
 
 type expr =
-  | Bool of { value: bool }
-  | Int of { value: int32 }
-  | Long of { value: int64 }
-  | Float of { value: float }
-  | Double of { value: float }
-  | Rune of { value: Uchar.t }
-  | String of { value: string; len: int }
-  | Ident of { id: Sym.t }
-  | Builtin of { fn: Builtin.builtin; args: expr list }
+  | ExprBool of { value: bool }
+  | ExprInt of { value: int32 }
+  | ExprLong of { value: int64 }
+  | ExprFloat of { value: float }
+  | ExprDouble of { value: float }
+  | ExprRune of { value: Uchar.t }
+  | ExprString of { value: string; len: int }
+  | ExprIdent of { id: Sym.t }
+  | ExprBuiltin of { fn: Builtin.builtin; args: expr list }
 
 and binding =
   | Binding of { patt: patt; ty: Type.ty; value: expr }
 
 type top =
-  | Let of { binding: binding }
+  | TopLet of { binding: binding }
 
 (* Patterns *)
 
@@ -30,17 +32,17 @@ let patt_var id = PattVar { id }
 
 (* Expressions *)
 
-let expr_bool value = Bool { value }
-let expr_int value = Int { value }
-let expr_long value = Long { value }
-let expr_float value = Float { value }
-let expr_double value = Double { value }
-let expr_rune value = Rune { value }
+let expr_bool value = ExprBool { value }
+let expr_int value = ExprInt { value }
+let expr_long value = ExprLong { value }
+let expr_float value = ExprFloat { value }
+let expr_double value = ExprDouble { value }
+let expr_rune value = ExprRune { value }
 let expr_string value =
   let value = Utf8.normalize value in
-  String { value; len = Utf8.length value }
-let expr_ident id = Ident { id }
-let expr_builtin fn args = Builtin { fn; args }
+  ExprString { value; len = Utf8.length value }
+let expr_ident id = ExprIdent { id }
+let expr_builtin fn args = ExprBuiltin { fn; args }
 
 (* Bindings *)
 
@@ -48,4 +50,4 @@ let binding patt ty value = Binding { patt; ty; value }
 
 (* Top-Level Expressions *)
 
-let top_let binding = Let { binding }
+let top_let binding = TopLet { binding }

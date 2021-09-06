@@ -1,3 +1,5 @@
+(* Pretty Printing *)
+
 open Format
 
 open Common
@@ -19,29 +21,29 @@ let pp_builtin fmt builtin =
       | _ -> fprintf fmt "%s[%a]" id (pp_print_list ~pp_sep pp_ty) tys
   in
   match builtin with
-    | Builtin.Add builtin -> pp "add" [builtin.ty]
-    | Builtin.Sub builtin -> pp "sub" [builtin.ty]
-    | Builtin.Mul builtin -> pp "mul" [builtin.ty]
-    | Builtin.Div builtin -> pp "div" [builtin.ty]
-    | Builtin.Mod builtin -> pp "mod" [builtin.ty]
-    | Builtin.Exp builtin -> pp "exp" [builtin.ty]
-    | Builtin.Promote builtin -> pp "promote" [builtin.sub; builtin.sup]
-    | Builtin.Concat builtin -> pp "concat" [builtin.ty]
+    | Builtin.BuiltinAdd builtin -> pp "add" [builtin.ty]
+    | Builtin.BuiltinSub builtin -> pp "sub" [builtin.ty]
+    | Builtin.BuiltinMul builtin -> pp "mul" [builtin.ty]
+    | Builtin.BuiltinDiv builtin -> pp "div" [builtin.ty]
+    | Builtin.BuiltinMod builtin -> pp "mod" [builtin.ty]
+    | Builtin.BuiltinExp builtin -> pp "exp" [builtin.ty]
+    | Builtin.BuiltinPromote builtin -> pp "promote" [builtin.sub; builtin.sup]
+    | Builtin.BuiltinConcat builtin -> pp "concat" [builtin.ty]
 
 let pp_patt fmt = function
   | Ast.PattGround -> Pretty.ground fmt
   | Ast.PattVar patt -> Sym.pp fmt patt.id
 
 let rec pp_expr fmt = function
-  | Ast.Bool expr -> fprintf fmt "%B" expr.value
-  | Ast.Int expr -> fprintf fmt "%ld" expr.value
-  | Ast.Long expr -> fprintf fmt "%Ld" expr.value
-  | Ast.Float expr -> fprintf fmt "%g" expr.value
-  | Ast.Double expr -> fprintf fmt "%g" expr.value
-  | Ast.Rune expr -> pp_expr_rune fmt expr.value
-  | Ast.String expr -> fprintf fmt "%S" expr.value
-  | Ast.Ident expr -> Sym.pp fmt expr.id
-  | Ast.Builtin expr -> pp_expr_builtin fmt expr.fn expr.args
+  | Ast.ExprBool expr -> fprintf fmt "%B" expr.value
+  | Ast.ExprInt expr -> fprintf fmt "%ld" expr.value
+  | Ast.ExprLong expr -> fprintf fmt "%Ld" expr.value
+  | Ast.ExprFloat expr -> fprintf fmt "%g" expr.value
+  | Ast.ExprDouble expr -> fprintf fmt "%g" expr.value
+  | Ast.ExprRune expr -> pp_expr_rune fmt expr.value
+  | Ast.ExprString expr -> fprintf fmt "%S" expr.value
+  | Ast.ExprIdent expr -> Sym.pp fmt expr.id
+  | Ast.ExprBuiltin expr -> pp_expr_builtin fmt expr.fn expr.args
 
 and pp_expr_rune fmt r =
   if r = Utf8.single_quote
@@ -60,5 +62,5 @@ let pp_binding fmt = function
     fprintf fmt "%a: %a = %a" pp_patt binding.patt pp_ty binding.ty pp_expr binding.value
 
 let pp_top fmt = function
-  | Ast.Let top ->
+  | Ast.TopLet top ->
     fprintf fmt "let %a" pp_binding top.binding

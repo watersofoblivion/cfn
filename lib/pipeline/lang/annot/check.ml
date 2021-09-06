@@ -43,14 +43,14 @@ let check_builtin_binop test check err env ty args kontinue =
   else err ty
 
 let rec check_builtin env fn args kontinue = match fn with
-  | Builtin.Add builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Sub builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Mul builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Div builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
-  | Builtin.Mod builtin -> check_builtin_binop_integral env builtin.ty args kontinue
-  | Builtin.Exp builtin -> check_builtin_binop_floating_point env builtin.ty args kontinue
-  | Builtin.Promote builtin -> check_builtin_promote env builtin.sub builtin.sup args kontinue
-  | Builtin.Concat builtin -> check_builtin_concat env builtin.ty args kontinue
+  | Builtin.BuiltinAdd builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinSub builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinMul builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinDiv builtin -> check_builtin_binop_numeric env builtin.ty args kontinue
+  | Builtin.BuiltinMod builtin -> check_builtin_binop_integral env builtin.ty args kontinue
+  | Builtin.BuiltinExp builtin -> check_builtin_binop_floating_point env builtin.ty args kontinue
+  | Builtin.BuiltinPromote builtin -> check_builtin_promote env builtin.sub builtin.sup args kontinue
+  | Builtin.BuiltinConcat builtin -> check_builtin_concat env builtin.ty args kontinue
 
 and check_builtin_binop_args env ty lhs rhs kontinue =
   check_expr env lhs (fun inferred ->
@@ -89,15 +89,15 @@ and check_builtin_concat_args env ty args kontinue = match args with
 (* Expressions *)
 
 and check_expr env expr kontinue = match expr with
-  | Ast.Bool _ -> kontinue Type.ty_bool
-  | Ast.Int _ -> kontinue Type.ty_int
-  | Ast.Long _ -> kontinue Type.ty_long
-  | Ast.Float _ -> kontinue Type.ty_float
-  | Ast.Double _ -> kontinue Type.ty_double
-  | Ast.Rune _ -> kontinue Type.ty_rune
-  | Ast.String _ -> kontinue Type.ty_string
-  | Ast.Ident expr -> check_expr_ident env expr.id kontinue
-  | Ast.Builtin expr -> check_builtin env expr.fn expr.args kontinue
+  | Ast.ExprBool _ -> kontinue Type.ty_bool
+  | Ast.ExprInt _ -> kontinue Type.ty_int
+  | Ast.ExprLong _ -> kontinue Type.ty_long
+  | Ast.ExprFloat _ -> kontinue Type.ty_float
+  | Ast.ExprDouble _ -> kontinue Type.ty_double
+  | Ast.ExprRune _ -> kontinue Type.ty_rune
+  | Ast.ExprString _ -> kontinue Type.ty_string
+  | Ast.ExprIdent expr -> check_expr_ident env expr.id kontinue
+  | Ast.ExprBuiltin expr -> check_builtin env expr.fn expr.args kontinue
 
 and check_expr_ident env id kontinue =
   try
@@ -117,4 +117,4 @@ let check_binding env binding kontinue = match binding with
 (* Top-Level Expressions *)
 
 let check_top env top kontinue = match top with
-  | Ast.Let top -> check_binding env top.binding kontinue
+  | Ast.TopLet top -> check_binding env top.binding kontinue

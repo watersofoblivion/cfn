@@ -3,18 +3,18 @@
 open Common
 
 type atom =
-  | Bool of { value: bool }
-  | Int of { value: int32 }
-  | Long of { value: int64 }
-  | Float of { value: float }
-  | Double of { value: float }
-  | Rune of { value: Uchar.t }
-  | String of { value: string; len: int }
-  | Ident of { id: Sym.t }
+  | AtomBool of { value: bool }
+  | AtomInt of { value: int32 }
+  | AtomLong of { value: int64 }
+  | AtomFloat of { value: float }
+  | AtomDouble of { value: float }
+  | AtomRune of { value: Uchar.t }
+  | AtomString of { value: string; len: int }
+  | AtomIdent of { id: Sym.t }
 
 type expr =
-  | Builtin of { fn: Builtin.builtin; args: atom list }
-  | Atom of { atom: atom }
+  | ExprBuiltin of { fn: Builtin.builtin; args: atom list }
+  | ExprAtom of { atom: atom }
 
 type patt =
   | PattGround
@@ -24,32 +24,32 @@ type binding =
   | Binding of { patt: patt; ty: Type.ty; value: expr }
 
 type block =
-  | Bind of { binding: binding; scope: block }
-  | Expr of { expr: expr }
+  | BlockLet of { binding: binding; scope: block }
+  | BlockExpr of { expr: expr }
 
 type top =
-  | Let of { binding: binding }
+  | TopLet of { binding: binding }
 
-let atom_bool value = Bool { value }
-let atom_int value = Int { value }
-let atom_long value = Long { value }
-let atom_float value = Float { value }
-let atom_double value = Double { value }
-let atom_rune value = Rune { value }
+let atom_bool value = AtomBool { value }
+let atom_int value = AtomInt { value }
+let atom_long value = AtomLong { value }
+let atom_float value = AtomFloat { value }
+let atom_double value = AtomDouble { value }
+let atom_rune value = AtomRune { value }
 let atom_string value =
   let value = Utf8.normalize value in
-  String { value; len = Utf8.length value }
-let atom_ident id = Ident { id }
+  AtomString { value; len = Utf8.length value }
+let atom_ident id = AtomIdent { id }
 
-let expr_builtin fn args = Builtin { fn; args }
-let expr_atom atom = Atom { atom }
+let expr_builtin fn args = ExprBuiltin { fn; args }
+let expr_atom atom = ExprAtom { atom }
 
 let patt_ground = PattGround
 let patt_var id = PattVar { id }
 
 let binding patt ty value = Binding { patt; ty; value }
 
-let block_bind binding scope = Bind { binding; scope }
-let block_expr expr = Expr { expr }
+let block_let binding scope = BlockLet { binding; scope }
+let block_expr expr = BlockExpr { expr }
 
-let top_let binding = Let { binding }
+let top_let binding = TopLet { binding }

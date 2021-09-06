@@ -14,29 +14,22 @@ let patt_not_equal = TestUtils.not_equal "Patterns" Annot.pp_patt
 (* let top_not_equal = TestUtils.not_equal "Top-level expressions" Fmt.top *)
 
 let assert_expr_equal ~ctxt expected actual = match (expected, actual) with
-  | Annot.Bool expected, Annot.Bool actual ->
+  | Annot.ExprBool expected, Annot.ExprBool actual ->
     assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" expected.value actual.value
-  | Annot.Int expected, Annot.Int actual ->
+  | Annot.ExprInt expected, Annot.ExprInt actual ->
     assert_equal ~ctxt ~cmp:Int32.equal ~printer:Int32.to_string ~msg:"Integer values are not equal" expected.value actual.value
-  | Annot.Long expected, Annot.Long actual ->
+  | Annot.ExprLong expected, Annot.ExprLong actual ->
     assert_equal ~ctxt ~cmp:Int64.equal ~printer:Int64.to_string ~msg:"Long values are not equal" expected.value actual.value
-  | Annot.Float expected, Annot.Float actual ->
+  | Annot.ExprFloat expected, Annot.ExprFloat actual ->
     assert_equal ~ctxt ~printer:string_of_float ~msg:"Float values are not equal" expected.value actual.value
-  | Annot.Double expected, Annot.Double actual ->
+  | Annot.ExprDouble expected, Annot.ExprDouble actual ->
     assert_equal ~ctxt ~printer:string_of_float ~msg:"Double values are not equal" expected.value actual.value
-  | Annot.Rune expected, Annot.Rune actual ->
+  | Annot.ExprRune expected, Annot.ExprRune actual ->
     let printer c = sprintf "%c" (Uchar.to_char c) in
     assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" expected.value actual.value
-  | Annot.String expected, Annot.String actual ->
-    let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
-    let printer s =
-      s
-        |> List.map Uchar.to_char
-        |> List.map (sprintf "%c")
-        |> String.concat ""
-    in
-    assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" expected.value actual.value
-  | Annot.Ident expected, Annot.Ident actual ->
+  | Annot.ExprString expected, Annot.ExprString actual ->
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"String values are not equal" expected.value actual.value
+  | Annot.ExprIdent expected, Annot.ExprIdent actual ->
     SymTest.assert_sym_equal ~ctxt expected.id actual.id
   | expected, actual -> expr_not_equal ~ctxt expected actual
 
@@ -53,7 +46,7 @@ let assert_binding_equal ~ctxt expected actual = match (expected, actual) with
     assert_expr_equal ~ctxt expected.value actual.value
 
 let assert_top_equal ~ctxt expected actual = match (expected, actual) with
-  | Annot.Let expected, Annot.Let actual ->
+  | Annot.TopLet expected, Annot.TopLet actual ->
     assert_binding_equal ~ctxt expected.binding actual.binding
 
 (* Constructors *)
@@ -62,7 +55,7 @@ let test_expr_bool ctxt =
   let value = true in
   let expected = Annot.expr_bool value in
   match expected with
-    | Annot.Bool actual ->
+    | Annot.ExprBool actual ->
       assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
@@ -70,7 +63,7 @@ let test_expr_int ctxt =
   let value = 42l in
   let expected = Annot.expr_int value in
   match expected with
-    | Annot.Int actual ->
+    | Annot.ExprInt actual ->
       assert_equal ~ctxt ~cmp:Int32.equal ~printer:Int32.to_string ~msg:"Integer values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
@@ -78,7 +71,7 @@ let test_expr_long ctxt =
   let value = 42L in
   let expected = Annot.expr_long value in
   match expected with
-    | Annot.Long actual ->
+    | Annot.ExprLong actual ->
       assert_equal ~ctxt ~cmp:Int64.equal ~printer:Int64.to_string ~msg:"Long values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
@@ -86,7 +79,7 @@ let test_expr_float ctxt =
   let value = 4.2 in
   let expected = Annot.expr_float value in
   match expected with
-    | Annot.Float actual ->
+    | Annot.ExprFloat actual ->
       assert_equal ~ctxt ~printer:string_of_float ~msg:"Float values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
@@ -94,7 +87,7 @@ let test_expr_double ctxt =
   let value = 4.2 in
   let expected = Annot.expr_double value in
   match expected with
-    | Annot.Double actual ->
+    | Annot.ExprDouble actual ->
       assert_equal ~ctxt ~printer:string_of_float ~msg:"Double values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
@@ -102,36 +95,24 @@ let test_expr_rune ctxt =
   let value = Uchar.of_char 'a' in
   let expected = Annot.expr_rune value in
   match expected with
-    | Annot.Rune actual ->
+    | Annot.ExprRune actual ->
       let printer c = sprintf "%c" (Uchar.to_char c) in
       assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_string ctxt =
-  let value =
-    "foobar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-  in
+  let value = "foobar" in
   let expected = Annot.expr_string value in
   match expected with
-    | Annot.String actual ->
-      let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
-      let printer s =
-        s
-          |> List.map Uchar.to_char
-          |> List.map (sprintf "%c")
-          |> String.concat ""
-      in
-      assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" value actual.value
+    | Annot.ExprString actual ->
+      assert_equal ~ctxt ~printer:Fun.id ~msg:"String values are not equal" value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_ident ctxt =
   let id = () |> Sym.seq |> Sym.gen in
   let expected = Annot.expr_ident id in
   match expected with
-    | Annot.Ident actual ->
+    | Annot.ExprIdent actual ->
       SymTest.assert_sym_equal ~ctxt id actual.id
     | actual -> expr_not_equal ~ctxt expected actual
 
@@ -168,7 +149,7 @@ let test_top_let ctxt =
   in
   let expected = Annot.top_let binding in
   match expected with
-    | Annot.Let actual ->
+    | Annot.TopLet actual ->
       assert_binding_equal ~ctxt binding actual.binding
 
 (* Test Suite *)

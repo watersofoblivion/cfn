@@ -9,46 +9,39 @@ open CommonTest
 (* Assertions *)
 
 let atom_not_equal = TestUtils.not_equal "Atomic values" Clos.pp_atom
-(* let expr_not_equal = TestUtils.not_equal "Expressions" Clos.pp_expr *)
-(* let block_not_equal = TestUtils.not_equal "Block values" Clos.pp_block *)
+let expr_not_equal = TestUtils.not_equal "Expressions" Clos.pp_expr
+let block_not_equal = TestUtils.not_equal "Block values" Clos.pp_block
 let patt_not_equal = TestUtils.not_equal "Patterns" Clos.pp_patt
 (* let binding_not_equal = TestUtils.not_equal "Bindings" Clos.pp_binding *)
 (* let top_not_equal = TestUtils.not_equal "Top-level expressions" Clos.pp_top *)
 
 let assert_atom_equal ~ctxt expected actual = match (expected, actual) with
-  | Clos.Bool expected, Clos.Bool actual ->
+  | Clos.AtomBool expected, Clos.AtomBool actual ->
     assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" expected.value actual.value
-  | Clos.Int expected, Clos.Int actual ->
+  | Clos.AtomInt expected, Clos.AtomInt actual ->
     assert_equal ~ctxt ~cmp:Int32.equal ~printer:Int32.to_string ~msg:"Integer values are not equal" expected.value actual.value
-  | Clos.Long expected, Clos.Long actual ->
+  | Clos.AtomLong expected, Clos.AtomLong actual ->
     assert_equal ~ctxt ~cmp:Int64.equal ~printer:Int64.to_string ~msg:"Long values are not equal" expected.value actual.value
-  | Clos.Float expected, Clos.Float actual ->
+  | Clos.AtomFloat expected, Clos.AtomFloat actual ->
     assert_equal ~ctxt ~printer:string_of_float ~msg:"Float values are not equal" expected.value actual.value
-  | Clos.Double expected, Clos.Double actual ->
+  | Clos.AtomDouble expected, Clos.AtomDouble actual ->
     assert_equal ~ctxt ~printer:string_of_float ~msg:"Double values are not equal" expected.value actual.value
-  | Clos.Rune expected, Clos.Rune actual ->
+  | Clos.AtomRune expected, Clos.AtomRune actual ->
     let printer c = sprintf "%c" (Uchar.to_char c) in
     assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" expected.value actual.value
-  | Clos.String expected, Clos.String actual ->
-    let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
-    let printer s =
-      s
-        |> List.map Uchar.to_char
-        |> List.map (sprintf "%c")
-        |> String.concat ""
-    in
-    assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" expected.value actual.value
-  | Clos.Ident expected, Clos.Ident actual ->
+  | Clos.AtomString expected, Clos.AtomString actual ->
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"String values are not equal" expected.value actual.value
+  | Clos.AtomIdent expected, Clos.AtomIdent actual ->
     SymTest.assert_sym_equal ~ctxt expected.id actual.id
   | expected, actual -> atom_not_equal ~ctxt expected actual
 
 let assert_expr_equal ~ctxt expected actual = match (expected, actual) with
-  | Clos.Atom expected, Clos.Atom actual ->
+  | Clos.ExprBuiltin expected, Clos.ExprBuiltin actual ->
+    BuiltinTest.assert_builtin_equal ~ctxt expected.fn actual.fn;
+    List.iter2 (assert_atom_equal ~ctxt) expected.args actual.args
+  | Clos.ExprAtom expected, Clos.ExprAtom actual ->
     assert_atom_equal ~ctxt expected.atom actual.atom
-
-let assert_block_equal ~ctxt expected actual = match (expected, actual) with
-  | Clos.Expr expected, Clos.Expr actual ->
-    assert_expr_equal ~ctxt expected.expr actual.expr
+  | expected, actual -> expr_not_equal ~ctxt expected actual
 
 let assert_patt_equal ~ctxt expected actual = match (expected, actual) with
   | Clos.PattGround, Clos.PattGround -> ()
@@ -62,8 +55,16 @@ let assert_binding_equal ~ctxt expected actual = match (expected, actual) with
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty;
     assert_expr_equal ~ctxt expected.value actual.value
 
+let rec assert_block_equal ~ctxt expected actual = match (expected, actual) with
+  | Clos.BlockLet expected, Clos.BlockLet actual ->
+    assert_binding_equal ~ctxt expected.binding actual.binding;
+    assert_block_equal ~ctxt expected.scope actual.scope
+  | Clos.BlockExpr expected, Clos.BlockExpr actual ->
+    assert_expr_equal ~ctxt expected.expr actual.expr
+  | expected, actual -> block_not_equal ~ctxt expected actual
+
 let assert_top_equal ~ctxt expected actual = match (expected, actual) with
-  | Clos.Let expected, Clos.Let actual ->
+  | Clos.TopLet expected, Clos.TopLet actual ->
     assert_binding_equal ~ctxt expected.binding actual.binding
 
 (* Constructors *)
@@ -74,7 +75,7 @@ let test_atom_bool ctxt =
   let value = true in
   let expected = Clos.atom_bool value in
   match expected with
-    | Clos.Bool actual ->
+    | Clos.AtomBool actual ->
       assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
@@ -82,7 +83,7 @@ let test_atom_int ctxt =
   let value = 42l in
   let expected = Clos.atom_int value in
   match expected with
-    | Clos.Int actual ->
+    | Clos.AtomInt actual ->
       assert_equal ~ctxt ~cmp:Int32.equal ~printer:Int32.to_string ~msg:"Integer values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
@@ -90,7 +91,7 @@ let test_atom_long ctxt =
   let value = 42L in
   let expected = Clos.atom_long value in
   match expected with
-    | Clos.Long actual ->
+    | Clos.AtomLong actual ->
       assert_equal ~ctxt ~cmp:Int64.equal ~printer:Int64.to_string ~msg:"Long values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
@@ -98,7 +99,7 @@ let test_atom_float ctxt =
   let value = 4.2 in
   let expected = Clos.atom_float value in
   match expected with
-    | Clos.Float actual ->
+    | Clos.AtomFloat actual ->
       assert_equal ~ctxt ~printer:string_of_float ~msg:"Float values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
@@ -106,7 +107,7 @@ let test_atom_double ctxt =
   let value = 4.2 in
   let expected = Clos.atom_double value in
   match expected with
-    | Clos.Double actual ->
+    | Clos.AtomDouble actual ->
       assert_equal ~ctxt ~printer:string_of_float ~msg:"Double values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
@@ -114,36 +115,24 @@ let test_atom_rune ctxt =
   let value = Uchar.of_char 'a' in
   let expected = Clos.atom_rune value in
   match expected with
-    | Clos.Rune actual ->
+    | Clos.AtomRune actual ->
       let printer c = sprintf "%c" (Uchar.to_char c) in
       assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
 let test_atom_string ctxt =
-  let value =
-    "foobar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-  in
+  let value = "foobar" in
   let expected = Clos.atom_string value in
   match expected with
-    | Clos.String actual ->
-      let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
-      let printer s =
-        s
-          |> List.map Uchar.to_char
-          |> List.map (sprintf "%c")
-          |> String.concat ""
-      in
-      assert_equal ~ctxt ~cmp ~printer ~msg:"String values are not equal" value actual.value
+    | Clos.AtomString actual ->
+      assert_equal ~ctxt ~printer:Fun.id ~msg:"String values are not equal" value actual.value
     | actual -> atom_not_equal ~ctxt expected actual
 
 let test_atom_ident ctxt =
   let id = () |> Sym.seq |> Sym.gen in
   let expected = Clos.atom_ident id in
   match expected with
-    | Clos.Ident actual ->
+    | Clos.AtomIdent actual ->
       SymTest.assert_sym_equal ~ctxt id actual.id
     | actual -> atom_not_equal ~ctxt expected actual
 
@@ -153,8 +142,9 @@ let test_expr_atom ctxt =
   let atom = Clos.atom_bool true in
   let expected = Clos.expr_atom atom in
   match expected with
-    | Clos.Atom actual ->
+    | Clos.ExprAtom actual ->
       assert_atom_equal ~ctxt atom actual.atom
+    | actual -> expr_not_equal ~ctxt expected actual
 
 (* Blocks *)
 
@@ -165,8 +155,9 @@ let test_block_expr ctxt =
   in
   let expected = Clos.block_expr expr in
   match expected with
-    | Clos.Expr actual ->
+    | Clos.BlockExpr actual ->
       assert_expr_equal ~ctxt expr actual.expr
+    | actual -> block_not_equal ~ctxt expected actual
 
 (* Patterns *)
 
@@ -212,7 +203,7 @@ let test_top_let ctxt =
   in
   let expected = Clos.top_let binding in
   match expected with
-    | Clos.Let actual ->
+    | Clos.TopLet actual ->
       assert_binding_equal ~ctxt binding actual.binding
 
 (* Test Suite *)

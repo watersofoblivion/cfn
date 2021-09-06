@@ -84,16 +84,16 @@ let normalize_float = normalize_number Prim.id_float Float.of_string
 let normalize_double = normalize_number Prim.id_double Float.of_string
 
 let rec desug_expr env expr kontinue = match expr with
-  | Syntax.Bool expr -> desug_expr_bool env expr.value kontinue
-  | Syntax.Int expr -> desug_expr_int env expr.loc expr.lexeme kontinue
-  | Syntax.Long expr -> desug_expr_long env expr.loc expr.lexeme kontinue
-  | Syntax.Float expr -> desug_expr_float env expr.loc expr.lexeme kontinue
-  | Syntax.Double expr -> desug_expr_double env expr.loc expr.lexeme kontinue
-  | Syntax.Rune expr -> desug_expr_rune env expr.value kontinue
-  | Syntax.String expr -> desug_expr_string env expr.value kontinue
-  | Syntax.Ident expr -> desug_expr_ident env expr.loc expr.id kontinue
-  | Syntax.UnOp _ -> failwith "TODO"
-  | Syntax.BinOp expr -> desug_expr_bin_op env expr.op expr.lhs expr.rhs kontinue
+  | Syntax.ExprBool expr -> desug_expr_bool env expr.value kontinue
+  | Syntax.ExprInt expr -> desug_expr_int env expr.loc expr.lexeme kontinue
+  | Syntax.ExprLong expr -> desug_expr_long env expr.loc expr.lexeme kontinue
+  | Syntax.ExprFloat expr -> desug_expr_float env expr.loc expr.lexeme kontinue
+  | Syntax.ExprDouble expr -> desug_expr_double env expr.loc expr.lexeme kontinue
+  | Syntax.ExprRune expr -> desug_expr_rune env expr.value kontinue
+  | Syntax.ExprString expr -> desug_expr_string env expr.value kontinue
+  | Syntax.ExprIdent expr -> desug_expr_ident env expr.loc expr.id kontinue
+  | Syntax.ExprUnOp _ -> failwith "TODO"
+  | Syntax.ExprBinOp expr -> desug_expr_bin_op env expr.op expr.lhs expr.rhs kontinue
 
 and desug_expr_bool _ b kontinue =
   b
@@ -148,12 +148,12 @@ and desug_expr_bin_op env op lhs rhs kontinue =
   desug_expr env lhs (fun lty lhs ->
     desug_expr env rhs (fun rty rhs ->
       match op with
-        | Syntax.OpAdd _ -> desug_expr_bin_op_numeric env Annot.builtin_add lty rty lhs rhs kontinue
-        | Syntax.OpSub _ -> desug_expr_bin_op_numeric env Annot.builtin_sub lty rty lhs rhs kontinue
-        | Syntax.OpMul _ -> desug_expr_bin_op_numeric env Annot.builtin_mul lty rty lhs rhs kontinue
-        | Syntax.OpDiv _ -> desug_expr_bin_op_numeric env Annot.builtin_div lty rty lhs rhs kontinue
-        | Syntax.OpMod _ -> desug_expr_bin_op_integral env Annot.builtin_mod lty rty lhs rhs kontinue
-        | Syntax.OpExp _ -> desug_expr_bin_op_floating_point env Annot.builtin_exp lty rty lhs rhs kontinue
+        | Syntax.BinAdd _ -> desug_expr_bin_op_numeric env Annot.builtin_add lty rty lhs rhs kontinue
+        | Syntax.BinSub _ -> desug_expr_bin_op_numeric env Annot.builtin_sub lty rty lhs rhs kontinue
+        | Syntax.BinMul _ -> desug_expr_bin_op_numeric env Annot.builtin_mul lty rty lhs rhs kontinue
+        | Syntax.BinDiv _ -> desug_expr_bin_op_numeric env Annot.builtin_div lty rty lhs rhs kontinue
+        | Syntax.BinMod _ -> desug_expr_bin_op_integral env Annot.builtin_mod lty rty lhs rhs kontinue
+        | Syntax.BinExp _ -> desug_expr_bin_op_floating_point env Annot.builtin_exp lty rty lhs rhs kontinue
       ))
 
 and desug_expr_bin_op_numeric _ builtin lty rty lhs rhs kontinue =
@@ -271,8 +271,8 @@ let desug_binding env binding kontinue = match binding with
 (* Top-Level Expressions *)
 
 let rec desug_top env top kontinue = match top with
-  | Syntax.Let top -> desug_top_let env top.binding kontinue
-  | Syntax.Val top -> desug_top_val env top.binding kontinue
+  | Syntax.TopLet top -> desug_top_let env top.binding kontinue
+  | Syntax.TopVal top -> desug_top_val env top.binding kontinue
 
 and desug_top_let env binding kontinue =
   desug_binding env binding (fun env binding ->

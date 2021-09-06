@@ -24,7 +24,7 @@ let fresh_of_lexeme ?start:(start = (0, 0, 0)) to_lexeme of_lexeme value =
 let fresh_ty_constr ?start:(start = (0, 0, 0)) ?seq:(seq = Sym.seq ()) ?id:(id = "FooBar") _ =
   let loc =
     id
-      |> Utf8.len
+      |> Utf8.length
       |> lexeme_loc_of_len start
   in
   seq
@@ -51,26 +51,36 @@ let fresh_double ?start:(start = (0, 0, 0)) ?value:(value = 4.2) _ =
   fresh_of_lexeme ~start (sprintf "%g") Syntax.expr_double value
 
 let fresh_rune ?start:(start = (0, 0, 0)) ?value:(value = 'a') _ =
-  let lexeme = Uchar.of_char value in
+  let (start_line, start_col, start_byte) = start in
+  let lexeme =
+    let loc = LocTest.make (start_line, start_col + 1, start_byte + 1) (start_line, start_col + 2, start_byte + 2) in
+    value
+      |> Uchar.of_char
+      |> Syntax.rune_lit loc
+  in
   let loc =
-    let (start_line, start_col, start_byte) = start in
     LocTest.make start (start_line, start_col + 3, start_byte + 3)
   in
   Syntax.expr_rune loc lexeme
 
 let fresh_string ?start:(start = (0, 0, 0)) ?value:(value = "foo bar") _ =
-  let lexeme = Utf8.normalize value in
-  let loc =
-    let (start_line, start_col, start_byte) = start in
-    let len = Utf8.len value in
-    LocTest.make start (start_line, start_col + len, start_byte + len)
+  let (start_line, start_col, start_byte) = start in
+  let len = Utf8.length value in
+  let lexeme =
+    let loc = LocTest.make (start_line, start_col + 1, start_byte + 1) (start_line, start_col + len + 1, start_col + len + 1) in
+    value
+      |> Utf8.normalize
+      |> Syntax.str_lit loc
   in
-  Syntax.expr_string loc lexeme
+  let loc =
+    LocTest.make start (start_line, start_col + len + 2, start_byte + len + 2)
+  in
+  Syntax.expr_string loc [lexeme]
 
 let fresh_ident ?start:(start = (0, 0, 0)) ?seq:(seq = Sym.seq ()) ?id:(id = "fooBar") _ =
   let loc =
     id
-      |> Utf8.len
+      |> Utf8.length
       |> lexeme_loc_of_len start
   in
   seq
@@ -84,7 +94,7 @@ let fresh_patt_ground ?start:((start_line, start_col, start_byte) = (0, 0, 0)) _
 let fresh_patt_var ?start:(start = (0, 0, 0)) ?seq:(seq = Sym.seq ()) ?id:(id = "fooBar") _ =
   let loc =
     id
-      |> Utf8.len
+      |> Utf8.length
       |> lexeme_loc_of_len start
   in
   seq
@@ -94,7 +104,7 @@ let fresh_patt_var ?start:(start = (0, 0, 0)) ?seq:(seq = Sym.seq ()) ?id:(id = 
 let fresh_name ?start:(start = (0, 0, 0)) ?seq:(seq = Sym.seq ()) ?id:(id = "fooBar") _ =
   let loc =
     id
-      |> Utf8.len
+      |> Utf8.length
       |> lexeme_loc_of_len start
   in
   seq
@@ -271,19 +281,29 @@ let test_lit_double ctxt =
   ]
 
 let test_lit_rune ctxt =
-  assert_lit ~ctxt "'a'" Syntax.expr_rune (Uchar.of_char 'a');
-  (* assert_lit ~ctxt "'ß'" Syntax.expr_rune (Uchar.of_char 'ß'); *)
-  assert_lit ~ctxt "'\\''" Syntax.expr_rune (Uchar.of_char '\'')
+  let expr_rune loc r =
+    r
+      |> Syntax.rune_lit LocTest.dummy
+      |> Syntax.expr_rune loc
+  in
+  assert_lit ~ctxt "'a'" expr_rune (Uchar.of_char 'a');
+  (* assert_lit ~ctxt "'ß'" expr_rune (Uchar.of_char 'ß'); *)
+  assert_lit ~ctxt "'\\''" expr_rune (Uchar.of_char '\'')
 
 let test_lit_string ctxt =
   let assert_str lexeme value =
     let env = EnvTest.fresh () in
-    let loc =
-      let len = Utf8.len lexeme in
-      LocTest.make (0, 0, 0) (0, len, len)
+    let len = Utf8.length lexeme in
+    let seg =
+      let loc = LocTest.make (0, 1, 1) (0, len + 1, len + 1) in
+      value
+        |> Utf8.normalize
+        |> Syntax.str_lit loc
     in
-    value
-      |> Utf8.normalize
+    let loc =
+      LocTest.make (0, 0, 0) (0, len + 2, len + 2)
+    in
+    [seg]
       |> Syntax.expr_string loc
       |> assert_parses_lit ~ctxt env [lexeme]
   in

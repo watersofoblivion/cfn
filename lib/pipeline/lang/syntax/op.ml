@@ -3,36 +3,36 @@
 open Common
 
 type un =
-  | OpNeg of { loc: Loc.t }
+  | UnNeg of { loc: Loc.t }
 
 type bin =
-  | OpAdd of { loc: Loc.t }
-  | OpSub of { loc: Loc.t }
-  | OpMul of { loc: Loc.t }
-  | OpDiv of { loc: Loc.t }
-  | OpMod of { loc: Loc.t }
-  | OpExp of { loc: Loc.t }
+  | BinAdd of { loc: Loc.t }
+  | BinSub of { loc: Loc.t }
+  | BinMul of { loc: Loc.t }
+  | BinDiv of { loc: Loc.t }
+  | BinMod of { loc: Loc.t }
+  | BinExp of { loc: Loc.t }
 
 (* Constructors *)
 
-let un_neg loc = OpNeg { loc }
+let un_neg loc = UnNeg { loc }
 
-let bin_add loc = OpAdd { loc }
-let bin_sub loc = OpSub { loc }
-let bin_mul loc = OpMul { loc }
-let bin_div loc = OpDiv { loc }
-let bin_mod loc = OpMod { loc }
-let bin_exp loc = OpExp { loc }
+let bin_add loc = BinAdd { loc }
+let bin_sub loc = BinSub { loc }
+let bin_mul loc = BinMul { loc }
+let bin_div loc = BinDiv { loc }
+let bin_mod loc = BinMod { loc }
+let bin_exp loc = BinExp { loc }
 
 (* Operations *)
 
 let loc_un = function
-  | OpNeg op -> op.loc
+  | UnNeg op -> op.loc
 
 let loc_bin = function
-  | OpAdd op -> op.loc
-  | OpSub op -> op.loc
-  | OpMul op -> op.loc
-  | OpDiv op -> op.loc
-  | OpMod op -> op.loc
-  | OpExp op -> op.loc
+  | BinAdd op -> op.loc
+  | BinSub op -> op.loc
+  | BinMul op -> op.loc
+  | BinDiv op -> op.loc
+  | BinMod op -> op.loc
+  | BinExp op -> op.loc

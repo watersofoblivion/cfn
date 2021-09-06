@@ -9,6 +9,10 @@ open CommonTest
 (* Assertions *)
 
 let assert_pp_ty = PrettyTest.assert_pp Syntax.pp_ty
+let assert_pp_un = PrettyTest.assert_pp Syntax.pp_un
+let assert_pp_bin = PrettyTest.assert_pp Syntax.pp_bin
+let assert_pp_rune = PrettyTest.assert_pp Syntax.pp_rune
+let assert_pp_str = PrettyTest.assert_pp Syntax.pp_str
 let assert_pp_expr = PrettyTest.assert_pp Syntax.pp_expr
 let assert_pp_patt = PrettyTest.assert_pp Syntax.pp_patt
 let assert_pp_binding = PrettyTest.assert_pp Syntax.pp_binding

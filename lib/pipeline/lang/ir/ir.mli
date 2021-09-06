@@ -17,67 +17,67 @@ type ty = private
 (** Types *)
 
 type builtin = private
-  | Add of {
+  | BuiltinAdd of {
       ty: ty (** Operand type *)
     } (** Addition *)
-  | Sub of {
+  | BuiltinSub of {
       ty: ty (** Operand type *)
     } (** Subtraction *)
-  | Mul of {
+  | BuiltinMul of {
       ty: ty (** Operand type *)
     } (** Multiplication *)
-  | Div of {
+  | BuiltinDiv of {
       ty: ty (** Operand type *)
     } (** Division *)
-  | Mod of {
+  | BuiltinMod of {
       ty: ty (** Operand type *)
     } (** Modulus *)
-  | Exp of {
+  | BuiltinExp of {
       ty: ty (** Operand type *)
     } (** Exponentiation *)
-  | Promote of {
+  | BuiltinPromote of {
       sub: ty; (** Subtype *)
       sup: ty  (** Supertype *)
     } (** Type Promotion *)
-  | Concat of {
+  | BuiltinConcat of {
       ty: ty (** The type of values being concatenated. *)
     } (** Concatenation *)
 (** Built-in Functions *)
 
 type atom = private
-  | Bool of {
+  | AtomBool of {
       value: bool (** Value *)
     } (** Booleans *)
-  | Int of {
+  | AtomInt of {
       value: int32 (** Value *)
     } (** Integers *)
-  | Long of {
+  | AtomLong of {
       value: int64 (** Value *)
     } (** Longs *)
-  | Float of {
+  | AtomFloat of {
       value: float (** Value *)
     } (** Floats *)
-  | Double of {
+  | AtomDouble of {
       value: float (** Value *)
     } (** Doubles *)
-  | Rune of {
+  | AtomRune of {
       value: Uchar.t (** Value *)
     } (** Runes *)
-  | String of {
+  | AtomString of {
       value: string; (** UTF-8 encoded value *)
       len:   int     (** Length in runes *)
     } (** Strings *)
-  | Ident of {
+  | AtomIdent of {
       id: Sym.t (** Identifier *)
     } (** Identifier *)
 (** Atomic Values *)
 
 type expr = private
-  | Builtin of {
+  | ExprBuiltin of {
       fn:   builtin;  (** Built-in function *)
       args: atom list (** Arguments *)
     } (** Built-in Function Application *)
-  | Atom of {
+  | ExprAtom of {
       atom: atom (** Atomic Value *)
     } (** Atomic Expression *)
 (** Expressions *)
@@ -98,17 +98,17 @@ type binding = private
 (** Bindings *)
 
 type block = private
-  | Bind of {
+  | BlockLet of {
       binding: binding; (** Binding *)
       scope:   block    (** Scope *)
     } (** Let Binding *)
-  | Expr of {
+  | BlockExpr of {
       expr: expr (** Expression *)
     } (** Expression Block *)
 (** Block Values *)
 
 type top = private
-  | Let of {
+  | TopLet of {
       binding: binding (** Binding *)
     } (** Let Binding *)
 (** Top-Level Bindings *)
@@ -252,8 +252,8 @@ val binding : patt -> ty -> expr -> binding
 
 (** {3 Blocks} *)
 
-val block_bind : binding -> block -> block
-(** [block_bind binding scope] constructs a [let] binding which binds [binding]
+val block_let : binding -> block -> block
+(** [block_let binding scope] constructs a [let] binding which binds [binding]
     in [scope]. *)
 
 val block_expr : expr -> block

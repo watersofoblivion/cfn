@@ -17,29 +17,29 @@ type ty = private
 (** Types *)
 
 type builtin = private
-  | Add of {
+  | BuiltinAdd of {
       ty: ty (** Operand type *)
     } (** Addition *)
-  | Sub of {
+  | BuiltinSub of {
       ty: ty (** Operand type *)
     } (** Subtraction *)
-  | Mul of {
+  | BuiltinMul of {
       ty: ty (** Operand type *)
     } (** Multiplication *)
-  | Div of {
+  | BuiltinDiv of {
       ty: ty (** Operand type *)
     } (** Division *)
-  | Mod of {
+  | BuiltinMod of {
       ty: ty (** Operand type *)
     } (** Modulus *)
-  | Exp of {
+  | BuiltinExp of {
       ty: ty (** Operand type *)
     } (** Exponentiation *)
-  | Promote of {
+  | BuiltinPromote of {
       sub: ty; (** Subtype *)
       sup: ty  (** Supertype *)
     } (** Type Promotion *)
-  | Concat of {
+  | BuiltinConcat of {
       ty: ty (** Operand type *)
     } (** Concatenation *)
 (** Builtin Functions *)
@@ -52,32 +52,32 @@ type patt = private
 (** Patterns *)
 
 and expr = private
-  | Bool of {
+  | ExprBool of {
       value: bool (** Value *)
     } (** Booleans *)
-  | Int of {
+  | ExprInt of {
       value: int32 (** Value *)
     } (** Integers *)
-  | Long of {
+  | ExprLong of {
       value: int64 (** Value *)
     } (** Longs *)
-  | Float of {
+  | ExprFloat of {
       value: float (** Value *)
     } (** Floats *)
-  | Double of {
+  | ExprDouble of {
       value: float (** Value *)
     } (** Doubles *)
-  | Rune of {
+  | ExprRune of {
       value: Uchar.t (** Value *)
     } (** Runes *)
-  | String of {
+  | ExprString of {
       value: string; (** UTF-8 encoded value *)
       len:   int     (** Length in runes *)
     } (** Strings *)
-  | Ident of {
+  | ExprIdent of {
       id: Sym.t (** Identifier *)
     } (** Identifiers *)
-  | Builtin of {
+  | ExprBuiltin of {
       fn:   builtin; (** Built-in function *)
       args: expr list (** Arguments *)
     } (** Function Application *)
@@ -92,7 +92,7 @@ and binding = private
 (** Bindings *)
 
 type top = private
-  | Let of {
+  | TopLet of {
       binding: binding (** Binding *)
     } (** Let Binding *)
 (** Top-Level Bindings *)

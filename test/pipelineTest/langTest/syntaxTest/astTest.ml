@@ -8,12 +8,6 @@ open CommonTest
 
 (* Fixtures *)
 
-let fresh_ty_constr ?seq:(seq = Sym.seq ()) ?id:(id = Prim.id_bool) _ =
-  let loc = LocTest.gen () in
-  seq
-    |> Sym.gen ~id
-    |> Syntax.ty_constr loc
-
 let fresh_expr_bool ?value:(value = true) _ =
   let loc = LocTest.gen () in
   Syntax.expr_bool loc value
@@ -43,18 +37,22 @@ let fresh_expr_double ?value:(value = 4.2) _ =
     |> Syntax.expr_double loc
 
 let fresh_expr_rune ?value:(value = 'a') _ =
+  let value =
+    let loc = LocTest.gen () in
+    value
+      |> Uchar.of_char
+      |> Syntax.rune_lit loc
+  in
   let loc = LocTest.gen () in
-  value
-    |> Uchar.of_char
-    |> Syntax.expr_rune loc
+  Syntax.expr_rune loc value
 
 let fresh_expr_string ?value:(value = "foo bar") _ =
+  let value =
+    let loc = LocTest.gen () in
+    [Syntax.str_lit loc value]
+  in
   let loc = LocTest.gen () in
-  value
-    |> String.to_seq
-    |> List.of_seq
-    |> List.map Uchar.of_char
-    |> Syntax.expr_string loc
+  Syntax.expr_string loc value
 
 let fresh_expr_ident ?seq:(seq = Sym.seq ()) ?id:(id = "") _ =
   let loc = LocTest.gen () in
@@ -78,7 +76,7 @@ let fresh_value_binding ?explicit:(explicit = false) ?seq:(seq = Sym.seq ()) ?id
   let patt = fresh_patt_var ~seq ~id () in
   let ty =
     if explicit
-    then Some (fresh_ty_constr ~seq ())
+    then Some (TypeTest.fresh_ty_constr ~seq ())
     else None
   in
   ()
@@ -149,18 +147,46 @@ let deloc_optional deloc = function
   | Some value -> Some (deloc value)
   | None -> None
 
-let deloc_ty = function
-  | Syntax.TyConstr constr -> Syntax.ty_constr LocTest.dummy constr.id
+let deloc_rune = function
+  | Syntax.RuneLit rune -> Syntax.rune_lit LocTest.dummy rune.value
+  | Syntax.RuneEscape rune -> Syntax.rune_escape LocTest.dummy rune.lexeme
 
-let deloc_expr = function
-  | Syntax.Bool b -> Syntax.expr_bool LocTest.dummy b.value
-  | Syntax.Int i -> Syntax.expr_int LocTest.dummy i.lexeme
-  | Syntax.Long l -> Syntax.expr_long LocTest.dummy l.lexeme
-  | Syntax.Float f -> Syntax.expr_float LocTest.dummy f.lexeme
-  | Syntax.Double d -> Syntax.expr_double LocTest.dummy d.lexeme
-  | Syntax.Rune r -> Syntax.expr_rune LocTest.dummy r.value
-  | Syntax.String s -> Syntax.expr_string LocTest.dummy s.value
-  | Syntax.Ident ident -> Syntax.expr_ident LocTest.dummy ident.id
+let deloc_str = function
+  | Syntax.StringLit str -> Syntax.str_lit LocTest.dummy str.lexeme
+  | Syntax.StringEscape str -> Syntax.str_escape LocTest.dummy str.lexeme
+
+let rec deloc_expr = function
+  | Syntax.ExprBool expr -> Syntax.expr_bool LocTest.dummy expr.value
+  | Syntax.ExprInt expr -> Syntax.expr_int LocTest.dummy expr.lexeme
+  | Syntax.ExprLong expr -> Syntax.expr_long LocTest.dummy expr.lexeme
+  | Syntax.ExprFloat expr -> Syntax.expr_float LocTest.dummy expr.lexeme
+  | Syntax.ExprDouble expr -> Syntax.expr_double LocTest.dummy expr.lexeme
+  | Syntax.ExprRune expr -> deloc_expr_rune expr.value
+  | Syntax.ExprString expr -> deloc_expr_string expr.value
+  | Syntax.ExprIdent expr -> Syntax.expr_ident LocTest.dummy expr.id
+  | Syntax.ExprUnOp expr -> deloc_expr_un_op expr.op expr.operand
+  | Syntax.ExprBinOp expr -> deloc_expr_bin_op expr.op expr.lhs expr.rhs
+
+and deloc_expr_rune value =
+  value
+    |> deloc_rune
+    |> Syntax.expr_rune LocTest.dummy
+
+and deloc_expr_string value =
+  value
+    |> List.map deloc_str
+    |> Syntax.expr_string LocTest.dummy
+
+and deloc_expr_un_op op operand =
+  let op = OpTest.deloc_un op in
+  let operand = deloc_expr operand in
+  Syntax.expr_un_op LocTest.dummy op operand
+
+and deloc_expr_bin_op op lhs rhs =
+  let op = OpTest.deloc_bin op in
+  let lhs = deloc_expr lhs in
+  let rhs = deloc_expr rhs in
+  Syntax.expr_bin_op LocTest.dummy op lhs rhs
 
 let deloc_patt = function
   | Syntax.PattGround _ -> Syntax.patt_ground LocTest.dummy
@@ -169,20 +195,24 @@ let deloc_patt = function
 let deloc_binding = function
   | Syntax.ValueBinding binding ->
     let patt = deloc_patt binding.patt in
-    let ty = deloc_optional deloc_ty binding.ty in
+    let ty = deloc_optional TypeTest.deloc_ty binding.ty in
     binding.value
       |> deloc_expr
       |> Syntax.value_binding LocTest.dummy patt ty
 
-let deloc_top = function
-  | Syntax.Let top ->
-    top.binding
-      |> deloc_binding
-      |> Syntax.top_let LocTest.dummy
-  | Syntax.Val top ->
-    top.binding
-      |> deloc_binding
-      |> Syntax.top_val LocTest.dummy
+let rec deloc_top = function
+  | Syntax.TopLet top -> deloc_top_let top.binding
+  | Syntax.TopVal top -> deloc_top_val top.binding
+
+and deloc_top_let binding =
+  binding
+    |> deloc_binding
+    |> Syntax.top_let LocTest.dummy
+
+and deloc_top_val binding =
+  binding
+    |> deloc_binding
+    |> Syntax.top_val LocTest.dummy
 
 let deloc_name = function
   | Syntax.Name name -> Syntax.name LocTest.dummy name.id
@@ -238,37 +268,65 @@ let deloc_file = function
 
 (* Assertions *)
 
+let rune_not_equal = TestUtils.not_equal "Runes" Syntax.pp_rune
+let str_not_equal = TestUtils.not_equal "Strings" Syntax.pp_str
 let expr_not_equal = TestUtils.not_equal "Expressions" Syntax.pp_expr
 let patt_not_equal = TestUtils.not_equal "Patterns" Syntax.pp_patt
 let top_not_equal = TestUtils.not_equal "Top-level expressions" Syntax.pp_top
 
-let assert_expr_equal ~ctxt expected actual = match (expected, actual) with
-  | Syntax.Bool expected, Syntax.Bool actual ->
+let assert_rune_equal ~ctxt expected actual = match (expected, actual) with
+  | Syntax.RuneLit expected, Syntax.RuneLit actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    let printer r = sprintf "%c" (Uchar.to_char r) in
+    assert_equal ~ctxt ~printer ~msg:"Runes are not equal" expected.value actual.value
+  | Syntax.RuneEscape expected, Syntax.RuneEscape actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"Rune escape sequences are not equal" expected.lexeme actual.lexeme
+  | expected, actual -> rune_not_equal ~ctxt expected actual
+
+let assert_str_equal ~ctxt expected actual = match (expected, actual) with
+  | Syntax.StringLit expected, Syntax.StringLit actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"String literals are not equal" expected.lexeme actual.lexeme
+  | Syntax.StringEscape expected, Syntax.StringEscape actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    assert_equal ~ctxt ~printer:Fun.id ~msg:"String escape sequences are not equal" expected.lexeme actual.lexeme
+  | expected, actual -> str_not_equal ~ctxt expected actual
+
+let rec assert_expr_equal ~ctxt expected actual = match (expected, actual) with
+  | Syntax.ExprBool expected, Syntax.ExprBool actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     assert_equal ~ctxt ~printer:string_of_bool ~msg:"Boolean values are not equal" expected.value actual.value
-  | Syntax.Int expected, Syntax.Int actual ->
+  | Syntax.ExprInt expected, Syntax.ExprInt actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     assert_equal ~ctxt ~printer:Fun.id ~msg:"Integer lexemes are not equal" expected.lexeme actual.lexeme
-  | Syntax.Long expected, Syntax.Long actual ->
+  | Syntax.ExprLong expected, Syntax.ExprLong actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     assert_equal ~ctxt ~printer:Fun.id ~msg:"Long lexemes are not equal" expected.lexeme actual.lexeme
-  | Syntax.Float expected, Syntax.Float actual ->
+  | Syntax.ExprFloat expected, Syntax.ExprFloat actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     assert_equal ~ctxt ~printer:Fun.id ~msg:"Float lexemes are not equal" expected.lexeme actual.lexeme
-  | Syntax.Double expected, Syntax.Double actual ->
+  | Syntax.ExprDouble expected, Syntax.ExprDouble actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     assert_equal ~ctxt ~printer:Fun.id ~msg:"Double lexemes are not equal" expected.lexeme actual.lexeme
-  | Syntax.Rune expected, Syntax.Rune actual ->
+  | Syntax.ExprRune expected, Syntax.ExprRune actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
-    let printer r = sprintf "%c" (Uchar.to_char r) in
-    assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"Rune values are not equal" expected.value actual.value
-  | Syntax.String expected, Syntax.String actual ->
+    assert_rune_equal ~ctxt expected.value actual.value
+  | Syntax.ExprString expected, Syntax.ExprString actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
-    let printer r = sprintf "%c" (Uchar.to_char r) in
-    List.iter2 (assert_equal ~ctxt ~cmp:Uchar.equal ~printer ~msg:"String values are not equal") expected.value actual.value
-  | Syntax.Ident expected, Syntax.Ident actual ->
+    List.iter2 (assert_str_equal ~ctxt) expected.value actual.value
+  | Syntax.ExprIdent expected, Syntax.ExprIdent actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     SymTest.assert_sym_equal ~ctxt expected.id actual.id
+  | Syntax.ExprUnOp expected, Syntax.ExprUnOp actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    OpTest.assert_un_equal ~ctxt expected.op actual.op;
+    assert_expr_equal ~ctxt expected.operand actual.operand
+  | Syntax.ExprBinOp expected, Syntax.ExprBinOp actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
+    OpTest.assert_bin_equal ~ctxt expected.op actual.op;
+    assert_expr_equal ~ctxt expected.lhs actual.lhs;
+    assert_expr_equal ~ctxt expected.rhs actual.rhs
   | expected, actual -> expr_not_equal ~ctxt expected actual
 
 let assert_patt_equal ~ctxt expected actual = match (expected, actual) with
@@ -287,10 +345,10 @@ let assert_binding_equal ~ctxt expected actual = match (expected, actual) with
     assert_expr_equal ~ctxt expected.value actual.value
 
 let assert_top_equal ~ctxt expected actual = match (expected, actual) with
-  | Syntax.Let expected, Syntax.Let actual ->
+  | Syntax.TopLet expected, Syntax.TopLet actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     assert_binding_equal ~ctxt expected.binding actual.binding
-  | Syntax.Val expected, Syntax.Val actual ->
+  | Syntax.TopVal expected, Syntax.TopVal actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     assert_binding_equal ~ctxt expected.binding actual.binding
   | expected, actual -> top_not_equal ~ctxt expected actual
@@ -343,7 +401,7 @@ let test_expr_bool ctxt =
   let loc = LocTest.gen () in
   let expected = Syntax.expr_bool loc true in
   match expected with
-    | Syntax.Bool actual ->
+    | Syntax.ExprBool actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
       assert_equal ~ctxt ~msg:"Boolean values are not equal" ~printer:string_of_bool true actual.value
     | actual -> expr_not_equal ~ctxt expected actual
@@ -353,9 +411,9 @@ let test_expr_int ctxt =
   let lexeme = "+42i" in
   let expected = Syntax.expr_int loc lexeme in
   match expected with
-    | Syntax.Int actual ->
+    | Syntax.ExprInt actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      assert_equal ~ctxt ~msg:"Int lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+      assert_equal ~ctxt ~msg:"Int lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_long ctxt =
@@ -363,9 +421,9 @@ let test_expr_long ctxt =
   let lexeme = "+42L" in
   let expected = Syntax.expr_long loc lexeme in
   match expected with
-    | Syntax.Long actual ->
+    | Syntax.ExprLong actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      assert_equal ~ctxt ~msg:"Long lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+      assert_equal ~ctxt ~msg:"Long lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_float ctxt =
@@ -373,9 +431,9 @@ let test_expr_float ctxt =
   let lexeme = "+1.2e-3.4f" in
   let expected = Syntax.expr_float loc lexeme in
   match expected with
-    | Syntax.Float actual ->
+    | Syntax.ExprFloat actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      assert_equal ~ctxt ~msg:"Float lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+      assert_equal ~ctxt ~msg:"Float lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_double ctxt =
@@ -383,41 +441,37 @@ let test_expr_double ctxt =
   let lexeme = "+1.2e-3.4D" in
   let expected = Syntax.expr_double loc lexeme in
   match expected with
-    | Syntax.Double actual ->
+    | Syntax.ExprDouble actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      assert_equal ~ctxt ~msg:"Double lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme;
+      assert_equal ~ctxt ~msg:"Double lexemes are not equal" ~printer:Fun.id lexeme actual.lexeme
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_rune ctxt =
+  let value =
+    let loc = LocTest.gen () in
+    'a'
+      |> Uchar.of_char
+      |> Syntax.rune_lit loc
+  in
   let loc = LocTest.gen () in
-  let value = Uchar.of_char 'a' in
   let expected = Syntax.expr_rune loc value in
   match expected with
-    | Syntax.Rune actual ->
+    | Syntax.ExprRune actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      let printer r = sprintf "%c" (Uchar.to_char r) in
-      assert_equal ~cmp:Uchar.equal ~msg:"Rune values are not equal" ~printer value actual.value
+      assert_rune_equal ~ctxt value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_string ctxt =
-  let loc = LocTest.gen () in
   let value =
-    "asdf"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
+    let loc = LocTest.gen () in
+    [Syntax.str_lit loc "asdf"]
   in
+  let loc = LocTest.gen () in
   let expected = Syntax.expr_string loc value in
   match expected with
-    | Syntax.String actual ->
+    | Syntax.ExprString actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      let cmp s s' = List.fold_left2 (fun acc c c' -> acc && Uchar.equal c c') true s s' in
-      let printer s =
-        s
-          |> List.map (fun c -> sprintf "%c" (Uchar.to_char c))
-          |> String.concat ""
-      in
-      assert_equal ~cmp ~printer ~msg:"String values are not equal" value actual.value
+      List.iter2 (assert_str_equal ~ctxt) value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_ident ctxt =
@@ -425,7 +479,7 @@ let test_expr_ident ctxt =
   let id = () |> Sym.seq |> Sym.gen in
   let expected = Syntax.expr_ident loc id in
   match expected with
-    | Syntax.Ident actual ->
+    | Syntax.ExprIdent actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
       SymTest.assert_sym_equal ~ctxt id actual.id
     | actual -> expr_not_equal ~ctxt expected actual
@@ -462,14 +516,14 @@ let test_binding_value_binding ctxt =
         assert_expr_equal ~ctxt value actual.value
   in
   assert_binding_equal None;
-  assert_binding_equal (Some (fresh_ty_constr ()))
+  assert_binding_equal (Some (TypeTest.fresh_ty_constr ()))
 
 let test_top_let ctxt =
   let loc = LocTest.gen () in
   let binding = fresh_value_binding () in
   let expected = Syntax.top_let loc binding in
   match expected with
-    | Syntax.Let actual ->
+    | Syntax.TopLet actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
       assert_binding_equal ~ctxt binding actual.binding
     | actual -> top_not_equal ~ctxt expected actual
@@ -479,7 +533,7 @@ let test_top_val ctxt =
   let binding = fresh_value_binding () in
   let expected = Syntax.top_val loc binding in
   match expected with
-    | Syntax.Val actual ->
+    | Syntax.TopVal actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
       assert_binding_equal ~ctxt binding actual.binding
     | actual -> top_not_equal ~ctxt expected actual

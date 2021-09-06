@@ -30,29 +30,29 @@ let pp_str fmt = function
 (* Operators *)
 
 let pp_un fmt = function
-  | Op.OpNeg _ -> fprintf fmt "-"
+  | Op.UnNeg _ -> fprintf fmt "-"
 
 let pp_bin fmt = function
-  | Op.OpAdd _ -> fprintf fmt "+"
-  | Op.OpSub _ -> fprintf fmt "-"
-  | Op.OpMul _ -> fprintf fmt "*"
-  | Op.OpDiv _ -> fprintf fmt "/"
-  | Op.OpMod _ -> fprintf fmt "%%"
-  | Op.OpExp _ -> fprintf fmt "^"
+  | Op.BinAdd _ -> fprintf fmt "+"
+  | Op.BinSub _ -> fprintf fmt "-"
+  | Op.BinMul _ -> fprintf fmt "*"
+  | Op.BinDiv _ -> fprintf fmt "/"
+  | Op.BinMod _ -> fprintf fmt "%%"
+  | Op.BinExp _ -> fprintf fmt "^"
 
 (* Expressions *)
 
 let rec pp_expr fmt = function
-  | Ast.Bool expr -> fprintf fmt "%B" expr.value
-  | Ast.Int expr -> fprintf fmt "%s" expr.lexeme
-  | Ast.Long expr -> fprintf fmt "%s" expr.lexeme
-  | Ast.Float expr -> fprintf fmt "%s" expr.lexeme
-  | Ast.Double expr -> fprintf fmt "%s" expr.lexeme
-  | Ast.Rune expr -> pp_rune fmt expr.value
-  | Ast.String expr -> List.iter (pp_str fmt) expr.value
-  | Ast.Ident expr -> Sym.pp_id fmt expr.id
-  | Ast.UnOp expr -> fprintf fmt "%a%a" pp_un expr.op pp_expr expr.operand
-  | Ast.BinOp expr -> fprintf fmt "%a %a %a" pp_expr expr.lhs pp_bin expr.op pp_expr expr.rhs
+  | Ast.ExprBool expr -> fprintf fmt "%B" expr.value
+  | Ast.ExprInt expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.ExprLong expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.ExprFloat expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.ExprDouble expr -> fprintf fmt "%s" expr.lexeme
+  | Ast.ExprRune expr -> pp_rune fmt expr.value
+  | Ast.ExprString expr -> List.iter (pp_str fmt) expr.value
+  | Ast.ExprIdent expr -> Sym.pp_id fmt expr.id
+  | Ast.ExprUnOp expr -> fprintf fmt "%a%a" pp_un expr.op pp_expr expr.operand
+  | Ast.ExprBinOp expr -> fprintf fmt "%a %a %a" pp_expr expr.lhs pp_bin expr.op pp_expr expr.rhs
 
 (* Patterns *)
 
@@ -70,8 +70,8 @@ let pp_binding fmt = function
 (* Top-Level Expressions *)
 
 let pp_top fmt = function
-  | Ast.Let top -> fprintf fmt "let %a" pp_binding top.binding
-  | Ast.Val top -> fprintf fmt "val %a" pp_binding top.binding
+  | Ast.TopLet top -> fprintf fmt "let %a" pp_binding top.binding
+  | Ast.TopVal top -> fprintf fmt "val %a" pp_binding top.binding
 
 (* Imports *)
 

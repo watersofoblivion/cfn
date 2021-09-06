@@ -75,11 +75,7 @@ let test_expr_rune ctxt =
     |> assert_pp_expr ~ctxt ["'a'"]
 
 let test_expr_string ctxt =
-  "foo bar"
-    |> String.to_seq
-    |> List.of_seq
-    |> List.map Uchar.of_char
-    |> Annot.expr_string
+  Annot.expr_string "foo bar"
     |> assert_pp_expr ~ctxt ["\"foo bar\""]
 
 (* Patterns *)

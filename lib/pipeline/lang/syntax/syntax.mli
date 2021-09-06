@@ -36,71 +36,71 @@ type str =
 (** Strings *)
 
 type un =
-  | OpNeg of {
+  | UnNeg of {
       loc: Loc.t (** Location *)
     } (** Negation *)
 (** Unary Operators *)
 
 type bin =
-  | OpAdd of {
+  | BinAdd of {
       loc: Loc.t (** Location *)
     } (** Addition *)
-  | OpSub of {
+  | BinSub of {
       loc: Loc.t (** Location *)
     } (** Subtraction *)
-  | OpMul of {
+  | BinMul of {
       loc: Loc.t (** Location *)
     } (** Multiplication *)
-  | OpDiv of {
+  | BinDiv of {
       loc: Loc.t (** Location *)
     } (** Division *)
-  | OpMod of {
+  | BinMod of {
       loc: Loc.t (** Location *)
     } (** Modulus *)
-  | OpExp of {
+  | BinExp of {
       loc: Loc.t (** Location *)
     } (** Exponentiation *)
 (** Binary Operators *)
 
 type expr = private
-  | Bool of {
+  | ExprBool of {
       loc:   Loc.t; (** Location *)
       value: bool   (** Value *)
     } (** Boolean literal *)
-  | Int of {
+  | ExprInt of {
       loc:    Loc.t; (** Location *)
       lexeme: string (** Lexeme *)
     } (** Integer literal *)
-  | Long of {
+  | ExprLong of {
       loc:    Loc.t; (** Location *)
       lexeme: string (** Lexeme *)
     } (** Long literal *)
-  | Float of {
+  | ExprFloat of {
       loc:    Loc.t; (** Location *)
       lexeme: string (** Lexeme *)
     } (** Float literal *)
-  | Double of {
+  | ExprDouble of {
       loc:    Loc.t; (** Location *)
       lexeme: string (** Lexeme *)
     } (** Double literal *)
-  | Rune of {
+  | ExprRune of {
       loc:   Loc.t; (** Location *)
       value: rune   (** Value *)
     } (** Rune literal *)
-  | String of {
+  | ExprString of {
       loc:   Loc.t;   (** Location *)
       value: str list (** UTF-8 encoded value *)
     } (** String literal *)
-  | Ident of {
+  | ExprIdent of {
       loc: Loc.t; (** Location *)
       id:  Sym.t  (** Identifier *)
     } (** Identifier *)
-  | UnOp of {
+  | ExprUnOp of {
       loc:     Loc.t; (** Location *)
       op:      un;    (** Operator *)
       operand: expr   (** Operand *)
     } (** Unary Operation *)
-  | BinOp of {
+  | ExprBinOp of {
       loc: Loc.t; (** Location *)
       op:  bin;   (** Operator *)
       lhs: expr;  (** Left-hand operand *)
@@ -128,11 +128,11 @@ type binding = private
 (** Bindings *)
 
 type top = private
-  | Let of {
+  | TopLet of {
       loc:     Loc.t;  (** Location *)
       binding: binding (** Binding *)
     } (** Let Binding *)
-  | Val of {
+  | TopVal of {
       loc:     Loc.t;  (** Location *)
       binding: binding (** Binding *)
     } (** Value Binding *)
@@ -413,6 +413,13 @@ val pp_un : formatter -> un -> unit
 
 val pp_bin : formatter -> bin -> unit
 (** [pp_bin fmt op] pretty-prints the binary operator [op] to the formatter
+    [fmt]. *)
+
+val pp_rune : formatter -> rune -> unit
+(** [pp_rune fmt r] pretty-prints the rune [r] to the formatter [fmt]. *)
+
+val pp_str : formatter -> str -> unit
+(** [pp_str fmt str] pretty-prints the string segment [str] to the formatter
     [fmt]. *)
 
 val pp_expr : formatter -> expr -> unit

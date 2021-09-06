@@ -68,12 +68,7 @@ let test_convert_atom_rune ctxt =
 
 let test_convert_atom_string ctxt =
   let env = EnvTest.fresh () in
-  let value =
-    "foo bar"
-      |> String.to_seq
-      |> List.of_seq
-      |> List.map Uchar.of_char
-  in
+  let value = "foo bar" in
   let ir = Ir.atom_string value in
   let mono = Mono.atom_string value in
   Monomorph.convert_atom env ir (fun ty atom ->
