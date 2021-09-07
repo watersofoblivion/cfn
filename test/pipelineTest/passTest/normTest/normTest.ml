@@ -4,6 +4,8 @@ open Common
 
 open CommonTest
 
+(* Types *)
+
 let test_norm_ty_bool ctxt =
   let env = EnvTest.fresh () in
   let annot = Annot.ty_bool in
@@ -52,6 +54,66 @@ let test_norm_ty_string ctxt =
   let ir = Ir.ty_string in
   IrTest.assert_ty_equal ~ctxt ir
     |> Norm.norm_ty env annot
+
+(* Builtins *)
+
+let test_norm_builtin_add ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_add Annot.ty_int in
+  let ir = Ir.builtin_add Ir.ty_int in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+let test_norm_builtin_sub ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_sub Annot.ty_int in
+  let ir = Ir.builtin_sub Ir.ty_int in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+let test_norm_builtin_mul ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_mul Annot.ty_int in
+  let ir = Ir.builtin_mul Ir.ty_int in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+let test_norm_builtin_div ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_div Annot.ty_int in
+  let ir = Ir.builtin_div Ir.ty_int in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+let test_norm_builtin_mod ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_mod Annot.ty_int in
+  let ir = Ir.builtin_mod Ir.ty_int in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+let test_norm_builtin_exp ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_exp Annot.ty_float in
+  let ir = Ir.builtin_exp Ir.ty_float in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+let test_norm_builtin_promote ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_promote Annot.ty_int Annot.ty_long in
+  let ir = Ir.builtin_promote Ir.ty_int Ir.ty_long in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+let test_norm_builtin_concat ctxt =
+  let env = EnvTest.fresh () in
+  let annot = Annot.builtin_concat Annot.ty_string in
+  let ir = Ir.builtin_concat Ir.ty_string in
+  Norm.norm_builtin env annot (fun builtin ->
+    IrTest.assert_builtin_equal ~ctxt ir builtin)
+
+(* Expressions *)
 
 let test_norm_expr_bool ctxt =
   let env = EnvTest.fresh () in
@@ -178,6 +240,8 @@ let test_norm_patt_ground ctxt =
   Norm.norm_patt env annot Ir.ty_bool (fun _ patt ->
     IrTest.assert_patt_equal ~ctxt ir patt)
 
+(* Patterns *)
+
 let test_norm_patt_var ctxt =
   let env = EnvTest.fresh () in
   let annot =
@@ -192,6 +256,8 @@ let test_norm_patt_var ctxt =
   Norm.norm_patt env annot ty (fun env patt ->
     EnvTest.assert_bound ~ctxt IrTest.assert_ty_equal id env ty;
     IrTest.assert_patt_equal ~ctxt ir patt)
+
+(* Bindings *)
 
 let test_norm_binding ctxt =
   let env = EnvTest.fresh () in
@@ -219,6 +285,8 @@ let test_norm_binding ctxt =
   Norm.norm_binding env annot (fun env binding ->
     EnvTest.assert_bound ~ctxt IrTest.assert_ty_equal id env ty;
     IrTest.assert_binding_equal ~ctxt ir binding)
+
+(* Top-Level Expressions *)
 
 let test_norm_top_let ctxt =
   let env = EnvTest.fresh () in
@@ -249,6 +317,8 @@ let test_norm_top_let ctxt =
     EnvTest.assert_bound ~ctxt IrTest.assert_ty_equal id env ty;
     IrTest.assert_top_equal ~ctxt ir top)
 
+(* Test Suite *)
+
 let suite =
   "A-Normalization" >::: [
     "Types" >::: [
@@ -259,6 +329,16 @@ let suite =
       "Double"  >:: test_norm_ty_double;
       "Rune"    >:: test_norm_ty_rune;
       "String"  >:: test_norm_ty_string;
+    ];
+    "Built-in Functions" >::: [
+      "Addition"       >:: test_norm_builtin_add;
+      "Subtraction"    >:: test_norm_builtin_sub;
+      "Multiplication" >:: test_norm_builtin_mul;
+      "Division"       >:: test_norm_builtin_div;
+      "Modulus"        >:: test_norm_builtin_mod;
+      "Exponentiation" >:: test_norm_builtin_exp;
+      "Type Promotion" >:: test_norm_builtin_promote;
+      "Concatenation"  >:: test_norm_builtin_concat;
     ];
     "Expressions" >::: [
       "Booleans" >:: test_norm_expr_bool;

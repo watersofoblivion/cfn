@@ -1,6 +1,10 @@
+(* Types *)
+
 open Format
 
 open OUnit2
+
+open Common
 
 open CommonTest
 
@@ -20,43 +24,43 @@ let assert_ty_equal ~ctxt expected actual = match (expected, actual) with
 
 (* Constructors *)
 
-let test_ty_bool ctxt =
+let test_bool ctxt =
   let expected = Clos.ty_bool in
   match expected with
     | Clos.TyBool -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_ty_int ctxt =
+let test_int ctxt =
   let expected = Clos.ty_int in
   match expected with
     | Clos.TyInt -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_ty_long ctxt =
+let test_long ctxt =
   let expected = Clos.ty_long in
   match expected with
     | Clos.TyLong -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_ty_float ctxt =
+let test_float ctxt =
   let expected = Clos.ty_float in
   match expected with
     | Clos.TyFloat -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_ty_double ctxt =
+let test_double ctxt =
   let expected = Clos.ty_double in
   match expected with
     | Clos.TyDouble -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_ty_rune ctxt =
+let test_rune ctxt =
   let expected = Clos.ty_rune in
   match expected with
     | Clos.TyRune -> ()
     | actual -> type_not_equal ~ctxt expected actual
 
-let test_ty_string ctxt =
+let test_string ctxt =
   let expected = Clos.ty_string in
   match expected with
     | Clos.TyString -> ()
@@ -64,13 +68,13 @@ let test_ty_string ctxt =
 
 let test_constructors =
   "Constructors" >::: [
-    "Boolean" >:: test_ty_bool;
-    "Integer" >:: test_ty_int;
-    "Long"    >:: test_ty_long;
-    "Float"   >:: test_ty_float;
-    "Double"  >:: test_ty_double;
-    "Rune"    >:: test_ty_rune;
-    "String"  >:: test_ty_string;
+    "Boolean" >:: test_bool;
+    "Integer" >:: test_int;
+    "Long"    >:: test_long;
+    "Float"   >:: test_float;
+    "Double"  >:: test_double;
+    "Rune"    >:: test_rune;
+    "String"  >:: test_string;
   ]
 
 (* Operations *)
@@ -116,10 +120,54 @@ let test_operations =
     ]
   ]
 
+(* Pretty Printing *)
+
+let assert_pp_ty = PrettyTest.assert_pp Clos.pp_ty
+
+let test_pp_ty_bool ctxt =
+  Clos.ty_bool
+    |> assert_pp_ty ~ctxt [Prim.id_bool]
+
+let test_pp_ty_int ctxt =
+  Clos.ty_int
+    |> assert_pp_ty ~ctxt [Prim.id_int]
+
+let test_pp_ty_long ctxt =
+  Clos.ty_long
+    |> assert_pp_ty ~ctxt [Prim.id_long]
+
+let test_pp_ty_float ctxt =
+  Clos.ty_float
+    |> assert_pp_ty ~ctxt [Prim.id_float]
+
+let test_pp_ty_double ctxt =
+  Clos.ty_double
+    |> assert_pp_ty ~ctxt [Prim.id_double]
+
+let test_pp_ty_rune ctxt =
+  Clos.ty_rune
+    |> assert_pp_ty ~ctxt [Prim.id_rune]
+
+let test_pp_ty_string ctxt =
+  Clos.ty_string
+    |> assert_pp_ty ~ctxt [Prim.id_string]
+
+let test_pp =
+  "Pretty Printing" >::: [
+    "Boolean" >:: test_pp_ty_bool;
+    "Integer" >:: test_pp_ty_int;
+    "Long"    >:: test_pp_ty_long;
+    "Float"   >:: test_pp_ty_float;
+    "Double"  >:: test_pp_ty_double;
+    "Rune"    >:: test_pp_ty_rune;
+    "String"  >:: test_pp_ty_string;
+  ]
+
 (* Test Suite *)
 
 let suite =
   "Types" >::: [
     test_constructors;
     test_operations;
+    test_pp;
   ]

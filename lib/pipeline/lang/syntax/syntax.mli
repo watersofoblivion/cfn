@@ -13,6 +13,88 @@ type ty = private
     } (** Type Constructor *)
 (** Types *)
 
+type un =
+  | UnNeg of {
+      loc: Loc.t (** Location *)
+    } (** Negation *)
+  | UnLogNot of {
+      loc: Loc.t (** Location *)
+    } (** Logical NOT *)
+  | UnBitNot of {
+      loc: Loc.t (** Location *)
+    } (** Bitwise NOT *)
+(** Unary Operators *)
+
+type bin =
+  | BinStructEq of {
+      loc: Loc.t (** Location *)
+    } (** Structural Equality *)
+  | BinStructNeq of {
+      loc: Loc.t (** Location *)
+    } (** Structural Inequality *)
+  | BinPhysEq of {
+      loc: Loc.t (** Location *)
+    } (** Physical Equality *)
+  | BinPhysNeq of {
+      loc: Loc.t (** Location *)
+    } (** Physical Inequality *)
+  | BinLt of {
+      loc: Loc.t (** Location *)
+    } (** Less Than *)
+  | BinLte of {
+      loc: Loc.t (** Location *)
+    } (** Less Than or Equal *)
+  | BinGt of {
+      loc: Loc.t (** Location *)
+    } (** Greater Than *)
+  | BinGte of {
+      loc: Loc.t (** Location *)
+    } (** Greater Than or Equal *)
+  | BinAdd of {
+      loc: Loc.t (** Location *)
+    } (** Addition *)
+  | BinSub of {
+      loc: Loc.t (** Location *)
+    } (** Subtraction *)
+  | BinMul of {
+      loc: Loc.t (** Location *)
+    } (** Multiplication *)
+  | BinDiv of {
+      loc: Loc.t (** Location *)
+    } (** Division *)
+  | BinMod of {
+      loc: Loc.t (** Location *)
+    } (** Modulus *)
+  | BinExp of {
+      loc: Loc.t (** Location *)
+    } (** Exponentiation *)
+  | BinLogAnd of {
+      loc: Loc.t (** Location *)
+    } (** Logical AND *)
+  | BinLogOr of {
+      loc: Loc.t (** Location *)
+    } (** Logical OR *)
+  | BinBitAnd of {
+      loc: Loc.t (** Location *)
+    } (** Bitwise AND *)
+  | BinBitOr of {
+      loc: Loc.t (** Location *)
+    } (** Bitwise OR *)
+  | BinBitXor of {
+      loc: Loc.t (** Location *)
+    } (** Bitwise XOR *)
+(** Binary Operators *)
+
+type patt = private
+  | PattGround of {
+      loc: Loc.t (** Location *)
+    } (** Ground *)
+  | PattVar of {
+      loc: Loc.t; (** Location *)
+      id:  Sym.t  (** Identifier *)
+    } (** Variable *)
+(** Patterns *)
+
 type rune =
   | RuneLit of {
       loc:   Loc.t;  (** Location *)
@@ -34,33 +116,6 @@ type str =
       lexeme: string (** Lexeme *)
     } (** A unicode escape sequence. *)
 (** Strings *)
-
-type un =
-  | UnNeg of {
-      loc: Loc.t (** Location *)
-    } (** Negation *)
-(** Unary Operators *)
-
-type bin =
-  | BinAdd of {
-      loc: Loc.t (** Location *)
-    } (** Addition *)
-  | BinSub of {
-      loc: Loc.t (** Location *)
-    } (** Subtraction *)
-  | BinMul of {
-      loc: Loc.t (** Location *)
-    } (** Multiplication *)
-  | BinDiv of {
-      loc: Loc.t (** Location *)
-    } (** Division *)
-  | BinMod of {
-      loc: Loc.t (** Location *)
-    } (** Modulus *)
-  | BinExp of {
-      loc: Loc.t (** Location *)
-    } (** Exponentiation *)
-(** Binary Operators *)
 
 type expr = private
   | ExprBool of {
@@ -106,19 +161,14 @@ type expr = private
       lhs: expr;  (** Left-hand operand *)
       rhs: expr   (** Right-hand operand *)
     } (** Binary Operation *)
+  | ExprLet of {
+      loc:     Loc.t;   (** Location *)
+      binding: binding; (** Binding *)
+      scope:   expr     (** Scope *)
+    } (** Let Binding *)
 (** Expressions *)
 
-type patt = private
-  | PattGround of {
-      loc: Loc.t (** Location *)
-    } (** Ground *)
-  | PattVar of {
-      loc: Loc.t; (** Location *)
-      id:  Sym.t  (** Identifier *)
-    } (** Variable *)
-(** Patterns *)
-
-type binding = private
+and binding = private
   | ValueBinding of {
       loc:   Loc.t;     (** Location *)
       patt:  patt;      (** Pattern *)
@@ -205,6 +255,96 @@ val ty_constr : Loc.t -> Sym.t -> ty
 (** [ty_constr loc id] constructs a type constructor at location [loc] for the
     type [id]. *)
 
+(** {3 Operators} *)
+
+(** {4 Unary} *)
+
+val un_neg : Loc.t -> un
+(** [un_neg loc] constructs a unary negation operator at location [loc]. *)
+
+val un_log_not : Loc.t -> un
+(** [un_log_not loc] constructs a unary logical NOT operator at location [loc]. *)
+
+val un_bit_not : Loc.t -> un
+(** [un_bit_not loc] constructs a unary bitwise NOT operator at location [loc]. *)
+
+(** {4 Binary} *)
+
+val bin_struct_eq : Loc.t -> bin
+(** [bin_struct_eq loc] constructs a binary structural equality operator at
+    location [loc]. *)
+
+val bin_struct_neq : Loc.t -> bin
+(** [bin_struct_neq loc] constructs a binary structural inequality operator at
+    location [loc]. *)
+
+val bin_phys_eq : Loc.t -> bin
+(** [bin_phys_eq loc] constructs a binary physical equality operator at location
+    [loc]. *)
+
+val bin_phys_neq : Loc.t -> bin
+(** [bin_phys_neq loc] constructs a binary physical inequality operator at
+    location [loc]. *)
+
+val bin_lt : Loc.t -> bin
+(** [bin_lt loc] constructs a binary less than operator at location [loc]. *)
+
+val bin_lte : Loc.t -> bin
+(** [bin_lte loc] constructs a binary less than or equal operator at location
+    [loc]. *)
+
+val bin_gt : Loc.t -> bin
+(** [bin_gt loc] constructs a binary greater than operator at location [loc]. *)
+
+val bin_gte : Loc.t -> bin
+(** [bin_gte loc] constructs a binary greater than or equal operator at location
+    [loc]. *)
+
+val bin_add : Loc.t -> bin
+(** [bin_add loc] constructs a binary addition operator at location [loc]. *)
+
+val bin_sub : Loc.t -> bin
+(** [bin_sub loc] constructs a binary subtraction operator at location [loc]. *)
+
+val bin_mul : Loc.t -> bin
+(** [bin_mul loc] constructs a binary multiplication operator at location [loc]. *)
+
+val bin_div : Loc.t -> bin
+(** [bin_div loc] constructs a binary division operator at location [loc]. *)
+
+val bin_mod : Loc.t -> bin
+(** [bin_mod loc] constructs a binary modulus operator at location [loc]. *)
+
+val bin_exp : Loc.t -> bin
+(** [bin_exp loc] constructs a binary exponentiation operator at location [loc]. *)
+
+val bin_log_and : Loc.t -> bin
+(** [bin_log_and loc] constructs a binary logical AND operator at location
+    [loc]. *)
+
+val bin_log_or : Loc.t -> bin
+(** [bin_log_or loc] constructs a binary logical OR operator at location [loc]. *)
+
+val bin_bit_and : Loc.t -> bin
+(** [bin_bit_and loc] constructs a binary bitwise AND operator at location
+    [loc]. *)
+
+val bin_bit_or : Loc.t -> bin
+(** [bin_bit_or loc] constructs a binary bitwise OR operator at location [loc]. *)
+
+val bin_bit_xor : Loc.t -> bin
+(** [bin_bit_xor loc] constructs a binary bitwise XOR operator at location
+    [loc]. *)
+
+(** {3 Patterns} *)
+
+val patt_ground : Loc.t -> patt
+(** [patt_ground loc] constructs a ground pattern at location [loc]. *)
+
+val patt_var : Loc.t -> Sym.t -> patt
+(** [patt_var loc id] constructs a variable pattern at location [loc] binding
+    the identifier [id]. *)
+
 (** {3 Runes} *)
 
 val rune_lit : Loc.t -> Uchar.t -> rune
@@ -224,29 +364,6 @@ val str_lit : Loc.t -> string -> str
 val str_escape : Loc.t -> string -> str
 (** [str_escape loc lexeme] constructs a unicode escape sequence string segment
     at location [loc] with lexeme [lexeme]. *)
-
-(** {3 Operators} *)
-
-val un_neg : Loc.t -> un
-(** [un_neg loc] constructs a unary negation operator at location [loc]. *)
-
-val bin_add : Loc.t -> bin
-(** [bin_add loc] constructs a binary addition operator at location [loc]. *)
-
-val bin_sub : Loc.t -> bin
-(** [bin_sub loc] constructs a binary subtraction operator at location [loc]. *)
-
-val bin_mul : Loc.t -> bin
-(** [bin_mul loc] constructs a binary multiplication operator at location [loc]. *)
-
-val bin_div : Loc.t -> bin
-(** [bin_div loc] constructs a binary division operator at location [loc]. *)
-
-val bin_mod : Loc.t -> bin
-(** [bin_mod loc] constructs a binary modulus operator at location [loc]. *)
-
-val bin_exp : Loc.t -> bin
-(** [bin_exp loc] constructs a binary exponentiation operator at location [loc]. *)
 
 (** {3 Expressions} *)
 
@@ -290,14 +407,9 @@ val expr_bin_op : Loc.t -> bin -> expr -> expr -> expr
 (** [expr_bin_op loc op lhs rhs] constructs a binary operation at location [loc]
     applying the binary operator [op] to the operands [lhs] and [rhs]. *)
 
-(** {3 Patterns} *)
-
-val patt_ground : Loc.t -> patt
-(** [patt_ground loc] constructs a ground pattern at location [loc]. *)
-
-val patt_var : Loc.t -> Sym.t -> patt
-(** [patt_var loc id] constructs a variable pattern at location [loc] binding
-    the identifier [id]. *)
+val expr_let : Loc.t -> binding -> expr -> expr
+(** [expr_let loc binding scope] constructs a local let binding at location
+    [loc] that binds [binding] in the scope of [scope]. *)
 
 (** {3 Bindings} *)
 
@@ -364,6 +476,12 @@ val loc_un : un -> Loc.t
 
 val loc_bin : bin -> Loc.t
 (** [loc_bin op] returns the location of the binary operator [op]. *)
+
+val loc_rune : rune -> Loc.t
+(** [loc_rune rune] returns the location of the rune [rune]. *)
+
+val loc_str : str -> Loc.t
+(** [loc_str str] returns the location of the string segment [str]. *)
 
 val loc_expr : expr -> Loc.t
 (** [loc_expr expr] returns the location of the expression [expr]. *)

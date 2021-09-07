@@ -19,88 +19,132 @@ val suite : test
  * lower-level fixtures generated as part of a higher-level fixture.
  *)
 
-val fresh_ty_constr : ?seq:Sym.seq -> ?id:string -> unit -> Syntax.ty
-(** [fresh_ty_constr ?seq ?id ()] constructs a fresh type constructor.  If not
-    provided, [id] defaults to {!Common.Prim.id_bool}. *)
+val fresh_ty_constr : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.ty
+(** [fresh_ty_constr ?loc ?seq ?id ()] constructs a fresh type constructor at
+    location [loc]. *)
 
-val fresh_un : unit -> Syntax.un
-(** [fresh_un ()] constructs a fresh unary operator. *)
+val fresh_op_un : ?loc:Loc.t -> unit -> Syntax.un
+(** [fresh_op_un ?loc ()] constructs a fresh unary operator at location [loc]. *)
 
-val fresh_bin : unit -> Syntax.bin
-(** [fresh_bin ()] constructs a fresh binary operator. *)
+val fresh_op_bin : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_op_bin ?loc ()] constructs a fresh binary operator at location [loc]. *)
 
-val fresh_expr_bool : ?value:bool -> unit -> Syntax.expr
-(** [fresh_expr_bool ?value ()] constructs a fresh boolean expression with value
-    [value].  If not provided, [value] defaults to [true]. *)
+val fresh_patt_ground : ?loc:Loc.t -> unit -> Syntax.patt
+(** [fresh_patt_ground ?loc ()] constructs a fresh ground pattern at location
+    [loc]. *)
 
-val fresh_expr_int : ?value:int32 -> unit -> Syntax.expr
-(** [fresh_expr_int ?value ()] constructs a fresh integer expression with value
-    [value].  If not provided, [value] defaults to [42l]. *)
+val fresh_patt_var : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.patt
+(** [fresh_patt_var ?loc ?seq ?id ()] constructs a fresh identifier pattern at
+    location [loc]. *)
 
-val fresh_expr_long : ?value:int64 -> unit -> Syntax.expr
-(** [fresh_expr_long ?value ()] constructs a fresh long expression with value
-    [value].  If not provided, [value] defaults to [42L]. *)
+val fresh_rune_lit : ?loc:Loc.t -> ?value:char -> unit -> Syntax.rune
+(** [fresh_rune_lit ?loc ?value ()] constructs a fresh rune literal at location
+    [loc] with value [value]. *)
 
-val fresh_expr_float : ?value:float -> unit -> Syntax.expr
-(** [fresh_expr_float ?value ()] constructs a fresh float expression with value
-    [value].  If not provided, [value] defaults to [4.2]. *)
+val fresh_rune_escape : ?loc:Loc.t -> ?value:int -> unit -> Syntax.rune
+(** [fresh_rune_escape ?loc ?value ()] constructs a fresh rune unicode escape
+    sequence at location [loc] for the codepoint [value]. *)
 
-val fresh_expr_double : ?value:float -> unit -> Syntax.expr
-(** [fresh_expr_double ?value ()] constructs a fresh double expression with
-    value [value].  If not provided, [value] defaults to [4.2]. *)
+val fresh_str_lit : ?loc:Loc.t -> ?value:string -> unit -> Syntax.str
+(** [fresh_str_lit ?loc ?value ()] constructs a fresh string literal segment
+    at location [loc] with lexeme [value]. *)
 
-val fresh_expr_rune : ?value:char -> unit -> Syntax.expr
-(** [fresh_expr_rune ?value ()] constructs a fresh rune expression with value
-    [value].  If not provided, [value] defaults to ['a']. *)
+val fresh_str_escape : ?loc:Loc.t -> ?value:int -> unit -> Syntax.str
+(** [fresh_str_escape ?loc ?value ()] constructs a fresh string unicode escape
+    sequence segment at location [loc] for the codepoint [value]. *)
 
-val fresh_expr_string : ?value:string -> unit -> Syntax.expr
-(** [fresh_expr_string ?value ()] constructs a fresh string expression with
-    value [value].  If not provided, [value] defaults to ["foo bar"]. *)
+val fresh_expr_bool : ?loc:Loc.t -> ?value:bool -> unit -> Syntax.expr
+(** [fresh_expr_bool ?loc ?value ()] constructs a fresh boolean expression at
+    location [loc] with value [value]. *)
 
-val fresh_expr_ident : ?seq:Sym.seq -> ?id:string -> unit -> Syntax.expr
-(** [fresh_expr_ident ?seq ?id ()] constructs a fresh identifier expression. *)
+val fresh_expr_int : ?loc:Loc.t -> ?value:int32 -> unit -> Syntax.expr
+(** [fresh_expr_int ?loc ?value ()] constructs a fresh integer expression at
+    location [loc] with value [value]. *)
 
-val fresh_patt_ground : unit -> Syntax.patt
-(** [fresh_patt_ground ()] constructs a fresh ground pattern. *)
+val fresh_expr_long : ?loc:Loc.t -> ?value:int64 -> unit -> Syntax.expr
+(** [fresh_expr_long ?loc ?value ()] constructs a fresh long expression at
+    location [loc] with value [value]. *)
 
-val fresh_patt_var : ?seq:Sym.seq -> ?id:string -> unit -> Syntax.patt
-(** [fresh_patt_var ?seq ?id ()] constructs a fresh identifier pattern. *)
+val fresh_expr_float : ?loc:Loc.t -> ?value:float -> unit -> Syntax.expr
+(** [fresh_expr_float ?loc ?value ()] constructs a fresh float expression at
+    location [loc] with value [value]. *)
 
-val fresh_value_binding : ?explicit:bool -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.binding
-(** [fresh_value_binding ?explicit ?seq ?id ()] constructs a fresh value
-    binding.  If [explicit] is true, a type annotation is generated.  If not
-    provided, [explicit] defaults to [false]. *)
+val fresh_expr_double : ?loc:Loc.t -> ?value:float -> unit -> Syntax.expr
+(** [fresh_expr_double ?loc ?value ()] constructs a fresh double expression at
+    location [loc] with value [value]. *)
 
-val fresh_name : ?seq:Sym.seq -> ?id:string -> unit -> Syntax.name
-(** [fresh_name ?seq ?id ()] constructs a fresh name using [id] as the name.  If
-     not provided, [id] defaults to [""]. *)
+val fresh_expr_rune : ?loc:Loc.t -> ?value:Syntax.rune -> unit -> Syntax.expr
+(** [fresh_expr_rune ?loc ?value ()] constructs a fresh rune expression at
+    location [loc] with value [value]. *)
 
-val fresh_src : ?seq:Sym.seq -> ?name:string -> unit -> Syntax.src
-(** [fresh_srq ?seq ?name ()] constructs a fresh import source using [name] as
-    the source's name.  If not given, [name] defaults to [""]. *)
+val fresh_expr_string : ?loc:Loc.t -> ?value:(Syntax.str list) -> unit -> Syntax.expr
+(** [fresh_expr_string ?loc ?value ()] constructs a fresh string expression
+    at location [loc] with value [value]. *)
 
-val fresh_from : ?seq:Sym.seq -> ?src:string -> unit -> Syntax.from
-(** [fresh_from ?seq ?src ()] generates a fresh from clause using [src] as the
-    source name.  If not given, [src] defaults to [""]. *)
+val fresh_expr_ident : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.expr
+(** [fresh_expr_ident ?loc ?seq ?id ()] constructs a fresh identifier expression
+    at location [loc]. *)
 
-val fresh_alias : ?seq:Sym.seq -> ?pkg:string -> ?local:string -> unit -> Syntax.alias
-(** [fresh_alias ?seq ?pkg ?local ()] generates a fresh alias clause using [pkg]
-    as the package name.  If [local] is not [""], it is used as the local alias.
-    (Defaults to [""].) *)
+val fresh_expr_un_op : ?loc:Loc.t -> ?op:Syntax.un -> ?operand:Syntax.expr -> unit -> Syntax.expr
+(** [fresh_expr_un_op ?loc ?op ?operand ()] constructs a fresh unary operator
+    expression at location [loc] applying the operator [op] to the operand
+    [operand]. *)
 
-val fresh_pkgs : ?seq:Sym.seq -> ?local:string -> unit -> Syntax.pkgs
-(** [fresh_pkgs ?seq ?local ()] generates a fresh list of packages.  The list
-    has two elements: the first without a local alias, and the second with.  The
-    value of [local] is used as the local alias.  Defaults to [localname]. *)
+val fresh_expr_bin_op : ?loc:Loc.t -> ?op:Syntax.bin -> ?lhs:Syntax.expr -> ?rhs:Syntax.expr -> unit -> Syntax.expr
+(** [fresh_expr_bin_op ?loc ?op ?lhs ?rhs ()] constructs a fresh binary operator
+    expression at location [loc] applying the operator [op] to the operands
+    [lhs] and [rhs]. *)
 
-val fresh_import : ?seq:Sym.seq -> ?from:bool -> ?pkgs:bool -> unit -> Syntax.import
-(** [fresh_import ?seq ?from ?pkgs ()] generates a fresh import statement.  If
-    [from] is [true], then a from clause is included.  If [pkgs] is [true], then
-    a list of packages is included.  Both default to [false]. *)
+val fresh_expr_let : ?loc:Loc.t -> ?binding:Syntax.binding -> ?scope:Syntax.expr -> unit -> Syntax.expr
+(** [fresh_expr_bin_op ?loc ?binding ?scope ()] constructs a fresh local let
+    binding at location [loc] binding [binding] in the scope of [scope]. *)
 
-val fresh_pkg : ?seq:Sym.seq -> ?id:string -> unit -> Syntax.pkg
-(** [fresh_pkg ?seq ?id ()] generates a fresh package clause using [id] as the
-    package name.  If not provided, [id] defaults to [""]. *)
+val fresh_value_binding : ?loc:Loc.t -> ?patt:Syntax.patt -> ?explicit:bool -> ?ty:Syntax.ty -> ?value:Syntax.expr -> unit -> Syntax.binding
+(** [fresh_value_binding ?loc ?patt ?explicit ?ty ?value ()] constructs a fresh
+    value binding at location [loc] binding the value [value] of type [ty] to
+    the pattern [patt].  If [explicit] is [true], a type annotation is
+    generated.  If not provided, [explicit] defaults to [false]. *)
+
+val fresh_top_let : ?loc:Loc.t -> ?binding:Syntax.binding -> unit -> Syntax.top
+(** [fresh_top_let ?loc ?binding ()] constructs a fresh top-level let binding at
+    location [loc] with the binding [binding]. *)
+
+val fresh_top_val : ?loc:Loc.t -> ?binding:Syntax.binding -> unit -> Syntax.top
+(** [fresh_top_val ?loc ?binding ()] constructs a fresh top-level val binding at
+    location [loc] with the binding [binding]. *)
+
+val fresh_name : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.name
+(** [fresh_name ?loc ?seq ?id ()] constructs a fresh name at location [loc]
+    using [id] as the name. *)
+
+val fresh_src : ?loc:Loc.t -> ?name:Syntax.name -> unit -> Syntax.src
+(** [fresh_srq ?loc ?name ()] constructs a fresh import source at location [loc]
+    using [name] as the source's name. *)
+
+val fresh_from : ?loc:Loc.t -> ?src:Syntax.src -> unit -> Syntax.from
+(** [fresh_from ?loc ?src ()] generates a fresh from clause at location [loc]
+    using [src] as the source name. *)
+
+val fresh_alias : ?loc:Loc.t -> ?pkg:Syntax.name -> ?alias:bool -> ?local:Syntax.name -> unit -> Syntax.alias
+(** [fresh_alias ?loc ?pkg ?local ()] generates a fresh alias clause at location
+    location [loc] using [pkg] as the package name.  If [alias] is [true],
+    [local] is used as the local alias.  If not provided, [alias] defaults to
+    [false]. *)
+
+val fresh_pkgs : ?loc:Loc.t -> ?aliases:(Syntax.alias list) -> unit -> Syntax.pkgs
+(** [fresh_pkgs ?loc ?aliases ()] generates a fresh list of packages at location
+    [loc] with the list of aliases [aliases].  If not provided, aliases defaults
+    to an empty list. *)
+
+val fresh_import : ?loc:Loc.t -> ?stdlib:bool -> ?from:Syntax.from -> ?pkgs:Syntax.pkgs -> unit -> Syntax.import
+(** [fresh_import ?loc ?seq ?from ?pkgs ()] generates a fresh import statement
+    at location [loc] import the packages [pkgs] from [from].  If [stdlib] is
+    [false], then the from clause is included.  If not provided, [stdlib]
+    defaults to [true]. *)
+
+val fresh_pkg : ?loc:Loc.t -> ?id:Syntax.name -> unit -> Syntax.pkg
+(** [fresh_pkg ?loc ?id ()] generates a fresh package clause at location [loc]
+    using [id] as the package name. *)
 
 (** {2 Utilities} *)
 
@@ -110,11 +154,7 @@ val fresh_pkg : ?seq:Sym.seq -> ?id:string -> unit -> Syntax.pkg
  * Replaces all location information with {!CommonTest.LocTest.dummy}.  Useful
  * for normalizing parsed syntax with hand-constructed syntax in tests.
  *)
-
-val deloc_optional : ('a -> 'a) -> 'a option -> 'a option
-(** [deloc_optional deloc value] strips location information from [value] using
-    [deloc] if the value is [Some]. *)
-
+ 
 val deloc_ty : Syntax.ty -> Syntax.ty
 (** [deloc_ty ty] strips location information from the type [ty]. *)
 

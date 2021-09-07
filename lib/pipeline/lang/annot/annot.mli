@@ -16,7 +16,43 @@ type ty = private
   | TyString (** String *)
 (** Types *)
 
+type arity =
+  | ArityFixed of {
+      arity: int;     (** Arity *)
+      args:  ty list; (** Argument types *)
+      res:   ty       (** Result type *)
+    } (** Fixed Arity *)
+  | ArityVar of {
+      args: ty; (** Argument type *)
+      res:  ty  (** Result type *)
+    } (** Variable Arity *)
+(* Builtin Arity *)
+
 type builtin = private
+  | BuiltinStructEq of {
+      ty: ty (** Operand type *)
+    } (** Structural Equality *)
+  | BuiltinStructNeq of {
+      ty: ty (** Operand type *)
+    } (** Structural Inequality *)
+  | BuiltinPhysEq of {
+      ty: ty (** Operand type *)
+    } (** Physical Equality *)
+  | BuiltinPhysNeq of {
+      ty: ty (** Operand type *)
+    } (** Physical Inequality *)
+  | BuiltinLt of {
+      ty: ty (** Operand type *)
+    } (** Less Than *)
+  | BuiltinLte of {
+      ty: ty (** Operand type *)
+    } (** Less Than or Equal *)
+  | BuiltinGt of {
+      ty: ty (** Operand type *)
+    } (** Greater Than *)
+  | BuiltinGte of {
+      ty: ty (** Operand type *)
+    } (** Greater Than or Equal *)
   | BuiltinAdd of {
       ty: ty (** Operand type *)
     } (** Addition *)
@@ -35,6 +71,22 @@ type builtin = private
   | BuiltinExp of {
       ty: ty (** Operand type *)
     } (** Exponentiation *)
+  | BuiltinNeg of {
+      ty: ty (** Operand type *)
+    } (** Negation *)
+  | BuiltinBitAnd of {
+      ty: ty (** Operand type *)
+    } (** Bitwise AND *)
+  | BuiltinBitOr of {
+      ty: ty (** Operand type *)
+    } (** Bitwise OR *)
+  | BuiltinBitNot of {
+      ty: ty (** Operand type *)
+    } (** Bitwise NOT *)
+  | BuiltinBitXor of {
+      ty: ty (** Operand type *)
+    } (** Bitwise XOR *)
+  | BuiltinLogNot (** Logical NOT *)
   | BuiltinPromote of {
       sub: ty; (** Subtype *)
       sup: ty  (** Supertype *)
@@ -78,9 +130,13 @@ and expr = private
       id: Sym.t (** Identifier *)
     } (** Identifiers *)
   | ExprBuiltin of {
-      fn:   builtin; (** Built-in function *)
+      fn:   builtin;  (** Built-in function *)
       args: expr list (** Arguments *)
     } (** Function Application *)
+  | ExprLet of {
+      binding: binding; (** Binding *)
+      scope:   expr     (** Scope *)
+    } (** Let Binding *)
 (** Expressions *)
 
 and binding = private
@@ -124,6 +180,18 @@ val ty_string : ty
 
 (** {3 Built-In Functions} *)
 
+(** {4 Arities} *)
+
+val arity_fixed : ty list -> ty -> arity
+(** [arity_fixed args res] constructs a fixed arity with arguments of types
+    [args] and result of type [res]. *)
+
+val arity_var : ty -> ty -> arity
+(** [arity_var args res] constructs a variable arity with arguments of type
+    [args] and a result of type [res]. *)
+
+(** {4 Exceptions} *)
+
 exception NotIntegral of ty
 (** [NotIntegral ty] is raised when the type [ty] is not an integral type as
     determined by {!Type.ty_is_numeric}. *)
@@ -143,6 +211,44 @@ exception UnsupportedPromotion of ty * ty
 exception UnsupportedConcatType of ty
 (** [UnsupportedConcatType ty] is raised when the type of a {!Concat} call is
     not one of the supported types. *)
+
+(** {4 Constructors} *)
+
+val builtin_struct_eq : ty -> builtin
+(** [builtin_struct_eq ty] constructs a structural equality builtin operating on
+    values of type [ty]. *)
+
+val builtin_struct_neq : ty -> builtin
+(** [builtin_struct_neq ty] constructs a structural inequality builtin operating
+    on values of type [ty]. *)
+
+val builtin_phys_eq : ty -> builtin
+(** [builtin_phys_eq ty] constructs a physical equality builtin operating on
+    values of type [ty]. *)
+
+val builtin_phys_neq : ty -> builtin
+(** [builtin_phys_neq ty] constructs a physical inequality builtin operating
+    on values of type [ty]. *)
+
+val builtin_lt : ty -> builtin
+(** [builtin_lt ty] constructs a less than builtin operating on values of type
+    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
+    {!Type.ty_is_numeric}. *)
+
+val builtin_lte : ty -> builtin
+(** [builtin_lte ty] constructs a less than or equal builtin operating on values
+    of type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as
+    determined by {!Type.ty_is_numeric}. *)
+
+val builtin_gt : ty -> builtin
+(** [builtin_gt ty] constructs a greater than builtin operating on values of
+    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
+    by {!Type.ty_is_numeric}. *)
+
+val builtin_gte : ty -> builtin
+(** [builtin_gte ty] constructs a greater than or equal builtin operating on
+    values of type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as
+    determined by {!Type.ty_is_numeric}. *)
 
 val builtin_add : ty -> builtin
 (** [builtin_add ty] constructs an addition builtin operating on values of type
@@ -173,6 +279,34 @@ val builtin_exp : ty -> builtin
 (** [builtin_exp ty] constructs an exponentiation builtin operating on values of
     type [ty].  Raises {!NotFloatingPoint} if [ty] is not a floating-point type
     as determined by {!Type.ty_is_floating_point}. *)
+
+val builtin_neg : ty -> builtin
+(** [builtin_neg ty] constructs a negation builtin operating on values of type
+    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
+    {!Type.ty_is_numeric}. *)
+
+val builtin_bit_and : ty -> builtin
+(** [builtin_bit_and ty] constructs a bitwise AND builtin operating on values of
+    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
+    by {!Type.ty_is_numeric}. *)
+
+val builtin_bit_or : ty -> builtin
+(** [builtin_bit_or ty] constructs a bitwise OR builtin operating on values of
+    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
+    by {!Type.ty_is_numeric}. *)
+
+val builtin_bit_not : ty -> builtin
+(** [builtin_bit_not ty] constructs a bitwise NOT builtin operating on values of
+    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
+    by {!Type.ty_is_numeric}. *)
+
+val builtin_bit_xor : ty -> builtin
+(** [builtin_bit_xor ty] constructs a bitwise XOR builtin operating on values of
+    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
+    by {!Type.ty_is_numeric}. *)
+
+val builtin_log_not : builtin
+(** [builtin_log_not] constructs a logical NOT builtin. *)
 
 val builtin_promote : ty -> ty -> builtin
 (** [builtin_promote sub sup] constructs a promotion builtin promoting values of
@@ -223,6 +357,10 @@ val expr_builtin : builtin -> expr list -> expr
 (** [expr_builtin fn args] constructs an application of the built-in function
     [fn] to the arguments [args]. *)
 
+val expr_let : binding -> expr -> expr
+(** [expr_let binding scope] constructs a let binding of [binding] in the scope
+    [scope]. *)
+
 (** {3 Bindings} *)
 
 val binding : patt -> ty -> expr -> binding
@@ -254,10 +392,16 @@ val ty_is_numeric : ty -> bool
 (** [ty_is_numeric ty] tests if type [ty] is a numeric (integral or
     floating-point) type. *)
 
+val ty_is_logical : ty -> bool
+(** [ty_is_logical ty] tests if type [ty] is a logical (boolean) type. *)
+
 (** {3 Pretty Printing} *)
 
 val pp_ty : formatter -> ty -> unit
 (** [pp_ty fmt ty] pretty-prints the type [ty] to the formatter [fmt]. *)
+
+val pp_arity : formatter -> arity -> unit
+(** [pp_arity fmt arity] pretty-prints the arity [arity] to the formatter [fmt]. *)
 
 val pp_builtin : formatter -> builtin -> unit
 (** [pp_builtin fmt builtin] pretty-prints the application of the built-in
@@ -296,11 +440,10 @@ exception UnsupportedConcatArg of expr * ty * ty
     argument [expr] to a {!Concat} call is of type [inferred] instead of the
     type [expected]. *)
 
-val check_builtin : ty Env.t -> builtin -> expr list -> (ty -> 'a) -> 'a
-(** [check_builtin env builtin args kontinue] type-checks the application of the
-    built-in function [builtin] to the arguments [args] in the environment
-    [env].  The result type of the application is passed to the continuation
-    [kontinue]. *)
+val check_builtin : ty Env.t -> builtin -> (arity -> 'a) -> 'a
+(** [check_builtin env builtin kontinue] gets the type of the built-in function
+    [builtin] in the environment [env].  The arity the function is passed to the
+    continuation [kontinue]. *)
 
 val check_patt : ty Env.t -> patt -> ty -> (ty Env.t -> 'a) -> 'a
 (** [check_patt env patt ty kontinue] type-checks the pattern [patt] against the

@@ -2,15 +2,13 @@ open OUnit2
 
 include TypeTest
 include BuiltinTest
+include PattTest
 include AstTest
-include PrettyTest
-include CheckTest
 
 let suite =
   "Monomorphic" >::: [
     TypeTest.suite;
     BuiltinTest.suite;
+    PattTest.suite;
     AstTest.suite;
-    PrettyTest.suite;
-    CheckTest.suite;
   ]

@@ -1,3 +1,5 @@
+open Format
+
 open Common
 
 (* Syntax *)
@@ -21,29 +23,14 @@ type expr =
   | ExprIdent of { loc: Loc.t; id: Sym.t }
   | ExprUnOp of { loc: Loc.t; op: Op.un; operand: expr }
   | ExprBinOp of { loc: Loc.t; op: Op.bin; lhs: expr; rhs: expr }
+  | ExprLet of { loc: Loc.t; binding: binding; scope: expr }
 
-type patt =
-  | PattGround of { loc: Loc.t }
-  | PattVar of { loc: Loc.t; id: Sym.t }
-
-type binding =
-  | ValueBinding of { loc: Loc.t; patt: patt; ty: Type.ty option; value: expr }
+and binding =
+  | ValueBinding of { loc: Loc.t; patt: Patt.patt; ty: Type.ty option; value: expr }
 
 type top =
   | TopLet of { loc: Loc.t; binding: binding }
   | TopVal of { loc: Loc.t; binding: binding }
-
-type name = Name of { loc: Loc.t; id: Sym.t }
-
-type src = Source of { loc: Loc.t; name: name }
-type from = From of { loc: Loc.t; src: src }
-type alias = Alias of { loc: Loc.t; pkg: name; alias: name option }
-type pkgs = Packages of { loc: Loc.t; pkgs: alias list }
-type import = Import of { loc: Loc.t; from: from option; pkgs: pkgs }
-
-type pkg = Package of { loc: Loc.t; id: name }
-
-type file = File of { pkg: pkg; imports: import list; tops: top list }
 
 (* Constructors *)
 
@@ -63,28 +50,22 @@ let expr_string loc value = ExprString { loc; value }
 let expr_ident loc id = ExprIdent { loc; id }
 let expr_un_op loc op operand = ExprUnOp { loc; op; operand }
 let expr_bin_op loc op lhs rhs = ExprBinOp { loc; op; lhs; rhs }
-
-let patt_ground loc = PattGround { loc }
-let patt_var loc id = PattVar { loc; id }
+let expr_let loc binding scope = ExprLet { loc; binding; scope }
 
 let value_binding loc patt ty value = ValueBinding { loc; patt; ty; value }
 
 let top_let loc binding = TopLet { loc; binding }
 let top_val loc binding = TopVal { loc; binding }
 
-let name loc id = Name { loc; id }
-
-let src loc name = Source { loc; name }
-let from loc src = From { loc; src }
-let alias loc pkg alias = Alias { loc; pkg; alias }
-let pkgs loc pkgs = Packages { loc; pkgs }
-let import loc from pkgs = Import { loc; from; pkgs }
-
-let pkg loc id = Package { loc; id }
-
-let file pkg imports tops = File { pkg; imports; tops }
-
 (* Locations *)
+
+let loc_rune = function
+  | RuneLit rune -> rune.loc
+  | RuneEscape rune -> rune.loc
+
+let loc_str = function
+  | StringLit str -> str.loc
+  | StringEscape str -> str.loc
 
 let loc_expr = function
   | ExprBool expr -> expr.loc
@@ -97,10 +78,7 @@ let loc_expr = function
   | ExprIdent expr -> expr.loc
   | ExprUnOp expr -> expr.loc
   | ExprBinOp expr -> expr.loc
-
-let loc_patt = function
-  | PattGround patt -> patt.loc
-  | PattVar patt -> patt.loc
+  | ExprLet expr -> expr.loc
 
 let loc_binding = function
   | ValueBinding binding -> binding.loc
@@ -109,23 +87,59 @@ let loc_top = function
   | TopLet top -> top.loc
   | TopVal top -> top.loc
 
-let loc_name = function
-  | Name name -> name.loc
+(* Pretty Printing *)
 
-let loc_src = function
-  | Source src -> src.loc
+(* Runes *)
 
-let loc_from = function
-  | From from -> from.loc
+let rec pp_rune fmt = function
+  | RuneLit rune -> pp_rune_lit fmt rune.value
+  | RuneEscape rune -> fprintf fmt "%s" rune.lexeme
 
-let loc_alias = function
-  | Alias alias -> alias.loc
+and pp_rune_lit fmt r =
+  if r = Utf8.single_quote
+  then fprintf fmt "\\'"
+  else
+    r
+      |> Utf8.to_string
+      |> fprintf fmt "%s"
 
-let loc_pkgs = function
-  | Packages pkgs -> pkgs.loc
+(* Strings *)
 
-let loc_import = function
-  | Import import -> import.loc
+let pp_str fmt = function
+  | StringLit str -> fprintf fmt "%s" str.lexeme
+  | StringEscape str -> fprintf fmt "%s" str.lexeme
 
-let loc_pkg = function
-  | Package pkg -> pkg.loc
+(* Expressions *)
+
+let rec pp_expr fmt = function
+  | ExprBool expr -> fprintf fmt "%B" expr.value
+  | ExprInt expr -> fprintf fmt "%s" expr.lexeme
+  | ExprLong expr -> fprintf fmt "%s" expr.lexeme
+  | ExprFloat expr -> fprintf fmt "%s" expr.lexeme
+  | ExprDouble expr -> fprintf fmt "%s" expr.lexeme
+  | ExprRune expr -> fprintf fmt "'%a'" pp_rune expr.value
+  | ExprString expr -> pp_expr_string fmt expr.value
+  | ExprIdent expr -> Sym.pp_id fmt expr.id
+  | ExprUnOp expr -> fprintf fmt "%a%a" Op.pp_un expr.op pp_expr expr.operand
+  | ExprBinOp expr -> fprintf fmt "%a %a %a" pp_expr expr.lhs Op.pp_bin expr.op pp_expr expr.rhs
+  | ExprLet expr -> pp_expr_let fmt expr.binding expr.scope
+
+and pp_expr_string fmt segs =
+  let pp_sep _ _ = () in
+  fprintf fmt "\"%a\"" (pp_print_list ~pp_sep pp_str) segs
+
+and pp_expr_let fmt binding scope =
+  fprintf fmt "let %a in %a" pp_binding binding pp_expr scope
+
+(* Bindings *)
+
+and pp_binding fmt = function
+  | ValueBinding binding ->
+    let pp_ty = pp_print_option (fun fmt t -> fprintf fmt ": %a" Type.pp_ty t) in
+    fprintf fmt "%a%a = %a" Patt.pp_patt binding.patt pp_ty binding.ty pp_expr binding.value
+
+(* Top-Level Expressions *)
+
+let pp_top fmt = function
+  | TopLet top -> fprintf fmt "let %a" pp_binding top.binding
+  | TopVal top -> fprintf fmt "val %a" pp_binding top.binding

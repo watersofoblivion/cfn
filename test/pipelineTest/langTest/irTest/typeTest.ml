@@ -2,6 +2,8 @@ open Format
 
 open OUnit2
 
+open Common
+
 open CommonTest
 
 (* Assertions *)
@@ -17,6 +19,8 @@ let assert_ty_equal ~ctxt expected actual = match (expected, actual) with
   | Ir.TyRune, Ir.TyRune
   | Ir.TyString, Ir.TyString -> ()
   | expected, actual -> type_not_equal ~ctxt expected actual
+
+(* Tests *)
 
 (* Constructors *)
 
@@ -114,6 +118,49 @@ let test_operations =
       "Equal"     >:: test_equal_equal;
       "Not Equal" >:: test_equal_not_equal;
     ]
+  ]
+
+(* Pretty Printing *)
+
+let assert_pp_ty = PrettyTest.assert_pp Ir.pp_ty
+
+let test_pp_ty_bool ctxt =
+  Ir.ty_bool
+    |> assert_pp_ty ~ctxt [Prim.id_bool]
+
+let test_pp_ty_int ctxt =
+  Ir.ty_int
+    |> assert_pp_ty ~ctxt [Prim.id_int]
+
+let test_pp_ty_long ctxt =
+  Ir.ty_long
+    |> assert_pp_ty ~ctxt [Prim.id_long]
+
+let test_pp_ty_float ctxt =
+  Ir.ty_float
+    |> assert_pp_ty ~ctxt [Prim.id_float]
+
+let test_pp_ty_double ctxt =
+  Ir.ty_double
+    |> assert_pp_ty ~ctxt [Prim.id_double]
+
+let test_pp_ty_rune ctxt =
+  Ir.ty_rune
+    |> assert_pp_ty ~ctxt [Prim.id_rune]
+
+let test_pp_ty_string ctxt =
+  Ir.ty_string
+    |> assert_pp_ty ~ctxt [Prim.id_string]
+
+let test_pp =
+  "Pretty Printing" >::: [
+    "Boolean" >:: test_pp_ty_bool;
+    "Integer" >:: test_pp_ty_int;
+    "Long"    >:: test_pp_ty_long;
+    "Float"   >:: test_pp_ty_float;
+    "Double"  >:: test_pp_ty_double;
+    "Rune"    >:: test_pp_ty_rune;
+    "String"  >:: test_pp_ty_string;
   ]
 
 (* Test Suite *)

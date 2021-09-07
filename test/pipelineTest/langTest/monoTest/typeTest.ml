@@ -1,6 +1,10 @@
+(* Types *)
+
 open Format
 
 open OUnit2
+
+open Common
 
 open CommonTest
 
@@ -116,10 +120,54 @@ let test_operations =
     ]
   ]
 
+(* Pretty Printing *)
+
+let assert_pp_ty = PrettyTest.assert_pp Mono.pp_ty
+
+let test_pp_ty_bool ctxt =
+  Mono.ty_bool
+    |> assert_pp_ty ~ctxt [Prim.id_bool]
+
+let test_pp_ty_int ctxt =
+  Mono.ty_int
+    |> assert_pp_ty ~ctxt [Prim.id_int]
+
+let test_pp_ty_long ctxt =
+  Mono.ty_long
+    |> assert_pp_ty ~ctxt [Prim.id_long]
+
+let test_pp_ty_float ctxt =
+  Mono.ty_float
+    |> assert_pp_ty ~ctxt [Prim.id_float]
+
+let test_pp_ty_double ctxt =
+  Mono.ty_double
+    |> assert_pp_ty ~ctxt [Prim.id_double]
+
+let test_pp_ty_rune ctxt =
+  Mono.ty_rune
+    |> assert_pp_ty ~ctxt [Prim.id_rune]
+
+let test_pp_ty_string ctxt =
+  Mono.ty_string
+    |> assert_pp_ty ~ctxt [Prim.id_string]
+
+let test_pp =
+  "Pretty Printing" >::: [
+    "Boolean" >:: test_pp_ty_bool;
+    "Integer" >:: test_pp_ty_int;
+    "Long"    >:: test_pp_ty_long;
+    "Float"   >:: test_pp_ty_float;
+    "Double"  >:: test_pp_ty_double;
+    "Rune"    >:: test_pp_ty_rune;
+    "String"  >:: test_pp_ty_string;
+  ]
+
 (* Test Suite *)
 
 let suite =
   "Types" >::: [
     test_constructors;
     test_operations;
+    test_pp;
   ]

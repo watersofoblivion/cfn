@@ -2,13 +2,17 @@ open OUnit2
 
 include TypeTest
 include OpTest
+include PattTest
 include AstTest
-include PrettyTest
+include ImportTest
+include FileTest
 
 let suite =
   "Abstract Syntax" >::: [
     TypeTest.suite;
     OpTest.suite;
+    PattTest.suite;
     AstTest.suite;
-    PrettyTest.suite;
+    ImportTest.suite;
+    FileTest.suite;
   ]

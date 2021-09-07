@@ -1,5 +1,9 @@
 (** {1 Types} *)
 
+open Format
+
+open Common
+
 type ty =
   | TyBool
   | TyInt
@@ -42,3 +46,14 @@ let ty_is_floating_point = function
   | _ -> false
 
 let ty_is_numeric ty = ty_is_integral ty || ty_is_floating_point ty
+
+(* Pretty Printing *)
+
+let pp_ty fmt = function
+  | TyBool -> fprintf fmt "%s" Prim.id_bool
+  | TyInt -> fprintf fmt "%s" Prim.id_int
+  | TyLong -> fprintf fmt "%s" Prim.id_long
+  | TyFloat -> fprintf fmt "%s" Prim.id_float
+  | TyDouble -> fprintf fmt "%s" Prim.id_double
+  | TyRune -> fprintf fmt "%s" Prim.id_rune
+  | TyString -> fprintf fmt "%s" Prim.id_string

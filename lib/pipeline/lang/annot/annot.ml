@@ -1,5 +1,4 @@
 include Type
 include Builtin
+include Patt
 include Ast
-include Pretty
-include Check

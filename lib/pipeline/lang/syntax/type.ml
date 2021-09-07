@@ -1,4 +1,8 @@
+(* Types *)
+
 open Common
+
+(* Syntax *)
 
 type ty =
   | TyConstr of { loc: Loc.t; id: Sym.t }
@@ -14,3 +18,8 @@ let ty_equal ty ty' = match (ty, ty') with
 
 let loc_ty = function
   | TyConstr ty -> ty.loc
+
+(* Pretty Printing *)
+
+let pp_ty fmt = function
+  | TyConstr constr -> Sym.pp_id fmt constr.id

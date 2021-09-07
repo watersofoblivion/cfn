@@ -22,6 +22,10 @@ val assert_ty_equal : ctxt:test_ctxt -> Ir.ty -> Ir.ty -> unit
 (** [assert_ty_equal ~ctxt expected actual] asserts that the type [actual] is
     equal to the type [expected]. *)
 
+val assert_arity_equal : ctxt:test_ctxt -> Ir.arity -> Ir.arity -> unit
+(** [assert_arity_equal ~ctxt expected actual] asserts that the built-in
+    function arity [actual] is equal to the built-in function arity [actual]. *)
+
 val assert_builtin_equal : ctxt:test_ctxt -> Ir.builtin -> Ir.builtin -> unit
 (** [assert_builtin_equal ~ctxt expected actual] asserts that the built-in
     function [actual] is equal to the built-in function [actual]. *)
