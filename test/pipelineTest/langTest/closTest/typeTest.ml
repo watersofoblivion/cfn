@@ -1,5 +1,3 @@
-(* Types *)
-
 open Format
 
 open OUnit2
@@ -21,6 +19,8 @@ let assert_ty_equal ~ctxt expected actual = match (expected, actual) with
   | Clos.TyRune, Clos.TyRune
   | Clos.TyString, Clos.TyString -> ()
   | expected, actual -> type_not_equal ~ctxt expected actual
+
+(* Tests *)
 
 (* Constructors *)
 
@@ -79,45 +79,92 @@ let test_constructors =
 
 (* Operations *)
 
-(* Equality *)
+let types = [
+  Clos.ty_bool;
+  Clos.ty_int;
+  Clos.ty_long;
+  Clos.ty_float;
+  Clos.ty_double;
+  Clos.ty_rune;
+  Clos.ty_string
+]
 
-let test_equal_equal ctxt =
-  List.iter (fun ty -> assert_ty_equal ~ctxt ty ty) [
-    Clos.ty_bool;
-    Clos.ty_int; Clos.ty_long;
-    Clos.ty_float; Clos.ty_double;
-    Clos.ty_rune; Clos.ty_string;
-  ]
+let printer ty =
+  fprintf str_formatter"%a" Clos.pp_ty ty
+    |> flush_str_formatter
 
-let test_equal_not_equal ctxt =
-  let rec not_this acc = function
+let test_ty_equal_equal ctxt =
+  let assert_ty_equal ty = assert_equal ~ctxt ~printer ~cmp:Clos.ty_equal ty ty in
+  List.iter assert_ty_equal types
+
+let test_ty_equal_not_equal ctxt =
+  let rec not_self acc = function
     | [] -> ()
     | hd :: tl ->
       let assert_not_equal ty =
         let cmp ty ty' = Clos.ty_equal ty ty' |> not in
-        let printer ty =
-          fprintf str_formatter"%a" Clos.pp_ty ty
-            |> flush_str_formatter
-        in
         assert_equal ~ctxt ~cmp ~printer ~msg:"Types are equal" hd ty
       in
       List.iter assert_not_equal acc;
       List.iter assert_not_equal tl;
-      not_this (hd :: acc) tl
+      not_self (hd :: acc) tl
   in
-  not_this [] [
-    Clos.ty_bool;
-    Clos.ty_int; Clos.ty_long;
-    Clos.ty_float; Clos.ty_double;
-    Clos.ty_rune; Clos.ty_string;
-  ]
+  not_self [] types
+
+let assert_is category matcher ty =
+  let msg =
+    fprintf str_formatter "Expected %a to be %s" Clos.pp_ty ty category
+      |> flush_str_formatter
+  in
+  matcher ty
+    |> assert_bool msg
+
+let assert_is_not category matcher ty =
+  let category = "not " ^ category in
+  let matcher ty = not (matcher ty) in
+  assert_is category matcher ty
+
+let assert_ty_is category matcher expected _ =
+  let assert_is = assert_is category matcher in
+  let assert_is_not = assert_is_not category matcher in
+  List.iter assert_is expected;
+  types
+    |> List.filter (fun ty -> not (List.mem ty expected))
+    |> List.iter assert_is_not
+
+let test_ty_is_numeric = assert_ty_is "numeric" Clos.ty_is_numeric [
+  Clos.ty_int;
+  Clos.ty_long;
+  Clos.ty_float;
+  Clos.ty_double;
+]
+
+let test_ty_is_integral = assert_ty_is "integral" Clos.ty_is_integral [
+  Clos.ty_int;
+  Clos.ty_long;
+]
+
+let test_ty_is_floating_point = assert_ty_is "floating point" Clos.ty_is_floating_point [
+  Clos.ty_float;
+  Clos.ty_double;
+]
+
+let test_ty_is_logical = assert_ty_is "logical" Clos.ty_is_logical [
+  Clos.ty_bool;
+]
 
 let test_operations =
   "Operations" >::: [
     "Equality" >::: [
-      "Equal"     >:: test_equal_equal;
-      "Not Equal" >:: test_equal_not_equal;
-    ]
+      "Equal"     >:: test_ty_equal_equal;
+      "Not Equal" >:: test_ty_equal_not_equal;
+    ];
+    "Categorization" >::: [
+      "Numeric"        >:: test_ty_is_numeric;
+      "Integral"       >:: test_ty_is_integral;
+      "Floating Point" >:: test_ty_is_floating_point;
+      "Logical"        >:: test_ty_is_logical;
+    ];
   ]
 
 (* Pretty Printing *)
@@ -169,5 +216,4 @@ let suite =
   "Types" >::: [
     test_constructors;
     test_operations;
-    test_pp;
   ]

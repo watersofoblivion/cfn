@@ -10,8 +10,71 @@ open CommonTest
 
 (* Fixtures *)
 
-let fresh_builtin ?ty:(ty = Mono.ty_bool) _ =
+let fresh_builtin_struct_eq ?ty:(ty = Mono.ty_bool) _ =
   Mono.builtin_struct_eq ty
+
+let fresh_builtin_struct_neq ?ty:(ty = Mono.ty_bool) _ =
+  Mono.builtin_struct_neq ty
+
+let fresh_builtin_phys_eq ?ty:(ty = Mono.ty_bool) _ =
+  Mono.builtin_phys_eq ty
+
+let fresh_builtin_phys_neq ?ty:(ty = Mono.ty_bool) _ =
+  Mono.builtin_phys_neq ty
+
+let fresh_builtin_lt ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_lt ty
+
+let fresh_builtin_lte ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_lte ty
+
+let fresh_builtin_gt ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_gt ty
+
+let fresh_builtin_gte ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_gte ty
+
+let fresh_builtin_add ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_add ty
+
+let fresh_builtin_sub ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_sub ty
+
+let fresh_builtin_mul ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_mul ty
+
+let fresh_builtin_div ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_div ty
+
+let fresh_builtin_mod ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_mod ty
+
+let fresh_builtin_exp ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_exp ty
+
+let fresh_builtin_neg ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_neg ty
+
+let fresh_builtin_bit_and ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_bit_and ty
+
+let fresh_builtin_bit_or ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_bit_or ty
+
+let fresh_builtin_bit_not ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_bit_not ty
+
+let fresh_builtin_bit_xor ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_bit_xor ty
+
+let fresh_builtin_log_not _ =
+  Mono.builtin_log_not
+
+let fresh_builtin_promote ?sub:(sub = Mono.ty_int) ?sup:(sup = Mono.ty_long) _ =
+  Mono.builtin_promote sub sup
+
+let fresh_builtin_concat ?ty:(ty = Mono.ty_string) _ =
+  Mono.builtin_concat ty
 
 (* Assertions *)
 
@@ -75,6 +138,28 @@ let assert_builtin_equal ~ctxt expected actual = match (expected, actual) with
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
   | expected, actual -> builtin_not_equal ~ctxt expected actual
 
+
+let assert_limited : (Mono.ty -> bool) -> (Mono.ty -> 'a) -> (Mono.ty -> Mono.builtin) -> (Mono.ty -> Mono.builtin -> unit) -> unit = fun filter ex constr test ->
+  let (valid, invalid) = List.partition filter MonoUtils.types in
+
+  let assert_valid ty =
+    constr ty
+      |> test ty
+  in
+  List.iter assert_valid valid;
+
+  let assert_invalid ty =
+    let exn = ex ty in
+    assert_raises exn (fun _ ->
+      ignore (constr ty))
+  in
+  List.iter assert_invalid invalid
+
+let assert_numeric = assert_limited Mono.ty_is_numeric (fun ty -> Mono.NotNumeric ty)
+let assert_integral = assert_limited Mono.ty_is_integral (fun ty -> Mono.NotIntegral ty)
+let assert_floating_point = assert_limited Mono.ty_is_floating_point (fun ty -> Mono.NotFloatingPoint ty)
+let assert_string = assert_limited (function Mono.TyString -> true | _ -> false) (fun ty -> Mono.UnsupportedConcatType ty)
+
 (* Tests *)
 
 (* Constructors *)
@@ -133,124 +218,110 @@ let test_builtin_phys_neq ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_lt ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_lt ty in
-  match expected with
-    | Mono.BuiltinLt actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_lt (fun ty expected ->
+    match expected with
+      | Mono.BuiltinLt actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
 
 let test_builtin_lte ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_lte ty in
-  match expected with
-    | Mono.BuiltinLte actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_lte (fun ty expected ->
+    match expected with
+      | Mono.BuiltinLte actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_gt ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_gt ty in
-  match expected with
-    | Mono.BuiltinGt actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_gt (fun ty expected ->
+    match expected with
+      | Mono.BuiltinGt actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+        | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_gte ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_gte ty in
-  match expected with
-    | Mono.BuiltinGte actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_gte (fun ty expected ->
+    match expected with
+      | Mono.BuiltinGte actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_add ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_add ty in
-  match expected with
-    | Mono.BuiltinAdd actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_add (fun ty expected ->
+    match expected with
+      | Mono.BuiltinAdd actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_sub ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_sub ty in
-  match expected with
-    | Mono.BuiltinSub actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_sub (fun ty expected ->
+    match expected with
+      | Mono.BuiltinSub actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_mul ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_mul ty in
-  match expected with
-    | Mono.BuiltinMul actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_mul (fun ty expected ->
+    match expected with
+      | Mono.BuiltinMul actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_div ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_div ty in
-  match expected with
-    | Mono.BuiltinDiv actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_div (fun ty expected ->
+    match expected with
+      | Mono.BuiltinDiv actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_mod ctxt =
-  let ty = Mono.ty_int in
-  let expected = Mono.builtin_mod ty in
-  match expected with
-    | Mono.BuiltinMod actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Mono.builtin_mod (fun ty expected ->
+    match expected with
+      | Mono.BuiltinMod actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_exp ctxt =
-  let ty = Mono.ty_float in
-  let expected = Mono.builtin_exp ty in
-  match expected with
-    | Mono.BuiltinExp actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_floating_point Mono.builtin_exp (fun ty expected ->
+    match expected with
+      | Mono.BuiltinExp actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_neg ctxt =
-  let ty = Mono.ty_float in
-  let expected = Mono.builtin_neg ty in
-  match expected with
-    | Mono.BuiltinNeg actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Mono.builtin_neg (fun ty expected ->
+    match expected with
+      | Mono.BuiltinNeg actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_and ctxt =
-  let ty = Mono.ty_float in
-  let expected = Mono.builtin_bit_and ty in
-  match expected with
-    | Mono.BuiltinBitAnd actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Mono.builtin_bit_and (fun ty expected ->
+    match expected with
+      | Mono.BuiltinBitAnd actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_or ctxt =
-  let ty = Mono.ty_float in
-  let expected = Mono.builtin_bit_or ty in
-  match expected with
-    | Mono.BuiltinBitOr actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Mono.builtin_bit_or (fun ty expected ->
+    match expected with
+      | Mono.BuiltinBitOr actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_not ctxt =
-  let ty = Mono.ty_float in
-  let expected = Mono.builtin_bit_not ty in
-  match expected with
-    | Mono.BuiltinBitNot actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Mono.builtin_bit_not (fun ty expected ->
+    match expected with
+      | Mono.BuiltinBitNot actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_xor ctxt =
-  let ty = Mono.ty_float in
-  let expected = Mono.builtin_bit_xor ty in
-  match expected with
-    | Mono.BuiltinBitXor actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Mono.builtin_bit_xor (fun ty expected ->
+    match expected with
+      | Mono.BuiltinBitXor actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_log_not ctxt =
   let expected = Mono.builtin_log_not in
@@ -259,22 +330,29 @@ let test_builtin_log_not ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_promote ctxt =
-  let sub = Mono.ty_int in
-  let sup = Mono.ty_long in
-  let expected = Mono.builtin_promote sub sup in
-  match expected with
-    | Mono.BuiltinPromote actual ->
-      TypeTest.assert_ty_equal ~ctxt sub actual.sub;
-      TypeTest.assert_ty_equal ~ctxt sup actual.sup;
-    | actual -> builtin_not_equal ~ctxt expected actual
+  List.iter (fun sub ->
+    List.iter (fun sup ->
+      if List.mem (sub, sup) MonoUtils.valid_promotions
+      then
+        let expected = Mono.builtin_promote sub sup in
+        match expected with
+          | Mono.BuiltinPromote actual ->
+            TypeTest.assert_ty_equal ~ctxt sub actual.sub;
+            TypeTest.assert_ty_equal ~ctxt sup actual.sup;
+          | actual -> builtin_not_equal ~ctxt expected actual
+      else
+        let exn = Mono.UnsupportedPromotion (sub, sup) in
+        assert_raises exn (fun _ ->
+          Mono.builtin_promote sub sup)
+    ) MonoUtils.types
+  ) MonoUtils.types
 
 let test_builtin_concat ctxt =
-  let ty = Mono.ty_string in
-  let expected = Mono.builtin_concat ty in
-  match expected with
-    | Mono.BuiltinConcat actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_string Mono.builtin_concat (fun ty expected ->
+    match expected with
+      | Mono.BuiltinConcat actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_constructors =
   "Constructors" >::: [
@@ -344,7 +422,7 @@ let test_pp_struct_eq ctxt =
        ]
 
 let test_pp_struct_neq ctxt =
-  Mono.builtin_struct_eq Mono.ty_bool
+  Mono.builtin_struct_neq Mono.ty_bool
     |> assert_pp_builtin ~ctxt [
          sprintf "structNeq[%s]" Prim.id_bool
        ]
@@ -356,7 +434,7 @@ let test_pp_phys_eq ctxt =
        ]
 
 let test_pp_phys_neq ctxt =
-  Mono.builtin_phys_eq Mono.ty_bool
+  Mono.builtin_phys_neq Mono.ty_bool
     |> assert_pp_builtin ~ctxt [
          sprintf "physNeq[%s]" Prim.id_bool
        ]
@@ -446,7 +524,7 @@ let test_pp_bit_not ctxt =
        ]
 
 let test_pp_bit_xor ctxt =
-  Mono.builtin_bit_xor Mono.ty_bool
+  Mono.builtin_bit_xor Mono.ty_int
     |> assert_pp_builtin ~ctxt [
          sprintf "bitXor[%s]" Prim.id_bool
        ]

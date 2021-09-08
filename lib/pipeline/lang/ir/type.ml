@@ -47,6 +47,10 @@ let ty_is_floating_point = function
 
 let ty_is_numeric ty = ty_is_integral ty || ty_is_floating_point ty
 
+let ty_is_logical = function
+  | TyBool -> true
+  | _ -> false
+
 (* Pretty Printing *)
 
 let pp_ty fmt = function

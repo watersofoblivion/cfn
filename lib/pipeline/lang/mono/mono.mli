@@ -414,6 +414,9 @@ val ty_is_numeric : ty -> bool
 (** [ty_is_numeric ty] tests if type [ty] is a numeric (integral or
     floating-point) type. *)
 
+val ty_is_logical : ty -> bool
+(** [ty_is_logical ty] tests if type [ty] is a logical (boolean) type. *)
+
 (** {3 Pretty Printing} *)
 
 val pp_ty : formatter -> ty -> unit
@@ -460,11 +463,6 @@ exception MismatchedTypes of ty * ty
 exception InvalidArity of int * int
 (** [InvalidArity (expected, actual)] is raised when a built-in function of
     arity [expected] is applied to [actual] arguments. *)
-
-exception UnsupportedConcatArg of atom * ty * ty
-(** [UnsupportedConcatArg (expr, inferred, expected)] is raised when the
-    argument [expr] to a {!Concat} call is of type [inferred] instead of the
-    type [expected]. *)
 
 val check_builtin : ty Env.t -> builtin -> (arity -> 'a) -> 'a
 (** [check_builtin env builtin kontinue] gets the type of the built-in function

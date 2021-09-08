@@ -6,6 +6,14 @@ open Common
 
 open CommonTest
 
+(* Fixtures *)
+
+let fresh_patt_ground _ =
+  Mono.patt_ground
+
+let fresh_patt_var ?id:(id = SymTest.fresh_sym ()) _ =
+  Mono.patt_var id
+
 (* Assertions *)
 
 let patt_not_equal = TestUtils.not_equal "Patterns" Mono.pp_patt
@@ -44,6 +52,7 @@ let test_constructors =
 
 let assert_pp_patt = PrettyTest.assert_pp Mono.pp_patt
 
+
 let test_pp_patt_ground ctxt =
   Mono.patt_ground
     |> assert_pp_patt ~ctxt ["_"]
@@ -57,11 +66,12 @@ let test_pp_patt_var ctxt =
 
 let test_pp =
   "Pretty Printing" >::: [
-    "Ground"   >:: test_pp_patt_ground;
-    "Variable" >:: test_pp_patt_var;
+    "Ground"    >:: test_pp_patt_ground;
+    "Variables" >:: test_pp_patt_var;
   ]
 
 (* Type Checking *)
+
 
 let test_check_patt_ground _ =
   let env = EnvTest.fresh () in
@@ -79,8 +89,8 @@ let test_check_patt_var ctxt =
 
 let test_check =
   "Type Checking" >::: [
-    "Ground"   >:: test_check_patt_ground;
-    "Variable" >:: test_check_patt_var;
+    "Ground"    >:: test_check_patt_ground;
+    "Variables" >:: test_check_patt_var;
   ]
 
 (* Test Suite *)

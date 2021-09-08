@@ -1,3 +1,5 @@
+(* Abstract Syntax *)
+
 open Format
 
 open OUnit2
@@ -6,12 +8,58 @@ open Common
 
 open CommonTest
 
+(* Fixtures *)
+
+let fresh_atom_bool ?value:(value = true) _ =
+  Mono.atom_bool value
+
+let fresh_atom_int ?value:(value = 42l) _ =
+  Mono.atom_int value
+
+let fresh_atom_long ?value:(value = 42L) _ =
+  Mono.atom_long value
+
+let fresh_atom_float ?value:(value = 4.2) _ =
+  Mono.atom_float value
+
+let fresh_atom_double ?value:(value = 4.2) _ =
+  Mono.atom_double value
+
+let fresh_atom_rune ?value:(value = 'a') _ =
+  value
+    |> Uchar.of_char
+    |> Mono.atom_rune
+
+let fresh_atom_string ?value:(value = "foo bar") _ =
+  Mono.atom_string value
+
+let fresh_atom_ident ?id:(id = SymTest.fresh_sym ()) _ =
+  Mono.atom_ident id
+
+let fresh_expr_builtin ?fn:(fn = BuiltinTest.fresh_builtin_add ()) ?args:(args = [fresh_atom_int (); fresh_atom_int ()]) _ =
+  Mono.expr_builtin fn args
+
+let fresh_expr_atom ?atom:(atom = fresh_atom_bool ()) _ =
+  Mono.expr_atom atom
+
+let fresh_binding ?patt:(patt = PattTest.fresh_patt_ground ()) ?ty:(ty = Mono.ty_bool) ?value:(value = fresh_expr_atom ()) _ =
+  Mono.binding patt ty value
+
+let fresh_block_expr ?expr:(expr = fresh_expr_atom ()) _ =
+  Mono.block_expr expr
+
+let fresh_block_let ?binding:(binding = fresh_binding ()) ?scope:(scope = fresh_block_expr ()) _ =
+  Mono.block_let binding scope
+
+let fresh_top_let ?binding:(binding = fresh_binding ()) _ =
+  Mono.top_let binding
+
 (* Assertions *)
 
 let atom_not_equal = TestUtils.not_equal "Atomic values" Mono.pp_atom
 let expr_not_equal = TestUtils.not_equal "Expressions" Mono.pp_expr
-let block_not_equal = TestUtils.not_equal "Block values" Mono.pp_block
 (* let binding_not_equal = TestUtils.not_equal "Bindings" Mono.pp_binding *)
+let block_not_equal = TestUtils.not_equal "Block values" Mono.pp_block
 (* let top_not_equal = TestUtils.not_equal "Top-level expressions" Mono.pp_top *)
 
 let assert_atom_equal ~ctxt expected actual = match (expected, actual) with
@@ -59,6 +107,8 @@ let rec assert_block_equal ~ctxt expected actual = match (expected, actual) with
 let assert_top_equal ~ctxt expected actual = match (expected, actual) with
   | Mono.TopLet expected, Mono.TopLet actual ->
     assert_binding_equal ~ctxt expected.binding actual.binding
+
+(* Tests *)
 
 (* Constructors *)
 
@@ -131,24 +181,50 @@ let test_atom_ident ctxt =
 
 (* Expressions *)
 
+let test_expr_builtin ctxt =
+  let fn = BuiltinTest.fresh_builtin_add () in
+  let args = [fresh_atom_int (); fresh_atom_long ()] in
+  let expected = Mono.expr_builtin fn args in
+  match expected with
+    | Mono.ExprBuiltin actual ->
+      BuiltinTest.assert_builtin_equal ~ctxt fn actual.fn;
+      List.iter2 (assert_atom_equal ~ctxt) args actual.args
+    | actual -> expr_not_equal ~ctxt expected actual
+
 let test_expr_atom ctxt =
-  let atom = Mono.atom_bool true in
+  let atom = fresh_atom_bool () in
   let expected = Mono.expr_atom atom in
   match expected with
     | Mono.ExprAtom actual ->
       assert_atom_equal ~ctxt atom actual.atom
     | actual -> expr_not_equal ~ctxt expected actual
 
+(* Blocks *)
+
+let test_block_let ctxt =
+  let binding = fresh_binding () in
+  let scope = fresh_block_expr () in
+  let expected = Mono.block_let binding scope in
+  match expected with
+    | Mono.BlockLet actual ->
+      assert_binding_equal ~ctxt binding actual.binding;
+      assert_block_equal ~ctxt scope actual.scope
+    | actual -> block_not_equal ~ctxt expected actual
+
+let test_block_expr ctxt =
+  let expr = fresh_expr_atom () in
+  let expected = Mono.block_expr expr in
+  match expected with
+    | Mono.BlockExpr actual ->
+      assert_expr_equal ~ctxt expr actual.expr
+    | actual -> block_not_equal ~ctxt expected actual
+
 (* Bindings *)
 
 let test_binding ctxt =
-  let patt = Mono.patt_ground in
+  let patt = PattTest.fresh_patt_ground () in
   let ty = Mono.ty_bool in
-  let value =
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
-  in
+  let value = fresh_expr_atom () in
   let expected = Mono.binding patt ty value in
   match expected with
     | Mono.Binding actual ->
@@ -156,28 +232,10 @@ let test_binding ctxt =
       TypeTest.assert_ty_equal ~ctxt ty actual.ty;
       assert_expr_equal ~ctxt value actual.value
 
-(* Blocks *)
-
-let test_block_expr ctxt =
-  let expr =
-    Mono.atom_bool true
-      |> Mono.expr_atom
-  in
-  let expected = Mono.block_expr expr in
-  match expected with
-    | Mono.BlockExpr actual ->
-      assert_expr_equal ~ctxt expr actual.expr
-    | actual -> block_not_equal ~ctxt expected actual
-
 (* Top-Level Expressions *)
 
 let test_top_let ctxt =
-  let binding =
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
-      |> Mono.binding Mono.patt_ground Mono.ty_bool
-  in
+  let binding = fresh_binding () in
   let expected = Mono.top_let binding in
   match expected with
     | Mono.TopLet actual ->
@@ -196,12 +254,14 @@ let test_constructors =
       "Identifiers" >:: test_atom_ident;
     ];
     "Expressions" >::: [
-      "Atoms" >:: test_expr_atom;
+      "Built-in Function Application" >:: test_expr_builtin;
+      "Atoms"                         >:: test_expr_atom;
+    ];
+    "Blocks" >::: [
+      "Let Bindings" >:: test_block_let;
+      "Expressions"  >:: test_block_expr;
     ];
     "Bindings" >:: test_binding;
-    "Blocks" >::: [
-      "Expressions" >:: test_block_expr;
-    ];
     "Top-Level Expressions" >::: [
       "Let Bindings" >:: test_top_let;
     ];
@@ -259,54 +319,67 @@ let test_pp_atom_ident ctxt =
 
 (* Expressions *)
 
+let test_pp_expr_builtin ctxt =
+  let fn = BuiltinTest.fresh_builtin_struct_eq () in
+  let args = [
+    fresh_atom_bool ();
+    fresh_atom_int ();
+  ] in
+  let pp_sep fmt _ = fprintf fmt "@ " in
+  fresh_expr_builtin ~fn ~args ()
+    |> assert_pp_expr ~ctxt [
+         fprintf str_formatter "%a %a" Mono.pp_builtin fn (pp_print_list ~pp_sep Mono.pp_atom) args
+           |> flush_str_formatter;
+       ]
+
 let test_pp_expr_atom ctxt =
-  true
-    |> Mono.atom_bool
-    |> Mono.expr_atom
+  let atom = fresh_atom_bool ~value:true () in
+  fresh_expr_atom ~atom ()
     |> assert_pp_expr ~ctxt ["true"]
 
 (* Bindings *)
 
 let test_pp_binding ctxt =
-  let patt = Mono.patt_ground in
+  let patt = PattTest.fresh_patt_ground () in
   let ty = Mono.ty_bool in
   let value =
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
+    let atom = fresh_atom_bool ~value:true () in
+    fresh_expr_atom ~atom ()
   in
-  Mono.binding patt ty value
+  fresh_binding ~patt ~ty ~value ()
     |> assert_pp_binding ~ctxt [
-         fprintf str_formatter "%a: %a = %a" Mono.pp_patt patt Mono.pp_ty ty Mono.pp_expr value |> flush_str_formatter
+         fprintf str_formatter "%a: %a = %a" Mono.pp_patt patt Mono.pp_ty ty Mono.pp_expr value
+           |> flush_str_formatter
        ]
 
 (* Blocks *)
 
+let test_pp_block_let ctxt =
+  let binding = fresh_binding () in
+  let scope = fresh_block_expr () in
+  fresh_block_let ~binding ~scope ()
+    |> assert_pp_block ~ctxt [
+         fprintf str_formatter "let %a in %a" Mono.pp_binding binding Mono.pp_block scope
+           |> flush_str_formatter
+       ]
+
 let test_pp_block_expr ctxt =
-  true
-    |> Mono.atom_bool
-    |> Mono.expr_atom
-    |> Mono.block_expr
+  let atom = fresh_atom_bool ~value:true () in
+  let expr = fresh_expr_atom ~atom () in
+  fresh_block_expr ~expr ()
     |> assert_pp_block ~ctxt ["true"]
 
 (* Top-Level Expressions *)
 
 let test_pp_top_let ctxt =
-  let binding =
-    let patt = Mono.patt_ground in
-    let ty = Mono.ty_bool in
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
-      |> Mono.binding patt ty
-  in
+  let binding = fresh_binding () in
   Mono.top_let binding
     |> assert_pp_top ~ctxt [
          fprintf str_formatter "let %a" Mono.pp_binding binding |> flush_str_formatter
        ]
 
 let test_pp =
-  "Constructors" >::: [
+  "Pretty Printing" >::: [
     "Atoms" >::: [
       "Booleans"    >:: test_pp_atom_bool;
       "Integers"    >:: test_pp_atom_int;
@@ -318,12 +391,14 @@ let test_pp =
       "Identifiers" >:: test_pp_atom_ident;
     ];
     "Expressions" >::: [
-      "Atoms" >:: test_pp_expr_atom;
+      "Built-in Function Application" >:: test_pp_expr_builtin;
+      "Atoms"                         >:: test_pp_expr_atom;
+    ];
+    "Blocks" >::: [
+      "Let Bindings" >:: test_pp_block_let;
+      "Expressions"  >:: test_pp_block_expr;
     ];
     "Bindings" >:: test_pp_binding;
-    "Blocks" >::: [
-      "Expressions" >:: test_pp_block_expr;
-    ];
     "Top-Level Expressions" >::: [
       "Let Bindings" >:: test_pp_top_let;
     ];
@@ -335,76 +410,116 @@ let test_pp =
 
 let test_check_atom_bool ctxt =
   let env = EnvTest.fresh () in
-  let b = Mono.atom_bool true in
+  let atom = fresh_atom_bool () in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_bool
-    |> Mono.check_atom env b
+    |> Mono.check_atom env atom
 
 let test_check_atom_int ctxt =
   let env = EnvTest.fresh () in
-  let i = Mono.atom_int 42l in
+  let atom = fresh_atom_int () in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_int
-    |> Mono.check_atom env i
+    |> Mono.check_atom env atom
 
 let test_check_atom_long ctxt =
   let env = EnvTest.fresh () in
-  let l = Mono.atom_long 42L in
+  let atom = fresh_atom_long () in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_long
-    |> Mono.check_atom env l
+    |> Mono.check_atom env atom
 
 let test_check_atom_float ctxt =
   let env = EnvTest.fresh () in
-  let f = Mono.atom_float 4.2 in
+  let atom = fresh_atom_float () in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_float
-    |> Mono.check_atom env f
+    |> Mono.check_atom env atom
 
 let test_check_atom_double ctxt =
   let env = EnvTest.fresh () in
-  let d = Mono.atom_double 4.2 in
+  let atom = fresh_atom_double () in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_double
-    |> Mono.check_atom env d
+    |> Mono.check_atom env atom
 
 let test_check_atom_rune ctxt =
   let env = EnvTest.fresh () in
-  let r =
-    'a'
-      |> Uchar.of_char
-      |> Mono.atom_rune
-  in
+  let atom = fresh_atom_rune () in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_rune
-    |> Mono.check_atom env r
+    |> Mono.check_atom env atom
 
 let test_check_atom_string ctxt =
   let env = EnvTest.fresh () in
-  let s = Mono.atom_string "foo bar" in
+  let atom = fresh_atom_string () in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_string
-    |> Mono.check_atom env s
+    |> Mono.check_atom env atom
 
 let test_check_atom_ident ctxt =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let ident = Mono.atom_ident id in
+  let id = SymTest.fresh_sym () in
   let ty = Mono.ty_bool in
+  let atom = fresh_atom_ident ~id () in
   Env.bind id ty env (fun env ->
     TypeTest.assert_ty_equal ~ctxt ty
-      |> Mono.check_atom env ident)
+      |> Mono.check_atom env atom)
 
 let test_check_atom_ident_unbound _ =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let ident = Mono.atom_ident id in
+  let id = SymTest.fresh_sym () in
+  let atom = fresh_atom_ident ~id () in
   let exn = Mono.UnboundIdentifier id in
   assert_raises exn (fun _ ->
-    Mono.check_atom env ident (fun _ ->
+    Mono.check_atom env atom (fun _ ->
       assert_failure "Expected exception"))
 
 (* Expressions *)
 
+let test_check_expr_builtin_fixed ctxt =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_struct_eq ~ty:Mono.ty_int () in
+  let args = [fresh_atom_int (); fresh_atom_int ()] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  TypeTest.assert_ty_equal ~ctxt Mono.ty_bool
+    |> Mono.check_expr env expr
+
+let test_check_expr_builtin_var ctxt =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_concat ~ty:Mono.ty_string () in
+  let args = [fresh_atom_string (); fresh_atom_string (); fresh_atom_string ()] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  TypeTest.assert_ty_equal ~ctxt Mono.ty_string
+    |> Mono.check_expr env expr
+
+let test_check_expr_builtin_invalid_arity _ =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_add ~ty:Mono.ty_int () in
+  let expr = fresh_expr_builtin ~fn ~args:[] () in
+  let exn = Mono.InvalidArity (2, 0) in
+  assert_raises exn (fun _ ->
+    Mono.check_expr env expr (fun _ ->
+      assert_failure "Expected exception"))
+
+let test_check_expr_builtin_fixed_mismatched_types _ =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_add ~ty:Mono.ty_int () in
+  let args = [fresh_atom_int (); fresh_atom_bool ()] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  let exn = Mono.MismatchedTypes (Mono.ty_bool, Mono.ty_int) in
+  assert_raises exn (fun _ ->
+    Mono.check_expr env expr (fun _ ->
+      assert_failure "Expected exception"))
+
+let test_check_expr_builtin_var_mismatched_types _ =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_concat ~ty:Mono.ty_string () in
+  let args = [fresh_atom_string (); fresh_atom_int (); fresh_atom_string ()] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  let exn = Mono.MismatchedTypes (Mono.ty_bool, Mono.ty_string) in
+  assert_raises exn (fun _ ->
+    Mono.check_expr env expr (fun _ ->
+      assert_failure "Expected exception"))
+
 let test_check_expr_atom ctxt =
   let env = EnvTest.fresh () in
   let expr =
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
+    let atom = fresh_atom_bool () in
+    fresh_expr_atom ~atom ()
   in
   TypeTest.assert_ty_equal ~ctxt Mono.ty_bool
     |> Mono.check_expr env expr
@@ -413,30 +528,34 @@ let test_check_expr_atom ctxt =
 
 let test_check_binding ctxt =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let patt = Mono.patt_var id in
+  let id = SymTest.fresh_sym () in
   let ty = Mono.ty_bool in
-  let value =
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
+  let binding =
+    let patt = PattTest.fresh_patt_var ~id () in
+    let value =
+      let atom = fresh_atom_bool () in
+      fresh_expr_atom ~atom ()
+    in
+    fresh_binding ~patt ~ty ~value ()
   in
-  let binding = Mono.binding patt ty value in
   Mono.check_binding env binding (fun env ->
     MonoUtils.assert_ty_bound ~ctxt id env ty)
 
 let test_check_binding_mismatched_types _ =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let patt = Mono.patt_var id in
   let inferred = Mono.ty_bool in
   let annotated = Mono.ty_int in
-  let value =
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
+  let binding =
+    let patt =
+      let id = SymTest.fresh_sym () in
+      PattTest.fresh_patt_var ~id ()
+    in
+    let value =
+      let atom = fresh_atom_bool () in
+      fresh_expr_atom ~atom ()
+    in
+    Mono.binding patt annotated value
   in
-  let binding = Mono.binding patt annotated value in
   let exn = Mono.MismatchedTypes (inferred, annotated) in
   assert_raises exn (fun _ ->
     Mono.check_binding env binding (fun _ ->
@@ -444,13 +563,35 @@ let test_check_binding_mismatched_types _ =
 
 (* Blocks *)
 
+let test_check_block_let ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Mono.ty_bool in
+  let block =
+    let id = SymTest.fresh_sym () in
+    let binding =
+      let patt = PattTest.fresh_patt_var ~id () in
+      let value =
+        let atom = fresh_atom_bool () in
+        fresh_expr_atom ~atom ()
+      in
+      fresh_binding ~patt ~ty ~value ()
+    in
+    let scope =
+      let atom = fresh_atom_ident ~id () in
+      let expr = fresh_expr_atom ~atom () in
+      fresh_block_expr ~expr ()
+    in
+    fresh_block_let ~binding ~scope ()
+  in
+  Mono.check_block env block (fun _ inferred ->
+    TypeTest.assert_ty_equal ~ctxt ty inferred)
+
 let test_check_block_expr ctxt =
   let env = EnvTest.fresh () in
   let block =
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
-      |> Mono.block_expr
+    let atom = fresh_atom_bool () in
+    let expr = fresh_expr_atom ~atom () in
+    fresh_block_expr ~expr ()
   in
   Mono.check_block env block (fun _ ty ->
     TypeTest.assert_ty_equal ~ctxt Mono.ty_bool ty)
@@ -459,15 +600,18 @@ let test_check_block_expr ctxt =
 
 let test_check_top_let ctxt =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
+  let id = SymTest.fresh_sym () in
   let ty = Mono.ty_bool in
   let top =
-    let patt = Mono.patt_var id in
-    true
-      |> Mono.atom_bool
-      |> Mono.expr_atom
-      |> Mono.binding patt ty
-      |> Mono.top_let
+    let binding =
+      let patt = PattTest.fresh_patt_var ~id () in
+      let value =
+        let atom = fresh_atom_bool () in
+        fresh_expr_atom ~atom ()
+      in
+      fresh_binding ~patt ~ty ~value ()
+    in
+    fresh_top_let ~binding ()
   in
   Mono.check_top env top (fun env ->
     MonoUtils.assert_ty_bound ~ctxt id env ty)
@@ -488,6 +632,17 @@ let test_check =
       ];
     ];
     "Expressions" >::: [
+      "Built-in Function Application" >::: [
+        "Valid"                     >::: [
+          "Fixed Arity"    >:: test_check_expr_builtin_fixed;
+          "Variable Arity" >:: test_check_expr_builtin_var;
+        ];
+        "Invalid Arity"             >:: test_check_expr_builtin_invalid_arity;
+        "Mismatched Argument Types" >::: [
+          "Fixed Arity"    >:: test_check_expr_builtin_fixed_mismatched_types;
+          "Variable Arity" >:: test_check_expr_builtin_var_mismatched_types;
+        ];
+      ];
       "Atoms" >:: test_check_expr_atom;
     ];
     "Bindings" >::: [
@@ -495,11 +650,12 @@ let test_check =
       "Mismatched Types" >:: test_check_binding_mismatched_types;
     ];
     "Blocks" >::: [
-      "Expressions" >:: test_check_block_expr;
+      "Let Expressions" >:: test_check_block_let;
+      "Expressions"     >:: test_check_block_expr;
     ];
     "Top-Levels" >::: [
       "Let Binding" >:: test_check_top_let;
-    ]
+    ];
   ]
 
 (* Test Suite *)

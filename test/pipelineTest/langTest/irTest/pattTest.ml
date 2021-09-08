@@ -6,6 +6,14 @@ open Common
 
 open CommonTest
 
+(* Fixtures *)
+
+let fresh_patt_ground _ =
+  Ir.patt_ground
+
+let fresh_patt_var ?id:(id = SymTest.fresh_sym ()) _ =
+  Ir.patt_var id
+
 (* Assertions *)
 
 let patt_not_equal = TestUtils.not_equal "Patterns" Ir.pp_patt

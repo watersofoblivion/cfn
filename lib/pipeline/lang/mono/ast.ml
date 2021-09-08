@@ -98,7 +98,6 @@ let pp_top fmt = function
 exception UnboundIdentifier of Sym.t
 exception MismatchedTypes of Type.ty * Type.ty
 exception InvalidArity of int * int
-exception UnsupportedConcatArg of atom * Type.ty * Type.ty
 
 let unbound_identifier id =
   UnboundIdentifier id
@@ -111,10 +110,6 @@ let mismatched_types inferred annotated =
 let invalid_arity expected lst =
   let actual = List.length lst in
   InvalidArity (expected, actual)
-    |> raise
-
-let unsupported_concat_arg arg inferred expected =
-  UnsupportedConcatArg (arg, inferred, expected)
     |> raise
 
 (* Atoms *)
