@@ -29,6 +29,18 @@ val desug_ty : Annot.ty Env.t -> Syntax.ty -> (Annot.ty -> 'a) -> 'a
 (** [desug_ty env ty kontinue] desugars the syntax type [ty] in the environment
     [env].  The desugared type is passed to the continuation [kontinue]. *)
 
+val desug_un : Annot.ty Env.t -> Syntax.un -> Annot.ty -> (Annot.ty -> Annot.builtin -> 'a) -> 'a
+(** [desug_un env op operand kontinue] desugars the unary operator [op]
+    operating on a value of type [operand] in the environment [env] into a
+    built-in function.  The desugared builtin and its result type passed to the
+    continuation [kontinue]. *)
+
+val desug_bin : Annot.ty Env.t -> Syntax.bin -> Annot.ty -> Annot.ty -> (Annot.ty -> Annot.builtin -> 'a) -> 'a
+(** [desug_bin env op lhs rhs kontinue] desugars the binary operator [op]
+    operating on values of type [lhs] and [rhs] in the environment [env] into a
+    built-in function.  The desugared builtin and its result type passed to the
+    continuation [kontinue]. *)
+
 val desug_rune : Annot.ty Env.t -> Syntax.rune -> (Annot.expr -> 'a) -> 'a
 (** [desug_rune env r kontinue] desugars the syntax rune [r] in the environment
     [env].  The desugared rune is passed to the continuation [kontinue]. *)
