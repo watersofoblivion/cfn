@@ -11,14 +11,98 @@ val suite : test
 
 (** {2 Fixtures} *)
 
-val fresh_builtin : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin ?ty ()] constructs a fresh built-in function operating on
-    values of type [ty]. *)
+val fresh_builtin_struct_eq : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_struct_eq ?ty ()] constructs a fresh built-in structural
+    equality function operating on values of type [ty]. *)
+
+val fresh_builtin_struct_neq : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_struct_neq ?ty ()] constructs a fresh built-in structural
+    inequality function operating on values of type [ty]. *)
+
+val fresh_builtin_phys_eq : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_phys_eq ?ty ()] constructs a fresh built-in physical equality
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_phys_neq : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_phys_neq ?ty ()] constructs a fresh built-in physical
+    inequality function operating on values of type [ty]. *)
+
+val fresh_builtin_lt : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_lt ?ty ()] constructs a fresh built-in less than function
+    operating on values of type [ty]. *)
+
+val fresh_builtin_lte : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_lte ?ty ()] constructs a fresh built-in less than or equal
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_gt : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_gt ?ty ()] constructs a fresh built-in greater than function
+    operating on values of type [ty]. *)
+
+val fresh_builtin_gte : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_gte ?ty ()] constructs a fresh built-in greater than or equal
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_add : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_add ?ty ()] constructs a fresh built-in addition function
+    operating on values of type [ty]. *)
+
+val fresh_builtin_sub : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_sub ?ty ()] constructs a fresh built-in subtraction function
+    operating on values of type [ty]. *)
+
+val fresh_builtin_mul : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_mul ?ty ()] constructs a fresh built-in multiplication
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_div : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_div ?ty ()] constructs a fresh built-in division function
+    operating on values of type [ty]. *)
+
+val fresh_builtin_mod : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_mod ?ty ()] constructs a fresh built-in modulus function
+    operating on values of type [ty]. *)
+
+val fresh_builtin_exp : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_exp ?ty ()] constructs a fresh built-in exponentiation
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_neg : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_neg ?ty ()] constructs a fresh built-in negation function
+    operating on values of type [ty]. *)
+
+val fresh_builtin_bit_and : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_bit_and ?ty ()] constructs a fresh built-in bitwise AND
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_bit_or : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_bit_or ?ty ()] constructs a fresh built-in bitwise OR
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_bit_not : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_bit_not ?ty ()] constructs a fresh built-in bitwise NOT
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_bit_xor : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_bit_xor ?ty ()] constructs a fresh built-in bitwise XOR
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_log_not : unit -> Annot.builtin
+(** [fresh_builtin_log_not ?ty ()] constructs a fresh built-in logical NOT
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_promote : ?sub:Annot.ty -> ?sup:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_promote ?sub ?sup ()] constructs a fresh built-in type
+    promotion function promoting values of type [sup] to values of type [sup]. *)
+
+val fresh_builtin_concat : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_concat ?ty ()] constructs a fresh built-in concatenation
+    function operating on values of type [ty]. *)
 
 val fresh_patt_ground : unit -> Annot.patt
 (** [fresh_patt_ground ()] constructs a fresh ground pattern. *)
 
-val fresh_patt_var : ?seq:Sym.seq -> ?id:string -> unit -> Annot.patt
+val fresh_patt_var : ?id:Sym.t -> unit -> Annot.patt
 (** [fresh_patt_var ?seq ?id ()] constructs a fresh variable pattern. *)
 
 (** {2 Assertions} *)

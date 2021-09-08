@@ -31,12 +31,10 @@ let fresh_expr_rune ?value:(value = 'a') _ =
 let fresh_expr_string ?value:(value = "foo bar") _ =
   Annot.expr_string value
 
-let fresh_expr_ident ?seq:(seq = Sym.seq ()) ?id:(id = "") _ =
-  seq
-    |> Sym.gen ~id
-    |> Annot.expr_ident
+let fresh_expr_ident ?id:(id = SymTest.fresh_sym ()) _ =
+  Annot.expr_ident id
 
-let fresh_expr_builtin ?fn:(fn = BuiltinTest.fresh_builtin ()) ?args:(args = [fresh_expr_bool (); fresh_expr_bool ()]) _ =
+let fresh_expr_builtin ?fn:(fn = BuiltinTest.fresh_builtin_struct_eq ()) ?args:(args = [fresh_expr_bool (); fresh_expr_bool ()]) _ =
   Annot.expr_builtin fn args
 
 let rec fresh_expr_let ?binding:(binding = fresh_binding ()) ?scope:(scope = fresh_expr_bool ()) _ =
@@ -157,6 +155,29 @@ let test_expr_ident ctxt =
       SymTest.assert_sym_equal ~ctxt id actual.id
     | actual -> expr_not_equal ~ctxt expected actual
 
+let test_expr_builtin ctxt =
+  let fn = BuiltinTest.fresh_builtin_struct_eq () in
+  let args = [
+    fresh_expr_bool ();
+    fresh_expr_int ();
+  ] in
+  let expected = Annot.expr_builtin fn args in
+  match expected with
+    | Annot.ExprBuiltin actual ->
+      BuiltinTest.assert_builtin_equal ~ctxt fn actual.fn;
+      List.iter2 (assert_expr_equal ~ctxt) args actual.args
+    | actual -> expr_not_equal ~ctxt expected actual
+
+let test_expr_let ctxt =
+  let binding = fresh_binding () in
+  let scope = fresh_expr_ident () in
+  let expected = Annot.expr_let binding scope in
+  match expected with
+    | Annot.ExprLet actual ->
+      assert_binding_equal ~ctxt binding actual.binding;
+      assert_expr_equal ~ctxt scope actual.scope
+    | actual -> expr_not_equal ~ctxt expected actual
+
 let test_binding ctxt =
   let patt = Annot.patt_ground in
   let ty = Annot.ty_bool in
@@ -182,14 +203,16 @@ let test_top_let ctxt =
 let test_constructors =
   "Constructors" >::: [
     "Expressions" >::: [
-      "Booleans"    >:: test_expr_bool;
-      "Integers"    >:: test_expr_int;
-      "Longs"       >:: test_expr_long;
-      "Floats"      >:: test_expr_float;
-      "Doubles"     >:: test_expr_double;
-      "Runes"       >:: test_expr_rune;
-      "Strings"     >:: test_expr_string;
-      "Identifiers" >:: test_expr_ident;
+      "Booleans"                      >:: test_expr_bool;
+      "Integers"                      >:: test_expr_int;
+      "Longs"                         >:: test_expr_long;
+      "Floats"                        >:: test_expr_float;
+      "Doubles"                       >:: test_expr_double;
+      "Runes"                         >:: test_expr_rune;
+      "Strings"                       >:: test_expr_string;
+      "Identifiers"                   >:: test_expr_ident;
+      "Built-in Function Application" >:: test_expr_builtin;
+      "Let Binding"                   >:: test_expr_let;
     ];
     "Bindings" >:: test_binding;
     "Top-Level Expressions" >::: [
@@ -204,106 +227,132 @@ let assert_pp_binding = PrettyTest.assert_pp Annot.pp_binding
 let assert_pp_top = PrettyTest.assert_pp Annot.pp_top
 
 let test_pp_expr_bool ctxt =
-  Annot.expr_bool true
+  fresh_expr_bool ~value:true ()
     |> assert_pp_expr ~ctxt ["true"];
-  Annot.expr_bool false
+  fresh_expr_bool ~value:false ()
     |> assert_pp_expr ~ctxt ["false"]
 
 let test_pp_expr_int ctxt =
-  Annot.expr_int 42l
+  fresh_expr_int ~value:42l ()
     |> assert_pp_expr ~ctxt ["42"]
 
 let test_pp_expr_long ctxt =
-  Annot.expr_long 42L
+  fresh_expr_long ~value:42L ()
     |> assert_pp_expr ~ctxt ["42"]
 
 let test_pp_expr_float ctxt =
-  Annot.expr_float 4.2
+  fresh_expr_float ~value:4.2 ()
     |> assert_pp_expr ~ctxt ["4.2"]
 
 let test_pp_expr_double ctxt =
-  Annot.expr_double 4.2
+  fresh_expr_double ~value:4.2 ()
     |> assert_pp_expr ~ctxt ["4.2"]
 
 let test_pp_expr_rune ctxt =
-  'a'
-    |> Uchar.of_char
-    |> Annot.expr_rune
-    |> assert_pp_expr ~ctxt ["'a'"]
+  fresh_expr_rune ~value:'a' ()
+    |> assert_pp_expr ~ctxt ["'a'"];
+  fresh_expr_rune ~value:'\'' ()
+    |> assert_pp_expr ~ctxt ["'\\'"]
 
 let test_pp_expr_string ctxt =
-  Annot.expr_string "foo bar"
+  fresh_expr_string ~value:"foo bar" ()
     |> assert_pp_expr ~ctxt ["\"foo bar\""]
+
+let test_pp_expr_ident ctxt =
+  let id = SymTest.fresh_sym ~id:"testId" () in
+  fresh_expr_ident ~id ()
+    |> assert_pp_expr ~ctxt ["testId"]
+
+let test_pp_expr_builtin ctxt =
+  let fn = BuiltinTest.fresh_builtin_add ~ty:Annot.ty_int () in
+  let args = [
+    fresh_expr_int ~value:1l ();
+    fresh_expr_int ~value:2l ()
+  ] in
+  fresh_expr_builtin ~fn ~args ()
+    |> assert_pp_expr ~ctxt [sprintf "add[%s] 1 2" Prim.id_int]
+
+let test_pp_expr_let ctxt =
+  let ident = "testId" in
+  let id = SymTest.fresh_sym ~id:ident () in
+  let value = 42l in
+  let binding =
+    let patt =  PattTest.fresh_patt_var ~id () in
+    let ty = Annot.ty_int in
+    let value = fresh_expr_int ~value () in
+    fresh_binding ~patt ~ty ~value ()
+  in
+  let scope = fresh_expr_ident ~id () in
+  fresh_expr_let ~binding ~scope ()
+    |> assert_pp_expr ~ctxt [sprintf "let %s: %s = %ld in %s" ident Prim.id_int value ident]
+
+let test_pp_binding ctxt =
+  let id = "testId" in
+  let v = 42l in
+  let patt =
+    let id = SymTest.fresh_sym ~id () in
+    PattTest.fresh_patt_var ~id ()
+  in
+  let ty = Annot.ty_int in
+  let value = fresh_expr_int ~value:v () in
+  fresh_binding ~patt ~ty ~value ()
+    |> assert_pp_binding ~ctxt [sprintf "%s: %s = %ld" id Prim.id_int v]
+
+let test_pp_top_let ctxt =
+  let id = "testId" in
+  let value = 42l in
+  let binding =
+    let patt =
+      let id = SymTest.fresh_sym ~id () in
+      PattTest.fresh_patt_var ~id ()
+    in
+    let ty = Annot.ty_int in
+    let value = fresh_expr_int ~value () in
+    fresh_binding ~patt ~ty ~value ()
+  in
+  fresh_top_let ~binding ()
+    |> assert_pp_top ~ctxt [sprintf "let %s: %s = %ld" id Prim.id_int value]
 
 let test_pp =
   "Pretty Printing" >::: [
     "Expressions" >::: [
-      "Booleans" >:: test_pp_expr_bool;
-      "Integers" >:: test_pp_expr_int;
-      "Longs"    >:: test_pp_expr_long;
-      "Floats"   >:: test_pp_expr_float;
-      "Doubles"  >:: test_pp_expr_double;
-      "Runes"    >:: test_pp_expr_rune;
-      "Strings"  >:: test_pp_expr_string;
+      "Booleans"                      >:: test_pp_expr_bool;
+      "Integers"                      >:: test_pp_expr_int;
+      "Longs"                         >:: test_pp_expr_long;
+      "Floats"                        >:: test_pp_expr_float;
+      "Doubles"                       >:: test_pp_expr_double;
+      "Runes"                         >:: test_pp_expr_rune;
+      "Strings"                       >:: test_pp_expr_string;
+      "Identifiers"                   >:: test_pp_expr_ident;
+      "Built-in Function Application" >:: test_pp_expr_builtin;
+      "Let Bindings"                  >:: test_pp_expr_let;
     ];
-    (* "Bindings" >:: test_pp_binding; *)
-    (* "Top-Level Expressions" >::: [ *)
-      (* "Let Bindings" >:: test_pp_top_let; *)
-    (* ]; *)
+    "Bindings" >:: test_pp_binding;
+    "Top-Level Expressions" >::: [
+      "Let Bindings" >:: test_pp_top_let;
+    ];
   ]
 
 (* Type Checking *)
 
-let test_check_expr_bool ctxt =
+let assert_check_expr fixture ty ctxt =
   let env = EnvTest.fresh () in
-  let b = Annot.expr_bool true in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_bool
-    |> Annot.check_expr env b
+  let expr = fixture () in
+  TypeTest.assert_ty_equal ~ctxt ty
+    |> Annot.check_expr env expr
 
-let test_check_expr_int ctxt =
-  let env = EnvTest.fresh () in
-  let i = Annot.expr_int 42l in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_int
-    |> Annot.check_expr env i
-
-let test_check_expr_long ctxt =
-  let env = EnvTest.fresh () in
-  let l = Annot.expr_long 42L in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_long
-    |> Annot.check_expr env l
-
-let test_check_expr_float ctxt =
-  let env = EnvTest.fresh () in
-  let f = Annot.expr_float 4.2 in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_float
-    |> Annot.check_expr env f
-
-let test_check_expr_double ctxt =
-  let env = EnvTest.fresh () in
-  let d = Annot.expr_double 4.2 in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_double
-    |> Annot.check_expr env d
-
-let test_check_expr_rune ctxt =
-  let env = EnvTest.fresh () in
-  let r =
-    'a'
-      |> Uchar.of_char
-      |> Annot.expr_rune
-  in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_rune
-    |> Annot.check_expr env r
-
-let test_check_expr_string ctxt =
-  let env = EnvTest.fresh () in
-  let s = Annot.expr_string "foo bar" in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_string
-    |> Annot.check_expr env s
+let test_check_expr_bool = assert_check_expr fresh_expr_bool Annot.ty_bool
+let test_check_expr_int = assert_check_expr fresh_expr_int Annot.ty_int
+let test_check_expr_long = assert_check_expr fresh_expr_long Annot.ty_long
+let test_check_expr_float = assert_check_expr fresh_expr_float Annot.ty_float
+let test_check_expr_double = assert_check_expr fresh_expr_double Annot.ty_double
+let test_check_expr_rune = assert_check_expr fresh_expr_rune Annot.ty_rune
+let test_check_expr_string = assert_check_expr fresh_expr_string Annot.ty_string
 
 let test_check_expr_ident ctxt =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let ident = Annot.expr_ident id in
+  let id = SymTest.fresh_sym () in
+  let ident = fresh_expr_ident ~id () in
   let ty = Annot.ty_bool in
   Env.bind id ty env (fun env ->
     TypeTest.assert_ty_equal ~ctxt ty
@@ -311,31 +360,109 @@ let test_check_expr_ident ctxt =
 
 let test_check_expr_ident_unbound _ =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let ident = Annot.expr_ident id in
+  let id = SymTest.fresh_sym () in
+  let ident = fresh_expr_ident ~id () in
   let exn = Annot.UnboundIdentifier id in
   assert_raises exn (fun _ ->
     Annot.check_expr env ident (fun _ ->
       assert_failure "Expected exception"))
 
+let test_check_expr_builtin_fixed ctxt =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_add ~ty:Annot.ty_int () in
+  let args = [
+    fresh_expr_int ();
+    fresh_expr_int ()
+  ] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_int
+    |> Annot.check_expr env expr
+
+let test_check_expr_builtin_var ctxt =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_concat ~ty:Annot.ty_string () in
+  let args = [
+    fresh_expr_string ();
+    fresh_expr_string ()
+  ] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_int
+    |> Annot.check_expr env expr
+
+let test_check_expr_builtin_invalid_arity _ =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_add ~ty:Annot.ty_int () in
+  let exn = Annot.InvalidArity (2, 0) in
+  let expr = fresh_expr_builtin ~fn ~args:[] () in
+  assert_raises exn (fun _ ->
+    Annot.check_expr env expr (fun _ ->
+      assert_failure "Expected exception"))
+
+let test_check_expr_builtin_fixed_mismatched_types _ =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_add ~ty:Annot.ty_int () in
+  let bad = fresh_expr_long () in
+  let args = [
+    fresh_expr_int ();
+    fresh_expr_long ();
+  ] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  let exn = Annot.MismatchedTypes (bad, Annot.ty_long, Annot.ty_int) in
+  assert_raises exn (fun _ ->
+    Annot.check_expr env expr (fun _ ->
+      assert_failure "Expected exception"))
+
+let test_check_expr_builtin_var_mismatched_types _ =
+  let env = EnvTest.fresh () in
+  let fn = BuiltinTest.fresh_builtin_concat ~ty:Annot.ty_string () in
+  let bad = fresh_expr_long () in
+  let args = [
+    fresh_expr_string ();
+    fresh_expr_long ();
+    fresh_expr_string ();
+  ] in
+  let expr = fresh_expr_builtin ~fn ~args () in
+  let exn = Annot.MismatchedTypes (bad, Annot.ty_long, Annot.ty_int) in
+  assert_raises exn (fun _ ->
+    Annot.check_expr env expr (fun _ ->
+      assert_failure "Expected exception"))
+
+let test_check_expr_let ctxt =
+  let env = EnvTest.fresh () in
+  let id = SymTest.fresh_sym () in
+  let ty = Annot.ty_bool in
+  let binding =
+    let patt = PattTest.fresh_patt_var ~id () in
+    let value = fresh_expr_bool () in
+    fresh_binding ~patt ~ty ~value ()
+  in
+  let scope = fresh_expr_ident ~id () in
+  let expr = fresh_expr_let ~binding ~scope () in
+  TypeTest.assert_ty_equal ~ctxt ty
+    |> Annot.check_expr env expr
+
 let test_check_binding ctxt =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let patt = Annot.patt_var id in
+  let id = SymTest.fresh_sym () in
   let ty = Annot.ty_bool in
-  let value = Annot.expr_bool true in
-  let binding = Annot.binding patt ty value in
+  let binding =
+    let patt = PattTest.fresh_patt_var ~id () in
+    let value = fresh_expr_bool ~value:true () in
+    Annot.binding patt ty value
+  in
   Annot.check_binding env binding (fun env ->
     AnnotUtils.assert_ty_bound ~ctxt id env ty)
 
 let test_check_binding_mismatched_types _ =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
-  let patt = Annot.patt_var id in
+  let value = fresh_expr_bool () in
   let inferred = Annot.ty_bool in
   let annotated = Annot.ty_int in
-  let value = Annot.expr_bool true in
-  let binding = Annot.binding patt annotated value in
+  let binding =
+    let id = SymTest.fresh_sym () in
+    let patt = PattTest.fresh_patt_var ~id () in
+    Annot.binding patt annotated value
+  in
   let exn = Annot.MismatchedTypes (value, inferred, annotated) in
   assert_raises exn (fun _ ->
     Annot.check_binding env binding (fun _ ->
@@ -343,14 +470,13 @@ let test_check_binding_mismatched_types _ =
 
 let test_check_top_let ctxt =
   let env = EnvTest.fresh () in
-  let id = () |> Sym.seq |> Sym.gen in
+  let id = SymTest.fresh_sym () in
   let ty = Annot.ty_bool in
   let top =
-    let patt = Annot.patt_var id in
-    true
-      |> Annot.expr_bool
-      |> Annot.binding patt ty
-      |> Annot.top_let
+    let patt = PattTest.fresh_patt_var ~id () in
+    let value = fresh_expr_bool () in
+    let binding = fresh_binding ~patt ~ty ~value () in
+    fresh_top_let ~binding ()
   in
   Annot.check_top env top (fun env ->
     AnnotUtils.assert_ty_bound ~ctxt id env ty)
@@ -369,6 +495,18 @@ let test_check =
         "Bound"   >:: test_check_expr_ident;
         "Unbound" >:: test_check_expr_ident_unbound
       ];
+      "Built-in Function Application" >::: [
+        "Valid"                     >::: [
+          "Fixed Arity"    >:: test_check_expr_builtin_fixed;
+          "Variable Arity" >:: test_check_expr_builtin_var;
+        ];
+        "Invalid Arity"             >:: test_check_expr_builtin_invalid_arity;
+        "Mismatched Argument Types" >::: [
+          "Fixed Arity"    >:: test_check_expr_builtin_fixed_mismatched_types;
+          "Variable Arity" >:: test_check_expr_builtin_var_mismatched_types;
+        ];
+      ];
+      "Let Bindings" >:: test_check_expr_let;
     ];
     "Bindings" >::: [
       "Valid"            >:: test_check_binding;

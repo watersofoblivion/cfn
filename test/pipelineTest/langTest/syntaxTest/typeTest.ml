@@ -85,12 +85,7 @@ let test_loc =
 let assert_pp_ty = PrettyTest.assert_pp Syntax.pp_ty
 
 let test_pp_ty_constr ctxt =
-  let constr =
-    ()
-      |> Sym.seq
-      |> Sym.gen ~id:Prim.id_bool
-  in
-  Syntax.ty_constr LocTest.dummy constr
+  fresh_ty_constr ~id:Prim.id_bool ()
     |> assert_pp_ty ~ctxt [Prim.id_bool]
 
 let test_pp =

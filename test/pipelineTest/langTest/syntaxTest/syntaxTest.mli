@@ -19,15 +19,107 @@ val suite : test
  * lower-level fixtures generated as part of a higher-level fixture.
  *)
 
+(** {3 Types} *)
+
 val fresh_ty_constr : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.ty
 (** [fresh_ty_constr ?loc ?seq ?id ()] constructs a fresh type constructor at
     location [loc]. *)
 
-val fresh_op_un : ?loc:Loc.t -> unit -> Syntax.un
-(** [fresh_op_un ?loc ()] constructs a fresh unary operator at location [loc]. *)
+(** {3 Operators} *)
 
-val fresh_op_bin : ?loc:Loc.t -> unit -> Syntax.bin
-(** [fresh_op_bin ?loc ()] constructs a fresh binary operator at location [loc]. *)
+(** {4 Unary} *)
+
+val fresh_un_neg : ?loc:Loc.t -> unit -> Syntax.un
+(** [fresh_un_neg ?loc ()] constructs a fresh unary negation operator at
+    location [loc]. *)
+
+val fresh_un_log_not : ?loc:Loc.t -> unit -> Syntax.un
+(** [fresh_un_log_not ?loc ()] constructs a fresh unary logical NOT operator
+    at location [loc]. *)
+
+val fresh_un_bit_not : ?loc:Loc.t -> unit -> Syntax.un
+(** [fresh_un_bit_not ?loc ()] constructs a fresh unary bitwise NOT operator
+    at location [loc]. *)
+
+(** {4 Binary} *)
+
+val fresh_bin_struct_eq : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_struct_eq ?loc ()] constructs a fresh binary structural equality
+    operator at location [loc]. *)
+
+val fresh_bin_struct_neq : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_struct_neq ?loc ()] constructs a fresh binary structural
+    inequality operator at location [loc]. *)
+
+val fresh_bin_phys_eq : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_phys_eq ?loc ()] constructs a fresh binary physical equality
+    operator at location [loc]. *)
+
+val fresh_bin_phys_neq : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_phys_neq ?loc ()] constructs a fresh binary physical inequality
+    operator at location [loc]. *)
+
+val fresh_bin_lt : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_lt ?loc ()] constructs a fresh binary less than operator at
+    location [loc]. *)
+
+val fresh_bin_lte : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_lte ?loc ()] constructs a fresh binary less than or equal
+    operator at location [loc]. *)
+
+val fresh_bin_gt : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_gt ?loc ()] constructs a fresh binary greater than operator at
+    location [loc]. *)
+
+val fresh_bin_gte : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_gte ?loc ()] constructs a fresh binary greater than or equal
+    operator at location [loc]. *)
+
+val fresh_bin_add : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_add ?loc ()] constructs a fresh binary addition operator at
+    location [loc]. *)
+
+val fresh_bin_sub : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_sub ?loc ()] constructs a fresh binary subtraction operator at
+    location [loc]. *)
+
+val fresh_bin_mul : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_mul ?loc ()] constructs a fresh binary multiplication operator at
+    location [loc]. *)
+
+val fresh_bin_div : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_div ?loc ()] constructs a fresh binary division operator at
+    location [loc]. *)
+
+val fresh_bin_mod : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_mod ?loc ()] constructs a fresh binary modulus operator at
+    location [loc]. *)
+
+val fresh_bin_exp : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_exp ?loc ()] constructs a fresh binary exponentiation operator at
+    location [loc]. *)
+
+val fresh_bin_log_and : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_log_and ?loc ()] constructs a fresh binary logical AND operator
+    at location [loc]. *)
+
+val fresh_bin_log_or : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_log_or ?loc ()] constructs a fresh binary logical OR operator at
+    location [loc]. *)
+
+val fresh_bin_bit_and : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_bit_and ?loc ()] constructs a fresh binary bitwise AND operator
+    at location [loc]. *)
+
+val fresh_bin_bit_or : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_bit_or ?loc ()] constructs a fresh binary bitwise OR operator at
+    location [loc]. *)
+
+val fresh_bin_bit_xor : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_bit_xor ?loc ()] constructs a fresh binary bitwise XOR operator
+    at location [loc]. *)
+
+(** {3 Patterns} *)
 
 val fresh_patt_ground : ?loc:Loc.t -> unit -> Syntax.patt
 (** [fresh_patt_ground ?loc ()] constructs a fresh ground pattern at location
@@ -37,6 +129,8 @@ val fresh_patt_var : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.
 (** [fresh_patt_var ?loc ?seq ?id ()] constructs a fresh identifier pattern at
     location [loc]. *)
 
+(** {3 Runes} *)
+
 val fresh_rune_lit : ?loc:Loc.t -> ?value:char -> unit -> Syntax.rune
 (** [fresh_rune_lit ?loc ?value ()] constructs a fresh rune literal at location
     [loc] with value [value]. *)
@@ -45,6 +139,8 @@ val fresh_rune_escape : ?loc:Loc.t -> ?value:int -> unit -> Syntax.rune
 (** [fresh_rune_escape ?loc ?value ()] constructs a fresh rune unicode escape
     sequence at location [loc] for the codepoint [value]. *)
 
+(** {3 Strings} *)
+
 val fresh_str_lit : ?loc:Loc.t -> ?value:string -> unit -> Syntax.str
 (** [fresh_str_lit ?loc ?value ()] constructs a fresh string literal segment
     at location [loc] with lexeme [value]. *)
@@ -52,6 +148,8 @@ val fresh_str_lit : ?loc:Loc.t -> ?value:string -> unit -> Syntax.str
 val fresh_str_escape : ?loc:Loc.t -> ?value:int -> unit -> Syntax.str
 (** [fresh_str_escape ?loc ?value ()] constructs a fresh string unicode escape
     sequence segment at location [loc] for the codepoint [value]. *)
+
+(** {3 Expressions} *)
 
 val fresh_expr_bool : ?loc:Loc.t -> ?value:bool -> unit -> Syntax.expr
 (** [fresh_expr_bool ?loc ?value ()] constructs a fresh boolean expression at
@@ -99,11 +197,15 @@ val fresh_expr_let : ?loc:Loc.t -> ?binding:Syntax.binding -> ?scope:Syntax.expr
 (** [fresh_expr_bin_op ?loc ?binding ?scope ()] constructs a fresh local let
     binding at location [loc] binding [binding] in the scope of [scope]. *)
 
+(** {3 Bindings} *)
+
 val fresh_value_binding : ?loc:Loc.t -> ?patt:Syntax.patt -> ?explicit:bool -> ?ty:Syntax.ty -> ?value:Syntax.expr -> unit -> Syntax.binding
 (** [fresh_value_binding ?loc ?patt ?explicit ?ty ?value ()] constructs a fresh
     value binding at location [loc] binding the value [value] of type [ty] to
     the pattern [patt].  If [explicit] is [true], a type annotation is
     generated.  If not provided, [explicit] defaults to [false]. *)
+
+(** {3 Top-Level Expressions} *)
 
 val fresh_top_let : ?loc:Loc.t -> ?binding:Syntax.binding -> unit -> Syntax.top
 (** [fresh_top_let ?loc ?binding ()] constructs a fresh top-level let binding at
@@ -112,6 +214,8 @@ val fresh_top_let : ?loc:Loc.t -> ?binding:Syntax.binding -> unit -> Syntax.top
 val fresh_top_val : ?loc:Loc.t -> ?binding:Syntax.binding -> unit -> Syntax.top
 (** [fresh_top_val ?loc ?binding ()] constructs a fresh top-level val binding at
     location [loc] with the binding [binding]. *)
+
+(** {3 Imports} *)
 
 val fresh_name : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.name
 (** [fresh_name ?loc ?seq ?id ()] constructs a fresh name at location [loc]
@@ -137,10 +241,10 @@ val fresh_pkgs : ?loc:Loc.t -> ?aliases:(Syntax.alias list) -> unit -> Syntax.pk
     to an empty list. *)
 
 val fresh_import : ?loc:Loc.t -> ?stdlib:bool -> ?from:Syntax.from -> ?pkgs:Syntax.pkgs -> unit -> Syntax.import
-(** [fresh_import ?loc ?seq ?from ?pkgs ()] generates a fresh import statement
-    at location [loc] import the packages [pkgs] from [from].  If [stdlib] is
-    [false], then the from clause is included.  If not provided, [stdlib]
-    defaults to [true]. *)
+(** [fresh_import ?loc ?stdlib ?from ?pkgs ()] generates a fresh import
+    statement at location [loc] import the packages [pkgs] from [from].  If
+    [stdlib] is [false], then the from clause is included.  If not provided,
+    [stdlib] defaults to [true]. *)
 
 val fresh_pkg : ?loc:Loc.t -> ?id:Syntax.name -> unit -> Syntax.pkg
 (** [fresh_pkg ?loc ?id ()] generates a fresh package clause at location [loc]
@@ -154,7 +258,7 @@ val fresh_pkg : ?loc:Loc.t -> ?id:Syntax.name -> unit -> Syntax.pkg
  * Replaces all location information with {!CommonTest.LocTest.dummy}.  Useful
  * for normalizing parsed syntax with hand-constructed syntax in tests.
  *)
- 
+
 val deloc_ty : Syntax.ty -> Syntax.ty
 (** [deloc_ty ty] strips location information from the type [ty]. *)
 

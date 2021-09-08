@@ -12,14 +12,20 @@ let file pkg imports tops = File { pkg; imports; tops }
 
 (* Pretty Printing *)
 
+let pp_list pp sep fmt lst =
+  let pp_sep fmt _ = fprintf fmt sep in
+  let _ = match lst with
+    | [] -> ()
+    | _ -> fprintf fmt "@ @ "
+  in
+  pp_print_list ~pp_sep pp fmt lst
+
+let pp_imports = pp_list Import.pp_import "@ "
+let pp_tops = pp_list Ast.pp_top "@ @ "
+
 let pp_file fmt = function
   | File file ->
     fprintf fmt "@[<v>%a" Import.pp_pkg file.pkg;
-    let _ = match file.imports with
-      | [] -> ()
-      | _ ->
-        fprintf fmt "@ @ ";
-        let pp_sep fmt _ = fprintf fmt "@ " in
-        pp_print_list ~pp_sep Import.pp_import fmt file.imports;
-    in
+    pp_imports fmt file.imports;
+    pp_tops fmt file.tops;
     fprintf fmt "@]"

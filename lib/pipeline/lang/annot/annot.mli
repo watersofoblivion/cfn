@@ -435,11 +435,6 @@ exception InvalidArity of int * int
 (** [InvalidArity (expected, actual)] is raised when a built-in function of
     arity [expected] is applied to [actual] arguments. *)
 
-exception UnsupportedConcatArg of expr * ty * ty
-(** [UnsupportedConcatArg (expr, inferred, expected)] is raised when the
-    argument [expr] to a {!Concat} call is of type [inferred] instead of the
-    type [expected]. *)
-
 val check_builtin : ty Env.t -> builtin -> (arity -> 'a) -> 'a
 (** [check_builtin env builtin kontinue] gets the type of the built-in function
     [builtin] in the environment [env].  The arity the function is passed to the

@@ -11,10 +11,8 @@ open CommonTest
 let fresh_patt_ground _ =
   Annot.patt_ground
 
-let fresh_patt_var ?seq:(seq = Sym.seq ()) ?id:(id = "") _ =
-  seq
-    |> Sym.gen ~id
-    |> Annot.patt_var
+let fresh_patt_var ?id:(id = SymTest.fresh_sym ()) _ =
+  Annot.patt_var id
 
 (* Assertions *)
 

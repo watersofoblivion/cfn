@@ -4,11 +4,71 @@ open CommonTest
 
 (* Fixtures *)
 
-let fresh_op_un ?loc:(loc = LocTest.gen ()) _ =
+let fresh_un_neg ?loc:(loc = LocTest.gen ()) _ =
   Syntax.un_neg loc
 
-let fresh_op_bin ?loc:(loc = LocTest.gen ()) _ =
+let fresh_un_log_not ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.un_log_not loc
+
+let fresh_un_bit_not ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.un_bit_not loc
+
+let fresh_bin_struct_eq ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_struct_eq loc
+
+let fresh_bin_struct_neq ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_struct_neq loc
+
+let fresh_bin_phys_eq ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_phys_eq loc
+
+let fresh_bin_phys_neq ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_phys_neq loc
+
+let fresh_bin_lt ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_lt loc
+
+let fresh_bin_lte ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_lte loc
+
+let fresh_bin_gt ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_gt loc
+
+let fresh_bin_gte ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_gte loc
+
+let fresh_bin_add ?loc:(loc = LocTest.gen ()) _ =
   Syntax.bin_add loc
+
+let fresh_bin_sub ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_sub loc
+
+let fresh_bin_mul ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_mul loc
+
+let fresh_bin_div ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_div loc
+
+let fresh_bin_mod ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_mod loc
+
+let fresh_bin_exp ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_exp loc
+
+let fresh_bin_log_and ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_log_and loc
+
+let fresh_bin_log_or ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_log_or loc
+
+let fresh_bin_bit_and ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_bit_and loc
+
+let fresh_bin_bit_or ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_bit_or loc
+
+let fresh_bin_bit_xor ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_bit_xor loc
 
 (* Utilities *)
 

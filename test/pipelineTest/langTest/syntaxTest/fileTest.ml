@@ -8,6 +8,73 @@ open Common
 
 open CommonTest
 
+(* Fixtures *)
+
+let pkg_lexeme = "testpackage"
+let src_lexeme = "testsrc"
+let import_lexeme = "importedpkg"
+let alias_lexeme = "pkgalias"
+let import_lexeme' = "anotherpkg"
+
+let let_lexeme = "letBound"
+let let_ty = Prim.id_bool
+let let_value = true
+
+let val_lexeme = "ValBound"
+let val_ty = Prim.id_int
+let val_value = 42l
+
+let pkg =
+  let id = ImportTest.fresh_name ~id:pkg_lexeme () in
+  ImportTest.fresh_pkg ~id ()
+
+let from =
+  let name = ImportTest.fresh_name ~id:src_lexeme () in
+  let src = ImportTest.fresh_src ~name () in
+  ImportTest.fresh_from ~src ()
+
+let alias =
+  let pkg = ImportTest.fresh_name ~id:import_lexeme () in
+  let local = ImportTest.fresh_name ~id:alias_lexeme () in
+  ImportTest.fresh_alias ~pkg ~alias:true ~local ()
+
+let alias' =
+  let pkg = ImportTest.fresh_name ~id:import_lexeme' () in
+  ImportTest.fresh_alias ~pkg ()
+
+let pkgs =
+  ImportTest.fresh_pkgs ~aliases:[alias; alias'] ()
+
+let ext_import =
+  ImportTest.fresh_import ~stdlib:false ~from ~pkgs ()
+
+let stdlib_import =
+  ImportTest.fresh_import ~pkgs ()
+
+let imports =
+  [ext_import; stdlib_import]
+
+let top_let =
+  let binding =
+    let patt = PattTest.fresh_patt_var ~id:let_lexeme () in
+    let ty = TypeTest.fresh_ty_constr ~id:let_ty () in
+    let value = AstTest.fresh_expr_bool ~value:let_value () in
+    AstTest.fresh_value_binding ~patt ~ty ~value ()
+  in
+  AstTest.fresh_top_let ~binding ()
+
+let top_val =
+  let binding =
+    let patt = PattTest.fresh_patt_var ~id:val_lexeme () in
+    let ty = TypeTest.fresh_ty_constr ~id:val_ty () in
+    let value = AstTest.fresh_expr_int ~value:val_value () in
+    AstTest.fresh_value_binding ~patt ~ty ~value ()
+  in
+  AstTest.fresh_top_val ~binding ()
+
+let tops =
+  [top_let; top_val]
+
 (* Location Stripping *)
 
 let deloc_file = function
@@ -34,27 +101,6 @@ let assert_file_equal ~ctxt expected actual = match (expected, actual) with
 (* Constructors *)
 
 let test_file ctxt =
-  let seq = Sym.seq () in
-  let pkg =
-    let id = ImportTest.fresh_name ~seq () in
-    ImportTest.fresh_pkg ~id ()
-  in
-
-  let imports = [] in
-  let tops = [] in
-  match Syntax.file pkg imports tops with
-    | Syntax.File file ->
-      ImportTest.assert_pkg_equal ~ctxt pkg file.pkg;
-      List.iter2 (ImportTest.assert_import_equal ~ctxt) imports file.imports;
-      List.iter2 (AstTest.assert_top_equal ~ctxt) tops file.tops;
-
-  let imports = [
-    ImportTest.fresh_import ();
-    ImportTest.fresh_import ()
-  ] in
-  let tops = [
-    (* TODO *)
-  ] in
   match Syntax.file pkg imports tops with
     | Syntax.File file ->
       ImportTest.assert_pkg_equal ~ctxt pkg file.pkg;
@@ -68,67 +114,58 @@ let test_constructor =
 
 let assert_pp_file = PrettyTest.assert_pp Syntax.pp_file
 
-let test_pp_file_no_imports ctxt =
-  let id = "testpackage" in
-  let name = ImportTest.fresh_name ~id () in
-
-  let pkg = ImportTest.fresh_pkg ~id:name () in
+let test_pp_file_package_only ctxt =
   Syntax.file pkg [] []
     |> assert_pp_file ~ctxt [
-         sprintf "package %s" id
+         sprintf "package %s" pkg_lexeme;
        ]
 
-let test_pp_file_with_imports ctxt =
-  let id = "testpackage" in
-  let src = "testsrc" in
-  let pkg = "testpkg" in
-  let local = "testlocal" in
-  let pkg' = "anotherpkg" in
-
-  let pkg_stmt =
-    let id = ImportTest.fresh_name ~id () in
-    ImportTest.fresh_pkg ~id ()
-  in
-  let imports =
-    let pkg = ImportTest.fresh_name ~id:pkg () in
-    let local = ImportTest.fresh_name ~id:local () in
-    let pkg' = ImportTest.fresh_name ~id:pkg' () in
-
-    let pkgs =
-      Syntax.pkgs LocTest.dummy [
-        ImportTest.fresh_alias ~pkg ~local ();
-        ImportTest.fresh_alias ~pkg:pkg' ()
-      ]
-    in
-
-    let import =
-      let from =
-        let name = ImportTest.fresh_name ~id:src () in
-        let src = ImportTest.fresh_src ~name () in
-        ImportTest.fresh_from ~src ()
-      in
-
-      ImportTest.fresh_import ~stdlib:false ~from ~pkgs ()
-    in
-    let import' = ImportTest.fresh_import ~pkgs () in
-    [import; import']
-  in
-  Syntax.file pkg_stmt imports []
+let test_pp_file_imports ctxt =
+  Syntax.file pkg imports []
     |> assert_pp_file ~ctxt [
-         sprintf "package %s" id;
+         sprintf "package %s" pkg_lexeme;
          "";
-         sprintf "from %s import" src;
-         sprintf "                   | %s -> %s" pkg local;
-         sprintf "                   | %s" pkg';
+         sprintf "from %s import" src_lexeme;
+         sprintf "                   | %s -> %s" import_lexeme alias_lexeme;
+         sprintf "                   | %s" import_lexeme';
          sprintf "import";
-         sprintf "      | %s -> %s" pkg local;
-         sprintf "      | %s" pkg'
+         sprintf "      | %s -> %s" import_lexeme alias_lexeme;
+         sprintf "      | %s" import_lexeme';
+       ]
+
+let test_pp_file_tops ctxt =
+  Syntax.file pkg [] tops
+    |> assert_pp_file ~ctxt [
+         sprintf "package %s" pkg_lexeme;
+         "";
+         sprintf "let %s: %s = %b" let_lexeme let_ty let_value;
+         "";
+         sprintf "val %s: %s = %ld" val_lexeme val_ty val_value;
+       ]
+
+let test_pp_file_imports_tops ctxt =
+  Syntax.file pkg imports tops
+    |> assert_pp_file ~ctxt [
+         sprintf "package %s" pkg_lexeme;
+         "";
+         sprintf "from %s import" src_lexeme;
+         sprintf "                   | %s -> %s" import_lexeme alias_lexeme;
+         sprintf "                   | %s" import_lexeme';
+         sprintf "import";
+         sprintf "      | %s -> %s" import_lexeme alias_lexeme;
+         sprintf "      | %s" import_lexeme';
+         "";
+         sprintf "let %s: %s = %b" let_lexeme let_ty let_value;
+         "";
+         sprintf "val %s: %s = %ld" val_lexeme val_ty val_value;
        ]
 
 let test_pp =
   "Pretty Printing" >::: [
-    "With Imports" >:: test_pp_file_with_imports;
-    "No Imports"   >:: test_pp_file_no_imports;
+    "Package Only"                      >:: test_pp_file_package_only;
+    "Imports"                           >:: test_pp_file_imports;
+    "Top-Level Expressions"             >:: test_pp_file_tops;
+    "Imports and Top-Level Expressions" >:: test_pp_file_imports_tops;
   ]
 
 (* Test Suite *)

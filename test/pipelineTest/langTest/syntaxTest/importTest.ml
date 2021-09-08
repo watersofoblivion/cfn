@@ -29,7 +29,7 @@ let fresh_pkgs ?loc:(loc = LocTest.gen ()) ?aliases:(aliases = []) _ =
   Syntax.pkgs loc aliases
 
 let fresh_import ?loc:(loc = LocTest.gen ()) ?stdlib:(stdlib = true) ?from:(from = fresh_from ()) ?pkgs:(pkgs = fresh_pkgs ()) _ =
-  let from = if stdlib then Some from else None in
+  let from = if stdlib then None else Some from in
   Syntax.import loc from pkgs
 
 let fresh_pkg ?loc:(loc = LocTest.gen ()) ?id:(id = fresh_name ()) _ =
@@ -146,23 +146,18 @@ let test_from ctxt =
       assert_src_equal ~ctxt src from.src
 
 let test_alias ctxt =
-  let seq = Sym.seq () in
   let loc = LocTest.gen () in
-  let pkg = fresh_name ~seq () in
-
-  let local = None in
-  match Syntax.alias loc pkg local with
-    | Syntax.Alias alias ->
-      LocTest.assert_loc_equal ~ctxt loc alias.loc;
-      assert_name_equal ~ctxt pkg alias.pkg;
-      TestUtils.assert_optional_equal ~ctxt "alias" assert_name_equal local alias.alias;
-
-  let local = Some (fresh_name ~seq ()) in
-  match Syntax.alias loc pkg local with
-    | Syntax.Alias alias ->
-      LocTest.assert_loc_equal ~ctxt loc alias.loc;
-      assert_name_equal ~ctxt pkg alias.pkg;
-      TestUtils.assert_optional_equal ~ctxt "alias" assert_name_equal local alias.alias
+  let pkg = fresh_name () in
+  let assert_alias local =
+    match Syntax.alias loc pkg local with
+      | Syntax.Alias alias ->
+        LocTest.assert_loc_equal ~ctxt loc alias.loc;
+        assert_name_equal ~ctxt pkg alias.pkg;
+        TestUtils.assert_optional_equal ~ctxt "alias" assert_name_equal local alias.alias;
+  in
+  assert_alias None;
+  Some (fresh_name ())
+    |> assert_alias
 
 let test_pkgs ctxt =
   let seq = Sym.seq () in
@@ -182,31 +177,28 @@ let test_pkgs ctxt =
 let test_import ctxt =
   let seq = Sym.seq () in
   let loc = LocTest.gen () in
+  let assert_import from pkgs =
+    match Syntax.import loc from pkgs with
+      | Syntax.Import import ->
+        LocTest.assert_loc_equal ~ctxt loc import.loc;
+        TestUtils.assert_optional_equal ~ctxt "from clause" assert_from_equal from import.from;
+        assert_pkgs_equal ~ctxt pkgs import.pkgs;
+  in
 
   let from = None in
-  let pkgs = fresh_pkgs () in
-  match Syntax.import loc from pkgs with
-    | Syntax.Import import ->
-      LocTest.assert_loc_equal ~ctxt loc import.loc;
-      TestUtils.assert_optional_equal ~ctxt "from clause" assert_from_equal from import.from;
-      assert_pkgs_equal ~ctxt pkgs import.pkgs;
+  fresh_pkgs ()
+    |> assert_import from;
 
   let from = Some (fresh_from ()) in
-  let pkgs =
-    let pkg_one = fresh_name ~seq ~id:"pkgOne" () in
-    let pkg_two = fresh_name ~seq ~id:"pkgTwo" () in
-    let local = fresh_name ~seq ~id:"localName" () in
-    let aliases = [
-      fresh_alias ~pkg:pkg_one ();
-      fresh_alias ~pkg:pkg_two ~alias:true ~local ()
-    ] in
-    fresh_pkgs ~aliases ()
-  in
-  match Syntax.import loc from pkgs with
-    | Syntax.Import import ->
-      LocTest.assert_loc_equal ~ctxt loc import.loc;
-      TestUtils.assert_optional_equal ~ctxt "from clause" assert_from_equal from import.from;
-      assert_pkgs_equal ~ctxt pkgs import.pkgs
+  let pkg_one = fresh_name ~seq ~id:"pkgOne" () in
+  let pkg_two = fresh_name ~seq ~id:"pkgTwo" () in
+  let local = fresh_name ~seq ~id:"localName" () in
+  let aliases = [
+    fresh_alias ~pkg:pkg_one ();
+    fresh_alias ~pkg:pkg_two ~alias:true ~local ()
+  ] in
+  fresh_pkgs ~aliases ()
+    |> assert_import from
 
 let test_pkg ctxt =
   let loc = LocTest.gen () in

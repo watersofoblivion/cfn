@@ -62,10 +62,10 @@ let fresh_expr_ident ?loc:(loc = LocTest.gen ()) ?seq:(seq = Sym.seq ()) ?id:(id
     |> Sym.gen ~id
     |> Syntax.expr_ident loc
 
-let fresh_expr_un_op ?loc:(loc = LocTest.gen ()) ?op:(op = OpTest.fresh_op_un ()) ?operand:(operand = fresh_expr_bool ()) _ =
+let fresh_expr_un_op ?loc:(loc = LocTest.gen ()) ?op:(op = OpTest.fresh_un_log_not ()) ?operand:(operand = fresh_expr_bool ()) _ =
   Syntax.expr_un_op loc op operand
 
-let fresh_expr_bin_op ?loc:(loc = LocTest.gen ()) ?op:(op = OpTest.fresh_op_bin ()) ?lhs:(lhs = fresh_expr_int ~value:1l ()) ?rhs:(rhs = fresh_expr_int ~value:2l ()) _ =
+let fresh_expr_bin_op ?loc:(loc = LocTest.gen ()) ?op:(op = OpTest.fresh_bin_add ()) ?lhs:(lhs = fresh_expr_int ~value:1l ()) ?rhs:(rhs = fresh_expr_int ~value:2l ()) _ =
   Syntax.expr_bin_op loc op lhs rhs
 
 let rec fresh_expr_let ?loc:(loc = LocTest.gen ()) ?binding:(binding = fresh_value_binding ()) ?scope:(scope = fresh_expr_bool ()) _ =
@@ -359,7 +359,7 @@ let test_expr_ident ctxt =
 
 let test_expr_un_op ctxt =
   let loc = LocTest.gen () in
-  let op = OpTest.fresh_op_un () in
+  let op = OpTest.fresh_un_neg () in
   let operand = fresh_expr_int () in
   let expected = Syntax.expr_un_op loc op operand in
   match expected with
@@ -371,7 +371,7 @@ let test_expr_un_op ctxt =
 
 let test_expr_bin_op ctxt =
   let loc = LocTest.gen () in
-  let op = OpTest.fresh_op_bin () in
+  let op = OpTest.fresh_bin_add () in
   let lhs = fresh_expr_int ~value:1l () in
   let rhs = fresh_expr_int ~value:2l () in
   let expected = Syntax.expr_bin_op loc op lhs rhs in
@@ -530,10 +530,34 @@ let assert_pp_expr = PrettyTest.assert_pp Syntax.pp_expr
 let assert_pp_binding = PrettyTest.assert_pp Syntax.pp_binding
 let assert_pp_top = PrettyTest.assert_pp Syntax.pp_top
 
+let test_pp_rune_lit ctxt =
+  let value = 'a' in
+  fresh_rune_lit ~value ()
+    |> assert_pp_rune ~ctxt [sprintf "%c" value]
+
+let test_pp_rune_lit_quote ctxt =
+  fresh_rune_lit ~value:'\'' ()
+    |> assert_pp_rune ~ctxt ["\\'"]
+
+let test_pp_rune_escape ctxt =
+  let value = 42 in
+  fresh_rune_escape ~value ()
+    |> assert_pp_rune ~ctxt ["\\U+2A"]
+
+let test_pp_str_lit ctxt =
+  let value = "foo bar" in
+  fresh_str_lit ~value ()
+    |> assert_pp_str ~ctxt [value]
+
+let test_pp_str_escape ctxt =
+  let value = 42 in
+  fresh_str_escape ~value ()
+    |> assert_pp_str ~ctxt ["\\U+2A"]
+
 let test_pp_expr_bool ctxt =
-  Syntax.expr_bool LocTest.dummy true
+  fresh_expr_bool ~value:true ()
     |> assert_pp_expr ~ctxt ["true"];
-  Syntax.expr_bool LocTest.dummy false
+  fresh_expr_bool ~value:false ()
     |> assert_pp_expr ~ctxt ["false"]
 
 let test_pp_expr_int ctxt =
@@ -561,11 +585,47 @@ let test_pp_expr_rune ctxt =
        ]
 
 let test_pp_expr_string ctxt =
-  let lexeme = "asdf" in
-  let value = [fresh_str_lit ~value:lexeme ()] in
+  let lexeme = "foobar" in
+  let value = [
+    fresh_str_lit ~value:"foo" ();
+    fresh_str_lit ~value:"bar" ();
+  ] in
   fresh_expr_string ~value ()
     |> assert_pp_expr ~ctxt [
          sprintf "%S" lexeme
+       ]
+
+let test_pp_expr_ident ctxt =
+  let id = "testId" in
+  fresh_expr_ident ~id ()
+    |> assert_pp_expr ~ctxt [id]
+
+let test_pp_expr_un_op ctxt =
+  let op = OpTest.fresh_un_log_not () in
+  let operand = fresh_expr_bool ~value:true () in
+  fresh_expr_un_op ~op ~operand ()
+    |> assert_pp_expr ~ctxt ["!true"]
+
+let test_pp_expr_bin_op ctxt =
+  let op = OpTest.fresh_bin_add () in
+  let lhs = fresh_expr_int ~value:1l () in
+  let rhs = fresh_expr_int ~value:2l () in
+  fresh_expr_bin_op ~op ~lhs ~rhs ()
+    |> assert_pp_expr ~ctxt ["1 + 2"]
+
+let test_pp_expr_let ctxt =
+  let id = "testId" in
+  let value = 42l in
+  let binding =
+    let patt = PattTest.fresh_patt_var ~id () in
+    let ty = TypeTest.fresh_ty_constr ~id:Prim.id_int () in
+    let value = fresh_expr_int ~value () in
+    fresh_value_binding ~patt ~ty ~value ()
+  in
+  let scope = fresh_expr_ident ~id () in
+  fresh_expr_let ~binding ~scope ()
+    |> assert_pp_expr ~ctxt [
+         sprintf "let %s: %s = %ld in %s" id Prim.id_int value id
        ]
 
 let test_pp_binding_value_binding ctxt =
@@ -610,14 +670,29 @@ let test_pp_top_val ctxt =
 
 let test_pp =
   "Pretty Printing" >::: [
+    "Runes" >::: [
+      "Literals"                 >:: test_pp_rune_lit;
+      "Escaped Single Quote"     >:: test_pp_rune_lit_quote;
+      "Unicode Escape Sequences" >:: test_pp_rune_escape;
+    ];
+    "Strings" >::: [
+      "Literals"                 >:: test_pp_str_lit;
+      "Unicode Escape Sequences" >:: test_pp_str_escape;
+    ];
     "Expressions" >::: [
-      "Booleans" >:: test_pp_expr_bool;
-      "Integers" >:: test_pp_expr_int;
-      "Longs"    >:: test_pp_expr_long;
-      "Floats"   >:: test_pp_expr_float;
-      "Doubles"  >:: test_pp_expr_double;
-      "Runes"    >:: test_pp_expr_rune;
-      "Strings"  >:: test_pp_expr_string;
+      "Booleans"    >:: test_pp_expr_bool;
+      "Integers"    >:: test_pp_expr_int;
+      "Longs"       >:: test_pp_expr_long;
+      "Floats"      >:: test_pp_expr_float;
+      "Doubles"     >:: test_pp_expr_double;
+      "Runes"       >:: test_pp_expr_rune;
+      "Strings"     >:: test_pp_expr_string;
+      "Identifiers" >:: test_pp_expr_ident;
+      "Operators" >::: [
+        "Unary"  >:: test_pp_expr_un_op;
+        "Binary" >:: test_pp_expr_bin_op;
+      ];
+      "Let Bindings" >:: test_pp_expr_let;
     ];
     "Bindings" >::: [
       "Value Bindings" >:: test_pp_binding_value_binding;

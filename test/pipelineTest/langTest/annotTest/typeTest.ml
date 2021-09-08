@@ -79,43 +79,92 @@ let test_constructors =
 
 (* Equality *)
 
+let types = [
+  Annot.ty_bool;
+  Annot.ty_int;
+  Annot.ty_long;
+  Annot.ty_float;
+  Annot.ty_double;
+  Annot.ty_rune;
+  Annot.ty_string
+]
+
+let printer ty =
+  fprintf str_formatter"%a" Annot.pp_ty ty
+    |> flush_str_formatter
+
 let test_ty_equal_equal ctxt =
-  List.iter (fun ty -> assert_ty_equal ~ctxt ty ty) [
-    Annot.ty_bool;
-    Annot.ty_int; Annot.ty_long;
-    Annot.ty_float; Annot.ty_double;
-    Annot.ty_rune; Annot.ty_string;
-  ]
+  let assert_ty_equal ty = assert_equal ~ctxt ~printer ~cmp:Annot.ty_equal ty ty in
+  List.iter assert_ty_equal types
 
 let test_ty_equal_not_equal ctxt =
-  let rec not_this acc = function
+  let rec not_self acc = function
     | [] -> ()
     | hd :: tl ->
       let assert_not_equal ty =
         let cmp ty ty' = Annot.ty_equal ty ty' |> not in
-        let printer ty =
-          fprintf str_formatter"%a" Annot.pp_ty ty
-            |> flush_str_formatter
-        in
         assert_equal ~ctxt ~cmp ~printer ~msg:"Types are equal" hd ty
       in
       List.iter assert_not_equal acc;
       List.iter assert_not_equal tl;
-      not_this (hd :: acc) tl
+      not_self (hd :: acc) tl
   in
-  not_this [] [
-    Annot.ty_bool;
-    Annot.ty_int; Annot.ty_long;
-    Annot.ty_float; Annot.ty_double;
-    Annot.ty_rune; Annot.ty_string;
-  ]
+  not_self [] types
+
+let assert_is category matcher ty =
+  let msg =
+    fprintf str_formatter "Expected %a to be %s" Annot.pp_ty ty category
+      |> flush_str_formatter
+  in
+  matcher ty
+    |> assert_bool msg
+
+let assert_is_not category matcher ty =
+  let category = "not " ^ category in
+  let matcher ty = not (matcher ty) in
+  assert_is category matcher ty
+
+let assert_ty_is category matcher expected _ =
+  let assert_is = assert_is category matcher in
+  let assert_is_not = assert_is_not category matcher in
+  List.iter assert_is expected;
+  types
+    |> List.filter (fun ty -> not (List.mem ty expected))
+    |> List.iter assert_is_not
+
+let test_ty_is_numeric = assert_ty_is "numeric" Annot.ty_is_numeric [
+  Annot.ty_int;
+  Annot.ty_long;
+  Annot.ty_float;
+  Annot.ty_double;
+]
+
+let test_ty_is_integral = assert_ty_is "integral" Annot.ty_is_integral [
+  Annot.ty_int;
+  Annot.ty_long;
+]
+
+let test_ty_is_floating_point = assert_ty_is "floating point" Annot.ty_is_floating_point [
+  Annot.ty_float;
+  Annot.ty_double;
+]
+
+let test_ty_is_logical = assert_ty_is "logical" Annot.ty_is_logical [
+  Annot.ty_bool;
+]
 
 let test_operations =
   "Operations" >::: [
     "Equality" >::: [
       "Equal"     >:: test_ty_equal_equal;
       "Not Equal" >:: test_ty_equal_not_equal;
-    ]
+    ];
+    "Categorization" >::: [
+      "Numeric"        >:: test_ty_is_numeric;
+      "Integral"       >:: test_ty_is_integral;
+      "Floating Point" >:: test_ty_is_floating_point;
+      "Logical"        >:: test_ty_is_logical;
+    ];
   ]
 
 (* Pretty Printing *)

@@ -10,8 +10,71 @@ open CommonTest
 
 (* Fixtures *)
 
-let fresh_builtin ?ty:(ty = Annot.ty_bool) _ =
+let fresh_builtin_struct_eq ?ty:(ty = Annot.ty_bool) _ =
   Annot.builtin_struct_eq ty
+
+let fresh_builtin_struct_neq ?ty:(ty = Annot.ty_bool) _ =
+  Annot.builtin_struct_neq ty
+
+let fresh_builtin_phys_eq ?ty:(ty = Annot.ty_bool) _ =
+  Annot.builtin_phys_eq ty
+
+let fresh_builtin_phys_neq ?ty:(ty = Annot.ty_bool) _ =
+  Annot.builtin_phys_neq ty
+
+let fresh_builtin_lt ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_lt ty
+
+let fresh_builtin_lte ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_lte ty
+
+let fresh_builtin_gt ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_gt ty
+
+let fresh_builtin_gte ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_gte ty
+
+let fresh_builtin_add ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_add ty
+
+let fresh_builtin_sub ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_sub ty
+
+let fresh_builtin_mul ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_mul ty
+
+let fresh_builtin_div ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_div ty
+
+let fresh_builtin_mod ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_mod ty
+
+let fresh_builtin_exp ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_exp ty
+
+let fresh_builtin_neg ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_neg ty
+
+let fresh_builtin_bit_and ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_bit_and ty
+
+let fresh_builtin_bit_or ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_bit_or ty
+
+let fresh_builtin_bit_not ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_bit_not ty
+
+let fresh_builtin_bit_xor ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_bit_xor ty
+
+let fresh_builtin_log_not _ =
+  Annot.builtin_log_not
+
+let fresh_builtin_promote ?sub:(sub = Annot.ty_int) ?sup:(sup = Annot.ty_long) _ =
+  Annot.builtin_promote sub sup
+
+let fresh_builtin_concat ?ty:(ty = Annot.ty_string) _ =
+  Annot.builtin_concat ty
 
 (* Assertions *)
 
@@ -75,6 +138,28 @@ let assert_builtin_equal ~ctxt expected actual = match (expected, actual) with
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
   | expected, actual -> builtin_not_equal ~ctxt expected actual
 
+
+let assert_limited : (Annot.ty -> bool) -> (Annot.ty -> 'a) -> (Annot.ty -> Annot.builtin) -> (Annot.ty -> Annot.builtin -> unit) -> unit = fun filter ex constr test ->
+  let (valid, invalid) = List.partition filter AnnotUtils.types in
+
+  let assert_valid ty =
+    constr ty
+      |> test ty
+  in
+  List.iter assert_valid valid;
+
+  let assert_invalid ty =
+    let exn = ex ty in
+    assert_raises exn (fun _ ->
+      ignore (constr ty))
+  in
+  List.iter assert_invalid invalid
+
+let assert_numeric = assert_limited Annot.ty_is_numeric (fun ty -> Annot.NotNumeric ty)
+let assert_integral = assert_limited Annot.ty_is_integral (fun ty -> Annot.NotIntegral ty)
+let assert_floating_point = assert_limited Annot.ty_is_floating_point (fun ty -> Annot.NotFloatingPoint ty)
+let assert_string = assert_limited (function Annot.TyString -> true | _ -> false) (fun ty -> Annot.UnsupportedConcatType ty)
+
 (* Tests *)
 
 (* Constructors *)
@@ -133,124 +218,110 @@ let test_builtin_phys_neq ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_lt ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_lt ty in
-  match expected with
-    | Annot.BuiltinLt actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_lt (fun ty expected ->
+    match expected with
+      | Annot.BuiltinLt actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
 
 let test_builtin_lte ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_lte ty in
-  match expected with
-    | Annot.BuiltinLte actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_lte (fun ty expected ->
+    match expected with
+      | Annot.BuiltinLte actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_gt ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_gt ty in
-  match expected with
-    | Annot.BuiltinGt actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_gt (fun ty expected ->
+    match expected with
+      | Annot.BuiltinGt actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+        | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_gte ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_gte ty in
-  match expected with
-    | Annot.BuiltinGte actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_gte (fun ty expected ->
+    match expected with
+      | Annot.BuiltinGte actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_add ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_add ty in
-  match expected with
-    | Annot.BuiltinAdd actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_add (fun ty expected ->
+    match expected with
+      | Annot.BuiltinAdd actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_sub ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_sub ty in
-  match expected with
-    | Annot.BuiltinSub actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_sub (fun ty expected ->
+    match expected with
+      | Annot.BuiltinSub actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_mul ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_mul ty in
-  match expected with
-    | Annot.BuiltinMul actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_mul (fun ty expected ->
+    match expected with
+      | Annot.BuiltinMul actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_div ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_div ty in
-  match expected with
-    | Annot.BuiltinDiv actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_div (fun ty expected ->
+    match expected with
+      | Annot.BuiltinDiv actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_mod ctxt =
-  let ty = Annot.ty_int in
-  let expected = Annot.builtin_mod ty in
-  match expected with
-    | Annot.BuiltinMod actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Annot.builtin_mod (fun ty expected ->
+    match expected with
+      | Annot.BuiltinMod actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_exp ctxt =
-  let ty = Annot.ty_float in
-  let expected = Annot.builtin_exp ty in
-  match expected with
-    | Annot.BuiltinExp actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_floating_point Annot.builtin_exp (fun ty expected ->
+    match expected with
+      | Annot.BuiltinExp actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_neg ctxt =
-  let ty = Annot.ty_float in
-  let expected = Annot.builtin_neg ty in
-  match expected with
-    | Annot.BuiltinNeg actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_numeric Annot.builtin_neg (fun ty expected ->
+    match expected with
+      | Annot.BuiltinNeg actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_and ctxt =
-  let ty = Annot.ty_float in
-  let expected = Annot.builtin_bit_and ty in
-  match expected with
-    | Annot.BuiltinBitAnd actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Annot.builtin_bit_and (fun ty expected ->
+    match expected with
+      | Annot.BuiltinBitAnd actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_or ctxt =
-  let ty = Annot.ty_float in
-  let expected = Annot.builtin_bit_or ty in
-  match expected with
-    | Annot.BuiltinBitOr actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Annot.builtin_bit_or (fun ty expected ->
+    match expected with
+      | Annot.BuiltinBitOr actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_not ctxt =
-  let ty = Annot.ty_float in
-  let expected = Annot.builtin_bit_not ty in
-  match expected with
-    | Annot.BuiltinBitNot actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Annot.builtin_bit_not (fun ty expected ->
+    match expected with
+      | Annot.BuiltinBitNot actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_bit_xor ctxt =
-  let ty = Annot.ty_float in
-  let expected = Annot.builtin_bit_xor ty in
-  match expected with
-    | Annot.BuiltinBitXor actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_integral Annot.builtin_bit_xor (fun ty expected ->
+    match expected with
+      | Annot.BuiltinBitXor actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_builtin_log_not ctxt =
   let expected = Annot.builtin_log_not in
@@ -259,22 +330,29 @@ let test_builtin_log_not ctxt =
     | actual -> builtin_not_equal ~ctxt expected actual
 
 let test_builtin_promote ctxt =
-  let sub = Annot.ty_int in
-  let sup = Annot.ty_long in
-  let expected = Annot.builtin_promote sub sup in
-  match expected with
-    | Annot.BuiltinPromote actual ->
-      TypeTest.assert_ty_equal ~ctxt sub actual.sub;
-      TypeTest.assert_ty_equal ~ctxt sup actual.sup;
-    | actual -> builtin_not_equal ~ctxt expected actual
+  List.iter (fun sub ->
+    List.iter (fun sup ->
+      if List.mem (sub, sup) AnnotUtils.valid_promotions
+      then
+        let expected = Annot.builtin_promote sub sup in
+        match expected with
+          | Annot.BuiltinPromote actual ->
+            TypeTest.assert_ty_equal ~ctxt sub actual.sub;
+            TypeTest.assert_ty_equal ~ctxt sup actual.sup;
+          | actual -> builtin_not_equal ~ctxt expected actual
+      else
+        let exn = Annot.UnsupportedPromotion (sub, sup) in
+        assert_raises exn (fun _ ->
+          Annot.builtin_promote sub sup)
+    ) AnnotUtils.types
+  ) AnnotUtils.types
 
 let test_builtin_concat ctxt =
-  let ty = Annot.ty_string in
-  let expected = Annot.builtin_concat ty in
-  match expected with
-    | Annot.BuiltinConcat actual ->
-      TypeTest.assert_ty_equal ~ctxt ty actual.ty
-    | actual -> builtin_not_equal ~ctxt expected actual
+  assert_string Annot.builtin_concat (fun ty expected ->
+    match expected with
+      | Annot.BuiltinConcat actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
 
 let test_constructors =
   "Constructors" >::: [
@@ -344,7 +422,7 @@ let test_pp_struct_eq ctxt =
        ]
 
 let test_pp_struct_neq ctxt =
-  Annot.builtin_struct_eq Annot.ty_bool
+  Annot.builtin_struct_neq Annot.ty_bool
     |> assert_pp_builtin ~ctxt [
          sprintf "structNeq[%s]" Prim.id_bool
        ]
@@ -356,7 +434,7 @@ let test_pp_phys_eq ctxt =
        ]
 
 let test_pp_phys_neq ctxt =
-  Annot.builtin_phys_eq Annot.ty_bool
+  Annot.builtin_phys_neq Annot.ty_bool
     |> assert_pp_builtin ~ctxt [
          sprintf "physNeq[%s]" Prim.id_bool
        ]
@@ -446,7 +524,7 @@ let test_pp_bit_not ctxt =
        ]
 
 let test_pp_bit_xor ctxt =
-  Annot.builtin_bit_xor Annot.ty_bool
+  Annot.builtin_bit_xor Annot.ty_int
     |> assert_pp_builtin ~ctxt [
          sprintf "bitXor[%s]" Prim.id_bool
        ]
