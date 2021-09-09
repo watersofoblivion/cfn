@@ -77,8 +77,8 @@ let rec pp_expr fmt = function
   | ExprAtom expr -> pp_atom fmt expr.atom
 
 and pp_expr_builtin fmt fn args =
-  let pp_sep fmt _ = fprintf fmt ", " in
-  fprintf fmt "%a(%a)" Builtin.pp_builtin fn (pp_print_list ~pp_sep pp_atom) args
+  let pp_sep fmt _ = fprintf fmt " " in
+  fprintf fmt "%a %a" Builtin.pp_builtin fn (pp_print_list ~pp_sep pp_atom) args
 
 (* Bindings *)
 
@@ -93,7 +93,7 @@ let rec pp_block fmt = function
   | BlockExpr block -> pp_expr fmt block.expr
 
 and pp_block_let fmt binding scope =
-  fprintf fmt "let %a = %a" pp_binding binding pp_block scope
+  fprintf fmt "let %a in %a" pp_binding binding pp_block scope
 
 (* Top-Level Expressions *)
 

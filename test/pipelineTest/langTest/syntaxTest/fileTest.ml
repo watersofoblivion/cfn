@@ -57,18 +57,24 @@ let imports =
 let top_let =
   let binding =
     let patt = PattTest.fresh_patt_var ~id:let_lexeme () in
-    let ty = TypeTest.fresh_ty_constr ~id:let_ty () in
+    let ty =
+      let id = SymTest.fresh_sym ~id:let_ty () in
+      TypeTest.fresh_ty_constr ~id ()
+    in
     let value = AstTest.fresh_expr_bool ~value:let_value () in
-    AstTest.fresh_value_binding ~patt ~ty ~value ()
+    AstTest.fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
   AstTest.fresh_top_let ~binding ()
 
 let top_val =
   let binding =
     let patt = PattTest.fresh_patt_var ~id:val_lexeme () in
-    let ty = TypeTest.fresh_ty_constr ~id:val_ty () in
+    let ty =
+      let id = SymTest.fresh_sym ~id:val_ty () in
+      TypeTest.fresh_ty_constr ~id ()
+    in
     let value = AstTest.fresh_expr_int ~value:val_value () in
-    AstTest.fresh_value_binding ~patt ~ty ~value ()
+    AstTest.fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
   AstTest.fresh_top_val ~binding ()
 

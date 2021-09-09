@@ -8,10 +8,8 @@ open CommonTest
 
 (* Fixtures *)
 
-let fresh_ty_constr ?loc:(loc = LocTest.gen ()) ?seq:(seq = Sym.seq ()) ?id:(id = Prim.id_bool) _ =
-  seq
-    |> Sym.gen ~id
-    |> Syntax.ty_constr loc
+let fresh_ty_constr ?loc:(loc = LocTest.gen ()) ?id:(id = SymTest.fresh_sym ()) _ =
+  Syntax.ty_constr loc id
 
 (* Utilities *)
 
@@ -31,7 +29,7 @@ let assert_ty_equal ~ctxt expected actual = match (expected, actual) with
 
 let test_ty_constr ctxt =
   let loc = LocTest.gen () in
-  let id = () |> Sym.seq |> Sym.gen in
+  let id = SymTest.fresh_sym () in
   let expected = Syntax.ty_constr loc id in
   match expected with
     | Syntax.TyConstr actual ->
@@ -51,13 +49,26 @@ let printer ty =
     |> flush_str_formatter
 
 let test_ty_equal_equal ctxt =
-  let ty = fresh_ty_constr ~id:Prim.id_bool () in
-  let ty' = fresh_ty_constr ~id:Prim.id_bool () in
+  let ty =
+    let id = () |> Sym.seq |> Sym.gen ~id:Prim.id_bool in
+    fresh_ty_constr ~id ()
+  in
+  let ty' =
+    let id = () |> Sym.seq |> Sym.gen ~id:Prim.id_bool in
+    fresh_ty_constr ~id ()
+  in
   assert_equal ~ctxt ~cmp:Syntax.ty_equal ~printer ~msg:"Types are not equal" ty ty'
 
 let test_ty_equal_not_equal ctxt =
-  let ty = fresh_ty_constr ~id:Prim.id_bool () in
-  let ty' = fresh_ty_constr ~id:Prim.id_int () in
+  let seq = Sym.seq () in
+  let ty =
+    let id = Sym.gen seq ~id:Prim.id_bool in
+    fresh_ty_constr ~id ()
+  in
+  let ty' =
+    let id = Sym.gen seq ~id:Prim.id_int in
+    fresh_ty_constr ~id ()
+  in
   let cmp ty ty' = not (Syntax.ty_equal ty ty') in
   assert_equal ~ctxt ~cmp ~printer ~msg:"Types are equal" ty ty'
 
@@ -85,7 +96,8 @@ let test_loc =
 let assert_pp_ty = PrettyTest.assert_pp Syntax.pp_ty
 
 let test_pp_ty_constr ctxt =
-  fresh_ty_constr ~id:Prim.id_bool ()
+  let id = SymTest.fresh_sym ~id:Prim.id_bool () in
+  fresh_ty_constr ~id ()
     |> assert_pp_ty ~ctxt [Prim.id_bool]
 
 let test_pp =

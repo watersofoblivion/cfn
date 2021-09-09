@@ -126,32 +126,32 @@ let pp_builtin fmt builtin =
   let pp id tys =
     let pp_sep fmt _ = fprintf fmt ", " in
     match tys with
-      | [] -> fprintf fmt "%s" id
-      | _ -> fprintf fmt "%s[%a]" id (pp_print_list ~pp_sep Type.pp_ty) tys
+      | [] -> fprintf fmt "_.%s" id
+      | _ -> fprintf fmt "_.%s[%a]" id (pp_print_list ~pp_sep Type.pp_ty) tys
   in
   match builtin with
-    | BuiltinStructEq builtin -> pp "structEq" [builtin.ty]
-    | BuiltinStructNeq builtin -> pp "structNeq" [builtin.ty]
-    | BuiltinPhysEq builtin -> pp "physEq" [builtin.ty]
-    | BuiltinPhysNeq builtin -> pp "physNeq" [builtin.ty]
-    | BuiltinLt builtin -> pp "lt" [builtin.ty]
-    | BuiltinLte builtin -> pp "lte" [builtin.ty]
-    | BuiltinGt builtin -> pp "gt" [builtin.ty]
-    | BuiltinGte builtin -> pp "gte" [builtin.ty]
-    | BuiltinAdd builtin -> pp "add" [builtin.ty]
-    | BuiltinSub builtin -> pp "sub" [builtin.ty]
-    | BuiltinMul builtin -> pp "mul" [builtin.ty]
-    | BuiltinDiv builtin -> pp "div" [builtin.ty]
-    | BuiltinMod builtin -> pp "mod" [builtin.ty]
-    | BuiltinExp builtin -> pp "exp" [builtin.ty]
-    | BuiltinNeg builtin -> pp "neg" [builtin.ty]
-    | BuiltinBitAnd builtin -> pp "bitAnd" [builtin.ty]
-    | BuiltinBitOr builtin -> pp "bitOr" [builtin.ty]
-    | BuiltinBitNot builtin -> pp "bitNot" [builtin.ty]
-    | BuiltinBitXor builtin -> pp "bitXor" [builtin.ty]
-    | BuiltinLogNot -> pp "logNot" []
-    | BuiltinPromote builtin -> pp "promote" [builtin.sub; builtin.sup]
-    | BuiltinConcat builtin -> pp "concat" [builtin.ty]
+    | BuiltinStructEq builtin -> pp "StructEq" [builtin.ty]
+    | BuiltinStructNeq builtin -> pp "StructNeq" [builtin.ty]
+    | BuiltinPhysEq builtin -> pp "PhysEq" [builtin.ty]
+    | BuiltinPhysNeq builtin -> pp "PhysNeq" [builtin.ty]
+    | BuiltinLt builtin -> pp "Lt" [builtin.ty]
+    | BuiltinLte builtin -> pp "Lte" [builtin.ty]
+    | BuiltinGt builtin -> pp "Gt" [builtin.ty]
+    | BuiltinGte builtin -> pp "Gte" [builtin.ty]
+    | BuiltinAdd builtin -> pp "Add" [builtin.ty]
+    | BuiltinSub builtin -> pp "Sub" [builtin.ty]
+    | BuiltinMul builtin -> pp "Mul" [builtin.ty]
+    | BuiltinDiv builtin -> pp "Div" [builtin.ty]
+    | BuiltinMod builtin -> pp "Mod" [builtin.ty]
+    | BuiltinExp builtin -> pp "Exp" [builtin.ty]
+    | BuiltinNeg builtin -> pp "Neg" [builtin.ty]
+    | BuiltinBitAnd builtin -> pp "BitAnd" [builtin.ty]
+    | BuiltinBitOr builtin -> pp "BitOr" [builtin.ty]
+    | BuiltinBitNot builtin -> pp "BitNot" [builtin.ty]
+    | BuiltinBitXor builtin -> pp "BitXor" [builtin.ty]
+    | BuiltinLogNot -> pp "LogNot" []
+    | BuiltinPromote builtin -> pp "Promote" [builtin.sub; builtin.sup]
+    | BuiltinConcat builtin -> pp "Concat" [builtin.ty]
 
 (* Type Checking *)
 

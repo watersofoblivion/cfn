@@ -21,9 +21,9 @@ val suite : test
 
 (** {3 Types} *)
 
-val fresh_ty_constr : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.ty
-(** [fresh_ty_constr ?loc ?seq ?id ()] constructs a fresh type constructor at
-    location [loc]. *)
+val fresh_ty_constr : ?loc:Loc.t -> ?id:Sym.t -> unit -> Syntax.ty
+(** [fresh_ty_constr ?loc ?id ()] constructs a fresh type constructor at
+    location [loc] with the constructor [id]. *)
 
 (** {3 Operators} *)
 

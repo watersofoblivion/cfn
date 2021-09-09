@@ -325,7 +325,7 @@ let test_pp_expr_builtin ctxt =
     fresh_atom_bool ();
     fresh_atom_int ();
   ] in
-  let pp_sep fmt _ = fprintf fmt "@ " in
+  let pp_sep fmt _ = fprintf fmt " " in
   fresh_expr_builtin ~fn ~args ()
     |> assert_pp_expr ~ctxt [
          fprintf str_formatter "%a %a" Ir.pp_builtin fn (pp_print_list ~pp_sep Ir.pp_atom) args
@@ -510,7 +510,7 @@ let test_check_expr_builtin_var_mismatched_types _ =
   let fn = BuiltinTest.fresh_builtin_concat ~ty:Ir.ty_string () in
   let args = [fresh_atom_string (); fresh_atom_int (); fresh_atom_string ()] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Ir.MismatchedTypes (Ir.ty_bool, Ir.ty_string) in
+  let exn = Ir.MismatchedTypes (Ir.ty_int, Ir.ty_string) in
   assert_raises exn (fun _ ->
     Ir.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))

@@ -418,131 +418,131 @@ let test_pp_arity_var ctxt =
 let test_pp_struct_eq ctxt =
   Mono.builtin_struct_eq Mono.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "structEq[%s]" Prim.id_bool
+         sprintf "_.StructEq[%s]" Prim.id_bool
        ]
 
 let test_pp_struct_neq ctxt =
   Mono.builtin_struct_neq Mono.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "structNeq[%s]" Prim.id_bool
+         sprintf "_.StructNeq[%s]" Prim.id_bool
        ]
 
 let test_pp_phys_eq ctxt =
   Mono.builtin_phys_eq Mono.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "physEq[%s]" Prim.id_bool
+         sprintf "_.PhysEq[%s]" Prim.id_bool
        ]
 
 let test_pp_phys_neq ctxt =
   Mono.builtin_phys_neq Mono.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "physNeq[%s]" Prim.id_bool
+         sprintf "_.PhysNeq[%s]" Prim.id_bool
        ]
 
 let test_pp_lt ctxt =
   Mono.builtin_lt Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "lt[%s]" Prim.id_int
+         sprintf "_.Lt[%s]" Prim.id_int
        ]
 
 let test_pp_lte ctxt =
   Mono.builtin_lte Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "lte[%s]" Prim.id_int
+         sprintf "_.Lte[%s]" Prim.id_int
        ]
 
 let test_pp_gt ctxt =
   Mono.builtin_gt Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "gt[%s]" Prim.id_int
+         sprintf "_.Gt[%s]" Prim.id_int
        ]
 
 let test_pp_gte ctxt =
   Mono.builtin_gte Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "gte[%s]" Prim.id_int
+         sprintf "_.Gte[%s]" Prim.id_int
        ]
 
 let test_pp_add ctxt =
   Mono.builtin_add Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "add[%s]" Prim.id_int
+         sprintf "_.Add[%s]" Prim.id_int
        ]
 
 let test_pp_sub ctxt =
   Mono.builtin_sub Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "sub[%s]" Prim.id_int
+         sprintf "_.Sub[%s]" Prim.id_int
        ]
 
 let test_pp_mul ctxt =
   Mono.builtin_mul Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "mul[%s]" Prim.id_int
+         sprintf "_.Mul[%s]" Prim.id_int
        ]
 
 let test_pp_div ctxt =
   Mono.builtin_div Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "div[%s]" Prim.id_int
+         sprintf "_.Div[%s]" Prim.id_int
        ]
 
 let test_pp_mod ctxt =
   Mono.builtin_mod Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "mod[%s]" Prim.id_int
+         sprintf "_.Mod[%s]" Prim.id_int
        ]
 
 let test_pp_exp ctxt =
   Mono.builtin_exp Mono.ty_float
     |> assert_pp_builtin ~ctxt [
-         sprintf "exp[%s]" Prim.id_float
+         sprintf "_.Exp[%s]" Prim.id_float
        ]
 
 let test_pp_neg ctxt =
   Mono.builtin_neg Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "neg[%s]" Prim.id_int
+         sprintf "_.Neg[%s]" Prim.id_int
        ]
 
 let test_pp_bit_and ctxt =
   Mono.builtin_bit_and Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitAnd[%s]" Prim.id_int
+         sprintf "_.BitAnd[%s]" Prim.id_int
        ]
 
 let test_pp_bit_or ctxt =
   Mono.builtin_bit_or Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitOr[%s]" Prim.id_int
+         sprintf "_.BitOr[%s]" Prim.id_int
        ]
 
 let test_pp_bit_not ctxt =
   Mono.builtin_bit_not Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitNot[%s]" Prim.id_int
+         sprintf "_.BitNot[%s]" Prim.id_int
        ]
 
 let test_pp_bit_xor ctxt =
   Mono.builtin_bit_xor Mono.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitXor[%s]" Prim.id_bool
+         sprintf "_.BitXor[%s]" Prim.id_int
        ]
 
 let test_pp_log_not ctxt =
   Mono.builtin_log_not
-    |> assert_pp_builtin ~ctxt ["logNot"]
+    |> assert_pp_builtin ~ctxt ["_.LogNot"]
 
 let test_pp_promote ctxt =
   Mono.builtin_promote Mono.ty_int Mono.ty_double
     |> assert_pp_builtin ~ctxt [
-         sprintf "logNot[%s, %s]" Prim.id_int Prim.id_double
+         sprintf "_.Promote[%s, %s]" Prim.id_int Prim.id_double
        ]
 
 let test_pp_concat ctxt =
   Mono.builtin_concat Mono.ty_string
     |> assert_pp_builtin ~ctxt [
-         sprintf "concat[%s]" Prim.id_string
+         sprintf "_.Concat[%s]" Prim.id_string
        ]
 
 let test_pp =
@@ -707,7 +707,7 @@ let test_check_neg ctxt =
   let env = EnvTest.fresh () in
   let ty = Mono.ty_int in
   let builtin = Mono.builtin_neg ty in
-  Mono.arity_fixed [ty; ty] ty
+  Mono.arity_fixed [ty] ty
     |> assert_arity_equal ~ctxt
     |> Mono.check_builtin env builtin
 

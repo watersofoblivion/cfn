@@ -344,7 +344,7 @@ let test_pp_import_from ctxt =
   in
   let pkgs =
     Syntax.pkgs LocTest.dummy [
-      fresh_alias ~pkg ~local ();
+      fresh_alias ~pkg ~alias:true ~local ();
       fresh_alias ~pkg:pkg' ()
     ]
   in
@@ -367,7 +367,7 @@ let test_pp_import ctxt =
 
   let pkgs =
     Syntax.pkgs LocTest.dummy [
-      fresh_alias ~pkg ~local ();
+      fresh_alias ~pkg ~alias:true ~local ();
       fresh_alias ~pkg:pkg' ()
     ]
   in

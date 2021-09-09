@@ -252,16 +252,19 @@ let test_pp_expr_rune ctxt =
   fresh_expr_rune ~value:'a' ()
     |> assert_pp_expr ~ctxt ["'a'"];
   fresh_expr_rune ~value:'\'' ()
-    |> assert_pp_expr ~ctxt ["'\\'"]
+    |> assert_pp_expr ~ctxt ["'\\''"]
 
 let test_pp_expr_string ctxt =
   fresh_expr_string ~value:"foo bar" ()
     |> assert_pp_expr ~ctxt ["\"foo bar\""]
 
 let test_pp_expr_ident ctxt =
-  let id = SymTest.fresh_sym ~id:"testId" () in
+  let id = SymTest.fresh_sym () in
   fresh_expr_ident ~id ()
-    |> assert_pp_expr ~ctxt ["testId"]
+    |> assert_pp_expr ~ctxt [
+         fprintf str_formatter "%a" Sym.pp id
+           |> flush_str_formatter
+       ]
 
 let test_pp_expr_builtin ctxt =
   let fn = BuiltinTest.fresh_builtin_add ~ty:Annot.ty_int () in
@@ -269,49 +272,42 @@ let test_pp_expr_builtin ctxt =
     fresh_expr_int ~value:1l ();
     fresh_expr_int ~value:2l ()
   ] in
+  let pp_sep fmt _ = fprintf fmt " " in
   fresh_expr_builtin ~fn ~args ()
-    |> assert_pp_expr ~ctxt [sprintf "add[%s] 1 2" Prim.id_int]
+    |> assert_pp_expr ~ctxt [
+         fprintf str_formatter "%a %a" Annot.pp_builtin fn (pp_print_list ~pp_sep Annot.pp_expr) args
+           |> flush_str_formatter
+       ]
 
 let test_pp_expr_let ctxt =
-  let ident = "testId" in
-  let id = SymTest.fresh_sym ~id:ident () in
-  let value = 42l in
-  let binding =
-    let patt =  PattTest.fresh_patt_var ~id () in
-    let ty = Annot.ty_int in
-    let value = fresh_expr_int ~value () in
-    fresh_binding ~patt ~ty ~value ()
-  in
+  let id = SymTest.fresh_sym () in
+  let binding = fresh_binding () in
   let scope = fresh_expr_ident ~id () in
   fresh_expr_let ~binding ~scope ()
-    |> assert_pp_expr ~ctxt [sprintf "let %s: %s = %ld in %s" ident Prim.id_int value ident]
+    |> assert_pp_expr ~ctxt [
+         fprintf str_formatter "let %a in %a" Annot.pp_binding binding Sym.pp id
+           |> flush_str_formatter
+       ]
 
 let test_pp_binding ctxt =
-  let id = "testId" in
+  let id = SymTest.fresh_sym () in
   let v = 42l in
-  let patt =
-    let id = SymTest.fresh_sym ~id () in
-    PattTest.fresh_patt_var ~id ()
-  in
+  let patt = PattTest.fresh_patt_var ~id () in
   let ty = Annot.ty_int in
   let value = fresh_expr_int ~value:v () in
   fresh_binding ~patt ~ty ~value ()
-    |> assert_pp_binding ~ctxt [sprintf "%s: %s = %ld" id Prim.id_int v]
+    |> assert_pp_binding ~ctxt [
+         fprintf str_formatter "%a: %s = %ld" Sym.pp id Prim.id_int v
+           |> flush_str_formatter
+       ]
 
 let test_pp_top_let ctxt =
-  let id = "testId" in
-  let value = 42l in
-  let binding =
-    let patt =
-      let id = SymTest.fresh_sym ~id () in
-      PattTest.fresh_patt_var ~id ()
-    in
-    let ty = Annot.ty_int in
-    let value = fresh_expr_int ~value () in
-    fresh_binding ~patt ~ty ~value ()
-  in
+  let binding = fresh_binding () in
   fresh_top_let ~binding ()
-    |> assert_pp_top ~ctxt [sprintf "let %s: %s = %ld" id Prim.id_int value]
+    |> assert_pp_top ~ctxt [
+         fprintf str_formatter "let %a" Annot.pp_binding binding
+           |> flush_str_formatter
+       ]
 
 let test_pp =
   "Pretty Printing" >::: [
@@ -386,7 +382,7 @@ let test_check_expr_builtin_var ctxt =
     fresh_expr_string ()
   ] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  TypeTest.assert_ty_equal ~ctxt Annot.ty_int
+  TypeTest.assert_ty_equal ~ctxt Annot.ty_string
     |> Annot.check_expr env expr
 
 let test_check_expr_builtin_invalid_arity _ =
@@ -422,7 +418,7 @@ let test_check_expr_builtin_var_mismatched_types _ =
     fresh_expr_string ();
   ] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Annot.MismatchedTypes (bad, Annot.ty_long, Annot.ty_int) in
+  let exn = Annot.MismatchedTypes (bad, Annot.ty_long, Annot.ty_string) in
   assert_raises exn (fun _ ->
     Annot.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))

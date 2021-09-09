@@ -418,131 +418,131 @@ let test_pp_arity_var ctxt =
 let test_pp_struct_eq ctxt =
   Annot.builtin_struct_eq Annot.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "structEq[%s]" Prim.id_bool
+         sprintf "_.StructEq[%s]" Prim.id_bool
        ]
 
 let test_pp_struct_neq ctxt =
   Annot.builtin_struct_neq Annot.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "structNeq[%s]" Prim.id_bool
+         sprintf "_.StructNeq[%s]" Prim.id_bool
        ]
 
 let test_pp_phys_eq ctxt =
   Annot.builtin_phys_eq Annot.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "physEq[%s]" Prim.id_bool
+         sprintf "_.PhysEq[%s]" Prim.id_bool
        ]
 
 let test_pp_phys_neq ctxt =
   Annot.builtin_phys_neq Annot.ty_bool
     |> assert_pp_builtin ~ctxt [
-         sprintf "physNeq[%s]" Prim.id_bool
+         sprintf "_.PhysNeq[%s]" Prim.id_bool
        ]
 
 let test_pp_lt ctxt =
   Annot.builtin_lt Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "lt[%s]" Prim.id_int
+         sprintf "_.Lt[%s]" Prim.id_int
        ]
 
 let test_pp_lte ctxt =
   Annot.builtin_lte Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "lte[%s]" Prim.id_int
+         sprintf "_.Lte[%s]" Prim.id_int
        ]
 
 let test_pp_gt ctxt =
   Annot.builtin_gt Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "gt[%s]" Prim.id_int
+         sprintf "_.Gt[%s]" Prim.id_int
        ]
 
 let test_pp_gte ctxt =
   Annot.builtin_gte Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "gte[%s]" Prim.id_int
+         sprintf "_.Gte[%s]" Prim.id_int
        ]
 
 let test_pp_add ctxt =
   Annot.builtin_add Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "add[%s]" Prim.id_int
+         sprintf "_.Add[%s]" Prim.id_int
        ]
 
 let test_pp_sub ctxt =
   Annot.builtin_sub Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "sub[%s]" Prim.id_int
+         sprintf "_.Sub[%s]" Prim.id_int
        ]
 
 let test_pp_mul ctxt =
   Annot.builtin_mul Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "mul[%s]" Prim.id_int
+         sprintf "_.Mul[%s]" Prim.id_int
        ]
 
 let test_pp_div ctxt =
   Annot.builtin_div Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "div[%s]" Prim.id_int
+         sprintf "_.Div[%s]" Prim.id_int
        ]
 
 let test_pp_mod ctxt =
   Annot.builtin_mod Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "mod[%s]" Prim.id_int
+         sprintf "_.Mod[%s]" Prim.id_int
        ]
 
 let test_pp_exp ctxt =
   Annot.builtin_exp Annot.ty_float
     |> assert_pp_builtin ~ctxt [
-         sprintf "exp[%s]" Prim.id_float
+         sprintf "_.Exp[%s]" Prim.id_float
        ]
 
 let test_pp_neg ctxt =
   Annot.builtin_neg Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "neg[%s]" Prim.id_int
+         sprintf "_.Neg[%s]" Prim.id_int
        ]
 
 let test_pp_bit_and ctxt =
   Annot.builtin_bit_and Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitAnd[%s]" Prim.id_int
+         sprintf "_.BitAnd[%s]" Prim.id_int
        ]
 
 let test_pp_bit_or ctxt =
   Annot.builtin_bit_or Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitOr[%s]" Prim.id_int
+         sprintf "_.BitOr[%s]" Prim.id_int
        ]
 
 let test_pp_bit_not ctxt =
   Annot.builtin_bit_not Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitNot[%s]" Prim.id_int
+         sprintf "_.BitNot[%s]" Prim.id_int
        ]
 
 let test_pp_bit_xor ctxt =
   Annot.builtin_bit_xor Annot.ty_int
     |> assert_pp_builtin ~ctxt [
-         sprintf "bitXor[%s]" Prim.id_bool
+         sprintf "_.BitXor[%s]" Prim.id_int
        ]
 
 let test_pp_log_not ctxt =
   Annot.builtin_log_not
-    |> assert_pp_builtin ~ctxt ["logNot"]
+    |> assert_pp_builtin ~ctxt ["_.LogNot"]
 
 let test_pp_promote ctxt =
   Annot.builtin_promote Annot.ty_int Annot.ty_double
     |> assert_pp_builtin ~ctxt [
-         sprintf "logNot[%s, %s]" Prim.id_int Prim.id_double
+         sprintf "_.Promote[%s, %s]" Prim.id_int Prim.id_double
        ]
 
 let test_pp_concat ctxt =
   Annot.builtin_concat Annot.ty_string
     |> assert_pp_builtin ~ctxt [
-         sprintf "concat[%s]" Prim.id_string
+         sprintf "_.Concat[%s]" Prim.id_string
        ]
 
 let test_pp =
@@ -707,7 +707,7 @@ let test_check_neg ctxt =
   let env = EnvTest.fresh () in
   let ty = Annot.ty_int in
   let builtin = Annot.builtin_neg ty in
-  Annot.arity_fixed [ty; ty] ty
+  Annot.arity_fixed [ty] ty
     |> assert_arity_equal ~ctxt
     |> Annot.check_builtin env builtin
 

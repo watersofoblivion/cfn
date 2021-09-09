@@ -1,4 +1,5 @@
 %{
+  [@@@coverage exclude_file]
   open Common
 
   let make_ty_constr (start_loc, end_loc) constr env kontinue =
