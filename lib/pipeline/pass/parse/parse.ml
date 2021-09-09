@@ -141,6 +141,24 @@ let parse_ty lexbuf =
     |> Parser.Incremental.ty_test
     |> parse_main lexbuf
 
+let parse_un lexbuf =
+  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
+  start_pos
+    |> Parser.Incremental.un_test
+    |> parse_main lexbuf
+
+let parse_bin lexbuf =
+  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
+  start_pos
+    |> Parser.Incremental.bin_test
+    |> parse_main lexbuf
+
+let parse_patt lexbuf =
+  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
+  start_pos
+    |> Parser.Incremental.patt_test
+    |> parse_main lexbuf
+
 let parse_lit lexbuf =
   let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
@@ -153,16 +171,22 @@ let parse_ident lexbuf =
     |> Parser.Incremental.ident_test
     |> parse_main lexbuf
 
+let parse_atom lexbuf =
+  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
+  start_pos
+    |> Parser.Incremental.atom_test
+    |> parse_main lexbuf
+
 let parse_expr lexbuf =
   let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.expr_test
     |> parse_main lexbuf
 
-let parse_patt lexbuf =
+let parse_block lexbuf =
   let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
-    |> Parser.Incremental.patt_test
+    |> Parser.Incremental.block_test
     |> parse_main lexbuf
 
 let parse_binding lexbuf =

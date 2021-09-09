@@ -38,17 +38,29 @@ val parse_annot : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syn
 val parse_ty : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.ty -> 'a) -> 'a
 (** [parse_ty lexbuf env kontinue] parses a type constructor. *)
 
+val parse_un : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.un -> 'a) -> 'a
+(** [parse_un lexbuf env kontinue] parses a unary operator. *)
+
+val parse_bin : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.bin -> 'a) -> 'a
+(** [parse_bin lexbuf env kontinue] parses a binary operator. *)
+
+val parse_patt : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.patt -> 'a) -> 'a
+(** [parse_patt lexbuf env kontinue] parses a pattern. *)
+
 val parse_lit : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
 (** [parse_lit lexbuf env kontinue] parses a literal value. *)
 
 val parse_ident : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
 (** [parse_ident lexbuf env kontinue] parses an identifier. *)
 
+val parse_atom : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
+(** [parse_atom lexbuf env kontinue] parses an atomic expression. *)
+
 val parse_expr : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
 (** [parse_expr lexbuf env kontinue] parses an expression. *)
 
-val parse_patt : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.patt -> 'a) -> 'a
-(** [parse_patt lexbuf env kontinue] parses a pattern. *)
+val parse_block : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
+(** [parse_block lexbuf env kontinue] parses an block expression. *)
 
 val parse_binding : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.binding -> 'a) -> 'a
 (** [parse_binding lexbuf env kontinue] parses a binding. *)

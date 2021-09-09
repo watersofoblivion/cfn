@@ -27,6 +27,8 @@ let new_line lex lexbuf =
 
 (* Punctuation *)
 
+let punct_lparen = LPAREN
+let punct_rparen = RPAREN
 let punct_pipe = PIPE
 let punct_arrow = ARROW
 let punct_colon = COLON
@@ -35,12 +37,39 @@ let punct_ground = GROUND
 let punct_squote = SQUOTE
 let punct_dquote = DQUOTE
 
+(* Operators *)
+
+let op_un_neg = UN_NEG
+let op_un_log_not = UN_LOG_NOT
+let op_un_bit_not = UN_BIT_NOT
+
+let op_bin_struct_eq = BIN_STRUCT_EQ
+let op_bin_struct_neq = BIN_STRUCT_NEQ
+let op_bin_phys_eq = BIN_PHYS_EQ
+let op_bin_phys_neq = BIN_PHYS_NEQ
+let op_bin_lt = BIN_LT
+let op_bin_lte = BIN_LTE
+let op_bin_gt = BIN_GT
+let op_bin_gte = BIN_GTE
+let op_bin_add = BIN_ADD
+(* let op_bin_sub = BIN_SUB *) (* Overload of UN_NEG *)
+let op_bin_mul = BIN_MUL
+let op_bin_div = BIN_DIV
+let op_bin_mod = BIN_MOD
+let op_bin_exp = BIN_EXP
+let op_bin_log_and = BIN_LOG_AND
+let op_bin_log_or = BIN_LOG_OR
+let op_bin_bit_and = BIN_BIT_AND
+(* let op_bin_bit_or = BIN_BIT_OR *) (* Overload of PIPE *)
+let op_bin_bit_xor = BIN_BIT_XOR
+
 (* Keywords *)
 
 let kwd_package = PACKAGE
 let kwd_from = FROM
 let kwd_import = IMPORT
 let kwd_let = LET
+let kwd_in = IN
 let kwd_val = VAL
 
 (* Syntactic Values *)
@@ -120,7 +149,7 @@ let dquote = [%sedlex.regexp? '"']
 
 let esc_squote = [%sedlex.regexp? "\\'"]
 let esc_dquote = [%sedlex.regexp? "\\\""]
-let esc_nl = [%sedlex.regexp? "\\n"]
+let esc_lf = [%sedlex.regexp? "\\n"]
 let esc_cr = [%sedlex.regexp? "\\r"]
 let esc_tab = [%sedlex.regexp? "\\t"]
 
@@ -137,6 +166,8 @@ let rec lex_main lexbuf =
     | newline         -> new_line lex_main lexbuf
 
     (* Punctuation *)
+    | '('    -> punct_lparen
+    | ')'    -> punct_rparen
     | '|'    -> punct_pipe
     | "->"   -> punct_arrow
     | ':'    -> punct_colon
@@ -145,11 +176,35 @@ let rec lex_main lexbuf =
     | squote -> punct_squote
     | dquote -> punct_dquote
 
+    (* Operators *)
+    | '-' -> op_un_neg
+    | '!' -> op_un_log_not
+    | '~' -> op_un_bit_not
+
+    | "=="  -> op_bin_struct_eq
+    | "!="  -> op_bin_struct_neq
+    | "!==" -> op_bin_phys_eq
+    | "===" -> op_bin_phys_eq
+    | "<"   -> op_bin_lt
+    | "<="  -> op_bin_lte
+    | ">"   -> op_bin_gt
+    | ">="  -> op_bin_gte
+    | '+'   -> op_bin_add
+    | '*'   -> op_bin_mul
+    | '/'   -> op_bin_div
+    | '%'   -> op_bin_mod
+    | "^^"  -> op_bin_exp
+    | "&&"  -> op_bin_log_and
+    | "||"  -> op_bin_log_or
+    | '&'   -> op_bin_bit_and
+    | '^'   -> op_bin_bit_xor
+
     (* Keywords *)
     | "package" -> kwd_package
     | "from"    -> kwd_from
     | "import"  -> kwd_import
     | "let"     -> kwd_let
+    | "in"      -> kwd_in
     | "val"     -> kwd_val
 
     (*
@@ -202,7 +257,7 @@ let rec lex_main lexbuf =
 let lex_rune lexbuf =
   match%sedlex lexbuf with
     | esc_squote                                            -> lit_esc_squote
-    | esc_nl                                                -> lit_esc_squote
+    | esc_lf                                                -> lit_esc_squote
     | esc_cr                                                -> lit_esc_squote
     | esc_tab                                               -> lit_esc_squote
     | '\\', unicode_radix, Opt '+', Rep (hex_digit, 2 .. 6) -> lit_codepoint lexbuf
@@ -224,7 +279,7 @@ let lex_rune lexbuf =
 let lex_str lexbuf =
   match%sedlex lexbuf with
     | esc_dquote                                            -> lit_esc_squote
-    | esc_nl                                                -> lit_esc_squote
+    | esc_lf                                                -> lit_esc_squote
     | esc_cr                                                -> lit_esc_squote
     | esc_tab                                               -> lit_esc_squote
     | '\\', unicode_radix, Opt '+', Rep (hex_digit, 2 .. 6) -> punct_dquote

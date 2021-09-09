@@ -1,13 +1,14 @@
 (menhir
- (modules parser)
- (flags
-   --strict
-   --explain
-   --dump
-   --dump-resolved
-   --no-dollars
-   --table
-   --inspection))
+  (modules tokens type op patt ast import file)
+  (merge_into parser)
+  (flags
+    --strict
+    --explain
+    --dump
+    --dump-resolved
+    --no-dollars
+    --table
+    --inspection))
 
 (library
   (name parse)
