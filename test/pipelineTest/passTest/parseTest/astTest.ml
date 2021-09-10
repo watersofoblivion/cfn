@@ -109,7 +109,7 @@ let fresh_value_binding ?patt:(patt = PattTest.fresh_patt_ground ()) ?explicit:(
   in
   SyntaxTest.fresh_value_binding ~loc ~patt ~explicit ~ty ~value ()
 
-let fresh_block_let ?start:(start = ParseUtils.bof) ?binding:(binding = fresh_value_binding ()) ?scope:(scope = fresh_atom_bool ()) _ =
+let fresh_term_let ?start:(start = ParseUtils.bof) ?binding:(binding = fresh_value_binding ()) ?scope:(scope = fresh_atom_bool ()) _ =
   let loc =
     scope
       |> Syntax.loc_expr
@@ -167,7 +167,7 @@ let assert_parses_ident = ParseUtils.assert_parses Parse.parse_ident SyntaxTest.
 let assert_parses_atom = ParseUtils.assert_parses Parse.parse_atom SyntaxTest.assert_expr_equal
 let assert_parses_expr = ParseUtils.assert_parses Parse.parse_expr SyntaxTest.assert_expr_equal
 let assert_parses_binding = ParseUtils.assert_parses Parse.parse_binding SyntaxTest.assert_binding_equal
-let assert_parses_block = ParseUtils.assert_parses Parse.parse_block SyntaxTest.assert_expr_equal
+let assert_parses_term = ParseUtils.assert_parses Parse.parse_term SyntaxTest.assert_expr_equal
 
 let assert_parses_rune_lit value input ctxt =
   let loc = ParseUtils.lexeme_loc ParseUtils.bof input in
@@ -311,7 +311,7 @@ let test_parse_atom_paren ctxt =
     fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
   let scope = fresh_atom_ident ~start:(0, 28, 28) ~id () in
-  fresh_block_let ~start:(0, 1, 1) ~binding ~scope ()
+  fresh_term_let ~start:(0, 1, 1) ~binding ~scope ()
     |> assert_parses_atom ~ctxt [
          sprintf "(let %s: %s = true in %s)" lexeme Prim.id_bool lexeme
        ]
@@ -552,9 +552,9 @@ let test_parse_binding_value_binding_explicit ctxt =
          sprintf "%s: %s = true" lexeme Prim.id_bool
        ]
 
-(* Blocks *)
+(* Terms *)
 
-let test_parse_block_let ctxt =
+let test_parse_term_let ctxt =
   let seq = Sym.seq () in
   let lexeme = "testId" in
   let id = Sym.gen seq ~id:lexeme in
@@ -568,14 +568,14 @@ let test_parse_block_let ctxt =
     fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
   let scope = fresh_atom_ident ~start:(0, 27, 27) ~id () in
-  fresh_block_let ~binding ~scope ()
-    |> assert_parses_block ~ctxt [
+  fresh_term_let ~binding ~scope ()
+    |> assert_parses_term ~ctxt [
          sprintf "let %s: %s = true in %s" lexeme Prim.id_bool lexeme
        ]
 
-let test_parse_block_expr ctxt =
+let test_parse_term_expr ctxt =
   fresh_atom_bool ~value:true ()
-    |> assert_parses_block ~ctxt ["true"]
+    |> assert_parses_term ~ctxt ["true"]
 
 (* Test Suite *)
 
@@ -627,9 +627,9 @@ let suite =
           "Explicit" >:: test_parse_binding_value_binding_explicit;
         ];
       ];
-      "Blocks" >::: [
-        "Let Bindings" >:: test_parse_block_let;
-        "Expressions"  >:: test_parse_block_expr;
+      "Terms" >::: [
+        "Let Bindings" >:: test_parse_term_let;
+        "Expressions"  >:: test_parse_term_expr;
       ];
     ];
   ]

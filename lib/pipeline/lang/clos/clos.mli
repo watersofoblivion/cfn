@@ -149,15 +149,15 @@ type binding = private
     } (** Binding *)
 (** Bindings *)
 
-type block = private
-  | BlockLet of {
+type term = private
+  | TermLet of {
       binding: binding; (** Binding *)
-      scope:   block    (** Scope *)
+      scope:   term    (** Scope *)
     } (** Let Binding *)
-  | BlockExpr of {
+  | TermExpr of {
       expr: expr (** Expression *)
-    } (** Expression Block *)
-(** Block Values *)
+    } (** Expression Term *)
+(** Term Values *)
 
 type top = private
   | TopLet of {
@@ -380,14 +380,14 @@ val binding : patt -> ty -> expr -> binding
 (** [binding patt ty value] constructs a binding that binds the value [value] of
     type [ty] to the pattern [patt]. *)
 
-(** {3 Blocks} *)
+(** {3 Terms} *)
 
-val block_let : binding -> block -> block
-(** [block_let binding scope] constructs a [let] binding which binds [binding]
+val term_let : binding -> term -> term
+(** [term_let binding scope] constructs a [let] binding which binds [binding]
     in [scope]. *)
 
-val block_expr : expr -> block
-(** [block_expr expr] constructs an expression block of the expression [expr]. *)
+val term_expr : expr -> term
+(** [term_expr expr] constructs an expression term of the expression [expr]. *)
 
 (** {3 Top-Level Bindings} *)
 
@@ -437,8 +437,8 @@ val pp_expr : formatter -> expr -> unit
 (** [pp_expr fmt expr] pretty-prints the expression [expr] to the formatter
     [fmt]. *)
 
-val pp_block : formatter -> block -> unit
-(** [pp_block fmt block] pretty-prints the block [block] to the formatter [fmt]. *)
+val pp_term : formatter -> term -> unit
+(** [pp_term fmt term] pretty-prints the term [term] to the formatter [fmt]. *)
 
 val pp_patt : formatter -> patt -> unit
 (** [pp_patt fmt patt] pretty-prints the pattern [patt] to the formatter [fmt]. *)
@@ -479,9 +479,9 @@ val check_expr : ty Env.t -> expr -> (ty -> 'a) -> 'a
     environment [env].  The type of the expression is passed to the continuation
     [kontinue]. *)
 
-val check_block : ty Env.t -> block -> (ty Env.t -> ty -> 'a) -> 'a
-(** [check_block env block kontinue] type-checks the block [block] in the
-    environment [env].  The type of the block and a (possibly updated)
+val check_term : ty Env.t -> term -> (ty Env.t -> ty -> 'a) -> 'a
+(** [check_term env term kontinue] type-checks the term [term] in the
+    environment [env].  The type of the term and a (possibly updated)
     environment are passed to the continuation [kontinue]. *)
 
 val check_patt : ty Env.t -> patt -> ty -> (ty Env.t -> 'a) -> 'a

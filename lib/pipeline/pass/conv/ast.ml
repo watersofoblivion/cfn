@@ -71,22 +71,22 @@ let convert_binding env binding kontinue = match binding with
               |> kontinue env)
         else mismatched_types inferred annotated))
 
-(* Blocks *)
+(* Terms *)
 
-let rec convert_block env block kontinue = match block with
-  | Mono.BlockLet block -> convert_block_let env block.binding block.scope kontinue
-  | Mono.BlockExpr block -> convert_block_expr env block.expr kontinue
+let rec convert_term env term kontinue = match term with
+  | Mono.TermLet term -> convert_term_let env term.binding term.scope kontinue
+  | Mono.TermExpr term -> convert_term_expr env term.expr kontinue
 
-and convert_block_let env binding scope kontinue =
+and convert_term_let env binding scope kontinue =
   convert_binding env binding (fun env binding ->
-    convert_block env scope (fun env scope ->
-      Clos.block_let binding scope
+    convert_term env scope (fun env scope ->
+      Clos.term_let binding scope
         |> kontinue env))
 
-and convert_block_expr env expr kontinue =
+and convert_term_expr env expr kontinue =
     convert_expr env expr (fun ty expr ->
       expr
-        |> Clos.block_expr
+        |> Clos.term_expr
         |> kontinue ty)
 
 (* Top-Level Expressions *)

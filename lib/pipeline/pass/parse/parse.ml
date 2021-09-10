@@ -195,10 +195,10 @@ let parse_expr lexbuf =
     |> Parser.Incremental.expr_test
     |> parse_main lexbuf
 
-let parse_block lexbuf =
+let parse_term lexbuf =
   let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
-    |> Parser.Incremental.block_test
+    |> Parser.Incremental.term_test
     |> parse_main lexbuf
 
 let parse_binding lexbuf =

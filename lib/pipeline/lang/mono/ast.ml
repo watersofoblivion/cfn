@@ -23,9 +23,9 @@ type expr =
 type binding =
   | Binding of { patt: Patt.patt; ty: Type.ty; value: expr }
 
-type block =
-  | BlockLet of { binding: binding; scope: block }
-  | BlockExpr of { expr: expr }
+type term =
+  | TermLet of { binding: binding; scope: term }
+  | TermExpr of { expr: expr }
 
 type top =
   | TopLet of { binding: binding }
@@ -48,8 +48,8 @@ let expr_atom atom = ExprAtom { atom }
 
 let binding patt ty value = Binding { patt; ty; value }
 
-let block_let binding scope = BlockLet { binding; scope }
-let block_expr expr = BlockExpr { expr }
+let term_let binding scope = TermLet { binding; scope }
+let term_expr expr = TermExpr { expr }
 
 let top_let binding = TopLet { binding }
 
@@ -80,12 +80,12 @@ let pp_binding fmt = function
   | Binding binding ->
     fprintf fmt "%a: %a = %a" Patt.pp_patt binding.patt Type.pp_ty binding.ty pp_expr binding.value
 
-let rec pp_block fmt = function
-  | BlockLet block -> pp_block_let fmt block.binding block.scope
-  | BlockExpr block -> pp_expr fmt block.expr
+let rec pp_term fmt = function
+  | TermLet term -> pp_term_let fmt term.binding term.scope
+  | TermExpr term -> pp_expr fmt term.expr
 
-and pp_block_let fmt binding scope =
-  fprintf fmt "let %a in %a" pp_binding binding pp_block scope
+and pp_term_let fmt binding scope =
+  fprintf fmt "let %a in %a" pp_binding binding pp_term scope
 
 let pp_top fmt = function
   | TopLet top ->
@@ -175,17 +175,17 @@ let check_binding env binding kontinue = match binding with
       then Patt.check_patt env binding.patt expr kontinue
       else mismatched_types expr binding.ty)
 
-(* Blocks *)
+(* Terms *)
 
-let rec check_block env block kontinue = match block with
-  | BlockLet block -> check_block_let env block.binding block.scope kontinue
-  | BlockExpr block -> check_block_expr env block.expr kontinue
+let rec check_term env term kontinue = match term with
+  | TermLet term -> check_term_let env term.binding term.scope kontinue
+  | TermExpr term -> check_term_expr env term.expr kontinue
 
-and check_block_let env binding scope kontinue =
+and check_term_let env binding scope kontinue =
   check_binding env binding (fun env ->
-    check_block env scope kontinue)
+    check_term env scope kontinue)
 
-and check_block_expr env expr kontinue =
+and check_term_expr env expr kontinue =
   check_expr env expr (fun inferred ->
     inferred
       |> kontinue env)

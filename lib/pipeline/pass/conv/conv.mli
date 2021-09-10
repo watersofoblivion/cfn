@@ -33,9 +33,9 @@ val convert_expr : Clos.ty Env.t -> Mono.expr -> (Clos.ty -> Clos.expr -> 'a) ->
     exprression [expr] in the environment [env].  The closure-converted
     expression and its type are passed to the continuation [kontinue]. *)
 
-val convert_block : Clos.ty Env.t -> Mono.block -> (Clos.ty -> Clos.block -> 'a) -> 'a
-(** [convert_block env block kontinue] closure-converts the monomorphic block
-    [block] in the environment [env].  The closure-converted block and its type
+val convert_term : Clos.ty Env.t -> Mono.term -> (Clos.ty -> Clos.term -> 'a) -> 'a
+(** [convert_term env term kontinue] closure-converts the monomorphic term
+    [term] in the environment [env].  The closure-converted term and its type
     are passed to the continuation [kontinue]. *)
 
 val convert_patt : Clos.ty Env.t -> Mono.patt -> Clos.ty -> (Clos.ty Env.t -> Clos.patt -> 'a) -> 'a

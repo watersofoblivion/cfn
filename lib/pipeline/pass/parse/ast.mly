@@ -130,14 +130,14 @@
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.binding -> 'a) -> 'a> binding_test
 %start binding_test
 
-%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> block_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> term_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> expr_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> atom_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> ident_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> lit_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.rune -> 'a) -> 'a> rune_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.str -> 'a) -> 'a>  str_test
-%start block_test
+%start term_test
 %start expr_test
 %start atom_test
 %start ident_test
@@ -155,8 +155,8 @@ top_test:
 binding_test:
 | binding = binding; EOF { binding }
 
-block_test:
-| block = block; EOF { block }
+term_test:
+| term = term; EOF { term }
 
 expr_test:
 | expr = expr; EOF { expr }
@@ -185,12 +185,12 @@ str_test:
 /* Bindings */
 
 %public binding:
-| patt = patt; ty = annot?; BIND; value = block { make_value_binding $sloc patt ty value }
+| patt = patt; ty = annot?; BIND; value = term { make_value_binding $sloc patt ty value }
 
 /* Expressions */
 
-%public block:
-| "let"; binding = binding; "in"; scope = block { make_expr_let $sloc binding scope }
+%public term:
+| "let"; binding = binding; "in"; scope = term { make_expr_let $sloc binding scope }
 | expr = expr { expr }
 
 %public expr:
@@ -201,7 +201,7 @@ str_test:
 %public atom:
 | lit = lit                                     { lit }
 | id = ident                                    { id }
-| "("; block = block; ")"                       { block }
+| "("; term = term; ")"                       { term }
 
 %inline ident:
 | id = UIDENT { make_expr_ident $sloc id }

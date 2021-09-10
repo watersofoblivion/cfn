@@ -122,11 +122,11 @@ let test_norm_expr_bool ctxt =
     true
       |> Ir.atom_bool
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
-  Norm.norm_expr env annot (fun ty block ->
+  Norm.norm_expr env annot (fun ty term ->
     IrTest.assert_ty_equal ~ctxt Ir.ty_bool ty;
-    IrTest.assert_block_equal ~ctxt ir block)
+    IrTest.assert_term_equal ~ctxt ir term)
 
 let test_norm_expr_int ctxt =
   let env = EnvTest.fresh () in
@@ -135,11 +135,11 @@ let test_norm_expr_int ctxt =
     42l
       |> Ir.atom_int
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
-  Norm.norm_expr env annot (fun ty block ->
+  Norm.norm_expr env annot (fun ty term ->
     IrTest.assert_ty_equal ~ctxt Ir.ty_int ty;
-    IrTest.assert_block_equal ~ctxt ir block)
+    IrTest.assert_term_equal ~ctxt ir term)
 
 let test_norm_expr_long ctxt =
   let env = EnvTest.fresh () in
@@ -148,11 +148,11 @@ let test_norm_expr_long ctxt =
     42L
       |> Ir.atom_long
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
-  Norm.norm_expr env annot (fun ty block ->
+  Norm.norm_expr env annot (fun ty term ->
     IrTest.assert_ty_equal ~ctxt Ir.ty_long ty;
-    IrTest.assert_block_equal ~ctxt ir block)
+    IrTest.assert_term_equal ~ctxt ir term)
 
 let test_norm_expr_float ctxt =
   let env = EnvTest.fresh () in
@@ -161,11 +161,11 @@ let test_norm_expr_float ctxt =
     4.2
       |> Ir.atom_float
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
-  Norm.norm_expr env annot (fun ty block ->
+  Norm.norm_expr env annot (fun ty term ->
     IrTest.assert_ty_equal ~ctxt Ir.ty_float ty;
-    IrTest.assert_block_equal ~ctxt ir block)
+    IrTest.assert_term_equal ~ctxt ir term)
 
 let test_norm_expr_double ctxt =
   let env = EnvTest.fresh () in
@@ -174,11 +174,11 @@ let test_norm_expr_double ctxt =
     4.2
       |> Ir.atom_double
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
-  Norm.norm_expr env annot (fun ty block ->
+  Norm.norm_expr env annot (fun ty term ->
     IrTest.assert_ty_equal ~ctxt Ir.ty_double ty;
-    IrTest.assert_block_equal ~ctxt ir block)
+    IrTest.assert_term_equal ~ctxt ir term)
 
 let test_norm_expr_rune ctxt =
   let env = EnvTest.fresh () in
@@ -188,11 +188,11 @@ let test_norm_expr_rune ctxt =
     value
       |> Ir.atom_rune
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
-  Norm.norm_expr env annot (fun ty block ->
+  Norm.norm_expr env annot (fun ty term ->
     IrTest.assert_ty_equal ~ctxt Ir.ty_rune ty;
-    IrTest.assert_block_equal ~ctxt ir block)
+    IrTest.assert_term_equal ~ctxt ir term)
 
 let test_norm_expr_string ctxt =
   let env = EnvTest.fresh () in
@@ -202,11 +202,11 @@ let test_norm_expr_string ctxt =
     value
       |> Ir.atom_string
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
-  Norm.norm_expr env annot (fun ty block ->
+  Norm.norm_expr env annot (fun ty term ->
     IrTest.assert_ty_equal ~ctxt Ir.ty_string ty;
-    IrTest.assert_block_equal ~ctxt ir block)
+    IrTest.assert_term_equal ~ctxt ir term)
 
 let test_norm_expr_ident ctxt =
   let env = EnvTest.fresh () in
@@ -217,12 +217,12 @@ let test_norm_expr_ident ctxt =
     value
       |> Ir.atom_ident
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
   in
   Env.bind value bound env (fun env ->
-    Norm.norm_expr env annot (fun ty block ->
+    Norm.norm_expr env annot (fun ty term ->
       IrTest.assert_ty_equal ~ctxt bound ty;
-      IrTest.assert_block_equal ~ctxt ir block))
+      IrTest.assert_term_equal ~ctxt ir term))
 
 let test_norm_expr_ident_unbound _ =
   let env = EnvTest.fresh () in

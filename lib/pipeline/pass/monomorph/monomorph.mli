@@ -33,9 +33,9 @@ val convert_expr : Mono.ty Env.t -> Ir.expr -> (Mono.ty -> Mono.expr -> 'a) -> '
     the environment [env].  The monomorphic expression and its type are passed
     to the continuation [kontinue]. *)
 
-val convert_block : Mono.ty Env.t -> Ir.block -> (Mono.ty -> Mono.block -> 'a) -> 'a
-(** [convert_block env block kontinue] monomorphizes the ANF block [block] in
-    the environment [env].  The monomorphic block and its type are passed to the
+val convert_term : Mono.ty Env.t -> Ir.term -> (Mono.ty -> Mono.term -> 'a) -> 'a
+(** [convert_term env term kontinue] monomorphizes the ANF term [term] in
+    the environment [env].  The monomorphic term and its type are passed to the
     continuation [kontinue]. *)
 
 val convert_patt : Mono.ty Env.t -> Ir.patt -> Mono.ty -> (Mono.ty Env.t -> Mono.patt -> 'a) -> 'a

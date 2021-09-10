@@ -16,7 +16,7 @@ let mismatched_types inferred annotated =
 (* Helpers *)
 
 let to_expr = function
-  | Ir.BlockExpr block -> block.expr
+  | Ir.TermExpr term -> term.expr
   | _ -> failwith "Not an expression"
 
 (* Expressions *)
@@ -25,7 +25,7 @@ let norm_atom _ constr ty value kontinue =
   value
     |> constr
     |> Ir.expr_atom
-    |> Ir.block_expr
+    |> Ir.term_expr
     |> kontinue ty
 
 let rec norm_expr env expr kontinue = match expr with
@@ -46,7 +46,7 @@ and norm_expr_ident env id kontinue =
     id
       |> Ir.atom_ident
       |> Ir.expr_atom
-      |> Ir.block_expr
+      |> Ir.term_expr
       |> kontinue ty
   with Not_found -> unbound_identifier id
 
@@ -56,7 +56,7 @@ and norm_expr_builtin env fn args kontinue =
     let _ = args in
     []
       |> Ir.expr_builtin fn
-      |> Ir.block_expr
+      |> Ir.term_expr
       |> kontinue Ir.ty_bool)
 
 and norm_expr_let _ _ _ _ =
@@ -66,12 +66,12 @@ and norm_expr_let _ _ _ _ =
 
 and norm_binding env binding kontinue = match binding with
   | Annot.Binding binding ->
-    norm_expr env binding.value (fun inferred block ->
+    norm_expr env binding.value (fun inferred term ->
       Type.norm_ty env binding.ty (fun annotated ->
         if Ir.ty_equal inferred annotated
         then
           Patt.norm_patt env binding.patt inferred (fun env patt ->
-            block
+            term
               |> to_expr
               |> Ir.binding patt inferred
               |> kontinue env)

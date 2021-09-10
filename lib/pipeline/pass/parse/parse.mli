@@ -65,8 +65,8 @@ val parse_atom : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Synt
 val parse_expr : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
 (** [parse_expr lexbuf env kontinue] parses an expression. *)
 
-val parse_block : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
-(** [parse_block lexbuf env kontinue] parses an block expression. *)
+val parse_term : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
+(** [parse_term lexbuf env kontinue] parses an term expression. *)
 
 val parse_binding : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.binding -> 'a) -> 'a
 (** [parse_binding lexbuf env kontinue] parses a binding. *)

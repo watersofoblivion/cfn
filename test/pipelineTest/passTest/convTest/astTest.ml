@@ -147,9 +147,9 @@ let test_convert_binding ctxt =
     EnvTest.assert_bound ~ctxt ClosTest.assert_ty_equal id env ty;
     ClosTest.assert_binding_equal ~ctxt clos binding)
 
-(* Blocks *)
+(* Terms *)
 
-let test_convert_block_let ctxt =
+let test_convert_term_let ctxt =
   let env = EnvTest.fresh () in
   let sym = () |> Sym.seq |> Sym.gen in
   let mono =
@@ -164,8 +164,8 @@ let test_convert_block_let ctxt =
     sym
       |> Mono.atom_ident
       |> Mono.expr_atom
-      |> Mono.block_expr
-      |> Mono.block_let binding
+      |> Mono.term_expr
+      |> Mono.term_let binding
   in
   let clos =
     let binding =
@@ -179,20 +179,20 @@ let test_convert_block_let ctxt =
     sym
       |> Clos.atom_ident
       |> Clos.expr_atom
-      |> Clos.block_expr
-      |> Clos.block_let binding
+      |> Clos.term_expr
+      |> Clos.term_let binding
   in
-  Conv.convert_block env mono (fun ty block ->
+  Conv.convert_term env mono (fun ty term ->
     ClosTest.assert_ty_equal ~ctxt Clos.ty_bool ty;
-    ClosTest.assert_block_equal ~ctxt clos block)
+    ClosTest.assert_term_equal ~ctxt clos term)
 
-let test_convert_block_expr ctxt =
+let test_convert_term_expr ctxt =
   let env = EnvTest.fresh () in
-  let mono = true |> Mono.atom_bool |> Mono.expr_atom |> Mono.block_expr in
-  let clos = true |> Clos.atom_bool |> Clos.expr_atom |> Clos.block_expr in
-  Conv.convert_block env mono (fun ty block ->
+  let mono = true |> Mono.atom_bool |> Mono.expr_atom |> Mono.term_expr in
+  let clos = true |> Clos.atom_bool |> Clos.expr_atom |> Clos.term_expr in
+  Conv.convert_term env mono (fun ty term ->
     ClosTest.assert_ty_equal ~ctxt Clos.ty_bool ty;
-    ClosTest.assert_block_equal ~ctxt clos block)
+    ClosTest.assert_term_equal ~ctxt clos term)
 
 (* Top-Level Expressions *)
 
@@ -252,9 +252,9 @@ let suite =
       "Atomic Values"                 >:: test_convert_expr_atom;
     ];
     "Binding" >:: test_convert_binding;
-    "Blocks" >::: [
-      "Let Bindings" >:: test_convert_block_let;
-      "Expressions"  >:: test_convert_block_expr;
+    "Terms" >::: [
+      "Let Bindings" >:: test_convert_term_let;
+      "Expressions"  >:: test_convert_term_expr;
     ];
     "Top-Level Expressions" >::: [
       "Let Bindings" >:: test_convert_top_let;

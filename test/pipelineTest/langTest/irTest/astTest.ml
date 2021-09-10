@@ -45,11 +45,11 @@ let fresh_expr_atom ?atom:(atom = fresh_atom_bool ()) _ =
 let fresh_binding ?patt:(patt = PattTest.fresh_patt_ground ()) ?ty:(ty = Ir.ty_bool) ?value:(value = fresh_expr_atom ()) _ =
   Ir.binding patt ty value
 
-let fresh_block_expr ?expr:(expr = fresh_expr_atom ()) _ =
-  Ir.block_expr expr
+let fresh_term_expr ?expr:(expr = fresh_expr_atom ()) _ =
+  Ir.term_expr expr
 
-let fresh_block_let ?binding:(binding = fresh_binding ()) ?scope:(scope = fresh_block_expr ()) _ =
-  Ir.block_let binding scope
+let fresh_term_let ?binding:(binding = fresh_binding ()) ?scope:(scope = fresh_term_expr ()) _ =
+  Ir.term_let binding scope
 
 let fresh_top_let ?binding:(binding = fresh_binding ()) _ =
   Ir.top_let binding
@@ -59,7 +59,7 @@ let fresh_top_let ?binding:(binding = fresh_binding ()) _ =
 let atom_not_equal = TestUtils.not_equal "Atomic values" Ir.pp_atom
 let expr_not_equal = TestUtils.not_equal "Expressions" Ir.pp_expr
 (* let binding_not_equal = TestUtils.not_equal "Bindings" Ir.pp_binding *)
-let block_not_equal = TestUtils.not_equal "Block values" Ir.pp_block
+let term_not_equal = TestUtils.not_equal "Term values" Ir.pp_term
 (* let top_not_equal = TestUtils.not_equal "Top-level expressions" Ir.pp_top *)
 
 let assert_atom_equal ~ctxt expected actual = match (expected, actual) with
@@ -96,13 +96,13 @@ let assert_binding_equal ~ctxt expected actual = match (expected, actual) with
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty;
     assert_expr_equal ~ctxt expected.value actual.value
 
-let rec assert_block_equal ~ctxt expected actual = match (expected, actual) with
-  | Ir.BlockLet expected, Ir.BlockLet actual ->
+let rec assert_term_equal ~ctxt expected actual = match (expected, actual) with
+  | Ir.TermLet expected, Ir.TermLet actual ->
     assert_binding_equal ~ctxt expected.binding actual.binding;
-    assert_block_equal ~ctxt expected.scope actual.scope
-  | Ir.BlockExpr expected, Ir.BlockExpr actual ->
+    assert_term_equal ~ctxt expected.scope actual.scope
+  | Ir.TermExpr expected, Ir.TermExpr actual ->
     assert_expr_equal ~ctxt expected.expr actual.expr
-  | expected, actual -> block_not_equal ~ctxt expected actual
+  | expected, actual -> term_not_equal ~ctxt expected actual
 
 let assert_top_equal ~ctxt expected actual = match (expected, actual) with
   | Ir.TopLet expected, Ir.TopLet actual ->
@@ -199,25 +199,25 @@ let test_expr_atom ctxt =
       assert_atom_equal ~ctxt atom actual.atom
     | actual -> expr_not_equal ~ctxt expected actual
 
-(* Blocks *)
+(* Terms *)
 
-let test_block_let ctxt =
+let test_term_let ctxt =
   let binding = fresh_binding () in
-  let scope = fresh_block_expr () in
-  let expected = Ir.block_let binding scope in
+  let scope = fresh_term_expr () in
+  let expected = Ir.term_let binding scope in
   match expected with
-    | Ir.BlockLet actual ->
+    | Ir.TermLet actual ->
       assert_binding_equal ~ctxt binding actual.binding;
-      assert_block_equal ~ctxt scope actual.scope
-    | actual -> block_not_equal ~ctxt expected actual
+      assert_term_equal ~ctxt scope actual.scope
+    | actual -> term_not_equal ~ctxt expected actual
 
-let test_block_expr ctxt =
+let test_term_expr ctxt =
   let expr = fresh_expr_atom () in
-  let expected = Ir.block_expr expr in
+  let expected = Ir.term_expr expr in
   match expected with
-    | Ir.BlockExpr actual ->
+    | Ir.TermExpr actual ->
       assert_expr_equal ~ctxt expr actual.expr
-    | actual -> block_not_equal ~ctxt expected actual
+    | actual -> term_not_equal ~ctxt expected actual
 
 (* Bindings *)
 
@@ -257,9 +257,9 @@ let test_constructors =
       "Built-in Function Application" >:: test_expr_builtin;
       "Atoms"                         >:: test_expr_atom;
     ];
-    "Blocks" >::: [
-      "Let Bindings" >:: test_block_let;
-      "Expressions"  >:: test_block_expr;
+    "Terms" >::: [
+      "Let Bindings" >:: test_term_let;
+      "Expressions"  >:: test_term_expr;
     ];
     "Bindings" >:: test_binding;
     "Top-Level Expressions" >::: [
@@ -271,7 +271,7 @@ let test_constructors =
 
 let assert_pp_atom = PrettyTest.assert_pp Ir.pp_atom
 let assert_pp_expr = PrettyTest.assert_pp Ir.pp_expr
-let assert_pp_block = PrettyTest.assert_pp Ir.pp_block
+let assert_pp_term = PrettyTest.assert_pp Ir.pp_term
 let assert_pp_binding = PrettyTest.assert_pp Ir.pp_binding
 let assert_pp_top = PrettyTest.assert_pp Ir.pp_top
 
@@ -352,22 +352,22 @@ let test_pp_binding ctxt =
            |> flush_str_formatter
        ]
 
-(* Blocks *)
+(* Terms *)
 
-let test_pp_block_let ctxt =
+let test_pp_term_let ctxt =
   let binding = fresh_binding () in
-  let scope = fresh_block_expr () in
-  fresh_block_let ~binding ~scope ()
-    |> assert_pp_block ~ctxt [
-         fprintf str_formatter "let %a in %a" Ir.pp_binding binding Ir.pp_block scope
+  let scope = fresh_term_expr () in
+  fresh_term_let ~binding ~scope ()
+    |> assert_pp_term ~ctxt [
+         fprintf str_formatter "let %a in %a" Ir.pp_binding binding Ir.pp_term scope
            |> flush_str_formatter
        ]
 
-let test_pp_block_expr ctxt =
+let test_pp_term_expr ctxt =
   let atom = fresh_atom_bool ~value:true () in
   let expr = fresh_expr_atom ~atom () in
-  fresh_block_expr ~expr ()
-    |> assert_pp_block ~ctxt ["true"]
+  fresh_term_expr ~expr ()
+    |> assert_pp_term ~ctxt ["true"]
 
 (* Top-Level Expressions *)
 
@@ -394,9 +394,9 @@ let test_pp =
       "Built-in Function Application" >:: test_pp_expr_builtin;
       "Atoms"                         >:: test_pp_expr_atom;
     ];
-    "Blocks" >::: [
-      "Let Bindings" >:: test_pp_block_let;
-      "Expressions"  >:: test_pp_block_expr;
+    "Terms" >::: [
+      "Let Bindings" >:: test_pp_term_let;
+      "Expressions"  >:: test_pp_term_expr;
     ];
     "Bindings" >:: test_pp_binding;
     "Top-Level Expressions" >::: [
@@ -561,12 +561,12 @@ let test_check_binding_mismatched_types _ =
     Ir.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))
 
-(* Blocks *)
+(* Terms *)
 
-let test_check_block_let ctxt =
+let test_check_term_let ctxt =
   let env = EnvTest.fresh () in
   let ty = Ir.ty_bool in
-  let block =
+  let term =
     let id = SymTest.fresh_sym () in
     let binding =
       let patt = PattTest.fresh_patt_var ~id () in
@@ -579,21 +579,21 @@ let test_check_block_let ctxt =
     let scope =
       let atom = fresh_atom_ident ~id () in
       let expr = fresh_expr_atom ~atom () in
-      fresh_block_expr ~expr ()
+      fresh_term_expr ~expr ()
     in
-    fresh_block_let ~binding ~scope ()
+    fresh_term_let ~binding ~scope ()
   in
-  Ir.check_block env block (fun _ inferred ->
+  Ir.check_term env term (fun _ inferred ->
     TypeTest.assert_ty_equal ~ctxt ty inferred)
 
-let test_check_block_expr ctxt =
+let test_check_term_expr ctxt =
   let env = EnvTest.fresh () in
-  let block =
+  let term =
     let atom = fresh_atom_bool () in
     let expr = fresh_expr_atom ~atom () in
-    fresh_block_expr ~expr ()
+    fresh_term_expr ~expr ()
   in
-  Ir.check_block env block (fun _ ty ->
+  Ir.check_term env term (fun _ ty ->
     TypeTest.assert_ty_equal ~ctxt Ir.ty_bool ty)
 
 (* Top-Level Expressions *)
@@ -649,9 +649,9 @@ let test_check =
       "Valid"            >:: test_check_binding;
       "Mismatched Types" >:: test_check_binding_mismatched_types;
     ];
-    "Blocks" >::: [
-      "Let Expressions" >:: test_check_block_let;
-      "Expressions"     >:: test_check_block_expr;
+    "Terms" >::: [
+      "Let Expressions" >:: test_check_term_let;
+      "Expressions"     >:: test_check_term_expr;
     ];
     "Top-Levels" >::: [
       "Let Binding" >:: test_check_top_let;

@@ -34,9 +34,9 @@ val assert_expr_equal : ctxt:test_ctxt -> Clos.expr -> Clos.expr -> unit
 (** [assert_expr_equal ~ctxt expected actual] asserts that the expression
     [actual] is equal to the expression [expected]. *)
 
-val assert_block_equal : ctxt:test_ctxt -> Clos.block -> Clos.block -> unit
-(** [assert_block_equal ~ctxt expected actual] asserts that the block [actual]
-    is equal to the block [expected]. *)
+val assert_term_equal : ctxt:test_ctxt -> Clos.term -> Clos.term -> unit
+(** [assert_term_equal ~ctxt expected actual] asserts that the term [actual]
+    is equal to the term [expected]. *)
 
 val assert_patt_equal : ctxt:test_ctxt -> Clos.patt -> Clos.patt -> unit
 (** [assert_patt_equal ~ctxt expected actual] asserts that the pattern [actual]
