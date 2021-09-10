@@ -143,8 +143,8 @@ type expr = private
       value: rune   (** Value *)
     } (** Rune literal *)
   | ExprString of {
-      loc:   Loc.t;   (** Location *)
-      value: str list (** UTF-8 encoded value *)
+      loc:   Loc.t;        (** Location *)
+      value: str list list (** UTF-8 encoded value *)
     } (** String literal *)
   | ExprIdent of {
       loc: Loc.t; (** Location *)
@@ -391,7 +391,7 @@ val expr_rune : Loc.t -> rune -> expr
 (** [expr_rune loc value] constructs a rune literal at location [loc] with value
     [value]. *)
 
-val expr_string : Loc.t -> str list -> expr
+val expr_string : Loc.t -> str list list -> expr
 (** [expr_string loc value] constructs a string literal at location [loc] with
     value [value]. *)
 

@@ -19,6 +19,18 @@ let fresh_rune_lit ?start:(start = ParseUtils.bof) ?value:(value = 'a') _ =
   in
   SyntaxTest.fresh_rune_lit ~loc ~value ()
 
+let fresh_rune_escape ?start:(start = ParseUtils.bof) ?value:(value = "\\U+2a") _ =
+  let loc = ParseUtils.lexeme_loc start value in
+  Syntax.rune_escape loc value
+
+let fresh_str_lit ?start:(start = ParseUtils.bof) ?value:(value = "foo bar") _ =
+  let loc = ParseUtils.lexeme_loc start value in
+  SyntaxTest.fresh_str_lit ~loc ~value ()
+
+let fresh_str_escape ?start:(start = ParseUtils.bof) ?value:(value = "\\U+2a") _ =
+  let loc = ParseUtils.lexeme_loc start value in
+  Syntax.str_escape loc value
+
 let fresh_atom_bool ?start:(start = ParseUtils.bof) ?value:(value = true) _ =
   let loc =
     let len = if value then 4 else 5 in
@@ -41,6 +53,30 @@ let fresh_atom_float ?start:(start = ParseUtils.bof) ?lexeme:(lexeme = "4.2") _ 
 let fresh_atom_double ?start:(start = ParseUtils.bof) ?lexeme:(lexeme = "4.2") _ =
   let loc = ParseUtils.lexeme_loc start lexeme in
   Syntax.expr_double loc lexeme
+
+let fresh_atom_string ?start:(start = ParseUtils.bof) ?value:(value = []) _ =
+  let rec str_end lines =
+    let rec line = function
+      | [] -> failwith "Boom!"
+      | hd :: [] -> Syntax.loc_str hd
+      | _ :: tl -> line tl
+    in
+    match lines with
+      | [] ->
+        start
+          |> LocTest.make start
+          |> LocTest.shift (0, 1, 1)
+          |> LocTest.span_from start
+      | hd :: [] -> line hd
+      | _ :: tl -> str_end tl
+  in
+  let loc =
+    value
+      |> str_end
+      |> LocTest.shift (0, 1, 1)
+      |> LocTest.span_from start
+  in
+  SyntaxTest.fresh_expr_string ~loc ~value ()
 
 let fresh_atom_ident ?start:(start = ParseUtils.bof) ?id:(id = SymTest.fresh_sym ()) _ =
   let loc = ParseUtils.sym_loc start id in
@@ -134,18 +170,31 @@ let assert_parses_binding = ParseUtils.assert_parses Parse.parse_binding SyntaxT
 let assert_parses_block = ParseUtils.assert_parses Parse.parse_block SyntaxTest.assert_expr_equal
 
 let assert_parses_rune_lit value input ctxt =
-  fresh_rune_lit ~value ()
+  let loc = ParseUtils.lexeme_loc ParseUtils.bof input in
+  SyntaxTest.fresh_rune_lit ~loc ~value ()
     |> assert_parses_rune ~ctxt [input]
 
 (* Tests *)
 
 (* Runes *)
 
-(* let test_parse_rune_lit = assert_parses_rune_lit 'a' "a" *)
-(* let test_parse_rune_lit_esc_squote = assert_parses_rune_lit '\'' "\\'" *)
-(* let test_parse_rune_lit_cr = assert_parses_rune_lit '\r' "\\r" *)
-(* let test_parse_rune_lit_lf = assert_parses_rune_lit '\n' "\\n" *)
-(* let test_parse_rune_lit_tab = assert_parses_rune_lit '\t' "\\t" *)
+let test_parse_rune_lit = assert_parses_rune_lit 'a' "a"
+let test_parse_rune_lit_esc_bslash = assert_parses_rune_lit '\\' "\\\\"
+let test_parse_rune_lit_esc_squote = assert_parses_rune_lit '\'' "\\'"
+let test_parse_rune_lit_cr = assert_parses_rune_lit '\r' "\\r"
+let test_parse_rune_lit_lf = assert_parses_rune_lit '\n' "\\n"
+let test_parse_rune_lit_tab = assert_parses_rune_lit '\t' "\\t"
+
+let test_parse_rune_escape ctxt =
+  let assert_parses_rune_escape value =
+    fresh_rune_escape ~value ()
+      |> assert_parses_rune ~ctxt [value]
+  in
+  List.iter assert_parses_rune_escape [
+    "\\u2a"; "\\U2a"; "\\u2A"; "\\U2A";
+    "\\u+2a"; "\\U+2a"; "\\u+2A"; "\\U+2A";
+    "\\U+1"; "\\U+12"; "\\U+123"; "\\U+1234"; "\\U+12345"; "\\U+123456";
+  ]
 
 (* Strings *)
 
@@ -185,8 +234,42 @@ let test_parse_lit_double ctxt =
   in
   List.iter assert_parse_expr_double double_lexemes
 
-let test_parse_lit_rune _ = ()
-let test_parse_lit_string _ = ()
+let test_parse_lit_rune ctxt =
+  let assert_parses_rune value lexeme loc =
+    SyntaxTest.fresh_expr_rune ~loc ~value ()
+      |> assert_parses_lit ~ctxt [sprintf "'%s'" lexeme]
+  in
+  let assert_parses_rune_lit value lexeme =
+    let lexeme_loc = ParseUtils.lexeme_loc (0, 1, 1) lexeme in
+    let value = SyntaxTest.fresh_rune_lit ~loc:lexeme_loc ~value () in
+    lexeme_loc
+      |> LocTest.shift (0, 1, 1)
+      |> LocTest.span_from ParseUtils.bof
+      |> assert_parses_rune value lexeme
+  in
+  let assert_parses_rune_escape lexeme =
+    let value = fresh_rune_escape ~start:(0, 1, 1) ~value:lexeme () in
+    value
+      |> Syntax.loc_rune
+      |> LocTest.shift (0, 1, 1)
+      |> LocTest.span_from ParseUtils.bof
+      |> assert_parses_rune value lexeme
+  in
+  assert_parses_rune_lit 'a' "a";
+  assert_parses_rune_lit '\'' "\\'";
+  assert_parses_rune_lit '\\' "\\\\";
+  assert_parses_rune_lit '\n' "\\n";
+  assert_parses_rune_lit '\r' "\\r";
+  assert_parses_rune_lit '\t' "\\t";
+  assert_parses_rune_escape "\\U+2a"
+
+let test_parse_lit_string ctxt =
+  fresh_atom_string ~value:[] ()
+    |> assert_parses_lit ~ctxt ["\"\""]
+  (* let seg = fresh_str_lit ~start:(0, 1, 1) ~value:"foo" in
+  fresh_atom_str ~value:[[seg]] ()
+    |> assert_parses_lit ~ctxt ["\"foo\""]; *)
+
 
 (* Identifiers *)
 
@@ -241,19 +324,6 @@ let pp_assoc fmt = function
   | Left -> fprintf fmt "left"
   | Right -> fprintf fmt "right"
 
-let prec_assoc_err op assoc op' assoc' =
-  fprintf
-    str_formatter
-    "Operator %S and %S have the same precedence but different associativity: %S is %a associative, but %S is %a associative"
-      op
-      op'
-      op
-      pp_assoc assoc
-      op'
-      pp_assoc assoc'
-    |> flush_str_formatter
-    |> assert_failure
-
 let un_ops = [
   (Syntax.un_neg,     "-");
   (Syntax.un_log_not, "!");
@@ -261,33 +331,31 @@ let un_ops = [
 ]
 
 let bin_ops = [
-  [(Right, Syntax.bin_exp, "^^")];
-  [
-    (Left, Syntax.bin_mul, "*");
-    (Left, Syntax.bin_div, "/");
-    (Left, Syntax.bin_mod, "%")
-  ];
-  [
-    (Left, Syntax.bin_add, "+");
-    (Left, Syntax.bin_sub, "-")
-  ];
-  [
-    (Left, Syntax.bin_lt,  "<");
-    (Left, Syntax.bin_lte, "<=");
-    (Left, Syntax.bin_gt,  ">");
-    (Left, Syntax.bin_gte, ">=")
-  ];
-  [(Left, Syntax.bin_bit_and, "&")];
-  [(Left, Syntax.bin_bit_xor, "^")];
-  [(Left, Syntax.bin_bit_or,  "|")];
-  [
-    (Left, Syntax.bin_struct_eq,  "==");
-    (Left, Syntax.bin_struct_neq, "!=");
-    (Left, Syntax.bin_phys_eq,    "===");
-    (Left, Syntax.bin_phys_neq,   "!==")
-  ];
-  [(Left, Syntax.bin_log_and, "&&")];
-  [(Left, Syntax.bin_log_or,  "||")];
+  (Right, [
+    (Syntax.bin_exp, "^^")]);
+  (Left, [
+    (Syntax.bin_mul, "*");
+    (Syntax.bin_div, "/");
+    (Syntax.bin_mod, "%")]);
+  (Left, [
+    (Syntax.bin_add, "+");
+    (Syntax.bin_sub, "-")]);
+  (Left, [
+    (Syntax.bin_lt,  "<");
+    (Syntax.bin_lte, "<=");
+    (Syntax.bin_gt,  ">");
+    (Syntax.bin_gte, ">=")]);
+  (Left, [(Syntax.bin_bit_and, "&")]);
+  (Left, [(Syntax.bin_bit_xor, "^")]);
+  (Left, [(Syntax.bin_bit_or,  "|")]);
+  (Left, [
+    (Syntax.bin_struct_eq,  "==");
+    (Syntax.bin_struct_neq, "!=");
+    (Syntax.bin_phys_eq,    "===");
+    (Syntax.bin_phys_neq,   "!==")
+  ]);
+  (Left, [(Syntax.bin_log_and, "&&")]);
+  (Left, [(Syntax.bin_log_or,  "||")]);
 ]
 
 let test_parse_expr_un_op ctxt =
@@ -303,15 +371,13 @@ let test_parse_expr_un_op ctxt =
   ) un_ops
 
 let test_parse_expr_bin_op ctxt =
-  in
-
   let left = fresh_atom_int ~lexeme:"1" () in
   let rec versus acc = function
     | [] -> ()
-    | hd :: tl ->
+    | ((assoc, ops) as hd) :: tl ->
       let rec versus' acc' = function
         | [] -> ()
-        | ((assoc, constr, lexeme) as hd') :: tl' ->
+        | ((constr, lexeme) as hd') :: tl' ->
           (* Self *)
           let op_len = String.length lexeme in
           let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
@@ -338,28 +404,27 @@ let test_parse_expr_bin_op ctxt =
             |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme];
 
           (* Other operators of equal precedence *)
-          List.iter (fun (assoc', constr', lexeme') ->
+          List.iter (fun (constr', lexeme') ->
             let op_len' = String.length lexeme' in
             let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
             let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
             let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
             let right = fresh_atom_int ~start:(0, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
-            let expr = match (assoc, assoc') with
-              | Left, Left ->
+            let expr = match assoc with
+              | Left ->
                 let lhs =
                   let op = constr left_op_loc in
                   fresh_bin_op ~op ~lhs:left ~rhs:center ()
                 in
                 let op = constr' right_op_loc in
                 fresh_bin_op ~op ~lhs ~rhs:right ()
-              | Right, Right ->
+              | Right ->
                 let rhs =
                   let op = constr' right_op_loc in
                   fresh_bin_op ~op ~lhs:center ~rhs:right ()
                 in
                 let op = constr left_op_loc in
                 fresh_bin_op ~op ~lhs:left ~rhs ()
-              | _ -> prec_assoc_err lexeme assoc lexeme' assoc'
             in
             expr
               |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme'];
@@ -367,30 +432,29 @@ let test_parse_expr_bin_op ctxt =
             let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len', 2 + op_len') in
             let right_op_loc = LocTest.make (0, 5 + op_len', 5 + op_len') (0, 5 + op_len + op_len', 5 + op_len + op_len') in
             let center = fresh_atom_int ~start:(0, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
-            let expr = match (assoc, assoc') with
-              | Left, Left ->
+            let expr = match assoc with
+              | Left ->
                 let lhs =
                   let op = constr' left_op_loc in
                   fresh_bin_op ~op ~lhs:left ~rhs:center ()
                 in
                 let op = constr right_op_loc in
                 fresh_bin_op ~op ~lhs ~rhs:right ()
-              | Right, Right ->
+              | Right ->
                 let rhs =
                   let op = constr right_op_loc in
                   fresh_bin_op ~op ~lhs:center ~rhs:right ()
                 in
                 let op = constr' left_op_loc in
                 fresh_bin_op ~op ~lhs:left ~rhs ()
-              | _ -> prec_assoc_err lexeme assoc lexeme' assoc'
             in
             expr
               |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme' lexeme];
           ) tl';
 
           (* Higher Precedence Operators *)
-          List.iter (fun higher ->
-            List.iter (fun (_, constr', lexeme') ->
+          List.iter (fun (_, higher) ->
+            List.iter (fun (constr', lexeme') ->
               let op_len' = String.length lexeme' in
               let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
               let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
@@ -418,8 +482,8 @@ let test_parse_expr_bin_op ctxt =
           ) acc;
 
           (* Lower Precedence Operators *)
-          List.iter (fun lower ->
-            List.iter (fun (_, constr', lexeme') ->
+          List.iter (fun (_, lower) ->
+            List.iter (fun (constr', lexeme') ->
               let op_len' = String.length lexeme' in
               let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
               let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
@@ -448,7 +512,7 @@ let test_parse_expr_bin_op ctxt =
 
           versus' (hd' :: acc') tl'
     in
-    versus' [] hd;
+    versus' [] ops;
     versus (hd :: acc) tl
   in
   versus [] bin_ops
@@ -518,11 +582,15 @@ let test_parse_block_expr ctxt =
 let suite =
   "Abstract Syntax" >::: [
     "Runes" >::: [
-      (* "Literals"              >:: test_parse_rune_lit; *)
-      (* "Escaped Single Quotes" >:: test_parse_rune_lit_esc_squote; *)
-      (* "Carriage Return"       >:: test_parse_rune_lit_cr; *)
-      (* "Line Feed"             >:: test_parse_rune_lit_lf; *)
-      (* "Tab"                   >:: test_parse_rune_lit_tab; *)
+      "Literals" >:: test_parse_rune_lit;
+      "Escapes" >::: [
+        "Backslash"       >:: test_parse_rune_lit_esc_bslash;
+        "Single Quotes"   >:: test_parse_rune_lit_esc_squote;
+        "Carriage Return" >:: test_parse_rune_lit_cr;
+        "Line Feed"       >:: test_parse_rune_lit_lf;
+        "Tab"             >:: test_parse_rune_lit_tab;
+      ];
+      "Unicode Escape Sequences" >:: test_parse_rune_escape;
     ];
     "Strings" >::: [
 

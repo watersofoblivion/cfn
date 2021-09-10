@@ -175,7 +175,7 @@ val fresh_expr_rune : ?loc:Loc.t -> ?value:Syntax.rune -> unit -> Syntax.expr
 (** [fresh_expr_rune ?loc ?value ()] constructs a fresh rune expression at
     location [loc] with value [value]. *)
 
-val fresh_expr_string : ?loc:Loc.t -> ?value:(Syntax.str list) -> unit -> Syntax.expr
+val fresh_expr_string : ?loc:Loc.t -> ?value:(Syntax.str list list) -> unit -> Syntax.expr
 (** [fresh_expr_string ?loc ?value ()] constructs a fresh string expression
     at location [loc] with value [value]. *)
 

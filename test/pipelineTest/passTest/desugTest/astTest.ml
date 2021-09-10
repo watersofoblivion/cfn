@@ -134,7 +134,7 @@ let test_desug_expr_string ctxt =
       Syntax.str_lit loc value
     in
     let loc = LocTest.gen () in
-    Syntax.expr_string loc [value]
+    Syntax.expr_string loc [[value]]
   in
   let annot = Annot.expr_string value in
   Desug.desug_expr env syntax (fun ty expr ->

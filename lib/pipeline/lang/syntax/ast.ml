@@ -19,7 +19,7 @@ type expr =
   | ExprFloat of { loc: Loc.t; lexeme: string }
   | ExprDouble of { loc: Loc.t; lexeme: string }
   | ExprRune of { loc: Loc.t; value: rune }
-  | ExprString of { loc: Loc.t; value: str list }
+  | ExprString of { loc: Loc.t; value: str list list }
   | ExprIdent of { loc: Loc.t; id: Sym.t }
   | ExprUnOp of { loc: Loc.t; op: Op.un; operand: expr }
   | ExprBinOp of { loc: Loc.t; op: Op.bin; lhs: expr; rhs: expr }
@@ -124,9 +124,13 @@ let rec pp_expr fmt = function
   | ExprBinOp expr -> fprintf fmt "%a %a %a" pp_expr expr.lhs Op.pp_bin expr.op pp_expr expr.rhs
   | ExprLet expr -> pp_expr_let fmt expr.binding expr.scope
 
-and pp_expr_string fmt segs =
-  let pp_sep _ _ = () in
-  fprintf fmt "\"%a\"" (pp_print_list ~pp_sep pp_str) segs
+and pp_expr_string fmt lines =
+  let pp_line fmt segs =
+    let pp_sep _ _ = () in
+    fprintf fmt "%a" (pp_print_list ~pp_sep pp_str) segs
+  in
+  let pp_sep fmt _ = fprintf fmt "\\@ " in
+  fprintf fmt "\"@[<v>%a@]\"" (pp_print_list ~pp_sep pp_line) lines
 
 and pp_expr_let fmt binding scope =
   fprintf fmt "let %a in %a" pp_binding binding pp_expr scope

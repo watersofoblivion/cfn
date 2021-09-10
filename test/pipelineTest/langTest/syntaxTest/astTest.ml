@@ -54,7 +54,7 @@ let fresh_expr_double ?loc:(loc = LocTest.gen ()) ?value:(value = 4.2) _ =
 let fresh_expr_rune ?loc:(loc = LocTest.gen ()) ?value:(value = fresh_rune_lit ()) _ =
   Syntax.expr_rune loc value
 
-let fresh_expr_string ?loc:(loc = LocTest.gen ()) ?value:(value = [fresh_str_lit ()]) _ =
+let fresh_expr_string ?loc:(loc = LocTest.gen ()) ?value:(value = [[fresh_str_lit ()]]) _ =
   Syntax.expr_string loc value
 
 let fresh_expr_ident ?loc:(loc = LocTest.gen ()) ?seq:(seq = Sym.seq ()) ?id:(id = "") _ =
@@ -113,7 +113,7 @@ and deloc_expr_rune value =
 
 and deloc_expr_string value =
   value
-    |> List.map deloc_str
+    |> List.map (List.map deloc_str)
     |> Syntax.expr_string LocTest.dummy
 
 and deloc_expr_un_op op operand =
@@ -201,7 +201,7 @@ let rec assert_expr_equal ~ctxt expected actual = match (expected, actual) with
     assert_rune_equal ~ctxt expected.value actual.value
   | Syntax.ExprString expected, Syntax.ExprString actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
-    List.iter2 (assert_str_equal ~ctxt) expected.value actual.value
+    List.iter2 (List.iter2 (assert_str_equal ~ctxt)) expected.value actual.value
   | Syntax.ExprIdent expected, Syntax.ExprIdent actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
     SymTest.assert_sym_equal ~ctxt expected.id actual.id
@@ -338,13 +338,13 @@ let test_expr_rune ctxt =
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_string ctxt =
-  let value = [fresh_str_lit ()] in
+  let value = [[fresh_str_lit ()]] in
   let loc = LocTest.gen () in
   let expected = Syntax.expr_string loc value in
   match expected with
     | Syntax.ExprString actual ->
       LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      List.iter2 (assert_str_equal ~ctxt) value actual.value
+      List.iter2 (List.iter2 (assert_str_equal ~ctxt)) value actual.value
     | actual -> expr_not_equal ~ctxt expected actual
 
 let test_expr_ident ctxt =
@@ -585,14 +585,13 @@ let test_pp_expr_rune ctxt =
        ]
 
 let test_pp_expr_string ctxt =
-  let lexeme = "foobar" in
   let value = [
-    fresh_str_lit ~value:"foo" ();
-    fresh_str_lit ~value:"bar" ();
+    [fresh_str_lit ~value:"foo" ()];
+    [fresh_str_lit ~value:"bar" ()];
   ] in
   fresh_expr_string ~value ()
     |> assert_pp_expr ~ctxt [
-         sprintf "%S" lexeme
+         sprintf "\"foo\\\n bar\""
        ]
 
 let test_pp_expr_ident ctxt =

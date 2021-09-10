@@ -58,6 +58,7 @@
 %token <Uchar.t> RUNE
 
 /* Strings */
+%token NEWLINE
 %token <string> STRING
 
 /* Identifiers */

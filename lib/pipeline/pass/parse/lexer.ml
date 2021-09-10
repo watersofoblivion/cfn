@@ -1,5 +1,7 @@
 open Parser
 
+open Common
+
 (* Initializers *)
 
 let from_string str =
@@ -101,6 +103,20 @@ let lit_rune lexbuf =
   let lexeme = Sedlexing.lexeme lexbuf in
   RUNE lexeme.(0)
 
+let lit_str_esc chr =
+  let lexeme =
+    chr
+      |> Uchar.of_char
+      |> Utf8.to_string
+  in
+  STRING lexeme
+
+let lit_str_multiline = NEWLINE
+
+let lit_str lexbuf =
+  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
+  STRING lexeme
+
 let lit_lident lexbuf =
   let lexeme = Sedlexing.Utf8.lexeme lexbuf in
   LIDENT lexeme
@@ -140,8 +156,10 @@ let unicode_radix = [%sedlex.regexp? 'u'|'U']
 let squote = [%sedlex.regexp? "'"]
 let dquote = [%sedlex.regexp? '"']
 
+let esc_bslash = [%sedlex.regexp? "\\\\"]
 let esc_squote = [%sedlex.regexp? "\\'"]
 let esc_dquote = [%sedlex.regexp? "\\\""]
+let multiline = [%sedlex.regexp? "\\\n"]
 let esc_lf = [%sedlex.regexp? "\\n"]
 let esc_cr = [%sedlex.regexp? "\\r"]
 let esc_tab = [%sedlex.regexp? "\\t"]
@@ -245,15 +263,16 @@ let rec lex_main lexbuf =
  *)
 let lex_rune lexbuf =
   match%sedlex lexbuf with
-    | 'a' -> lit_rune_esc 'a'
-    (* | esc_squote  -> lit_rune_esc '\'' *)
-    (* | esc_lf      -> lit_rune_esc '\r' *)
-    (* | esc_cr      -> lit_rune_esc '\n' *)
-    (* | esc_tab     -> lit_rune_esc '\t' *)
-    (* | esc_unicode -> lit_codepoint lexbuf *)
-    (* | Compl ("'" | "\\", ('n' | 't' | 'r')) -> lit_rune lexbuf *)
-    (* | squote      -> punct_squote *)
-    | _           -> failwith "Lexing error (rune)"
+    | eof                 -> punct_eof
+    | squote              -> punct_squote
+    | esc_bslash          -> lit_rune_esc '\\'
+    | esc_squote          -> lit_rune_esc '\''
+    | esc_lf              -> lit_rune_esc '\n'
+    | esc_cr              -> lit_rune_esc '\r'
+    | esc_tab             -> lit_rune_esc '\t'
+    | esc_unicode         -> lit_codepoint lexbuf
+    | Compl ('\'' | '\\') -> lit_rune lexbuf
+    | _                   -> failwith "Lexing error (rune)"
 
 (**
  * Lexes the body of a string.  Allowed syntaxes are:
@@ -268,11 +287,14 @@ let lex_rune lexbuf =
  *)
 let lex_str lexbuf =
   match%sedlex lexbuf with
-    (* | esc_dquote         -> lit_str_esc '\'' *)
-    (* | esc_lf             -> lit_str_esc '\r' *)
-    (* | esc_cr             -> lit_str_esc '\n' *)
-    (* | esc_tab            -> lit_str_esc '\t' *)
-    (* | esc_unicode        -> lit_str_codepoint lexbuf *)
-    (* | Plus (Compl "\\'") -> punct_dquote *)
-    (* | dquote             -> punct_dquote *)
-    | _                     -> failwith "Lexing error (string segment)"
+    | eof                       -> punct_eof
+    | dquote                    -> punct_dquote
+    | esc_bslash                -> lit_str_esc '\\'
+    | esc_dquote                -> lit_str_esc '"'
+    | esc_lf                    -> lit_str_esc '\n'
+    | esc_cr                    -> lit_str_esc '\r'
+    | esc_tab                   -> lit_str_esc '\t'
+    | multiline                 -> lit_str_multiline
+    | esc_unicode               -> lit_codepoint lexbuf
+    | Plus (Compl ('"' | '\\')) -> lit_str lexbuf
+    | _                         -> failwith "Lexing error (string segment)"

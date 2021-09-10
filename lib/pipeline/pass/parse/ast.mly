@@ -53,13 +53,14 @@
       Syntax.expr_rune loc r
         |> kontinue env)
 
-  let rec make_str_segs segs env kontinue = match segs with
+  let make_str_segs segs env kontinue = match segs with
     | [] -> kontinue env []
-    | seg :: segs ->
+    | _ -> kontinue env []
+    (* | seg :: segs ->
       seg env (fun env seg ->
         make_str_segs segs env (fun env segs ->
           seg :: segs
-            |> kontinue env))
+            |> kontinue env)) *)
 
   let make_lit_string (start_loc, end_loc) segs env kontinue =
     let loc = Loc.loc start_loc end_loc in
@@ -135,7 +136,7 @@
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> ident_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.expr -> 'a) -> 'a> lit_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.rune -> 'a) -> 'a> rune_test
-%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.str -> 'a) -> 'a> str_test
+%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.str -> 'a) -> 'a>  str_test
 %start block_test
 %start expr_test
 %start atom_test
@@ -207,18 +208,22 @@ str_test:
 | id = LIDENT { make_expr_ident $sloc id }
 
 %inline lit:
-| lit = BOOL                       { make_lit_bool $sloc lit }
-| lit = INT                        { make_lit_int $sloc lit }
-| lit = LONG                       { make_lit_long $sloc lit }
-| lit = FLOAT                      { make_lit_float $sloc lit }
-| lit = DOUBLE                     { make_lit_double $sloc lit }
-| "'"; r = rune; "'"               { make_lit_rune $sloc r }
-| DQUOTE; segs = list(str); DQUOTE { make_lit_string $sloc segs }
+| lit = BOOL                 { make_lit_bool $sloc lit }
+| lit = INT                  { make_lit_int $sloc lit }
+| lit = LONG                 { make_lit_long $sloc lit }
+| lit = FLOAT                { make_lit_float $sloc lit }
+| lit = DOUBLE               { make_lit_double $sloc lit }
+| "'"; lit = rune; "'"       { make_lit_rune $sloc lit }
+| DQUOTE; lit = line; DQUOTE { make_lit_string $sloc lit }
 
 %public rune:
-| r = RUNE    { make_rune_lit $sloc r }
+| rune = RUNE { make_rune_lit $sloc rune }
 | uesc = UESC { make_rune_escape $sloc uesc }
 
+%public line:
+| segs = str*; NEWLINE; line = line { segs :: line }
+| segs = str* { segs :: [] }
+
 %public str:
-| s = STRING  { make_str_lit $sloc s }
-| uesc = UESC { make_str_escape $sloc uesc }
+| str = STRING { make_str_lit $sloc str }
+| uesc = UESC  { make_str_escape $sloc uesc }
