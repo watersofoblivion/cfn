@@ -9,10 +9,8 @@ open CommonTest
 let fresh_patt_ground ?loc:(loc = LocTest.gen ()) _ =
   Syntax.patt_ground loc
 
-let fresh_patt_var ?loc:(loc = LocTest.gen ()) ?seq:(seq = Sym.seq ()) ?id:(id = "") _ =
-  seq
-    |> Sym.gen ~id
-    |> Syntax.patt_var loc
+let fresh_patt_var ?loc:(loc = LocTest.gen ()) ?id:(id = SymTest.fresh_sym ()) _ =
+  Syntax.patt_var loc id
 
 (* Location Stripping *)
 
@@ -80,9 +78,10 @@ let test_pp_patt_ground ctxt =
     |> assert_pp_patt ~ctxt ["_"]
 
 let test_pp_patt_var ctxt =
-  let id = "testId" in
+  let lexeme = "testId" in
+  let id = SymTest.fresh_sym ~id:lexeme () in
   fresh_patt_var ~id ()
-    |> assert_pp_patt ~ctxt [id]
+    |> assert_pp_patt ~ctxt [lexeme]
 
 let test_pp =
   "Pretty Printing" >::: [

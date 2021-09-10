@@ -1,8 +1,18 @@
 open OUnit2
 
-include ParserTest
+include TypeTest
+include OpTest
+include PattTest
+include AstTest
+include ImportTest
+include FileTest
 
 let suite =
   "Parsing" >::: [
-    ParserTest.suite;
+    TypeTest.suite;
+    OpTest.suite;
+    PattTest.suite;
+    AstTest.suite;
+    ImportTest.suite;
+    FileTest.suite;
   ]

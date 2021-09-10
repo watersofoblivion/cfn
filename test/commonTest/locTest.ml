@@ -9,6 +9,7 @@ open Common
 let dummy = Loc.loc Lexing.dummy_pos Lexing.dummy_pos
 
 let pos = ref 0
+
 let gen_pos fname =
   let lnum = !pos in
   incr pos;
@@ -20,12 +21,14 @@ let gen_pos fname =
     Lexing.pos_lnum  = lnum;
     Lexing.pos_bol   = bol;
     Lexing.pos_cnum  = cnum }
+
 let gen _ =
   let fname = sprintf "file-%d.nile" !pos in
   incr pos;
   let start_pos = gen_pos fname in
   let end_pos = gen_pos fname in
   Loc.loc start_pos end_pos
+
 let make (start_line, start_col, start_off) (end_line, end_col, end_off) =
   let start_pos =
     { Lexing.pos_fname = "";
@@ -41,50 +44,20 @@ let make (start_line, start_col, start_off) (end_line, end_col, end_off) =
   in
   Loc.loc start_pos end_pos
 
-(* Cursors *)
+let span src dst =
+  make
+    (src.Loc.start_pos.line, src.start_pos.col, src.start_pos.off)
+    (dst.Loc.end_pos.line, dst.end_pos.col, dst.end_pos.off)
 
-type cursor = {
-  mutable line: int;
-  mutable col:  int;
-  mutable off:  int;
-}
+let span_from src dst =
+  make
+    src
+    (dst.Loc.end_pos.line, dst.end_pos.col, dst.end_pos.off)
 
-let cursor _ =
-  { line = 1; col = 0; off = 0 }
-
-let newline cursor =
-  cursor.line <- cursor.line + 1;
-  cursor.col <- 0
-
-let advance cursor n =
-  cursor.col <- cursor.col + n;
-  cursor.off <- cursor.off + n
-
-type mark = {
-  mark_line: int;
-  mark_col:  int;
-  mark_off:  int
-}
-
-let mark cursor =
-  { mark_line = cursor.line;
-    mark_col  = cursor.col;
-    mark_off  = cursor.off }
-
-let span mark cursor =
-  make (cursor.line, cursor.col, cursor.off) (mark.mark_line, mark.mark_col, mark.mark_off)
-
-let capture cursor n =
-  let mk = mark cursor in
-  advance cursor n;
-  span mk cursor
-
-let lexeme cursor lexeme =
-  lexeme
-    |> String.length
-    |> capture cursor
-
-(* Marks *)
+let shift (lines, cols, off) loc =
+  make
+    (loc.Loc.start_pos.line + lines, loc.start_pos.col + cols, loc.start_pos.off + off)
+    (loc.end_pos.line + lines, loc.end_pos.col + cols, loc.end_pos.off + off)
 
 (* Assertions *)
 

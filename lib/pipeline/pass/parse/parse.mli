@@ -47,6 +47,12 @@ val parse_bin : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Synta
 val parse_patt : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.patt -> 'a) -> 'a
 (** [parse_patt lexbuf env kontinue] parses a pattern. *)
 
+val parse_rune : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.rune -> 'a) -> 'a
+(** [parse_rune lexbuf env kontinue] parses a rune literal value. *)
+
+val parse_str : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.str -> 'a) -> 'a
+(** [parse_str lexbuf env kontinue] parses a string segment value. *)
+
 val parse_lit : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.expr -> 'a) -> 'a
 (** [parse_lit lexbuf env kontinue] parses a literal value. *)
 

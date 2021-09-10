@@ -32,6 +32,20 @@
   let make_bin_bit_xor loc env kontinue = make_op Syntax.bin_bit_xor loc env kontinue
 %}
 
+/* Precedences */
+
+%left  BIN_LOG_OR
+%left  BIN_LOG_AND
+%left  BIN_STRUCT_EQ BIN_STRUCT_NEQ BIN_PHYS_EQ BIN_PHYS_NEQ
+%left  PIPE /* Alias for BIN_BIT_OR */
+%left  BIN_BIT_XOR
+%left  BIN_BIT_AND
+%left  BIN_LTE BIN_LT BIN_GT BIN_GTE
+%left  BIN_ADD UN_NEG /* Alias for BIN_SUB */
+%left  BIN_MUL BIN_DIV BIN_MOD
+%right BIN_EXP
+%right UN_LOG_NOT UN_BIT_NOT
+
 /* Testing Entry Points */
 
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.un -> 'a) -> 'a>  un_test

@@ -125,8 +125,8 @@ val fresh_patt_ground : ?loc:Loc.t -> unit -> Syntax.patt
 (** [fresh_patt_ground ?loc ()] constructs a fresh ground pattern at location
     [loc]. *)
 
-val fresh_patt_var : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.patt
-(** [fresh_patt_var ?loc ?seq ?id ()] constructs a fresh identifier pattern at
+val fresh_patt_var : ?loc:Loc.t -> ?id:Sym.t -> unit -> Syntax.patt
+(** [fresh_patt_var ?loc ?id ()] constructs a fresh identifier pattern at
     location [loc]. *)
 
 (** {3 Runes} *)

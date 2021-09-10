@@ -617,7 +617,10 @@ let test_pp_expr_let ctxt =
   let id = "testId" in
   let value = 42l in
   let binding =
-    let patt = PattTest.fresh_patt_var ~id () in
+    let patt =
+      let id = SymTest.fresh_sym ~id () in
+      PattTest.fresh_patt_var ~id ()
+    in
     let ty =
       let id = SymTest.fresh_sym ~id:Prim.id_int () in
       TypeTest.fresh_ty_constr ~id ()
@@ -634,7 +637,10 @@ let test_pp_expr_let ctxt =
 let test_pp_binding_value_binding ctxt =
   let id = "testId" in
 
-  let patt = PattTest.fresh_patt_var ~id () in
+  let patt =
+    let id = SymTest.fresh_sym ~id () in
+    PattTest.fresh_patt_var ~id ()
+  in
   let ty =
     let id = SymTest.fresh_sym ~id:Prim.id_bool () in
     TypeTest.fresh_ty_constr ~id ()
@@ -653,7 +659,10 @@ let test_pp_binding_value_binding ctxt =
 let test_pp_top_let ctxt =
   let id = "testId" in
 
-  let patt = PattTest.fresh_patt_var ~id () in
+  let patt =
+    let id = SymTest.fresh_sym ~id () in
+    PattTest.fresh_patt_var ~id ()
+  in
   let value = fresh_expr_bool ~value:true () in
   let binding = fresh_value_binding ~patt ~value () in
 
@@ -665,7 +674,10 @@ let test_pp_top_let ctxt =
 let test_pp_top_val ctxt =
   let id = "testId" in
 
-  let patt = PattTest.fresh_patt_var ~id () in
+  let patt =
+    let id = SymTest.fresh_sym ~id () in
+    PattTest.fresh_patt_var ~id ()
+  in
   let value = fresh_expr_bool ~value:true () in
   let binding = fresh_value_binding ~patt ~value () in
 

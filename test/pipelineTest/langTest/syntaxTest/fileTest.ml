@@ -56,7 +56,10 @@ let imports =
 
 let top_let =
   let binding =
-    let patt = PattTest.fresh_patt_var ~id:let_lexeme () in
+    let patt =
+      let id = SymTest.fresh_sym ~id:let_lexeme () in
+      PattTest.fresh_patt_var ~id ()
+    in
     let ty =
       let id = SymTest.fresh_sym ~id:let_ty () in
       TypeTest.fresh_ty_constr ~id ()
@@ -68,7 +71,10 @@ let top_let =
 
 let top_val =
   let binding =
-    let patt = PattTest.fresh_patt_var ~id:val_lexeme () in
+    let patt =
+      let id = SymTest.fresh_sym ~id:val_lexeme () in
+      PattTest.fresh_patt_var ~id ()
+    in
     let ty =
       let id = SymTest.fresh_sym ~id:val_ty () in
       TypeTest.fresh_ty_constr ~id ()

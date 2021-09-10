@@ -30,7 +30,7 @@ exception ParseError of Loc.t
 exception Rejected
 
 let parse_error env = match Menhir.top env with
-  | None -> failwith "Boom!"
+  | None -> failwith "Boom: parse_error"
   | Some (Menhir.Element (_, _, start_loc, end_loc)) ->
     let loc = Loc.loc start_loc end_loc in
     ParseError loc
@@ -44,7 +44,7 @@ let rec parse_main lexbuf checkpoint = match checkpoint with
   | Menhir.InputNeeded _ -> input_main lexbuf checkpoint
   | Menhir.Shifting (_, env, _) ->
     let resume = match Menhir.top env with
-      | None -> failwith "Boom!"
+      | None -> failwith "Boom: parse_main no top"
       | Some (Menhir.Element (state, _, _, _)) ->
         match Menhir.incoming_symbol state with
           | Menhir.T Menhir.T_SQUOTE -> resume_rune
@@ -62,7 +62,7 @@ and parse_rune lexbuf checkpoint = match checkpoint with
   | Menhir.InputNeeded _ -> input_rune lexbuf checkpoint
   | Menhir.Shifting (_, env, _) ->
     let resume = match Menhir.top env with
-      | None -> failwith "Boom!"
+      | None -> failwith "Boom: parse_rune no top"
       | Some (Menhir.Element (state, _, _, _)) ->
         match Menhir.incoming_symbol state with
           | Menhir.T Menhir.T_SQUOTE -> resume_main
@@ -79,7 +79,7 @@ and parse_str lexbuf checkpoint = match checkpoint with
   | Menhir.InputNeeded _ -> input_str lexbuf checkpoint
   | Menhir.Shifting (_, env, _) ->
     let resume = match Menhir.top env with
-      | None -> failwith "Boom!"
+      | None -> failwith "Boom: parse_str no top"
       | Some (Menhir.Element (state, _, _, _)) ->
         match Menhir.incoming_symbol state with
           | Menhir.T Menhir.T_DQUOTE -> resume_main
@@ -158,6 +158,18 @@ let parse_patt lexbuf =
   start_pos
     |> Parser.Incremental.patt_test
     |> parse_main lexbuf
+
+let parse_rune lexbuf =
+  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
+  start_pos
+    |> Parser.Incremental.rune_test
+    |> parse_rune lexbuf
+
+let parse_str lexbuf =
+  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
+  start_pos
+    |> Parser.Incremental.str_test
+    |> parse_str lexbuf
 
 let parse_lit lexbuf =
   let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
