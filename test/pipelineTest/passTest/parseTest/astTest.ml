@@ -237,6 +237,23 @@ let test_parse_atom_paren ctxt =
 
 type assoc = Left | Right
 
+let pp_assoc fmt = function
+  | Left -> fprintf fmt "left"
+  | Right -> fprintf fmt "right"
+
+let prec_assoc_err op assoc op' assoc' =
+  fprintf
+    str_formatter
+    "Operator %S and %S have the same precedence but different associativity: %S is %a associative, but %S is %a associative"
+      op
+      op'
+      op
+      pp_assoc assoc
+      op'
+      pp_assoc assoc'
+    |> flush_str_formatter
+    |> assert_failure
+
 let un_ops = [
   (Syntax.un_neg,     "-");
   (Syntax.un_log_not, "!");
@@ -274,26 +291,167 @@ let bin_ops = [
 ]
 
 let test_parse_expr_un_op ctxt =
-  let rec not_self acc = function
-    | [] -> ()
-    | constr :: tl ->
-      List.iter () acc;
-      List.iter () tl;
-  in
-  not_self [] un_ops
+  List.iter (fun (constr, lexeme) ->
+    let op_len = String.length lexeme in
+    let op =
+      LocTest.make (0, 0, 0) (0, op_len, op_len)
+        |> constr
+    in
+    let operand = fresh_atom_int ~start:(0, 1 + op_len, 1 + op_len) ~lexeme:"1" () in
+    fresh_un_op ~op ~operand ()
+      |> assert_parses_expr ~ctxt [sprintf "%s 1" lexeme]
+  ) un_ops
 
 let test_parse_expr_bin_op ctxt =
-  let rec not_self acc = function
-    | [] -> ()
-    | (assoc, constr) :: tl ->
-      let _ = match assoc with
-        | Left ->
-        | Right ->
-      in
-      List.iter () acc;
-      List.iter () tl;
   in
-  not_self [] bin_ops
+
+  let left = fresh_atom_int ~lexeme:"1" () in
+  let rec versus acc = function
+    | [] -> ()
+    | hd :: tl ->
+      let rec versus' acc' = function
+        | [] -> ()
+        | ((assoc, constr, lexeme) as hd') :: tl' ->
+          (* Self *)
+          let op_len = String.length lexeme in
+          let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
+          let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + 2*op_len, 5 + 2*op_len) in
+          let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+          let right = fresh_atom_int ~start:(0, 6 + 2*op_len, 6 + 2*op_len) ~lexeme:"3" () in
+          let expr = match assoc with
+            | Left ->
+              let lhs =
+                let op = constr left_op_loc in
+                fresh_bin_op ~op ~lhs:left ~rhs:center ()
+              in
+              let op = constr right_op_loc in
+              fresh_bin_op ~op ~lhs ~rhs:right ()
+            | Right ->
+              let rhs =
+                let op = constr right_op_loc in
+                fresh_bin_op ~op ~lhs:center ~rhs:right ()
+              in
+              let op = constr left_op_loc in
+              fresh_bin_op ~op ~lhs:left ~rhs ()
+          in
+          expr
+            |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme];
+
+          (* Other operators of equal precedence *)
+          List.iter (fun (assoc', constr', lexeme') ->
+            let op_len' = String.length lexeme' in
+            let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
+            let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
+            let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+            let right = fresh_atom_int ~start:(0, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
+            let expr = match (assoc, assoc') with
+              | Left, Left ->
+                let lhs =
+                  let op = constr left_op_loc in
+                  fresh_bin_op ~op ~lhs:left ~rhs:center ()
+                in
+                let op = constr' right_op_loc in
+                fresh_bin_op ~op ~lhs ~rhs:right ()
+              | Right, Right ->
+                let rhs =
+                  let op = constr' right_op_loc in
+                  fresh_bin_op ~op ~lhs:center ~rhs:right ()
+                in
+                let op = constr left_op_loc in
+                fresh_bin_op ~op ~lhs:left ~rhs ()
+              | _ -> prec_assoc_err lexeme assoc lexeme' assoc'
+            in
+            expr
+              |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme'];
+
+            let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len', 2 + op_len') in
+            let right_op_loc = LocTest.make (0, 5 + op_len', 5 + op_len') (0, 5 + op_len + op_len', 5 + op_len + op_len') in
+            let center = fresh_atom_int ~start:(0, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
+            let expr = match (assoc, assoc') with
+              | Left, Left ->
+                let lhs =
+                  let op = constr' left_op_loc in
+                  fresh_bin_op ~op ~lhs:left ~rhs:center ()
+                in
+                let op = constr right_op_loc in
+                fresh_bin_op ~op ~lhs ~rhs:right ()
+              | Right, Right ->
+                let rhs =
+                  let op = constr right_op_loc in
+                  fresh_bin_op ~op ~lhs:center ~rhs:right ()
+                in
+                let op = constr' left_op_loc in
+                fresh_bin_op ~op ~lhs:left ~rhs ()
+              | _ -> prec_assoc_err lexeme assoc lexeme' assoc'
+            in
+            expr
+              |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme' lexeme];
+          ) tl';
+
+          (* Higher Precedence Operators *)
+          List.iter (fun higher ->
+            List.iter (fun (_, constr', lexeme') ->
+              let op_len' = String.length lexeme' in
+              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
+              let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+              let right = fresh_atom_int ~start:(0, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
+              let rhs =
+                let op = constr' right_op_loc in
+                fresh_bin_op ~op ~lhs:center ~rhs:right ()
+              in
+              let op = constr left_op_loc in
+              fresh_bin_op ~op ~lhs:left ~rhs ()
+                |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme'];
+
+              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len', 2 + op_len') in
+              let right_op_loc = LocTest.make (0, 5 + op_len', 5 + op_len') (0, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(0, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
+              let lhs =
+                let op = constr' left_op_loc in
+                fresh_bin_op ~op ~lhs:left ~rhs:center ()
+              in
+              let op = constr right_op_loc in
+              fresh_bin_op ~op ~lhs ~rhs:right ()
+                |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme' lexeme];
+            ) higher
+          ) acc;
+
+          (* Lower Precedence Operators *)
+          List.iter (fun lower ->
+            List.iter (fun (_, constr', lexeme') ->
+              let op_len' = String.length lexeme' in
+              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
+              let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+              let right = fresh_atom_int ~start:(0, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
+              let lhs =
+                let op = constr left_op_loc in
+                fresh_bin_op ~op ~lhs:left ~rhs:center ()
+              in
+              let op = constr' right_op_loc in
+              fresh_bin_op ~op ~lhs ~rhs:right ()
+                |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme'];
+
+              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len', 2 + op_len') in
+              let right_op_loc = LocTest.make (0, 5 + op_len', 5 + op_len') (0, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(0, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
+              let rhs =
+                let op = constr right_op_loc in
+                fresh_bin_op ~op ~lhs:center ~rhs:right ()
+              in
+              let op = constr' left_op_loc in
+              fresh_bin_op ~op ~lhs:left ~rhs ()
+                |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme' lexeme];
+            ) lower
+          ) tl;
+
+          versus' (hd' :: acc') tl'
+    in
+    versus' [] hd;
+    versus (hd :: acc) tl
+  in
+  versus [] bin_ops
 
 let test_parse_expr_atom ctxt =
   fresh_atom_bool ~value:true ()
