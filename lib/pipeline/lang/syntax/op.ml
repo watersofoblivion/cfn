@@ -20,6 +20,10 @@ type bin =
   | BinLte of { loc: Loc.t }
   | BinGt of { loc: Loc.t }
   | BinGte of { loc: Loc.t }
+  | BinLsl of { loc: Loc.t }
+  | BinLsr of { loc: Loc.t }
+  | BinAsl of { loc: Loc.t }
+  | BinAsr of { loc: Loc.t }
   | BinAdd of { loc: Loc.t }
   | BinSub of { loc: Loc.t }
   | BinMul of { loc: Loc.t }
@@ -47,6 +51,11 @@ let bin_lt loc = BinLt { loc }
 let bin_lte loc = BinLte { loc }
 let bin_gt loc = BinGt { loc }
 let bin_gte loc = BinGte { loc }
+
+let bin_lsl loc = BinLsl { loc }
+let bin_lsr loc = BinLsr { loc }
+let bin_asl loc = BinAsl { loc }
+let bin_asr loc = BinAsr { loc }
 
 let bin_add loc = BinAdd { loc }
 let bin_sub loc = BinSub { loc }
@@ -78,6 +87,10 @@ let loc_bin = function
   | BinLte op -> op.loc
   | BinGt op -> op.loc
   | BinGte op -> op.loc
+  | BinLsl op -> op.loc
+  | BinLsr op -> op.loc
+  | BinAsl op -> op.loc
+  | BinAsr op -> op.loc
   | BinAdd op -> op.loc
   | BinSub op -> op.loc
   | BinMul op -> op.loc
@@ -106,6 +119,10 @@ let pp_bin fmt = function
   | BinLte _ -> fprintf fmt "<="
   | BinGt _ -> fprintf fmt ">"
   | BinGte _ -> fprintf fmt ">="
+  | BinLsl _ -> fprintf fmt "<<"
+  | BinLsr _ -> fprintf fmt ">>"
+  | BinAsl _ -> fprintf fmt "<<<"
+  | BinAsr _ -> fprintf fmt ">>>"
   | BinAdd _ -> fprintf fmt "+"
   | BinSub _ -> fprintf fmt "-"
   | BinMul _ -> fprintf fmt "*"

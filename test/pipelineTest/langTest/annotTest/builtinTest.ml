@@ -34,6 +34,18 @@ let fresh_builtin_gt ?ty:(ty = Annot.ty_int) _ =
 let fresh_builtin_gte ?ty:(ty = Annot.ty_int) _ =
   Annot.builtin_gte ty
 
+let fresh_builtin_lsl ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_lsl ty
+
+let fresh_builtin_lsr ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_lsr ty
+
+let fresh_builtin_asl ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_asl ty
+
+let fresh_builtin_asr ?ty:(ty = Annot.ty_int) _ =
+  Annot.builtin_asr ty
+
 let fresh_builtin_add ?ty:(ty = Annot.ty_int) _ =
   Annot.builtin_add ty
 
@@ -107,6 +119,14 @@ let assert_builtin_equal ~ctxt expected actual = match (expected, actual) with
   | Annot.BuiltinGt expected, Annot.BuiltinGt actual ->
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
   | Annot.BuiltinGte expected, Annot.BuiltinGte actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Annot.BuiltinLsl expected, Annot.BuiltinLsl actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Annot.BuiltinLsr expected, Annot.BuiltinLsr actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Annot.BuiltinAsl expected, Annot.BuiltinAsl actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Annot.BuiltinAsr expected, Annot.BuiltinAsr actual ->
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
   | Annot.BuiltinAdd expected, Annot.BuiltinAdd actual ->
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
@@ -224,7 +244,6 @@ let test_builtin_lt ctxt =
         TypeTest.assert_ty_equal ~ctxt ty actual.ty
       | actual -> builtin_not_equal ~ctxt expected actual)
 
-
 let test_builtin_lte ctxt =
   assert_numeric Annot.builtin_lte (fun ty expected ->
     match expected with
@@ -243,6 +262,34 @@ let test_builtin_gte ctxt =
   assert_numeric Annot.builtin_gte (fun ty expected ->
     match expected with
       | Annot.BuiltinGte actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
+let test_builtin_lsl ctxt =
+  assert_integral Annot.builtin_lsl (fun ty expected ->
+    match expected with
+      | Annot.BuiltinLsl actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
+let test_builtin_lsr ctxt =
+  assert_integral Annot.builtin_lsr (fun ty expected ->
+    match expected with
+      | Annot.BuiltinLsr actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
+let test_builtin_asl ctxt =
+  assert_integral Annot.builtin_asl (fun ty expected ->
+    match expected with
+      | Annot.BuiltinAsl actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
+let test_builtin_asr ctxt =
+  assert_integral Annot.builtin_asr (fun ty expected ->
+    match expected with
+      | Annot.BuiltinAsr actual ->
         TypeTest.assert_ty_equal ~ctxt ty actual.ty
       | actual -> builtin_not_equal ~ctxt expected actual)
 
@@ -376,6 +423,16 @@ let test_constructors =
       "Greater Than"          >:: test_builtin_gt;
       "Greater Than or Equal" >:: test_builtin_gte;
     ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_builtin_lsl;
+        "Right" >:: test_builtin_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_builtin_asl;
+        "Right" >:: test_builtin_asr;
+      ];
+    ];
     "Arithmetic" >::: [
       "Negation"       >:: test_builtin_neg;
       "Addition"       >:: test_builtin_add;
@@ -461,6 +518,30 @@ let test_pp_gte ctxt =
   Annot.builtin_gte Annot.ty_int
     |> assert_pp_builtin ~ctxt [
          sprintf "_.Gte[%s]" Prim.id_int
+       ]
+
+let test_pp_lsl ctxt =
+  Annot.builtin_lsl Annot.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Lsl[%s]" Prim.id_int
+       ]
+
+let test_pp_lsr ctxt =
+  Annot.builtin_lsr Annot.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Lsr[%s]" Prim.id_int
+       ]
+
+let test_pp_asl ctxt =
+  Annot.builtin_asl Annot.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Asl[%s]" Prim.id_int
+       ]
+
+let test_pp_asr ctxt =
+  Annot.builtin_asr Annot.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Asr[%s]" Prim.id_int
        ]
 
 let test_pp_add ctxt =
@@ -567,6 +648,16 @@ let test_pp =
       "Greater Than"          >:: test_pp_gt;
       "Greater Than or Equal" >:: test_pp_gte;
     ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_pp_lsl;
+        "Right" >:: test_pp_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_pp_asl;
+        "Right" >:: test_pp_asr;
+      ];
+    ];
     "Arithmetic" >::: [
       "Negation"       >:: test_pp_neg;
       "Addition"       >:: test_pp_add;
@@ -652,6 +743,38 @@ let test_check_gte ctxt =
   let ty = Annot.ty_int in
   let builtin = Annot.builtin_gte ty in
   Annot.arity_fixed [ty; ty] Annot.ty_bool
+    |> assert_arity_equal ~ctxt
+    |> Annot.check_builtin env builtin
+
+let test_check_lsl ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Annot.ty_int in
+  let builtin = Annot.builtin_lsl ty in
+  Annot.arity_fixed [ty; ty] ty
+    |> assert_arity_equal ~ctxt
+    |> Annot.check_builtin env builtin
+
+let test_check_lsr ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Annot.ty_int in
+  let builtin = Annot.builtin_lsr ty in
+  Annot.arity_fixed [ty; ty] ty
+    |> assert_arity_equal ~ctxt
+    |> Annot.check_builtin env builtin
+
+let test_check_asl ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Annot.ty_int in
+  let builtin = Annot.builtin_asl ty in
+  Annot.arity_fixed [ty; ty] ty
+    |> assert_arity_equal ~ctxt
+    |> Annot.check_builtin env builtin
+
+let test_check_asr ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Annot.ty_int in
+  let builtin = Annot.builtin_asr ty in
+  Annot.arity_fixed [ty; ty] ty
     |> assert_arity_equal ~ctxt
     |> Annot.check_builtin env builtin
 
@@ -784,6 +907,16 @@ let test_check =
       "Less Than or Equal"    >:: test_check_lte;
       "Greater Than"          >:: test_check_gt;
       "Greater Than or Equal" >:: test_check_gte;
+    ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_check_lsl;
+        "Right" >:: test_check_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_check_asl;
+        "Right" >:: test_check_asr;
+      ];
     ];
     "Arithmetic" >::: [
       "Negation"       >:: test_check_neg;

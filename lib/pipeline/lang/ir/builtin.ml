@@ -17,6 +17,10 @@ type builtin =
   | BuiltinLte of { ty: Type.ty }
   | BuiltinGt of { ty: Type.ty }
   | BuiltinGte of { ty: Type.ty }
+  | BuiltinLsl of { ty: Type.ty }
+  | BuiltinLsr of { ty: Type.ty }
+  | BuiltinAsl of { ty: Type.ty }
+  | BuiltinAsr of { ty: Type.ty }
   | BuiltinAdd of { ty: Type.ty }
   | BuiltinSub of { ty: Type.ty }
   | BuiltinMul of { ty: Type.ty }
@@ -84,6 +88,11 @@ let builtin_lte = builtin_numeric (fun ty -> BuiltinLte { ty })
 let builtin_gt = builtin_numeric (fun ty -> BuiltinGt { ty })
 let builtin_gte = builtin_numeric (fun ty -> BuiltinGte { ty })
 
+let builtin_lsl = builtin_integral (fun ty -> BuiltinLsl { ty })
+let builtin_lsr = builtin_integral (fun ty -> BuiltinLsr { ty })
+let builtin_asl = builtin_integral (fun ty -> BuiltinAsl { ty })
+let builtin_asr = builtin_integral (fun ty -> BuiltinAsr { ty })
+
 let builtin_add = builtin_numeric (fun ty -> BuiltinAdd { ty })
 let builtin_sub = builtin_numeric (fun ty -> BuiltinSub { ty })
 let builtin_mul = builtin_numeric (fun ty -> BuiltinMul { ty })
@@ -138,6 +147,10 @@ let pp_builtin fmt builtin =
     | BuiltinLte builtin -> pp "Lte" [builtin.ty]
     | BuiltinGt builtin -> pp "Gt" [builtin.ty]
     | BuiltinGte builtin -> pp "Gte" [builtin.ty]
+    | BuiltinLsl builtin -> pp "Lsl" [builtin.ty]
+    | BuiltinLsr builtin -> pp "Lsr" [builtin.ty]
+    | BuiltinAsl builtin -> pp "Asl" [builtin.ty]
+    | BuiltinAsr builtin -> pp "Asr" [builtin.ty]
     | BuiltinAdd builtin -> pp "Add" [builtin.ty]
     | BuiltinSub builtin -> pp "Sub" [builtin.ty]
     | BuiltinMul builtin -> pp "Mul" [builtin.ty]
@@ -164,6 +177,10 @@ let rec check_builtin env builtin kontinue = match builtin with
   | BuiltinLte builtin -> check_builtin_cmp env builtin.ty kontinue
   | BuiltinGt builtin -> check_builtin_cmp env builtin.ty kontinue
   | BuiltinGte builtin -> check_builtin_cmp env builtin.ty kontinue
+  | BuiltinLsl builtin -> check_builtin_bin_op env builtin.ty kontinue
+  | BuiltinLsr builtin -> check_builtin_bin_op env builtin.ty kontinue
+  | BuiltinAsl builtin -> check_builtin_bin_op env builtin.ty kontinue
+  | BuiltinAsr builtin -> check_builtin_bin_op env builtin.ty kontinue
   | BuiltinAdd builtin -> check_builtin_bin_op env builtin.ty kontinue
   | BuiltinSub builtin -> check_builtin_bin_op env builtin.ty kontinue
   | BuiltinMul builtin -> check_builtin_bin_op env builtin.ty kontinue

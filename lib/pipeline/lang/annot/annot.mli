@@ -53,6 +53,18 @@ type builtin = private
   | BuiltinGte of {
       ty: ty (** Operand type *)
     } (** Greater Than or Equal *)
+  | BuiltinLsl of {
+      ty: ty (** Operand type *)
+    } (** Logical Shift Left *)
+  | BuiltinLsr of {
+      ty: ty (** Operand type *)
+    } (** Logical Shift Right *)
+  | BuiltinAsl of {
+      ty: ty (** Operand type *)
+    } (** Arithmetic Shift Left *)
+  | BuiltinAsr of {
+      ty: ty (** Operand type *)
+    } (** Arithmetic Shift Right *)
   | BuiltinAdd of {
       ty: ty (** Operand type *)
     } (** Addition *)
@@ -249,6 +261,26 @@ val builtin_gte : ty -> builtin
 (** [builtin_gte ty] constructs a greater than or equal builtin operating on
     values of type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as
     determined by {!Type.ty_is_numeric}. *)
+
+val builtin_lsl : ty -> builtin
+(** [builtin_lsl ty] constructs a logical shift left builtin operating on values
+    of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type as
+    determined by {!Type.ty_is_integral}. *)
+
+val builtin_lsr : ty -> builtin
+(** [builtin_lsr ty] constructs a logical shift right builtin operating on
+    values of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type
+    as determined by {!Type.ty_is_integral}. *)
+
+val builtin_asl : ty -> builtin
+(** [builtin_asl ty] constructs a arithmetic shift left builtin operating on
+    values of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type
+    as determined by {!Type.ty_is_integral}. *)
+
+val builtin_asr : ty -> builtin
+(** [builtin_asr ty] constructs a arithmetic shift right builtin operating on
+    values of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type
+    as determined by {!Type.ty_is_integral}. *)
 
 val builtin_add : ty -> builtin
 (** [builtin_add ty] constructs an addition builtin operating on values of type

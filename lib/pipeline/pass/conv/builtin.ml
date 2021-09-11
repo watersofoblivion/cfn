@@ -14,6 +14,10 @@ let rec convert_builtin env builtin kontinue = match builtin with
   | Mono.BuiltinLte builtin -> convert Clos.builtin_lte env builtin.ty kontinue
   | Mono.BuiltinGt builtin -> convert Clos.builtin_gt env builtin.ty kontinue
   | Mono.BuiltinGte builtin -> convert Clos.builtin_gte env builtin.ty kontinue
+  | Mono.BuiltinLsl builtin -> convert Clos.builtin_lsl env builtin.ty kontinue
+  | Mono.BuiltinLsr builtin -> convert Clos.builtin_lsr env builtin.ty kontinue
+  | Mono.BuiltinAsl builtin -> convert Clos.builtin_asl env builtin.ty kontinue
+  | Mono.BuiltinAsr builtin -> convert Clos.builtin_asr env builtin.ty kontinue
   | Mono.BuiltinAdd builtin -> convert Clos.builtin_add env builtin.ty kontinue
   | Mono.BuiltinSub builtin -> convert Clos.builtin_sub env builtin.ty kontinue
   | Mono.BuiltinMul builtin -> convert Clos.builtin_mul env builtin.ty kontinue

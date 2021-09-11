@@ -43,6 +43,22 @@ val fresh_builtin_gte : ?ty:Annot.ty -> unit -> Annot.builtin
 (** [fresh_builtin_gte ?ty ()] constructs a fresh built-in greater than or equal
     function operating on values of type [ty]. *)
 
+val fresh_builtin_lsl : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_lsl ?ty ()] constructs a fresh built-in logical shift left
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_lsr : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_lsr ?ty ()] constructs a fresh built-in logical shift right
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_asl : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_asl ?ty ()] constructs a fresh built-in Arithmetic shift left
+    function operating on values of type [ty]. *)
+
+val fresh_builtin_asr : ?ty:Annot.ty -> unit -> Annot.builtin
+(** [fresh_builtin_asr ?ty ()] constructs a fresh built-in Arithmetic shift
+    right function operating on values of type [ty]. *)
+
 val fresh_builtin_add : ?ty:Annot.ty -> unit -> Annot.builtin
 (** [fresh_builtin_add ?ty ()] constructs a fresh built-in addition function
     operating on values of type [ty]. *)

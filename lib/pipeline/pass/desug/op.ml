@@ -40,6 +40,10 @@ let promotion_rule = function
   | Syntax.BinLte _
   | Syntax.BinGt _
   | Syntax.BinGte _ -> cmp_rule
+  | Syntax.BinLsl _
+  | Syntax.BinLsr _
+  | Syntax.BinAsl _
+  | Syntax.BinAsr _ -> numeric_rule
   | Syntax.BinAdd _
   | Syntax.BinSub _
   | Syntax.BinMul _
@@ -99,6 +103,10 @@ let rec desug_bin env op lhs rhs kontinue = match op with
   | Syntax.BinLte _ -> desug_bin_cmp env Annot.builtin_lte lhs rhs kontinue
   | Syntax.BinGt _ -> desug_bin_cmp env Annot.builtin_gt lhs rhs kontinue
   | Syntax.BinGte _ -> desug_bin_cmp env Annot.builtin_gte lhs rhs kontinue
+  | Syntax.BinLsl _ -> desug_bin_integral env Annot.builtin_lsl lhs rhs kontinue
+  | Syntax.BinLsr _ -> desug_bin_integral env Annot.builtin_lsr lhs rhs kontinue
+  | Syntax.BinAsl _ -> desug_bin_integral env Annot.builtin_asl lhs rhs kontinue
+  | Syntax.BinAsr _ -> desug_bin_integral env Annot.builtin_asr lhs rhs kontinue
   | Syntax.BinAdd _ -> desug_bin_numeric env Annot.builtin_add lhs rhs kontinue
   | Syntax.BinSub _ -> desug_bin_numeric env Annot.builtin_sub lhs rhs kontinue
   | Syntax.BinMul _ -> desug_bin_numeric env Annot.builtin_mul lhs rhs kontinue

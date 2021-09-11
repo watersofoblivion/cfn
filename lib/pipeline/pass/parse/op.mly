@@ -19,6 +19,10 @@
   let make_bin_lte loc env kontinue = make_op Syntax.bin_lte loc env kontinue
   let make_bin_gt loc env kontinue = make_op Syntax.bin_gt loc env kontinue
   let make_bin_gte loc env kontinue = make_op Syntax.bin_gte loc env kontinue
+  let make_bin_lsl loc env kontinue = make_op Syntax.bin_lsl loc env kontinue
+  let make_bin_lsr loc env kontinue = make_op Syntax.bin_lsr loc env kontinue
+  let make_bin_asl loc env kontinue = make_op Syntax.bin_asl loc env kontinue
+  let make_bin_asr loc env kontinue = make_op Syntax.bin_asr loc env kontinue
   let make_bin_add loc env kontinue = make_op Syntax.bin_add loc env kontinue
   let make_bin_sub loc env kontinue = make_op Syntax.bin_sub loc env kontinue
   let make_bin_mul loc env kontinue = make_op Syntax.bin_mul loc env kontinue
@@ -41,6 +45,7 @@
 %left  BIN_BIT_XOR
 %left  BIN_BIT_AND
 %left  BIN_LTE BIN_LT BIN_GT BIN_GTE
+%left  BIN_LSL BIN_LSR BIN_ASL BIN_ASR
 %left  BIN_ADD UN_NEG /* Alias for BIN_SUB */
 %left  BIN_MUL BIN_DIV BIN_MOD
 %right BIN_EXP
@@ -79,6 +84,10 @@ bin_test:
 | "<="  { make_bin_lte $sloc }
 | ">"   { make_bin_gt $sloc }
 | ">="  { make_bin_gte $sloc }
+| "<<"  { make_bin_lsl $sloc }
+| ">>"  { make_bin_lsr $sloc }
+| "<<<" { make_bin_asl $sloc }
+| ">>>" { make_bin_asr $sloc }
 | "+"   { make_bin_add $sloc }
 | "-"   { make_bin_sub $sloc }
 | "*"   { make_bin_mul $sloc }

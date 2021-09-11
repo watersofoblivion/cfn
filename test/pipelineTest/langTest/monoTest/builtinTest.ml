@@ -34,6 +34,18 @@ let fresh_builtin_gt ?ty:(ty = Mono.ty_int) _ =
 let fresh_builtin_gte ?ty:(ty = Mono.ty_int) _ =
   Mono.builtin_gte ty
 
+let fresh_builtin_lsl ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_lsl ty
+
+let fresh_builtin_lsr ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_lsr ty
+
+let fresh_builtin_asl ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_asl ty
+
+let fresh_builtin_asr ?ty:(ty = Mono.ty_int) _ =
+  Mono.builtin_asr ty
+
 let fresh_builtin_add ?ty:(ty = Mono.ty_int) _ =
   Mono.builtin_add ty
 
@@ -107,6 +119,14 @@ let assert_builtin_equal ~ctxt expected actual = match (expected, actual) with
   | Mono.BuiltinGt expected, Mono.BuiltinGt actual ->
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
   | Mono.BuiltinGte expected, Mono.BuiltinGte actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Mono.BuiltinLsl expected, Mono.BuiltinLsl actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Mono.BuiltinLsr expected, Mono.BuiltinLsr actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Mono.BuiltinAsl expected, Mono.BuiltinAsl actual ->
+    TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
+  | Mono.BuiltinAsr expected, Mono.BuiltinAsr actual ->
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
   | Mono.BuiltinAdd expected, Mono.BuiltinAdd actual ->
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty
@@ -246,6 +266,34 @@ let test_builtin_gte ctxt =
         TypeTest.assert_ty_equal ~ctxt ty actual.ty
       | actual -> builtin_not_equal ~ctxt expected actual)
 
+let test_builtin_lsl ctxt =
+  assert_integral Mono.builtin_lsl (fun ty expected ->
+    match expected with
+      | Mono.BuiltinLsl actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
+let test_builtin_lsr ctxt =
+  assert_integral Mono.builtin_lsr (fun ty expected ->
+    match expected with
+      | Mono.BuiltinLsr actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
+let test_builtin_asl ctxt =
+  assert_integral Mono.builtin_asl (fun ty expected ->
+    match expected with
+      | Mono.BuiltinAsl actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
+let test_builtin_asr ctxt =
+  assert_integral Mono.builtin_asr (fun ty expected ->
+    match expected with
+      | Mono.BuiltinAsr actual ->
+        TypeTest.assert_ty_equal ~ctxt ty actual.ty
+      | actual -> builtin_not_equal ~ctxt expected actual)
+
 let test_builtin_add ctxt =
   assert_numeric Mono.builtin_add (fun ty expected ->
     match expected with
@@ -376,6 +424,16 @@ let test_constructors =
       "Greater Than"          >:: test_builtin_gt;
       "Greater Than or Equal" >:: test_builtin_gte;
     ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_builtin_lsl;
+        "Right" >:: test_builtin_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_builtin_asl;
+        "Right" >:: test_builtin_asr;
+      ];
+    ];
     "Arithmetic" >::: [
       "Negation"       >:: test_builtin_neg;
       "Addition"       >:: test_builtin_add;
@@ -461,6 +519,30 @@ let test_pp_gte ctxt =
   Mono.builtin_gte Mono.ty_int
     |> assert_pp_builtin ~ctxt [
          sprintf "_.Gte[%s]" Prim.id_int
+       ]
+
+let test_pp_lsl ctxt =
+  Mono.builtin_lsl Mono.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Lsl[%s]" Prim.id_int
+       ]
+
+let test_pp_lsr ctxt =
+  Mono.builtin_lsr Mono.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Lsr[%s]" Prim.id_int
+       ]
+
+let test_pp_asl ctxt =
+  Mono.builtin_asl Mono.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Asl[%s]" Prim.id_int
+       ]
+
+let test_pp_asr ctxt =
+  Mono.builtin_asr Mono.ty_int
+    |> assert_pp_builtin ~ctxt [
+         sprintf "_.Asr[%s]" Prim.id_int
        ]
 
 let test_pp_add ctxt =
@@ -567,6 +649,16 @@ let test_pp =
       "Greater Than"          >:: test_pp_gt;
       "Greater Than or Equal" >:: test_pp_gte;
     ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_pp_lsl;
+        "Right" >:: test_pp_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_pp_asl;
+        "Right" >:: test_pp_asr;
+      ];
+    ];
     "Arithmetic" >::: [
       "Negation"       >:: test_pp_neg;
       "Addition"       >:: test_pp_add;
@@ -652,6 +744,38 @@ let test_check_gte ctxt =
   let ty = Mono.ty_int in
   let builtin = Mono.builtin_gte ty in
   Mono.arity_fixed [ty; ty] Mono.ty_bool
+    |> assert_arity_equal ~ctxt
+    |> Mono.check_builtin env builtin
+
+let test_check_lsl ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Mono.ty_int in
+  let builtin = Mono.builtin_lsl ty in
+  Mono.arity_fixed [ty; ty] ty
+    |> assert_arity_equal ~ctxt
+    |> Mono.check_builtin env builtin
+
+let test_check_lsr ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Mono.ty_int in
+  let builtin = Mono.builtin_lsr ty in
+  Mono.arity_fixed [ty; ty] ty
+    |> assert_arity_equal ~ctxt
+    |> Mono.check_builtin env builtin
+
+let test_check_asl ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Mono.ty_int in
+  let builtin = Mono.builtin_asl ty in
+  Mono.arity_fixed [ty; ty] ty
+    |> assert_arity_equal ~ctxt
+    |> Mono.check_builtin env builtin
+
+let test_check_asr ctxt =
+  let env = EnvTest.fresh () in
+  let ty = Mono.ty_int in
+  let builtin = Mono.builtin_asr ty in
+  Mono.arity_fixed [ty; ty] ty
     |> assert_arity_equal ~ctxt
     |> Mono.check_builtin env builtin
 
@@ -784,6 +908,16 @@ let test_check =
       "Less Than or Equal"    >:: test_check_lte;
       "Greater Than"          >:: test_check_gt;
       "Greater Than or Equal" >:: test_check_gte;
+    ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_check_lsl;
+        "Right" >:: test_check_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_check_asl;
+        "Right" >:: test_check_asr;
+      ];
     ];
     "Arithmetic" >::: [
       "Negation"       >:: test_check_neg;

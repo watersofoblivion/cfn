@@ -50,6 +50,18 @@ type bin =
   | BinGte of {
       loc: Loc.t (** Location *)
     } (** Greater Than or Equal *)
+  | BinLsl of {
+      loc: Loc.t (** Location *)
+    } (** Logical Shift Left *)
+  | BinLsr of {
+      loc: Loc.t (** Location *)
+    } (** Logical Shift Right *)
+  | BinAsl of {
+      loc: Loc.t (** Location *)
+    } (** Arithmetic Shift Left *)
+  | BinAsr of {
+      loc: Loc.t (** Location *)
+    } (** Arithmetic Shift Right *)
   | BinAdd of {
       loc: Loc.t (** Location *)
     } (** Addition *)
@@ -298,6 +310,22 @@ val bin_gt : Loc.t -> bin
 
 val bin_gte : Loc.t -> bin
 (** [bin_gte loc] constructs a binary greater than or equal operator at location
+    [loc]. *)
+
+val bin_lsl : Loc.t -> bin
+(** [bin_lsl loc] constructs a binary logical shift left operator at location
+    [loc]. *)
+
+val bin_asr : Loc.t -> bin
+(** [bin_asr loc] constructs a binary arithmetic shift right operator at
+    location [loc]. *)
+
+val bin_asl : Loc.t -> bin
+(** [bin_asl loc] constructs a binary arithmetic shift left operator at location
+    [loc]. *)
+
+val bin_lsr : Loc.t -> bin
+(** [bin_lsr loc] constructs a binary logical shift right operator at location
     [loc]. *)
 
 val bin_add : Loc.t -> bin

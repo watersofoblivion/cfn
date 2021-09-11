@@ -37,6 +37,18 @@ let fresh_bin_gt ?loc:(loc = LocTest.gen ()) _ =
 let fresh_bin_gte ?loc:(loc = LocTest.gen ()) _ =
   Syntax.bin_gte loc
 
+let fresh_bin_lsl ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_lsl loc
+
+let fresh_bin_lsr ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_lsr loc
+
+let fresh_bin_asl ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_asl loc
+
+let fresh_bin_asr ?loc:(loc = LocTest.gen ()) _ =
+  Syntax.bin_asr loc
+
 let fresh_bin_add ?loc:(loc = LocTest.gen ()) _ =
   Syntax.bin_add loc
 
@@ -86,6 +98,10 @@ let deloc_bin = function
   | Syntax.BinLte _ -> Syntax.bin_lte LocTest.dummy
   | Syntax.BinGt _ -> Syntax.bin_gt LocTest.dummy
   | Syntax.BinGte _ -> Syntax.bin_gte LocTest.dummy
+  | Syntax.BinLsl _ -> Syntax.bin_lsl LocTest.dummy
+  | Syntax.BinLsr _ -> Syntax.bin_lsr LocTest.dummy
+  | Syntax.BinAsl _ -> Syntax.bin_asl LocTest.dummy
+  | Syntax.BinAsr _ -> Syntax.bin_asr LocTest.dummy
   | Syntax.BinAdd _ -> Syntax.bin_add LocTest.dummy
   | Syntax.BinSub _ -> Syntax.bin_sub LocTest.dummy
   | Syntax.BinMul _ -> Syntax.bin_mul LocTest.dummy
@@ -128,6 +144,14 @@ let assert_bin_equal ~ctxt expected actual = match (expected, actual) with
   | Syntax.BinGt expected, Syntax.BinGt actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc
   | Syntax.BinGte expected, Syntax.BinGte actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc
+  | Syntax.BinLsl expected, Syntax.BinLsl actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc
+  | Syntax.BinLsr expected, Syntax.BinLsr actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc
+  | Syntax.BinAsl expected, Syntax.BinAsl actual ->
+    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc
+  | Syntax.BinAsr expected, Syntax.BinAsr actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc
   | Syntax.BinAdd expected, Syntax.BinAdd actual ->
     LocTest.assert_loc_equal ~ctxt expected.loc actual.loc
@@ -245,6 +269,38 @@ let test_bin_gte ctxt =
       LocTest.assert_loc_equal ~ctxt loc actual.loc
     | actual -> bin_not_equal ~ctxt expected actual
 
+let test_bin_lsl ctxt =
+  let loc = LocTest.gen () in
+  let expected = Syntax.bin_lsl loc in
+  match expected with
+    | Syntax.BinLsl actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc
+    | actual -> bin_not_equal ~ctxt expected actual
+
+let test_bin_lsr ctxt =
+  let loc = LocTest.gen () in
+  let expected = Syntax.bin_lsr loc in
+  match expected with
+    | Syntax.BinLsr actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc
+    | actual -> bin_not_equal ~ctxt expected actual
+
+let test_bin_asl ctxt =
+  let loc = LocTest.gen () in
+  let expected = Syntax.bin_asl loc in
+  match expected with
+    | Syntax.BinAsl actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc
+    | actual -> bin_not_equal ~ctxt expected actual
+
+let test_bin_asr ctxt =
+  let loc = LocTest.gen () in
+  let expected = Syntax.bin_asr loc in
+  match expected with
+    | Syntax.BinAsr actual ->
+      LocTest.assert_loc_equal ~ctxt loc actual.loc
+    | actual -> bin_not_equal ~ctxt expected actual
+
 let test_bin_add ctxt =
   let loc = LocTest.gen () in
   let expected = Syntax.bin_add loc in
@@ -351,6 +407,16 @@ let test_constructor =
       "Greater Than"          >:: test_bin_gt;
       "Greater Than or Equal" >:: test_bin_gte;
     ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_bin_lsl;
+        "Right" >:: test_bin_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_bin_asl;
+        "Right" >:: test_bin_asr;
+      ];
+    ];
     "Arithmetic" >::: [
       "Negation"       >:: test_un_neg;
       "Addition"       >:: test_bin_add;
@@ -396,6 +462,10 @@ let test_loc_bin_lt = assert_loc_bin Syntax.bin_lt
 let test_loc_bin_lte = assert_loc_bin Syntax.bin_lte
 let test_loc_bin_gt = assert_loc_bin Syntax.bin_gt
 let test_loc_bin_gte = assert_loc_bin Syntax.bin_gte
+let test_loc_bin_lsl = assert_loc_bin Syntax.bin_lsl
+let test_loc_bin_lsr = assert_loc_bin Syntax.bin_lsr
+let test_loc_bin_asl = assert_loc_bin Syntax.bin_asl
+let test_loc_bin_asr = assert_loc_bin Syntax.bin_asr
 let test_loc_bin_add = assert_loc_bin Syntax.bin_add
 let test_loc_bin_sub = assert_loc_bin Syntax.bin_sub
 let test_loc_bin_mul = assert_loc_bin Syntax.bin_mul
@@ -425,6 +495,16 @@ let test_loc =
       "Less Than or Equal"    >:: test_loc_bin_lte;
       "Greater Than"          >:: test_loc_bin_gt;
       "Greater Than or Equal" >:: test_loc_bin_gte;
+    ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_loc_bin_lsl;
+        "Right" >:: test_loc_bin_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_loc_bin_asl;
+        "Right" >:: test_loc_bin_asr;
+      ];
     ];
     "Arithmetic" >::: [
       "Negation"       >:: test_loc_un_neg;
@@ -479,6 +559,11 @@ let test_pp_bin_lte = assert_pp_bin Syntax.bin_lte "<="
 let test_pp_bin_gt = assert_pp_bin Syntax.bin_gt ">"
 let test_pp_bin_gte = assert_pp_bin Syntax.bin_gte ">="
 
+let test_pp_bin_lsl = assert_pp_bin Syntax.bin_lsl "<<"
+let test_pp_bin_lsr = assert_pp_bin Syntax.bin_lsr ">>"
+let test_pp_bin_asl = assert_pp_bin Syntax.bin_asl "<<<"
+let test_pp_bin_asr = assert_pp_bin Syntax.bin_asr ">>>"
+
 let test_pp_bin_add = assert_pp_bin Syntax.bin_add "+"
 let test_pp_bin_sub = assert_pp_bin Syntax.bin_sub "-"
 let test_pp_bin_mul = assert_pp_bin Syntax.bin_mul "*"
@@ -509,6 +594,16 @@ let test_pp =
       "Less Than or Equal"    >:: test_pp_bin_lte;
       "Greater Than"          >:: test_pp_bin_gt;
       "Greater Than or Equal" >:: test_pp_bin_gte;
+    ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_pp_bin_lsl;
+        "Right" >:: test_pp_bin_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_pp_bin_asl;
+        "Right" >:: test_pp_bin_asr;
+      ];
     ];
     "Arithmetic" >::: [
       "Negation"       >:: test_pp_un_neg;

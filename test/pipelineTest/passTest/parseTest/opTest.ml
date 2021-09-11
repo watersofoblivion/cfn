@@ -30,6 +30,11 @@ let test_parse_bin_lte = assert_parses_bin Syntax.bin_lte "<="
 let test_parse_bin_gt = assert_parses_bin Syntax.bin_gt ">"
 let test_parse_bin_gte = assert_parses_bin Syntax.bin_gte ">="
 
+let test_parse_bin_lsl = assert_parses_bin Syntax.bin_lsl "<<"
+let test_parse_bin_lsr = assert_parses_bin Syntax.bin_lsr ">>"
+let test_parse_bin_asl = assert_parses_bin Syntax.bin_asl "<<<"
+let test_parse_bin_asr = assert_parses_bin Syntax.bin_asr ">>>"
+
 let test_parse_bin_add = assert_parses_bin Syntax.bin_add "+"
 let test_parse_bin_sub = assert_parses_bin Syntax.bin_sub "-"
 let test_parse_bin_mul = assert_parses_bin Syntax.bin_mul "*"
@@ -63,6 +68,16 @@ let suite =
       "Less Than or Equal"    >:: test_parse_bin_lte;
       "Greater Than"          >:: test_parse_bin_gt;
       "Greater Than or Equal" >:: test_parse_bin_gte;
+    ];
+    "Shift" >::: [
+      "Logical" >::: [
+        "Left"  >:: test_parse_bin_lsl;
+        "Right" >:: test_parse_bin_lsr;
+      ];
+      "Arithmetic" >::: [
+        "Left"  >:: test_parse_bin_asl;
+        "Right" >:: test_parse_bin_asr;
+      ];
     ];
     "Arithmetic" >::: [
       "Negation"       >:: test_parse_un_neg;

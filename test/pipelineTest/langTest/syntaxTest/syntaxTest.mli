@@ -75,6 +75,22 @@ val fresh_bin_gte : ?loc:Loc.t -> unit -> Syntax.bin
 (** [fresh_bin_gte ?loc ()] constructs a fresh binary greater than or equal
     operator at location [loc]. *)
 
+val fresh_bin_lsl : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_lsl ?loc ()] constructs a fresh binary logical shift left
+    operator at location [loc]. *)
+
+val fresh_bin_lsr : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_lsr ?loc ()] constructs a fresh binary logical shift right
+    operator at location [loc]. *)
+
+val fresh_bin_asl : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_asl ?loc ()] constructs a fresh binary arithmetic shift left
+    operator at location [loc]. *)
+
+val fresh_bin_asr : ?loc:Loc.t -> unit -> Syntax.bin
+(** [fresh_bin_asr ?loc ()] constructs a fresh binary arithmetic shift right
+    operator at location [loc]. *)
+
 val fresh_bin_add : ?loc:Loc.t -> unit -> Syntax.bin
 (** [fresh_bin_add ?loc ()] constructs a fresh binary addition operator at
     location [loc]. *)

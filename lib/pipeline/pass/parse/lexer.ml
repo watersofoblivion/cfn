@@ -50,6 +50,10 @@ let op_bin_lt = BIN_LT
 let op_bin_lte = BIN_LTE
 let op_bin_gt = BIN_GT
 let op_bin_gte = BIN_GTE
+let op_bin_lsl = BIN_LSL
+let op_bin_lsr = BIN_LSR
+let op_bin_asl = BIN_ASL
+let op_bin_asr = BIN_ASR
 let op_bin_add = BIN_ADD
 (* let op_bin_sub = BIN_SUB *) (* Overload of UN_NEG *)
 let op_bin_mul = BIN_MUL
@@ -199,6 +203,10 @@ let rec lex_main lexbuf =
     | "<="  -> op_bin_lte
     | ">"   -> op_bin_gt
     | ">="  -> op_bin_gte
+    | "<<"  -> op_bin_lsl
+    | ">>"  -> op_bin_lsr
+    | "<<<" -> op_bin_asl
+    | ">>>" -> op_bin_asr
     | '+'   -> op_bin_add
     | '*'   -> op_bin_mul
     | '/'   -> op_bin_div

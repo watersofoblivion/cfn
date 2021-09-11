@@ -174,13 +174,18 @@ let assert_parses_rune_lit value input ctxt =
   SyntaxTest.fresh_rune_lit ~loc ~value ()
     |> assert_parses_rune ~ctxt [input]
 
+let assert_parses_str_lit value input ctxt =
+  let loc = ParseUtils.lexeme_loc ParseUtils.bof input in
+  SyntaxTest.fresh_str_lit ~loc ~value ()
+    |> assert_parses_str ~ctxt [input]
+
 (* Tests *)
 
 (* Runes *)
 
 let test_parse_rune_lit = assert_parses_rune_lit 'a' "a"
-let test_parse_rune_lit_esc_bslash = assert_parses_rune_lit '\\' "\\\\"
-let test_parse_rune_lit_esc_squote = assert_parses_rune_lit '\'' "\\'"
+let test_parse_rune_lit_bslash = assert_parses_rune_lit '\\' "\\\\"
+let test_parse_rune_lit_squote = assert_parses_rune_lit '\'' "\\'"
 let test_parse_rune_lit_cr = assert_parses_rune_lit '\r' "\\r"
 let test_parse_rune_lit_lf = assert_parses_rune_lit '\n' "\\n"
 let test_parse_rune_lit_tab = assert_parses_rune_lit '\t' "\\t"
@@ -197,6 +202,24 @@ let test_parse_rune_escape ctxt =
   ]
 
 (* Strings *)
+
+let test_parse_str_lit = assert_parses_str_lit "foo bar" "foo bar"
+let test_parse_str_lit_bslash = assert_parses_str_lit "\\" "\\\\"
+let test_parse_str_lit_dquote = assert_parses_str_lit "\"" "\\\""
+let test_parse_str_lit_cr = assert_parses_str_lit "\r" "\\r"
+let test_parse_str_lit_lf = assert_parses_str_lit "\n" "\\n"
+let test_parse_str_lit_tab = assert_parses_str_lit "\t" "\\t"
+
+let test_parse_str_escape ctxt =
+  let assert_parses_str_escape value =
+    fresh_str_escape ~value ()
+      |> assert_parses_str ~ctxt [value]
+  in
+  List.iter assert_parses_str_escape [
+    "\\u2a"; "\\U2a"; "\\u2A"; "\\U2A";
+    "\\u+2a"; "\\U+2a"; "\\u+2A"; "\\U+2A";
+    "\\U+1"; "\\U+12"; "\\U+123"; "\\U+1234"; "\\U+12345"; "\\U+123456";
+  ]
 
 (* Literals *)
 
@@ -340,6 +363,11 @@ let bin_ops = [
   (Left, [
     (Syntax.bin_add, "+");
     (Syntax.bin_sub, "-")]);
+  (Left, [
+    (Syntax.bin_lsl, "<<");
+    (Syntax.bin_lsr, ">>");
+    (Syntax.bin_asl, "<<<");
+    (Syntax.bin_asr, ">>>")]);
   (Left, [
     (Syntax.bin_lt,  "<");
     (Syntax.bin_lte, "<=");
@@ -584,8 +612,8 @@ let suite =
     "Runes" >::: [
       "Literals" >:: test_parse_rune_lit;
       "Escapes" >::: [
-        "Backslash"       >:: test_parse_rune_lit_esc_bslash;
-        "Single Quotes"   >:: test_parse_rune_lit_esc_squote;
+        "Backslash"       >:: test_parse_rune_lit_bslash;
+        "Single Quotes"   >:: test_parse_rune_lit_squote;
         "Carriage Return" >:: test_parse_rune_lit_cr;
         "Line Feed"       >:: test_parse_rune_lit_lf;
         "Tab"             >:: test_parse_rune_lit_tab;
@@ -593,7 +621,15 @@ let suite =
       "Unicode Escape Sequences" >:: test_parse_rune_escape;
     ];
     "Strings" >::: [
-
+      "Literals" >:: test_parse_str_lit;
+      "Escapes" >::: [
+        "Backslash"       >:: test_parse_str_lit_bslash;
+        "Double Quotes"   >:: test_parse_str_lit_dquote;
+        "Carriage Return" >:: test_parse_str_lit_cr;
+        "Line Feed"       >:: test_parse_str_lit_lf;
+        "Tab"             >:: test_parse_str_lit_tab;
+      ];
+      "Unicode Escape Sequences" >:: test_parse_str_escape;
     ];
     "Expressions" >::: [
       "Literals" >::: [

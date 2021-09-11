@@ -14,6 +14,10 @@ let rec norm_builtin env builtin kontinue = match builtin with
   | Annot.BuiltinLte builtin -> norm Ir.builtin_lte env builtin.ty kontinue
   | Annot.BuiltinGt builtin -> norm Ir.builtin_gt env builtin.ty kontinue
   | Annot.BuiltinGte builtin -> norm Ir.builtin_gte env builtin.ty kontinue
+  | Annot.BuiltinLsl builtin -> norm Ir.builtin_lsl env builtin.ty kontinue
+  | Annot.BuiltinLsr builtin -> norm Ir.builtin_lsr env builtin.ty kontinue
+  | Annot.BuiltinAsl builtin -> norm Ir.builtin_asl env builtin.ty kontinue
+  | Annot.BuiltinAsr builtin -> norm Ir.builtin_asr env builtin.ty kontinue
   | Annot.BuiltinAdd builtin -> norm Ir.builtin_add env builtin.ty kontinue
   | Annot.BuiltinSub builtin -> norm Ir.builtin_sub env builtin.ty kontinue
   | Annot.BuiltinMul builtin -> norm Ir.builtin_mul env builtin.ty kontinue
