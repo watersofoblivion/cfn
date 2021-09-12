@@ -106,157 +106,149 @@ and resume_str lexbuf checkpoint = resume parse_str lexbuf checkpoint
 
 (* Source-File Parsers *)
 
+let file_pos fname = {
+  Lexing.pos_fname = fname;
+  Lexing.pos_lnum = 1;
+  Lexing.pos_bol = 0;
+  Lexing.pos_cnum = 0;
+}
+
 let parse_package_only path =
-  let lexbuf = Lexer.from_file path in
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
-  start_pos
+  let lexbuf = Lexer.lexbuf_from_file path in
+  path
+    |> file_pos
     |> Parser.Incremental.package_only
     |> parse_main lexbuf
 
 let parse_imports_only path =
-  let lexbuf = Lexer.from_file path in
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
-  start_pos
+  let lexbuf = Lexer.lexbuf_from_file path in
+  path
+    |> file_pos
     |> Parser.Incremental.imports_only
     |> parse_main lexbuf
 
 let parse_file path =
-  let lexbuf = Lexer.from_file path in
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
-  start_pos
+  let lexbuf = Lexer.lexbuf_from_file path in
+  path
+    |> file_pos
     |> Parser.Incremental.file
     |> parse_main lexbuf
 
 (* Test Parsers *)
 
+let start_pos = {
+  Lexing.pos_fname = "-";
+  Lexing.pos_lnum = 1;
+  Lexing.pos_bol = 0;
+  Lexing.pos_cnum = 0;
+}
+
 let parse_annot lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.annot_test
     |> parse_main lexbuf
 
 let parse_ty lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.ty_test
     |> parse_main lexbuf
 
 let parse_un lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.un_test
     |> parse_main lexbuf
 
 let parse_bin lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.bin_test
     |> parse_main lexbuf
 
 let parse_patt lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.patt_test
     |> parse_main lexbuf
 
 let parse_rune lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.rune_test
     |> parse_rune lexbuf
 
 let parse_str lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.str_test
     |> parse_str lexbuf
 
 let parse_lit lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.lit_test
     |> parse_main lexbuf
 
 let parse_ident lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.ident_test
     |> parse_main lexbuf
 
 let parse_atom lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.atom_test
     |> parse_main lexbuf
 
 let parse_expr lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.expr_test
     |> parse_main lexbuf
 
 let parse_term lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.term_test
     |> parse_main lexbuf
 
 let parse_binding lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.binding_test
     |> parse_main lexbuf
 
 let parse_top lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.top_test
     |> parse_main lexbuf
 
 let parse_name lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.name_test
     |> parse_main lexbuf
 
 let parse_local lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.local_test
     |> parse_main lexbuf
 
 let parse_alias lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.alias_test
     |> parse_main lexbuf
 
 let parse_pkgs lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.pkgs_test
     |> parse_main lexbuf
 
 let parse_src lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.src_test
     |> parse_main lexbuf
 
 let parse_from lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.from_test
     |> parse_main lexbuf
 
 let parse_import lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.import_test
     |> parse_main lexbuf
 
 let parse_pkg lexbuf =
-  let (start_pos, _) = Sedlexing.lexing_positions lexbuf in
   start_pos
     |> Parser.Incremental.pkg_test
     |> parse_main lexbuf

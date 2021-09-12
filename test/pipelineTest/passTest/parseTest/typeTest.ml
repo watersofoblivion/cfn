@@ -34,7 +34,7 @@ let test_parse_ty_constr ctxt =
 let test_parse_ty_annot ctxt =
   let lexeme = "TestConstructor" in
   let id = () |> Sym.seq |> Sym.gen ~id:lexeme in
-  fresh_ty_constr ~start:(0, 2, 2) ~id ()
+  fresh_ty_constr ~start:(1, 2, 2) ~id ()
     |> assert_parses_ty_annot ~ctxt [
          sprintf ": %s" lexeme
        ]

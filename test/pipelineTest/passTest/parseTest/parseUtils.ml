@@ -4,7 +4,7 @@ open CommonTest
 
 (* Fixtures *)
 
-let bof = (0, 0, 0)
+let bof = (1, 0, 0)
 
 let loc_of_len (start_line, start_col, start_byte) cols bytes =
   LocTest.make (start_line, start_col, start_byte) (start_line, start_col + cols, start_byte + bytes)
@@ -29,7 +29,7 @@ let assert_parses ?env:(env = EnvTest.fresh ()) ~ctxt parse assert_equal input e
   let lexbuf =
     input
       |> String.concat "\n"
-      |> Sedlexing.Utf8.from_string
+      |> Parse.lexbuf_from_string
   in
   ignore begin
     parse lexbuf env (fun _ actual ->

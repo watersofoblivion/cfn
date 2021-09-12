@@ -3,6 +3,17 @@
 open Common
 
 (**
+ * {2 Lexers}
+ *)
+
+val lexbuf_from_string : string -> Sedlexing.lexbuf
+(** [lexbuf_from_string src] constructs a lexing buffer from the string [src]. *)
+
+val lexbuf_from_file : string -> Sedlexing.lexbuf
+(** [lexbuf_from_file path] constructs a lexing buffer reading from the file
+    [path]. *)
+
+(**
  * {2 Entry Points}
  *
  * Each takes a path to a source file [path] and parses the file in the

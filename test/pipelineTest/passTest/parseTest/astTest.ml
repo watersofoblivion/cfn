@@ -19,7 +19,7 @@ let fresh_rune_lit ?start:(start = ParseUtils.bof) ?value:(value = 'a') _ =
   in
   SyntaxTest.fresh_rune_lit ~loc ~value ()
 
-let fresh_rune_escape ?start:(start = ParseUtils.bof) ?value:(value = "\\U+2a") _ =
+let fresh_rune_escape ?start:(start = ParseUtils.bof) ?value:(value = "\\U+2a2a") _ =
   let loc = ParseUtils.lexeme_loc start value in
   Syntax.rune_escape loc value
 
@@ -27,7 +27,7 @@ let fresh_str_lit ?start:(start = ParseUtils.bof) ?value:(value = "foo bar") _ =
   let loc = ParseUtils.lexeme_loc start value in
   SyntaxTest.fresh_str_lit ~loc ~value ()
 
-let fresh_str_escape ?start:(start = ParseUtils.bof) ?value:(value = "\\U+2a") _ =
+let fresh_str_escape ?start:(start = ParseUtils.bof) ?value:(value = "\\U+2a2a") _ =
   let loc = ParseUtils.lexeme_loc start value in
   Syntax.str_escape loc value
 
@@ -55,18 +55,20 @@ let fresh_atom_double ?start:(start = ParseUtils.bof) ?lexeme:(lexeme = "4.2") _
   Syntax.expr_double loc lexeme
 
 let fresh_atom_string ?start:(start = ParseUtils.bof) ?value:(value = []) _ =
+  let empty =
+    start
+      |> LocTest.make start
+      |> LocTest.shift (0, 1, 1)
+      |> LocTest.span_from start
+  in
   let rec str_end lines =
     let rec line = function
-      | [] -> failwith "Boom!"
+      | [] -> empty
       | hd :: [] -> Syntax.loc_str hd
       | _ :: tl -> line tl
     in
     match lines with
-      | [] ->
-        start
-          |> LocTest.make start
-          |> LocTest.shift (0, 1, 1)
-          |> LocTest.span_from start
+      | [] -> empty
       | hd :: [] -> line hd
       | _ :: tl -> str_end tl
   in
@@ -196,9 +198,8 @@ let test_parse_rune_escape ctxt =
       |> assert_parses_rune ~ctxt [value]
   in
   List.iter assert_parses_rune_escape [
-    "\\u2a"; "\\U2a"; "\\u2A"; "\\U2A";
-    "\\u+2a"; "\\U+2a"; "\\u+2A"; "\\U+2A";
-    "\\U+1"; "\\U+12"; "\\U+123"; "\\U+1234"; "\\U+12345"; "\\U+123456";
+    "\\u2a42"; "\\U2a42"; "\\u2A42"; "\\U2A42";
+    "\\u+2a42"; "\\U+2a42"; "\\u+2A42"; "\\U+2A42"
   ]
 
 (* Strings *)
@@ -216,9 +217,8 @@ let test_parse_str_escape ctxt =
       |> assert_parses_str ~ctxt [value]
   in
   List.iter assert_parses_str_escape [
-    "\\u2a"; "\\U2a"; "\\u2A"; "\\U2A";
-    "\\u+2a"; "\\U+2a"; "\\u+2A"; "\\U+2A";
-    "\\U+1"; "\\U+12"; "\\U+123"; "\\U+1234"; "\\U+12345"; "\\U+123456";
+    "\\u2a42"; "\\U2a42"; "\\u2A42"; "\\U2A42";
+    "\\u+2a42"; "\\U+2a42"; "\\u+2A42"; "\\U+2A42";
   ]
 
 (* Literals *)
@@ -263,7 +263,7 @@ let test_parse_lit_rune ctxt =
       |> assert_parses_lit ~ctxt [sprintf "'%s'" lexeme]
   in
   let assert_parses_rune_lit value lexeme =
-    let lexeme_loc = ParseUtils.lexeme_loc (0, 1, 1) lexeme in
+    let lexeme_loc = ParseUtils.lexeme_loc (1, 1, 1) lexeme in
     let value = SyntaxTest.fresh_rune_lit ~loc:lexeme_loc ~value () in
     lexeme_loc
       |> LocTest.shift (0, 1, 1)
@@ -271,7 +271,7 @@ let test_parse_lit_rune ctxt =
       |> assert_parses_rune value lexeme
   in
   let assert_parses_rune_escape lexeme =
-    let value = fresh_rune_escape ~start:(0, 1, 1) ~value:lexeme () in
+    let value = fresh_rune_escape ~start:(1, 1, 1) ~value:lexeme () in
     value
       |> Syntax.loc_rune
       |> LocTest.shift (0, 1, 1)
@@ -284,15 +284,43 @@ let test_parse_lit_rune ctxt =
   assert_parses_rune_lit '\n' "\\n";
   assert_parses_rune_lit '\r' "\\r";
   assert_parses_rune_lit '\t' "\\t";
-  assert_parses_rune_escape "\\U+2a"
+  assert_parses_rune_escape "\\U+2a2a"
 
 let test_parse_lit_string ctxt =
-  fresh_atom_string ~value:[] ()
-    |> assert_parses_lit ~ctxt ["\"\""]
-  (* let seg = fresh_str_lit ~start:(0, 1, 1) ~value:"foo" in
-  fresh_atom_str ~value:[[seg]] ()
-    |> assert_parses_lit ~ctxt ["\"foo\""]; *)
+  fresh_atom_string ~value:[[]] ()
+    |> assert_parses_lit ~ctxt ["\"\""];
 
+  let line = [fresh_str_lit ~start:(1, 1, 1) ~value:"foo" ()] in
+  fresh_atom_string ~value:[line] ()
+    |> assert_parses_lit ~ctxt ["\"foo\""];
+
+  let line = [
+    fresh_str_lit ~start:(1, 1, 1) ~value:"foo" ();
+    fresh_str_escape ~start:(1, 4, 4) ~value:"\\U+42ba" ();
+    fresh_str_lit ~start:(1, 11, 11) ~value:"r" ();
+  ] in
+  fresh_atom_string ~value:[line] ()
+    |> assert_parses_lit ~ctxt ["\"foo\\U+42bar\""];
+
+  let lines = [
+    [let loc = LocTest.make (1, 3, 3) (1, 6, 6) in
+     SyntaxTest.fresh_str_lit ~loc ~value:"foo" ()];
+    [let loc = LocTest.make (2, 0, 8) (2, 6, 14) in
+     SyntaxTest.fresh_str_lit ~loc ~value:"bar" ()];
+    [let loc = LocTest.make (3, 0, 16) (3, 8, 24) in
+     SyntaxTest.fresh_str_lit ~loc ~value:"  baz" ()];
+    [let loc = LocTest.make (4, 0, 26) (4, 5, 31) in
+     SyntaxTest.fresh_str_lit ~loc ~value:"quux" ()];
+  ] in
+  (* let loc = LocTest.make (1, 2, 2) (4, 6, 32) in *)
+  (* SyntaxTest.fresh_expr_string ~loc ~value:lines () *)
+  fresh_atom_string ~start:(1, 2, 2) ~value:lines ()
+    |> assert_parses_lit ~ctxt [
+         "  \"foo\\";
+         "   bar\\";
+         "     baz\\";
+         " quux\"";
+       ]
 
 (* Identifiers *)
 
@@ -325,16 +353,16 @@ let test_parse_atom_paren ctxt =
   let lexeme = "testId" in
   let id = Sym.gen seq ~id:lexeme in
   let binding =
-    let patt = PattTest.fresh_patt_var ~start:(0, 5, 5) ~id () in
+    let patt = PattTest.fresh_patt_var ~start:(1, 5, 5) ~id () in
     let ty =
       let id = Sym.gen seq ~id:Prim.id_bool in
-      TypeTest.fresh_ty_constr ~start:(0, 13, 13) ~id ()
+      TypeTest.fresh_ty_constr ~start:(1, 13, 13) ~id ()
     in
-    let value = fresh_atom_bool ~start:(0, 20, 20) ~value:true () in
+    let value = fresh_atom_bool ~start:(1, 20, 20) ~value:true () in
     fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
-  let scope = fresh_atom_ident ~start:(0, 28, 28) ~id () in
-  fresh_term_let ~start:(0, 1, 1) ~binding ~scope ()
+  let scope = fresh_atom_ident ~start:(1, 28, 28) ~id () in
+  fresh_term_let ~start:(1, 1, 1) ~binding ~scope ()
     |> assert_parses_atom ~ctxt [
          sprintf "(let %s: %s = true in %s)" lexeme Prim.id_bool lexeme
        ]
@@ -390,10 +418,10 @@ let test_parse_expr_un_op ctxt =
   List.iter (fun (constr, lexeme) ->
     let op_len = String.length lexeme in
     let op =
-      LocTest.make (0, 0, 0) (0, op_len, op_len)
+      LocTest.make (1, 0, 0) (1, op_len, op_len)
         |> constr
     in
-    let operand = fresh_atom_int ~start:(0, 1 + op_len, 1 + op_len) ~lexeme:"1" () in
+    let operand = fresh_atom_int ~start:(1, 1 + op_len, 1 + op_len) ~lexeme:"1" () in
     fresh_un_op ~op ~operand ()
       |> assert_parses_expr ~ctxt [sprintf "%s 1" lexeme]
   ) un_ops
@@ -408,10 +436,10 @@ let test_parse_expr_bin_op ctxt =
         | ((constr, lexeme) as hd') :: tl' ->
           (* Self *)
           let op_len = String.length lexeme in
-          let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
-          let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + 2*op_len, 5 + 2*op_len) in
-          let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
-          let right = fresh_atom_int ~start:(0, 6 + 2*op_len, 6 + 2*op_len) ~lexeme:"3" () in
+          let left_op_loc = LocTest.make (1, 2, 2) (1, 2 + op_len, 2 + op_len) in
+          let right_op_loc = LocTest.make (1, 5 + op_len, 5 + op_len) (1, 5 + 2*op_len, 5 + 2*op_len) in
+          let center = fresh_atom_int ~start:(1, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+          let right = fresh_atom_int ~start:(1, 6 + 2*op_len, 6 + 2*op_len) ~lexeme:"3" () in
           let expr = match assoc with
             | Left ->
               let lhs =
@@ -434,10 +462,10 @@ let test_parse_expr_bin_op ctxt =
           (* Other operators of equal precedence *)
           List.iter (fun (constr', lexeme') ->
             let op_len' = String.length lexeme' in
-            let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
-            let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
-            let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
-            let right = fresh_atom_int ~start:(0, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
+            let left_op_loc = LocTest.make (1, 2, 2) (1, 2 + op_len, 2 + op_len) in
+            let right_op_loc = LocTest.make (1, 5 + op_len, 5 + op_len) (1, 5 + op_len + op_len', 5 + op_len + op_len') in
+            let center = fresh_atom_int ~start:(1, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+            let right = fresh_atom_int ~start:(1, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
             let expr = match assoc with
               | Left ->
                 let lhs =
@@ -457,9 +485,9 @@ let test_parse_expr_bin_op ctxt =
             expr
               |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme'];
 
-            let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len', 2 + op_len') in
-            let right_op_loc = LocTest.make (0, 5 + op_len', 5 + op_len') (0, 5 + op_len + op_len', 5 + op_len + op_len') in
-            let center = fresh_atom_int ~start:(0, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
+            let left_op_loc = LocTest.make (1, 2, 2) (1, 2 + op_len', 2 + op_len') in
+            let right_op_loc = LocTest.make (1, 5 + op_len', 5 + op_len') (1, 5 + op_len + op_len', 5 + op_len + op_len') in
+            let center = fresh_atom_int ~start:(1, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
             let expr = match assoc with
               | Left ->
                 let lhs =
@@ -484,10 +512,10 @@ let test_parse_expr_bin_op ctxt =
           List.iter (fun (_, higher) ->
             List.iter (fun (constr', lexeme') ->
               let op_len' = String.length lexeme' in
-              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
-              let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
-              let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
-              let right = fresh_atom_int ~start:(0, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
+              let left_op_loc = LocTest.make (1, 2, 2) (1, 2 + op_len, 2 + op_len) in
+              let right_op_loc = LocTest.make (1, 5 + op_len, 5 + op_len) (1, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(1, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+              let right = fresh_atom_int ~start:(1, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
               let rhs =
                 let op = constr' right_op_loc in
                 fresh_bin_op ~op ~lhs:center ~rhs:right ()
@@ -496,9 +524,9 @@ let test_parse_expr_bin_op ctxt =
               fresh_bin_op ~op ~lhs:left ~rhs ()
                 |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme'];
 
-              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len', 2 + op_len') in
-              let right_op_loc = LocTest.make (0, 5 + op_len', 5 + op_len') (0, 5 + op_len + op_len', 5 + op_len + op_len') in
-              let center = fresh_atom_int ~start:(0, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
+              let left_op_loc = LocTest.make (1, 2, 2) (1, 2 + op_len', 2 + op_len') in
+              let right_op_loc = LocTest.make (1, 5 + op_len', 5 + op_len') (1, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(1, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
               let lhs =
                 let op = constr' left_op_loc in
                 fresh_bin_op ~op ~lhs:left ~rhs:center ()
@@ -513,10 +541,10 @@ let test_parse_expr_bin_op ctxt =
           List.iter (fun (_, lower) ->
             List.iter (fun (constr', lexeme') ->
               let op_len' = String.length lexeme' in
-              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len, 2 + op_len) in
-              let right_op_loc = LocTest.make (0, 5 + op_len, 5 + op_len) (0, 5 + op_len + op_len', 5 + op_len + op_len') in
-              let center = fresh_atom_int ~start:(0, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
-              let right = fresh_atom_int ~start:(0, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
+              let left_op_loc = LocTest.make (1, 2, 2) (1, 2 + op_len, 2 + op_len) in
+              let right_op_loc = LocTest.make (1, 5 + op_len, 5 + op_len) (1, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(1, 3 + op_len, 3 + op_len) ~lexeme:"2" () in
+              let right = fresh_atom_int ~start:(1, 6 + op_len + op_len', 6 + op_len + op_len') ~lexeme:"3" () in
               let lhs =
                 let op = constr left_op_loc in
                 fresh_bin_op ~op ~lhs:left ~rhs:center ()
@@ -525,9 +553,9 @@ let test_parse_expr_bin_op ctxt =
               fresh_bin_op ~op ~lhs ~rhs:right ()
                 |> assert_parses_expr ~ctxt [sprintf "1 %s 2 %s 3" lexeme lexeme'];
 
-              let left_op_loc = LocTest.make (0, 2, 2) (0, 2 + op_len', 2 + op_len') in
-              let right_op_loc = LocTest.make (0, 5 + op_len', 5 + op_len') (0, 5 + op_len + op_len', 5 + op_len + op_len') in
-              let center = fresh_atom_int ~start:(0, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
+              let left_op_loc = LocTest.make (1, 2, 2) (1, 2 + op_len', 2 + op_len') in
+              let right_op_loc = LocTest.make (1, 5 + op_len', 5 + op_len') (1, 5 + op_len + op_len', 5 + op_len + op_len') in
+              let center = fresh_atom_int ~start:(1, 3 + op_len', 3 + op_len') ~lexeme:"2" () in
               let rhs =
                 let op = constr right_op_loc in
                 fresh_bin_op ~op ~lhs:center ~rhs:right ()
@@ -557,7 +585,7 @@ let test_parse_binding_value_binding_implicit ctxt =
     let id = () |> Sym.seq |> Sym.gen ~id:lexeme in
     PattTest.fresh_patt_var ~id ()
   in
-  let value = fresh_atom_bool ~start:(0, 9, 9) ~value:true () in
+  let value = fresh_atom_bool ~start:(1, 9, 9) ~value:true () in
   fresh_value_binding ~patt ~explicit:false ~value ()
     |> assert_parses_binding ~ctxt [
          sprintf "%s = true" lexeme
@@ -572,9 +600,9 @@ let test_parse_binding_value_binding_explicit ctxt =
   in
   let ty =
     let id = Sym.gen seq ~id:Prim.id_bool in
-    TypeTest.fresh_ty_constr ~start:(0, 8, 8) ~id ()
+    TypeTest.fresh_ty_constr ~start:(1, 8, 8) ~id ()
   in
-  let value = fresh_atom_bool ~start:(0, 15, 15) ~value:true () in
+  let value = fresh_atom_bool ~start:(1, 15, 15) ~value:true () in
   fresh_value_binding ~patt ~explicit:true ~ty ~value ()
     |> assert_parses_binding ~ctxt [
          sprintf "%s: %s = true" lexeme Prim.id_bool
@@ -587,15 +615,15 @@ let test_parse_term_let ctxt =
   let lexeme = "testId" in
   let id = Sym.gen seq ~id:lexeme in
   let binding =
-    let patt = PattTest.fresh_patt_var ~start:(0, 4, 4) ~id () in
+    let patt = PattTest.fresh_patt_var ~start:(1, 4, 4) ~id () in
     let ty =
       let id = Sym.gen seq ~id:Prim.id_bool in
-      TypeTest.fresh_ty_constr ~start:(0, 12, 12) ~id ()
+      TypeTest.fresh_ty_constr ~start:(1, 12, 12) ~id ()
     in
-    let value = fresh_atom_bool ~start:(0, 19, 19) ~value:true () in
+    let value = fresh_atom_bool ~start:(1, 19, 19) ~value:true () in
     fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
-  let scope = fresh_atom_ident ~start:(0, 27, 27) ~id () in
+  let scope = fresh_atom_ident ~start:(1, 27, 27) ~id () in
   fresh_term_let ~binding ~scope ()
     |> assert_parses_term ~ctxt [
          sprintf "let %s: %s = true in %s" lexeme Prim.id_bool lexeme

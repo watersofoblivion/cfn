@@ -4,13 +4,27 @@ open Common
 
 (* Initializers *)
 
-let from_string str =
+let lexbuf_from_string str =
   let lexbuf = Sedlexing.Utf8.from_string str in
+  let pos = {
+    Lexing.pos_fname = "-";
+    Lexing.pos_lnum = 1;
+    Lexing.pos_bol = 0;
+    Lexing.pos_cnum = 0;
+  } in
+  Sedlexing.set_position lexbuf pos;
   lexbuf
 
-let from_file path =
+let lexbuf_from_file path =
   let ic = open_in path in
   let lexbuf = Sedlexing.Utf8.from_channel ic in
+  let pos = {
+    Lexing.pos_fname = path;
+    Lexing.pos_lnum = 1;
+    Lexing.pos_bol = 0;
+    Lexing.pos_cnum = 0;
+  } in
+  Sedlexing.set_position lexbuf pos;
   Sedlexing.set_filename lexbuf path;
   lexbuf
 
@@ -115,7 +129,8 @@ let lit_str_esc chr =
   in
   STRING lexeme
 
-let lit_str_multiline = NEWLINE
+let lit_str_multiline =
+  NEWLINE
 
 let lit_str lexbuf =
   let lexeme = Sedlexing.Utf8.lexeme lexbuf in
@@ -167,7 +182,7 @@ let multiline = [%sedlex.regexp? "\\\n"]
 let esc_lf = [%sedlex.regexp? "\\n"]
 let esc_cr = [%sedlex.regexp? "\\r"]
 let esc_tab = [%sedlex.regexp? "\\t"]
-let esc_unicode = [%sedlex.regexp? '\\', unicode_radix, Opt '+', Rep (hex_digit, 1 .. 6)]
+let esc_unicode = [%sedlex.regexp? '\\', unicode_radix, Opt '+', Rep (hex_digit, 4)]
 
 (*
  * Main lexer

@@ -15,7 +15,7 @@ let fresh_rune_lit ?loc:(loc = LocTest.gen ()) ?value:(value = 'a') _ =
 
 let fresh_rune_escape ?loc:(loc = LocTest.gen ()) ?value:(value = 42) _ =
   value
-    |> fprintf str_formatter "\\U+%X"
+    |> fprintf str_formatter "\\U+%04X"
     |> flush_str_formatter
     |> Syntax.rune_escape loc
 
@@ -24,7 +24,7 @@ let fresh_str_lit ?loc:(loc = LocTest.gen ()) ?value:(value = "foo bar") _ =
 
 let fresh_str_escape ?loc:(loc = LocTest.gen ()) ?value:(value = 42) _ =
   value
-    |> fprintf str_formatter "\\U+%X"
+    |> fprintf str_formatter "\\U+%04X"
     |> flush_str_formatter
     |> Syntax.str_escape loc
 
@@ -250,7 +250,7 @@ let test_rune_lit ctxt =
 
 let test_rune_escape ctxt =
   let loc = LocTest.gen () in
-  let value = "\\U+42" in
+  let value = "\\U+422a" in
   let expected = Syntax.rune_escape loc value in
   match expected with
     | Syntax.RuneEscape actual ->
@@ -270,7 +270,7 @@ let test_str_lit ctxt =
 
 let test_str_escape ctxt =
   let loc = LocTest.gen () in
-  let value = "\\U+42" in
+  let value = "\\U+422a" in
   let expected = Syntax.str_escape loc value in
   match expected with
     | Syntax.StringEscape actual ->
@@ -542,7 +542,7 @@ let test_pp_rune_lit_quote ctxt =
 let test_pp_rune_escape ctxt =
   let value = 42 in
   fresh_rune_escape ~value ()
-    |> assert_pp_rune ~ctxt ["\\U+2A"]
+    |> assert_pp_rune ~ctxt ["\\U+002A"]
 
 let test_pp_str_lit ctxt =
   let value = "foo bar" in
@@ -552,7 +552,7 @@ let test_pp_str_lit ctxt =
 let test_pp_str_escape ctxt =
   let value = 42 in
   fresh_str_escape ~value ()
-    |> assert_pp_str ~ctxt ["\\U+2A"]
+    |> assert_pp_str ~ctxt ["\\U+002A"]
 
 let test_pp_expr_bool ctxt =
   fresh_expr_bool ~value:true ()
