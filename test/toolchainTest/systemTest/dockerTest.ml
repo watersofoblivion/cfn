@@ -32,7 +32,7 @@ let test_command =
 let assert_named_string msg = Assert.string_equals ~msg:msg
 
 let test_image =
-  let image_dir ctxt image = in_testdata_dir ctxt ["systemTest"; "images"; image] in
+  let image_dir ctxt image = in_testdata_dir ctxt ["toolchainTest"; "systemTest"; "images"; image] in
 
   let should_have_name =
     let assert_name = assert_named_string "Image Name" in
@@ -209,7 +209,7 @@ let test_mount =
 
 let test_run =
   let test_run_in =
-    let image_dir ctxt image = in_testdata_dir ctxt ["systemTest"; "images"; image] in
+    let image_dir ctxt image = in_testdata_dir ctxt ["toolchainTest"; "systemTest"; "images"; image] in
 
     let test_valid =
       let test_exit_status ctxt =
