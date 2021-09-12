@@ -43,14 +43,10 @@ let rec fresh_expr_let ?binding:(binding = fresh_binding ()) ?scope:(scope = fre
 and fresh_binding ?patt:(patt = PattTest.fresh_patt_ground ()) ?ty:(ty = Annot.ty_bool) ?value:(value = fresh_expr_bool ()) _ =
   Annot.binding patt ty value
 
-let fresh_top_let ?binding:(binding = fresh_binding ()) _ =
-  Annot.top_let binding
-
 (* Assertions *)
 
 let expr_not_equal = TestUtils.not_equal "Expressions" Annot.pp_expr
 (* let binding_not_equal = TestUtils.not_equal "Bindings" Fmt.binding *)
-(* let top_not_equal = TestUtils.not_equal "Top-level expressions" Fmt.top *)
 
 let rec assert_expr_equal ~ctxt expected actual = match (expected, actual) with
   | Annot.ExprBool expected, Annot.ExprBool actual ->
@@ -83,10 +79,6 @@ and assert_binding_equal ~ctxt expected actual = match (expected, actual) with
     PattTest.assert_patt_equal ~ctxt expected.patt actual.patt;
     TypeTest.assert_ty_equal ~ctxt expected.ty actual.ty;
     assert_expr_equal ~ctxt expected.value actual.value
-
-let assert_top_equal ~ctxt expected actual = match (expected, actual) with
-  | Annot.TopLet expected, Annot.TopLet actual ->
-    assert_binding_equal ~ctxt expected.binding actual.binding
 
 (* Constructors *)
 
@@ -189,17 +181,6 @@ let test_binding ctxt =
       TypeTest.assert_ty_equal ~ctxt ty actual.ty;
       assert_expr_equal ~ctxt value actual.value
 
-let test_top_let ctxt =
-  let binding =
-    true
-      |> Annot.expr_bool
-      |> Annot.binding Annot.patt_ground Annot.ty_bool
-  in
-  let expected = Annot.top_let binding in
-  match expected with
-    | Annot.TopLet actual ->
-      assert_binding_equal ~ctxt binding actual.binding
-
 let test_constructors =
   "Constructors" >::: [
     "Expressions" >::: [
@@ -215,16 +196,12 @@ let test_constructors =
       "Let Binding"                   >:: test_expr_let;
     ];
     "Bindings" >:: test_binding;
-    "Top-Level Expressions" >::: [
-      "Let Bindings" >:: test_top_let;
-    ];
   ]
 
 (* Pretty Printing *)
 
 let assert_pp_expr = PrettyTest.assert_pp Annot.pp_expr
 let assert_pp_binding = PrettyTest.assert_pp Annot.pp_binding
-let assert_pp_top = PrettyTest.assert_pp Annot.pp_top
 
 let test_pp_expr_bool ctxt =
   fresh_expr_bool ~value:true ()
@@ -301,14 +278,6 @@ let test_pp_binding ctxt =
            |> flush_str_formatter
        ]
 
-let test_pp_top_let ctxt =
-  let binding = fresh_binding () in
-  fresh_top_let ~binding ()
-    |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Annot.pp_binding binding
-           |> flush_str_formatter
-       ]
-
 let test_pp =
   "Pretty Printing" >::: [
     "Expressions" >::: [
@@ -324,9 +293,6 @@ let test_pp =
       "Let Bindings"                  >:: test_pp_expr_let;
     ];
     "Bindings" >:: test_pp_binding;
-    "Top-Level Expressions" >::: [
-      "Let Bindings" >:: test_pp_top_let;
-    ];
   ]
 
 (* Type Checking *)
@@ -464,19 +430,6 @@ let test_check_binding_mismatched_types _ =
     Annot.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))
 
-let test_check_top_let ctxt =
-  let env = EnvTest.fresh () in
-  let id = SymTest.fresh_sym () in
-  let ty = Annot.ty_bool in
-  let top =
-    let patt = PattTest.fresh_patt_var ~id () in
-    let value = fresh_expr_bool () in
-    let binding = fresh_binding ~patt ~ty ~value () in
-    fresh_top_let ~binding ()
-  in
-  Annot.check_top env top (fun env ->
-    AnnotUtils.assert_ty_bound ~ctxt id env ty)
-
 let test_check =
   "Type Checking" >::: [
     "Expressions" >::: [
@@ -508,15 +461,12 @@ let test_check =
       "Valid"            >:: test_check_binding;
       "Mismatched Types" >:: test_check_binding_mismatched_types;
     ];
-    "Top-Levels" >::: [
-      "Let Binding" >:: test_check_top_let;
-    ];
   ]
 
 (* Test Suite *)
 
 let suite =
-  "Abstract Syntax" >::: [
+  "Expressions" >::: [
     test_constructors;
     test_pp;
     test_check;

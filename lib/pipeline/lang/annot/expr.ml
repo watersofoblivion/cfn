@@ -1,4 +1,4 @@
-(* Abstract Syntax *)
+(* Expressions *)
 
 open Format
 
@@ -21,9 +21,6 @@ type expr =
 and binding =
   | Binding of { patt: Patt.patt; ty: Type.ty; value: expr }
 
-type top =
-  | TopLet of { binding: binding }
-
 (* Constructors *)
 
 let expr_bool value = ExprBool { value }
@@ -40,8 +37,6 @@ let expr_builtin fn args = ExprBuiltin { fn; args }
 let expr_let binding scope = ExprLet { binding; scope }
 
 let binding patt ty value = Binding { patt; ty; value }
-
-let top_let binding = TopLet { binding }
 
 (* Pretty Printing *)
 
@@ -79,12 +74,6 @@ and pp_expr_let fmt binding scope =
 and pp_binding fmt = function
   | Binding binding ->
     fprintf fmt "%a: %a = %a" Patt.pp_patt binding.patt Type.pp_ty binding.ty pp_expr binding.value
-
-(* Top-Level Expressions *)
-
-let pp_top fmt = function
-  | TopLet top ->
-    fprintf fmt "let %a" pp_binding top.binding
 
 (* Type Checking *)
 
@@ -169,8 +158,3 @@ and check_binding env binding kontinue = match binding with
       if Type.ty_equal binding.ty inferred
       then Patt.check_patt env binding.patt inferred kontinue
       else mismatched_types binding.value inferred binding.ty)
-
-(* Top-Level Expressions *)
-
-let check_top env top kontinue = match top with
-  | TopLet top -> check_binding env top.binding kontinue

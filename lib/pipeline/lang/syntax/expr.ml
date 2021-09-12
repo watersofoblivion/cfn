@@ -28,10 +28,6 @@ type expr =
 and binding =
   | ValueBinding of { loc: Loc.t; patt: Patt.patt; ty: Type.ty option; value: expr }
 
-type top =
-  | TopLet of { loc: Loc.t; binding: binding }
-  | TopVal of { loc: Loc.t; binding: binding }
-
 (* Constructors *)
 
 let rune_lit loc value = RuneLit { loc; value }
@@ -53,9 +49,6 @@ let expr_bin_op loc op lhs rhs = ExprBinOp { loc; op; lhs; rhs }
 let expr_let loc binding scope = ExprLet { loc; binding; scope }
 
 let value_binding loc patt ty value = ValueBinding { loc; patt; ty; value }
-
-let top_let loc binding = TopLet { loc; binding }
-let top_val loc binding = TopVal { loc; binding }
 
 (* Locations *)
 
@@ -82,10 +75,6 @@ let loc_expr = function
 
 let loc_binding = function
   | ValueBinding binding -> binding.loc
-
-let loc_top = function
-  | TopLet top -> top.loc
-  | TopVal top -> top.loc
 
 (* Pretty Printing *)
 
@@ -141,9 +130,3 @@ and pp_binding fmt = function
   | ValueBinding binding ->
     let pp_ty = pp_print_option (fun fmt t -> fprintf fmt ": %a" Type.pp_ty t) in
     fprintf fmt "%a%a = %a" Patt.pp_patt binding.patt pp_ty binding.ty pp_expr binding.value
-
-(* Top-Level Expressions *)
-
-let pp_top fmt = function
-  | TopLet top -> fprintf fmt "let %a" pp_binding top.binding
-  | TopVal top -> fprintf fmt "val %a" pp_binding top.binding

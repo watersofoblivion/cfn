@@ -119,6 +119,22 @@ let fresh_term_let ?start:(start = ParseUtils.bof) ?binding:(binding = fresh_val
   in
   SyntaxTest.fresh_expr_let ~loc ~binding ~scope ()
 
+let fresh_top_let ?start:(start = ParseUtils.bof) ?binding:(binding = fresh_value_binding ()) _ =
+  let loc =
+    binding
+      |> Syntax.loc_binding
+      |> LocTest.span_from start
+  in
+  SyntaxTest.fresh_top_let ~loc ~binding ()
+
+let fresh_top_val ?start:(start = ParseUtils.bof) ?binding:(binding = fresh_value_binding ()) _ =
+  let loc =
+    binding
+      |> Syntax.loc_binding
+      |> LocTest.span_from start
+  in
+  SyntaxTest.fresh_top_val ~loc ~binding ()
+
 (* Generators *)
 
 let signs = [""; "+"; "-"]
@@ -170,6 +186,7 @@ let assert_parses_atom = ParseUtils.assert_parses Parse.parse_atom SyntaxTest.as
 let assert_parses_expr = ParseUtils.assert_parses Parse.parse_expr SyntaxTest.assert_expr_equal
 let assert_parses_binding = ParseUtils.assert_parses Parse.parse_binding SyntaxTest.assert_binding_equal
 let assert_parses_term = ParseUtils.assert_parses Parse.parse_term SyntaxTest.assert_expr_equal
+let assert_parses_top = ParseUtils.assert_parses Parse.parse_top SyntaxTest.assert_top_equal
 
 let assert_parses_rune_lit value input ctxt =
   let loc = ParseUtils.lexeme_loc ParseUtils.bof input in
@@ -636,7 +653,7 @@ let test_parse_term_expr ctxt =
 (* Test Suite *)
 
 let suite =
-  "Abstract Syntax" >::: [
+  "Expressions" >::: [
     "Runes" >::: [
       "Literals" >:: test_parse_rune_lit;
       "Escapes" >::: [
@@ -659,41 +676,39 @@ let suite =
       ];
       "Unicode Escape Sequences" >:: test_parse_str_escape;
     ];
+    "Literals" >::: [
+      "Booleans" >:: test_parse_lit_bool;
+      "Integers" >:: test_parse_lit_int;
+      "Longs"    >:: test_parse_lit_long;
+      "Floats"   >:: test_parse_lit_float;
+      "Doubles"  >:: test_parse_lit_double;
+      "Runes"    >:: test_parse_lit_rune;
+      "Strings"  >:: test_parse_lit_string;
+    ];
+    "Identifiers" >::: [
+      "Lower Case" >:: test_parse_ident_lident;
+      "Upper Case" >:: test_parse_ident_uident;
+    ];
+    "Atoms" >::: [
+      "Literals"                  >:: test_parse_atom_lit;
+      "Identifiers"               >:: test_parse_atom_ident;
+      "Parenthesized Expressions" >:: test_parse_atom_paren;
+    ];
     "Expressions" >::: [
-      "Literals" >::: [
-        "Booleans" >:: test_parse_lit_bool;
-        "Integers" >:: test_parse_lit_int;
-        "Longs"    >:: test_parse_lit_long;
-        "Floats"   >:: test_parse_lit_float;
-        "Doubles"  >:: test_parse_lit_double;
-        "Runes"    >:: test_parse_lit_rune;
-        "Strings"  >:: test_parse_lit_string;
+      "Operators" >::: [
+        "Unary"  >:: test_parse_expr_un_op;
+        "Binary" >:: test_parse_expr_bin_op;
       ];
-      "Identifiers" >::: [
-        "Lower Case" >:: test_parse_ident_lident;
-        "Upper Case" >:: test_parse_ident_uident;
+      "Atoms" >:: test_parse_expr_atom;
+    ];
+    "Bindings" >::: [
+      "Value Bindings" >::: [
+        "Implicit" >:: test_parse_binding_value_binding_implicit;
+        "Explicit" >:: test_parse_binding_value_binding_explicit;
       ];
-      "Atoms" >::: [
-        "Literals"                  >:: test_parse_atom_lit;
-        "Identifiers"               >:: test_parse_atom_ident;
-        "Parenthesized Expressions" >:: test_parse_atom_paren;
-      ];
-      "Expressions" >::: [
-        "Operators" >::: [
-          "Unary"  >:: test_parse_expr_un_op;
-          "Binary" >:: test_parse_expr_bin_op;
-        ];
-        "Atoms" >:: test_parse_expr_atom;
-      ];
-      "Bindings" >::: [
-        "Value Bindings" >::: [
-          "Implicit" >:: test_parse_binding_value_binding_implicit;
-          "Explicit" >:: test_parse_binding_value_binding_explicit;
-        ];
-      ];
-      "Terms" >::: [
-        "Let Bindings" >:: test_parse_term_let;
-        "Expressions"  >:: test_parse_term_expr;
-      ];
+    ];
+    "Terms" >::: [
+      "Let Bindings" >:: test_parse_term_let;
+      "Expressions"  >:: test_parse_term_expr;
     ];
   ]

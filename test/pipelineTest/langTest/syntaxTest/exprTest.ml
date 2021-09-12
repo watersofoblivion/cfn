@@ -75,12 +75,6 @@ and fresh_value_binding ?loc:(loc = LocTest.gen ()) ?patt:(patt = PattTest.fresh
   let ty = if explicit then Some ty else None in
   Syntax.value_binding loc patt ty value
 
-let fresh_top_let ?loc:(loc = LocTest.gen ()) ?binding:(binding = fresh_value_binding ()) _ =
-  Syntax.top_let loc binding
-
-let fresh_top_val ?loc:(loc = LocTest.gen ()) ?binding:(binding = fresh_value_binding ()) _ =
-  Syntax.top_val loc binding
-
 (* Utilities *)
 
 (* Location Stripping *)
@@ -140,26 +134,11 @@ and deloc_binding = function
       |> deloc_expr
       |> Syntax.value_binding LocTest.dummy patt ty
 
-let rec deloc_top = function
-  | Syntax.TopLet top -> deloc_top_let top.binding
-  | Syntax.TopVal top -> deloc_top_val top.binding
-
-and deloc_top_let binding =
-  binding
-    |> deloc_binding
-    |> Syntax.top_let LocTest.dummy
-
-and deloc_top_val binding =
-  binding
-    |> deloc_binding
-    |> Syntax.top_val LocTest.dummy
-
 (* Assertions *)
 
 let rune_not_equal = TestUtils.not_equal "Runes" Syntax.pp_rune
 let str_not_equal = TestUtils.not_equal "Strings" Syntax.pp_str
 let expr_not_equal = TestUtils.not_equal "Expressions" Syntax.pp_expr
-let top_not_equal = TestUtils.not_equal "Top-level expressions" Syntax.pp_top
 
 let assert_rune_equal ~ctxt expected actual = match (expected, actual) with
   | Syntax.RuneLit expected, Syntax.RuneLit actual ->
@@ -226,15 +205,6 @@ and assert_binding_equal ~ctxt expected actual = match (expected, actual) with
     PattTest.assert_patt_equal ~ctxt expected.patt actual.patt;
     TestUtils.assert_optional_equal ~ctxt "type" TypeTest.assert_ty_equal expected.ty actual.ty;
     assert_expr_equal ~ctxt expected.value actual.value
-
-let assert_top_equal ~ctxt expected actual = match (expected, actual) with
-  | Syntax.TopLet expected, Syntax.TopLet actual ->
-    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
-    assert_binding_equal ~ctxt expected.binding actual.binding
-  | Syntax.TopVal expected, Syntax.TopVal actual ->
-    LocTest.assert_loc_equal ~ctxt expected.loc actual.loc;
-    assert_binding_equal ~ctxt expected.binding actual.binding
-  | expected, actual -> top_not_equal ~ctxt expected actual
 
 (* Constructors *)
 
@@ -411,26 +381,6 @@ let test_binding_value_binding ctxt =
   assert_binding_equal None;
   assert_binding_equal (Some (TypeTest.fresh_ty_constr ()))
 
-let test_top_let ctxt =
-  let loc = LocTest.gen () in
-  let binding = fresh_value_binding () in
-  let expected = Syntax.top_let loc binding in
-  match expected with
-    | Syntax.TopLet actual ->
-      LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      assert_binding_equal ~ctxt binding actual.binding
-    | actual -> top_not_equal ~ctxt expected actual
-
-let test_top_val ctxt =
-  let loc = LocTest.gen () in
-  let binding = fresh_value_binding () in
-  let expected = Syntax.top_val loc binding in
-  match expected with
-    | Syntax.TopVal actual ->
-      LocTest.assert_loc_equal ~ctxt loc actual.loc;
-      assert_binding_equal ~ctxt binding actual.binding
-    | actual -> top_not_equal ~ctxt expected actual
-
 let test_constructor =
   "Constructors" >::: [
     "Runes" >::: [
@@ -455,10 +405,6 @@ let test_constructor =
       "Let Bindings"     >:: test_expr_let;
     ];
     "Bindings" >:: test_binding_value_binding;
-    "Top-Level Expressions" >::: [
-      "Let Bindings" >:: test_top_let;
-      "Val Bindings" >:: test_top_val;
-    ];
   ]
 
 (* Locations *)
@@ -467,7 +413,6 @@ let assert_loc_rune = SyntaxUtils.assert_loc Syntax.loc_rune
 let assert_loc_str = SyntaxUtils.assert_loc Syntax.loc_str
 let assert_loc_expr = SyntaxUtils.assert_loc Syntax.loc_expr
 let assert_loc_binding = SyntaxUtils.assert_loc Syntax.loc_binding
-let assert_loc_top = SyntaxUtils.assert_loc Syntax.loc_top
 
 let test_loc_rune_lit = assert_loc_rune (fun loc -> fresh_rune_lit ~loc ())
 let test_loc_rune_escape = assert_loc_rune (fun loc -> fresh_rune_escape ~loc ())
@@ -488,9 +433,6 @@ let test_loc_expr_bin_op = assert_loc_expr (fun loc -> fresh_expr_bin_op ~loc ()
 let test_loc_expr_let = assert_loc_expr (fun loc -> fresh_expr_let ~loc ())
 
 let test_loc_binding_value_binding = assert_loc_binding (fun loc -> fresh_value_binding ~loc ())
-
-let test_loc_top_let = assert_loc_top (fun loc -> fresh_top_let ~loc ())
-let test_loc_top_val = assert_loc_top (fun loc -> fresh_top_val ~loc ())
 
 let test_loc =
   "Locations" >::: [
@@ -516,10 +458,6 @@ let test_loc =
       "Let Bindings"     >:: test_loc_expr_let;
     ];
     "Bindings" >:: test_loc_binding_value_binding;
-    "Top-Level Expressions" >::: [
-      "Let Bindings" >:: test_loc_top_let;
-      "Val Bindings" >:: test_loc_top_val;
-    ];
   ]
 
 (* Pretty Printing *)
@@ -528,7 +466,6 @@ let assert_pp_rune = PrettyTest.assert_pp Syntax.pp_rune
 let assert_pp_str = PrettyTest.assert_pp Syntax.pp_str
 let assert_pp_expr = PrettyTest.assert_pp Syntax.pp_expr
 let assert_pp_binding = PrettyTest.assert_pp Syntax.pp_binding
-let assert_pp_top = PrettyTest.assert_pp Syntax.pp_top
 
 let test_pp_rune_lit ctxt =
   let value = 'a' in
@@ -655,36 +592,6 @@ let test_pp_binding_value_binding ctxt =
          sprintf "%s = %B" id true
        ]
 
-let test_pp_top_let ctxt =
-  let id = "testId" in
-
-  let patt =
-    let id = SymTest.fresh_sym ~id () in
-    PattTest.fresh_patt_var ~id ()
-  in
-  let value = fresh_expr_bool ~value:true () in
-  let binding = fresh_value_binding ~patt ~value () in
-
-  fresh_top_let ~binding ()
-    |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Syntax.pp_binding binding |> flush_str_formatter
-       ]
-
-let test_pp_top_val ctxt =
-  let id = "testId" in
-
-  let patt =
-    let id = SymTest.fresh_sym ~id () in
-    PattTest.fresh_patt_var ~id ()
-  in
-  let value = fresh_expr_bool ~value:true () in
-  let binding = fresh_value_binding ~patt ~value () in
-
-  fresh_top_val ~binding ()
-    |> assert_pp_top ~ctxt [
-         fprintf str_formatter "val %a" Syntax.pp_binding binding |> flush_str_formatter
-       ]
-
 let test_pp =
   "Pretty Printing" >::: [
     "Runes" >::: [
@@ -714,16 +621,12 @@ let test_pp =
     "Bindings" >::: [
       "Value Bindings" >:: test_pp_binding_value_binding;
     ];
-    "Top-Level Expressions" >::: [
-      "Let Bindings" >:: test_pp_top_let;
-      "Val Bindings" >:: test_pp_top_val;
-    ];
   ]
 
 (* Test Suite *)
 
 let suite =
-  "Abstract Syntax" >::: [
+  "Expressions" >::: [
     test_constructor;
     test_loc;
     test_pp;

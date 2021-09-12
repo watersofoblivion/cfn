@@ -64,10 +64,10 @@ let top_let =
       let id = SymTest.fresh_sym ~id:let_ty () in
       TypeTest.fresh_ty_constr ~id ()
     in
-    let value = AstTest.fresh_expr_bool ~value:let_value () in
-    AstTest.fresh_value_binding ~patt ~explicit:true ~ty ~value ()
+    let value = ExprTest.fresh_expr_bool ~value:let_value () in
+    ExprTest.fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
-  AstTest.fresh_top_let ~binding ()
+  TopTest.fresh_top_let ~binding ()
 
 let top_val =
   let binding =
@@ -79,10 +79,10 @@ let top_val =
       let id = SymTest.fresh_sym ~id:val_ty () in
       TypeTest.fresh_ty_constr ~id ()
     in
-    let value = AstTest.fresh_expr_int ~value:val_value () in
-    AstTest.fresh_value_binding ~patt ~explicit:true ~ty ~value ()
+    let value = ExprTest.fresh_expr_int ~value:val_value () in
+    ExprTest.fresh_value_binding ~patt ~explicit:true ~ty ~value ()
   in
-  AstTest.fresh_top_val ~binding ()
+  TopTest.fresh_top_val ~binding ()
 
 let tops =
   [top_let; top_val]
@@ -97,7 +97,7 @@ let deloc_file = function
         |> List.map ImportTest.deloc_import
     in
     file.tops
-      |> List.map AstTest.deloc_top
+      |> List.map TopTest.deloc_top
       |> Syntax.file pkg imports
 
 (* Assertions *)
@@ -106,7 +106,7 @@ let assert_file_equal ~ctxt expected actual = match (expected, actual) with
   | Syntax.File expected, Syntax.File actual ->
     ImportTest.assert_pkg_equal ~ctxt expected.pkg actual.pkg;
     List.iter2 (ImportTest.assert_import_equal ~ctxt) expected.imports actual.imports;
-    List.iter2 (AstTest.assert_top_equal ~ctxt) expected.tops actual.tops
+    List.iter2 (TopTest.assert_top_equal ~ctxt) expected.tops actual.tops
 
 (* Tests *)
 
@@ -117,7 +117,7 @@ let test_file ctxt =
     | Syntax.File file ->
       ImportTest.assert_pkg_equal ~ctxt pkg file.pkg;
       List.iter2 (ImportTest.assert_import_equal ~ctxt) imports file.imports;
-      List.iter2 (AstTest.assert_top_equal ~ctxt) tops file.tops
+      List.iter2 (TopTest.assert_top_equal ~ctxt) tops file.tops
 
 let test_constructor =
   "Constructor" >:: test_file

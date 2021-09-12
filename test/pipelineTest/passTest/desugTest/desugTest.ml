@@ -5,7 +5,8 @@ open OUnit2
 include TypeTest
 include OpTest
 include PattTest
-include AstTest
+include ExprTest
+include TopTest
 include FileTest
 
 let suite =
@@ -13,6 +14,7 @@ let suite =
     TypeTest.suite;
     OpTest.suite;
     PattTest.suite;
-    AstTest.suite;
+    ExprTest.suite;
+    TopTest.suite;
     FileTest.suite;
   ]

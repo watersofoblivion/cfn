@@ -1,5 +1,5 @@
 (menhir
-  (modules tokens type op patt ast import file)
+  (modules tokens type op patt expr top import file)
   (merge_into parser)
   (flags
     --strict

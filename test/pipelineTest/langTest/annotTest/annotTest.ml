@@ -3,12 +3,14 @@ open OUnit2
 include TypeTest
 include BuiltinTest
 include PattTest
-include AstTest
+include ExprTest
+include TopTest
 
 let suite =
   "Annotated Syntax" >::: [
     TypeTest.suite;
     BuiltinTest.suite;
     PattTest.suite;
-    AstTest.suite;
+    ExprTest.suite;
+    TopTest.suite;
   ]
