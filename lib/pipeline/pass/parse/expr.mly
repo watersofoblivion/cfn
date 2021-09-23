@@ -2,53 +2,53 @@
   [@@@coverage exclude_file]
   open Common
 
-  let make_rune_lit (start_loc, end_loc) uchar env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_rune_lit (start_pos, end_pos) uchar env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.rune_lit loc uchar
       |> kontinue env
 
-  let make_rune_escape (start_loc, end_loc) lexeme env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_rune_escape (start_pos, end_pos) lexeme env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.rune_escape loc lexeme
       |> kontinue env
 
-  let make_str_lit (start_loc, end_loc) lexeme env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_str_lit (start_pos, end_pos) lexeme env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.str_lit loc lexeme
       |> kontinue env
 
-  let make_str_escape (start_loc, end_loc) lexeme env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_str_escape (start_pos, end_pos) lexeme env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.str_escape loc lexeme
       |> kontinue env
 
-  let make_lit_bool (start_loc, end_loc) b env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_lit_bool (start_pos, end_pos) b env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.expr_bool loc b
       |> kontinue env
 
-  let make_lit_int (start_loc, end_loc) lexeme env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_lit_int (start_pos, end_pos) lexeme env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.expr_int loc lexeme
       |> kontinue env
 
-  let make_lit_long (start_loc, end_loc) lexeme env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_lit_long (start_pos, end_pos) lexeme env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.expr_long loc lexeme
       |> kontinue env
 
-  let make_lit_float (start_loc, end_loc) lexeme env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_lit_float (start_pos, end_pos) lexeme env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.expr_float loc lexeme
       |> kontinue env
 
-  let make_lit_double (start_loc, end_loc) lexeme env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_lit_double (start_pos, end_pos) lexeme env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Syntax.expr_double loc lexeme
       |> kontinue env
 
-  let make_lit_rune (start_loc, end_loc) r env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_lit_rune (start_pos, end_pos) r env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     r env (fun env r ->
       Syntax.expr_rune loc r
         |> kontinue env)
@@ -103,53 +103,48 @@
           line :: lines
             |> kontinue env))
 
-  let make_lit_string (start_loc, end_loc) lines env kontinue =
-    let loc = Loc.loc start_loc end_loc in
-    let col = start_loc.Lexing.pos_cnum - start_loc.Lexing.pos_bol + 1 in
+  let make_lit_string (start_pos, end_pos) lines env kontinue =
+    let loc = Loc.loc start_pos end_pos in
+    let col = start_pos.Lexing.pos_cnum - start_pos.Lexing.pos_bol + 1 in
     make_str_lines col lines env (fun env lines ->
       Syntax.expr_string loc lines
         |> kontinue env)
 
-  let make_expr_ident (start_loc, end_loc) id env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_expr_ident (start_pos, end_pos) id env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Env.symbol_of id env
         |> Syntax.expr_ident loc
         |> kontinue env
 
-  let make_expr_un_op (start_loc, end_loc) op operand env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_expr_un_op (start_pos, end_pos) op operand env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     op env (fun env op ->
       operand env (fun env operand ->
         Syntax.expr_un_op loc op operand
           |> kontinue env))
 
-  let make_expr_bin_op (start_loc, end_loc) op lhs rhs env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_expr_bin_op (start_pos, end_pos) op lhs rhs env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     op env (fun env op ->
       lhs env (fun env lhs ->
         rhs env (fun env rhs ->
           Syntax.expr_bin_op loc op lhs rhs
             |> kontinue env)))
 
-  let make_expr_let (start_loc, end_loc) binding scope env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_expr_let (start_pos, end_pos) binding scope env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     binding env (fun env binding ->
       scope env (fun env scope ->
         Syntax.expr_let loc binding scope
           |> kontinue env))
 
-  let make_value_binding (start_loc, end_loc) patt ty value env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_value_binding (start_pos, end_pos) patt ty value env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     patt env (fun env patt ->
       value env (fun env value ->
-        match ty with
-          | None ->
-            Syntax.value_binding loc patt None value
-              |> kontinue env
-          | Some ty ->
-            ty env (fun env ty ->
-              Syntax.value_binding loc patt (Some ty) value
-                |> kontinue env)))
+        make_optional ty env (fun env ty ->
+          Syntax.value_binding loc patt ty value
+            |> kontinue env)))
 %}
 
 /* Testing Entry Points */

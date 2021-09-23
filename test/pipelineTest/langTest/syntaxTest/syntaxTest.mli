@@ -237,19 +237,46 @@ val fresh_name : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.name
 (** [fresh_name ?loc ?seq ?id ()] constructs a fresh name at location [loc]
     using [id] as the name. *)
 
-val fresh_src : ?loc:Loc.t -> ?name:Syntax.name -> unit -> Syntax.src
-(** [fresh_srq ?loc ?name ()] constructs a fresh import source at location [loc]
-    using [name] as the source's name. *)
+val fresh_proto : ?loc:Loc.t -> ?proto:string -> unit -> Syntax.proto
+(** [fresh_proto ?loc ?proto ()] constructs a fresh protocol at location [loc]
+    with the protocol [proto]. *)
+
+val fresh_host : ?loc:Loc.t -> ?host:string -> unit -> Syntax.host
+(** [fresh_host ?loc ?host ()] constructs a fresh host name at location [loc]
+    with the host name [host]. *)
+
+val fresh_hostpath : ?loc:Loc.t -> ?segs:(string list) -> unit -> Syntax.hostpath
+(** [fresh_hostpath ?loc ?segs ()] constructs a fresh host path at location
+    [loc] with the path segments [segs]. *)
+
+val fresh_version : ?loc:Loc.t -> ?version:string -> unit -> Syntax.version
+(** [fresh_version ?loc ?version ()] constructs a fresh version at location
+    [loc] with the major version [version]. *)
+
+val fresh_src_current : ?loc:Loc.t -> unit -> Syntax.src
+(** [fresh_src_current ?loc ()] constructs a fresh current package import source
+    at location [loc]. *)
+
+val fresh_src_external : ?loc:Loc.t -> ?with_proto:bool -> ?proto:Syntax.proto -> ?host:Syntax.host -> ?with_path:bool -> ?path:Syntax.hostpath -> ?version:Syntax.version -> unit -> Syntax.src
+(** [fresh_src_external ?loc ?with_proto ?proto ?host ?with_path ?path ?version ()]
+    constructs a fresh external import source at location [loc] using [host] as
+    the host and [version] as the major version.  If [with_proto] is [true],
+    then [proto] is used as the protocol.  If [with_path] is [true], then [path]
+    is used as the path. *)
 
 val fresh_from : ?loc:Loc.t -> ?src:Syntax.src -> unit -> Syntax.from
 (** [fresh_from ?loc ?src ()] generates a fresh from clause at location [loc]
     using [src] as the source name. *)
 
-val fresh_alias : ?loc:Loc.t -> ?pkg:Syntax.name -> ?alias:bool -> ?local:Syntax.name -> unit -> Syntax.alias
-(** [fresh_alias ?loc ?pkg ?local ()] generates a fresh alias clause at location
-    location [loc] using [pkg] as the package name.  If [alias] is [true],
-    [local] is used as the local alias.  If not provided, [alias] defaults to
-    [false]. *)
+val fresh_pkgpath : ?loc:Loc.t -> ?path:(Syntax.str list) -> unit -> Syntax.pkgpath
+(** [fresh_pkgpath ?loc ?path ()] constructs a fresh package path at location
+    [loc] with path [path]. *)
+
+val fresh_alias : ?loc:Loc.t -> ?pkg:Syntax.pkgpath -> ?with_alias:bool -> ?alias:Syntax.name -> unit -> Syntax.alias
+(** [fresh_alias ?loc ?pkg ?with_alias ?alias ()] generates a fresh alias clause
+    at location location [loc] using [pkg] as the package name.  If [with_alias]
+    is [true], [alias] is used as the local alias.  If not provided,
+    [with_alias] defaults to [false]. *)
 
 val fresh_pkgs : ?loc:Loc.t -> ?aliases:(Syntax.alias list) -> unit -> Syntax.pkgs
 (** [fresh_pkgs ?loc ?aliases ()] generates a fresh list of packages at location
@@ -301,11 +328,28 @@ val deloc_top : Syntax.top -> Syntax.top
 val deloc_name : Syntax.name -> Syntax.name
 (** [deloc_name name] strips location information from the name [name]. *)
 
+val deloc_proto : Syntax.proto -> Syntax.proto
+(** [deloc_proto proto] strips location information from the protocol [proto]. *)
+
+val deloc_host : Syntax.host -> Syntax.host
+(** [deloc_host host] strips location information from the host [host]. *)
+
+val deloc_hostpath : Syntax.hostpath -> Syntax.hostpath
+(** [deloc_hostpath path] strips location information from the host path [path]. *)
+
+val deloc_version : Syntax.version -> Syntax.version
+(** [deloc_verison version] strips location information from the version
+    [version]. *)
+
 val deloc_src : Syntax.src -> Syntax.src
 (** [deloc_src src] strips location information from the import source [src]. *)
 
 val deloc_from : Syntax.from -> Syntax.from
 (** [deloc_from from] strips location information from the from clause [from]. *)
+
+val deloc_pkgpath : Syntax.pkgpath -> Syntax.pkgpath
+(** [deloc_pkgpath path] strips location information from the package path
+    [path]. *)
 
 val deloc_alias : Syntax.alias -> Syntax.alias
 (** [deloc_alias alias] strips location information from the package alias
@@ -376,6 +420,22 @@ val assert_name_equal : ctxt:test_ctxt -> Syntax.name -> Syntax.name -> unit
 (** [assert_name_equal ~ctxt expected actual] asserts that the name [actual] is
     equal to the name [expected]. *)
 
+val assert_proto_equal : ctxt:test_ctxt -> Syntax.proto -> Syntax.proto -> unit
+(** [assert_proto_equal ~ctxt expected actual] asserts that the protocol
+    [actual] is equal to the protocol [expected]. *)
+
+val assert_host_equal : ctxt:test_ctxt -> Syntax.host -> Syntax.host -> unit
+(** [assert_host_equal ~ctxt expected actual] asserts that the host name
+    [actual] is equal to the host name [expected]. *)
+
+val assert_hostpath_equal : ctxt:test_ctxt -> Syntax.hostpath -> Syntax.hostpath -> unit
+(** [assert_hostpath_equal ~ctxt expected actual] asserts that the host path
+    [actual] is equal to the host path [expected]. *)
+
+val assert_version_equal : ctxt:test_ctxt -> Syntax.version -> Syntax.version -> unit
+(** [assert_version_equal ~ctxt expected actual] asserts that the major version
+    [actual] is equal to the major version [expected]. *)
+
 val assert_src_equal : ctxt:test_ctxt -> Syntax.src -> Syntax.src -> unit
 (** [assert_src_equal ~ctxt expected actual] asserts that the import source
     [actual] is equal to the import source [expected]. *)
@@ -383,6 +443,10 @@ val assert_src_equal : ctxt:test_ctxt -> Syntax.src -> Syntax.src -> unit
 val assert_from_equal : ctxt:test_ctxt -> Syntax.from -> Syntax.from -> unit
 (** [assert_from_equal ~ctxt expected actual] asserts that the from clause
     [actual] is equal to the from clause [expected]. *)
+
+val assert_pkgpath_equal : ctxt:test_ctxt -> Syntax.pkgpath -> Syntax.pkgpath -> unit
+(** [assert_pkgpath_equal ~ctxt expected actual] asserts that the package path
+    [actual] is equal to the package path [expected]. *)
 
 val assert_alias_equal : ctxt:test_ctxt -> Syntax.alias -> Syntax.alias -> unit
 (** [assert_alias_equal ~ctxt expected actual] asserts that the package alias

@@ -34,10 +34,6 @@ let lexbuf_from_file path =
 
 let punct_eof = EOF
 
-let new_line lex lexbuf =
-  Sedlexing.new_line lexbuf;
-  lex lexbuf
-
 (* Punctuation *)
 
 let punct_lparen = LPAREN
@@ -109,33 +105,6 @@ let lit_double lexbuf =
   let lexeme = Sedlexing.Utf8.lexeme lexbuf in
   DOUBLE lexeme
 
-let lit_codepoint lexbuf =
-  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
-  UESC lexeme
-
-let lit_rune_esc chr =
-  let cp = Uchar.of_char chr in
-  RUNE cp
-
-let lit_rune lexbuf =
-  let lexeme = Sedlexing.lexeme lexbuf in
-  RUNE lexeme.(0)
-
-let lit_str_esc chr =
-  let lexeme =
-    chr
-      |> Uchar.of_char
-      |> Utf8.to_string
-  in
-  STRING lexeme
-
-let lit_str_multiline =
-  NEWLINE
-
-let lit_str lexbuf =
-  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
-  STRING lexeme
-
 let lit_lident lexbuf =
   let lexeme = Sedlexing.Utf8.lexeme lexbuf in
   LIDENT lexeme
@@ -166,23 +135,16 @@ let long_suffix = [%sedlex.regexp? 'l'|'L']
 let float_suffix = [%sedlex.regexp? 'f'|'F']
 let double_suffix = [%sedlex.regexp? 'd'|'D']
 
-let whitespace = [%sedlex.regexp? ' '|'\t'|'\r']
-let newline = [%sedlex.regexp? '\n']
+let whitespace = [%sedlex.regexp? ' '|'\t'|'\n'|'\r']
 let ident = [%sedlex.regexp? uppercase|lowercase|'0'..'9'|'_']
-
-let unicode_radix = [%sedlex.regexp? 'u'|'U']
 
 let squote = [%sedlex.regexp? "'"]
 let dquote = [%sedlex.regexp? '"']
 
 let esc_bslash = [%sedlex.regexp? "\\\\"]
-let esc_squote = [%sedlex.regexp? "\\'"]
-let esc_dquote = [%sedlex.regexp? "\\\""]
-let multiline = [%sedlex.regexp? "\\\n"]
 let esc_lf = [%sedlex.regexp? "\\n"]
 let esc_cr = [%sedlex.regexp? "\\r"]
 let esc_tab = [%sedlex.regexp? "\\t"]
-let esc_unicode = [%sedlex.regexp? '\\', unicode_radix, Opt '+', Rep (hex_digit, 4)]
 
 (*
  * Main lexer
@@ -192,7 +154,6 @@ let rec lex_main lexbuf =
     (* Non-printable *)
     | eof             -> punct_eof
     | Plus whitespace -> lex_main lexbuf
-    | newline         -> new_line lex_main lexbuf
 
     (* Punctuation *)
     | '('    -> punct_lparen
@@ -273,17 +234,27 @@ let rec lex_main lexbuf =
     (* Error *)
     | _ -> failwith "Lexing error"
 
-(*
- * Lexes the body of a rune.  Allowed syntaxes are:
- *
- * {ul
- *   {li Unicode Escape - [\U+0A].  The 'U' and the hexadecimal digits are case-insensitive and the [+] is optional.}
- *   {li Escape Sequences - Specifically, [\'], [\n], [\r], [\t], [\0]}
- *   {li Literal - Any unicode character that is not a single quote and does not match any of the above. For example, [a] or [ß].}
- * }
- *
- * Also lexes the closing single quote.
- *)
+(* Unicode Escapes *)
+
+let lit_codepoint lexbuf =
+  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
+  UESC lexeme
+
+let unicode_radix = [%sedlex.regexp? 'u'|'U']
+let esc_unicode = [%sedlex.regexp? '\\', unicode_radix, Opt '+', Rep (hex_digit, 4)]
+
+(* Runes *)
+
+let lit_rune_esc chr =
+  let cp = Uchar.of_char chr in
+  RUNE cp
+
+let lit_rune lexbuf =
+  let lexeme = Sedlexing.lexeme lexbuf in
+  RUNE lexeme.(0)
+
+let esc_squote = [%sedlex.regexp? "\\'"]
+
 let lex_rune lexbuf =
   match%sedlex lexbuf with
     | eof                 -> punct_eof
@@ -297,17 +268,26 @@ let lex_rune lexbuf =
     | Compl ('\'' | '\\') -> lit_rune lexbuf
     | _                   -> failwith "Lexing error (rune)"
 
-(**
- * Lexes the body of a string.  Allowed syntaxes are:
- *
- * {ul
- *   {li Unicode Escape - [\U+0A].  The 'U' and the hexadecimal digits are case-insensitive and the [+] is optional.}
- *   {li Escape Sequences - Specifically, <double-quote>, [\n], [\r], [\t], [\0]}
- *   {li Literal - A sequence of unicode characters that are not a double quote and do not match any of the above.  For example, [foo bar].}
- * }
- *
- * Also lexes the closing double quote.
- *)
+(* String Segments *)
+
+let lit_str_esc chr =
+  let lexeme =
+    chr
+      |> Uchar.of_char
+      |> Utf8.to_string
+  in
+  STRING lexeme
+
+let lit_str_multiline =
+  NEWLINE
+
+let lit_str lexbuf =
+  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
+  STRING lexeme
+
+let esc_dquote = [%sedlex.regexp? "\\\""]
+let multiline = [%sedlex.regexp? "\\\n"]
+
 let lex_str lexbuf =
   match%sedlex lexbuf with
     | eof                       -> punct_eof
@@ -321,3 +301,53 @@ let lex_str lexbuf =
     | esc_unicode               -> lit_codepoint lexbuf
     | Plus (Compl ('"' | '\\')) -> lit_str lexbuf
     | _                         -> failwith "Lexing error (string segment)"
+
+(* Imports *)
+
+let dot = [%sedlex.regexp? '.']
+let at = [%sedlex.regexp? '@']
+let path_sep = [%sedlex.regexp? '/']
+let host = [%sedlex.regexp? Compl (' '|'\t'|'\n'|'\r'|dot|at|path_sep|'?'|'&'|'#'|':')]
+let path_seg = [%sedlex.regexp? Compl (' '|'\t'|'\n'|'\r'|dot|at|path_sep|'?'|'&'|'#'|':')]
+
+let punct_whitespace = WHITESPACE
+
+let punct_proto = PROTO
+let punct_dot = DOT
+let punct_path_sep = PATH_SEP
+let punct_at = AT
+let punct_v = V
+
+let lit_host lexbuf =
+  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
+  HOST lexeme
+
+let lit_path_seg lexbuf =
+  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
+  PATH_SEG lexeme
+
+let lit_version lexbuf =
+  let lexeme = Sedlexing.Utf8.lexeme lexbuf in
+  VERSION lexeme
+
+let lex_import_path lexbuf =
+  match%sedlex lexbuf with
+    | eof                              -> punct_eof
+    | Plus whitespace                  -> punct_whitespace
+    | dot                              -> punct_dot
+    | "://"                            -> punct_proto
+    | at                               -> punct_at
+    | path_sep                         -> punct_path_sep
+    | "import"                         -> kwd_import
+    | Plus (Plus host, dot), Plus host -> lit_host lexbuf
+    | Plus path_seg                    -> lit_path_seg lexbuf
+    | _                                -> failwith "Lexing error (import path)"
+
+let lex_import_version lexbuf =
+  match%sedlex lexbuf with
+    | eof                -> punct_eof
+    | Plus whitespace    -> punct_whitespace
+    | 'v'                -> punct_v
+    | "import"           -> kwd_import
+    | Plus decimal_digit -> lit_version lexbuf
+    | _                  -> failwith "Lexing error (import version)"

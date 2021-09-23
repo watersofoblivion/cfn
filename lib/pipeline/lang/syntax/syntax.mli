@@ -207,11 +207,45 @@ type name = private
     } (** A name *)
 (** Import Names *)
 
-type src = private
-  | Source of {
+type proto = private
+  | Proto of {
+      loc:   Loc.t; (** Location *)
+      proto: string (** Protocol *)
+    } (** Protocol *)
+(** Protocols *)
+
+type host = private
+  | Host of {
       loc:  Loc.t; (** Location *)
-      name: name   (** Name of the source *)
-    } (** An import source *)
+      host: string (** Hostname *)
+    } (** Host *)
+(** Hosts *)
+
+type hostpath = private
+  | HostPath of {
+      loc:  Loc.t;      (** Location *)
+      segs: string list (** Segments *)
+    } (** Host Path *)
+(** Host Paths *)
+
+type version = private
+  | Version of {
+      loc:     Loc.t; (** Location *)
+      version: string (** Version *)
+    } (** Version *)
+(** Versions *)
+
+type src = private
+  | Current of {
+      loc: Loc.t (** Location *)
+    } (** Current package *)
+  | External of {
+      loc:     Loc.t;           (** Location *)
+      proto:   proto option;    (** Optional Protocol *)
+      host:    host;            (** Host *)
+      path:    hostpath option; (** Path *)
+      version: version;         (** Major version *)
+    } (** External package *)
 (** Import Sources *)
 
 type from = private
@@ -221,10 +255,17 @@ type from = private
     } (** From clause *)
 (** From Clauses *)
 
+type pkgpath = private
+  | PkgPath of {
+      loc:  Loc.t;   (** Location *)
+      path: str list (** Path *)
+    } (** Package Path *)
+(** Package Paths *)
+
 type alias = private
   | Alias of {
       loc:   Loc.t;      (** Location *)
-      pkg:   name;       (** Package to import *)
+      pkg:   pkgpath;    (** Package to import *)
       alias: name option (** Optional local name *)
     } (** A package alias *)
 (** Package Aliases *)
@@ -460,15 +501,39 @@ val top_val : Loc.t -> binding -> top
 val name : Loc.t -> Sym.t -> name
 (** [name loc id] constructs a name at location [loc] of the identifier [id]. *)
 
-val src : Loc.t -> name -> src
-(** [src loc name] constructs a source reference at location [loc] with the name
-    [name]. *)
+val proto : Loc.t -> string -> proto
+(** [proto loc proto] constructs a protocol specifier at location [loc] with the
+    value [proto]. *)
+
+val host : Loc.t -> string -> host
+(** [host loc host] constructs a host identifier at location [loc] with the host
+    [host]. *)
+
+val hostpath : Loc.t -> string list -> hostpath
+(** [hostpath loc segs] constructs a host path at location [loc] of the path
+    segments [segs]. *)
+
+val version : Loc.t -> string -> version
+(** [version loc version] constructs a major version at location [loc] of the
+    version [version]. *)
+
+val src_current : Loc.t -> src
+(** [src_current loc] constructs a current source reference at location [loc]. *)
+
+val src_external : Loc.t -> proto option -> host -> hostpath option -> version -> src
+(** [src_external loc proto host path version] constructs an external source
+    reference at location [loc] with the protocol [proto], the host [host], the
+    path [path], and the version [version]. *)
 
 val from : Loc.t -> src -> from
 (** [from_clause loc src] constructs a [from] clause at location [loc] importing
     from the source [src]. *)
 
-val alias : Loc.t -> name -> name option -> alias
+val pkgpath : Loc.t -> str list -> pkgpath
+(** [pkgpath loc path] constructs a package path at location [loc] with package
+    path [path]. *)
+
+val alias : Loc.t -> pkgpath -> name option -> alias
 (** [alias loc pkg alias] constructs a package alias at location [loc] importing
     the package [pkg] with the optional local alias [alias]. *)
 
@@ -526,11 +591,26 @@ val loc_top : top -> Loc.t
 val loc_name : name -> Loc.t
 (** [loc_name name] returns the location of the import name [name]. *)
 
+val loc_proto : proto -> Loc.t
+(** [loc_proto proto] returns the location of the protocol specifier [proto]. *)
+
+val loc_host : host -> Loc.t
+(** [loc_host host] returns the location of the host [host]. *)
+
+val loc_hostpath : hostpath -> Loc.t
+(** [loc_hostpath path] returns the location of the path [path]. *)
+
+val loc_version : version -> Loc.t
+(** [loc_version version] returns the location of the major version [version]. *)
+
 val loc_src : src -> Loc.t
 (** [loc_src src] returns the location of the import source [src]. *)
 
 val loc_from : from -> Loc.t
 (** [loc_from from] returns the location of the from clause [from]. *)
+
+val loc_pkgpath : pkgpath -> Loc.t
+(** [loc_pkgpath path] returns the location of the package path [path]. *)
 
 val loc_alias : alias -> Loc.t
 (** [loc_alias alias] returns the location of the alias clause [alias]. *)
@@ -587,12 +667,31 @@ val pp_name : formatter -> name -> unit
 (** [pp_name fmt name] pretty-prints the import name [name] to the formatter
     [fmt]. *)
 
+val pp_proto : formatter -> proto -> unit
+(** [pp_proto fmt proto] pretty-prints the protocol specifier [proto] to the
+    formatter [fmt]. *)
+
+val pp_host : formatter -> host -> unit
+(** [pp_host fmt host] pretty-prints the host [host] to the formatter [fmt]. *)
+
+val pp_hostpath : formatter -> hostpath -> unit
+(** [pp_hostpath fmt path] pretty-prints the host path [path] to the formatter
+    [fmt]. *)
+
+val pp_version : formatter -> version -> unit
+(** [pp_version fmt version] pretty-prints the major version [version] to the
+    formatter [fmt]. *)
+
 val pp_src : formatter -> src -> unit
 (** [pp_src fmt src] pretty-prints the import source [src] to the formatter
     [fmt]. *)
 
 val pp_from : formatter -> from -> unit
 (** [pp_from fmt from] pretty-prints the from clause [from] to the formatter
+    [fmt]. *)
+
+val pp_pkgpath : formatter -> pkgpath -> unit
+(** [pp_pkgpath fmt path] pretty-prints the package path [path] to the formatter
     [fmt]. *)
 
 val pp_alias : formatter -> alias -> unit

@@ -2,13 +2,13 @@
   [@@@coverage exclude_file]
   open Common
 
-  let make_patt_ground (start_loc, end_loc) env kontinue =
-    Loc.loc start_loc end_loc
+  let make_patt_ground (start_pos, end_pos) env kontinue =
+    Loc.loc start_pos end_pos
       |> Syntax.patt_ground
       |> kontinue env
 
-  let make_patt_var (start_loc, end_loc) id env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_patt_var (start_pos, end_pos) id env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Env.rename id env (fun env sym ->
       Syntax.patt_var loc sym
         |> kontinue env)

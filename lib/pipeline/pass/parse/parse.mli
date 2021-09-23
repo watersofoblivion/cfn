@@ -43,11 +43,15 @@ val parse_file : string -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.file ->
  * continuation [kontinue].
  *)
 
+(** {3 Types} *)
+
 val parse_annot : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.ty -> 'a) -> 'a
 (** [parse_annot lexbuf env kontinue] parses a type annotation. *)
 
 val parse_ty : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.ty -> 'a) -> 'a
 (** [parse_ty lexbuf env kontinue] parses a type constructor. *)
+
+(** {3 Operators} *)
 
 val parse_un : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.un -> 'a) -> 'a
 (** [parse_un lexbuf env kontinue] parses a unary operator. *)
@@ -55,8 +59,12 @@ val parse_un : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax
 val parse_bin : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.bin -> 'a) -> 'a
 (** [parse_bin lexbuf env kontinue] parses a binary operator. *)
 
+(** {3 Patterns} *)
+
 val parse_patt : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.patt -> 'a) -> 'a
 (** [parse_patt lexbuf env kontinue] parses a pattern. *)
+
+(** {3 Expressions} *)
 
 val parse_rune : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.rune -> 'a) -> 'a
 (** [parse_rune lexbuf env kontinue] parses a rune literal value. *)
@@ -82,11 +90,18 @@ val parse_term : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Synt
 val parse_binding : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.binding -> 'a) -> 'a
 (** [parse_binding lexbuf env kontinue] parses a binding. *)
 
+(** {3 Top-Level Expressions} *)
+
 val parse_top : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.top -> 'a) -> 'a
 (** [parse_top lexbuf env kontinue] parses a top-level expression. *)
 
+(** {3 Imports} *)
+
 val parse_name : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.name -> 'a) -> 'a
 (** [parse_name lexbuf env kontinue] parses an import name. *)
+
+val parse_pkgpath : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.pkgpath -> 'a) -> 'a
+(** [parse_pkgpath lexbuf env kontinue] parses a package path. *)
 
 val parse_local : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.name -> 'a) -> 'a
 (** [parse_local lexbuf env kontinue] parses a local alias name. *)
@@ -96,6 +111,18 @@ val parse_alias : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syn
 
 val parse_pkgs : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.pkgs -> 'a) -> 'a
 (** [parse_pkgs lexbuf env kontinue] parses an alias list. *)
+
+val parse_proto : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.proto -> 'a) -> 'a
+(** [parse_proto lexbuf env kontinue] parses a protocol. *)
+
+val parse_host : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.host -> 'a) -> 'a
+(** [parse_host lexbuf env kontinue] parses a host name. *)
+
+val parse_hostpath : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.hostpath -> 'a) -> 'a
+(** [parse_hostpath lexbuf env kontinue] parses a host path. *)
+
+val parse_version : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.version -> 'a) -> 'a
+(** [parse_version lexbuf env kontinue] parses a major version. *)
 
 val parse_src : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.src -> 'a) -> 'a
 (** [parse_src lexbuf env kontinue] parses an import source. *)

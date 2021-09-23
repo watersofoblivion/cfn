@@ -35,3 +35,17 @@ let assert_parses ?env:(env = EnvTest.fresh ()) ~ctxt parse assert_equal input e
     parse lexbuf env (fun _ actual ->
       assert_equal ~ctxt expected actual)
   end
+
+let assert_parses_file ?env:(env = EnvTest.fresh ()) ~ctxt parse assert_equal input expected =
+  let (fname, oc) = Filename.open_temp_file "" "" in
+  let finally _ = Sys.remove fname in
+  Fun.protect ~finally (fun _ ->
+    let finally _ = close_out oc in
+    Fun.protect ~finally (fun _ ->
+      input
+        |> String.concat "\n"
+        |> output_string oc);
+    ignore begin
+      parse fname env (fun _ actual ->
+        assert_equal ~ctxt expected actual)
+    end)

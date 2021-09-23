@@ -311,6 +311,10 @@ let test_parse_lit_string ctxt =
   fresh_atom_string ~value:[line] ()
     |> assert_parses_lit ~ctxt ["\"foo\""];
 
+  let line = [fresh_str_lit ~start:(1, 1, 1) ~value:" foo " ()] in
+  fresh_atom_string ~value:[line] ()
+    |> assert_parses_lit ~ctxt ["\" foo \""];
+
   let line = [
     fresh_str_lit ~start:(1, 1, 1) ~value:"foo" ();
     fresh_str_escape ~start:(1, 4, 4) ~value:"\\U+42ba" ();

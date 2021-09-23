@@ -2,8 +2,8 @@
   [@@@coverage exclude_file]
   open Common
 
-  let make_op constr (start_loc, end_loc) env kontinue =
-    Loc.loc start_loc end_loc
+  let make_op constr (start_pos, end_pos) env kontinue =
+    Loc.loc start_pos end_pos
       |> constr
       |> kontinue env
 

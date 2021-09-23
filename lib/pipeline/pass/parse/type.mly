@@ -2,8 +2,8 @@
   [@@@coverage exclude_file]
   open Common
 
-  let make_ty_constr (start_loc, end_loc) constr env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_ty_constr (start_pos, end_pos) constr env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     Env.constr_of constr env (fun env sym ->
       Syntax.ty_constr loc sym
         |> kontinue env)

@@ -11,10 +11,10 @@ open CommonTest
 (* Fixtures *)
 
 let pkg_lexeme = "testpackage"
-let src_lexeme = "testsrc"
-let import_lexeme = "importedpkg"
+let src_lexeme = "https://github.com/owner/repo@v42"
+let import_lexeme = "imported/pkg"
 let alias_lexeme = "pkgalias"
-let import_lexeme' = "anotherpkg"
+let import_lexeme' = "another/pkg"
 
 let let_lexeme = "letBound"
 let let_ty = Prim.id_bool
@@ -29,17 +29,20 @@ let pkg =
   ImportTest.fresh_pkg ~id ()
 
 let from =
-  let name = ImportTest.fresh_name ~id:src_lexeme () in
-  let src = ImportTest.fresh_src ~name () in
+  let proto = ImportTest.fresh_proto ~proto:"https" () in
+  let host = ImportTest.fresh_host ~host:"github.com" () in
+  let path = ImportTest.fresh_hostpath ~segs:["owner"; "repo"] () in
+  let version = ImportTest.fresh_version ~version:"42" () in
+  let src = ImportTest.fresh_src_external ~with_proto:true ~proto ~host ~with_path:true ~path ~version () in
   ImportTest.fresh_from ~src ()
 
 let alias =
-  let pkg = ImportTest.fresh_name ~id:import_lexeme () in
-  let local = ImportTest.fresh_name ~id:alias_lexeme () in
-  ImportTest.fresh_alias ~pkg ~alias:true ~local ()
+  let pkg = ImportTest.fresh_pkgpath ~path:[ExprTest.fresh_str_lit ~value:"imported/pkg" ()] () in
+  let alias = ImportTest.fresh_name ~id:alias_lexeme () in
+  ImportTest.fresh_alias ~pkg ~with_alias:true ~alias ()
 
 let alias' =
-  let pkg = ImportTest.fresh_name ~id:import_lexeme' () in
+  let pkg = ImportTest.fresh_pkgpath ~path:[ExprTest.fresh_str_lit ~value:"another/pkg" ()] () in
   ImportTest.fresh_alias ~pkg ()
 
 let pkgs =
@@ -138,11 +141,11 @@ let test_pp_file_imports ctxt =
          sprintf "package %s" pkg_lexeme;
          "";
          sprintf "from %s import" src_lexeme;
-         sprintf "                   | %s -> %s" import_lexeme alias_lexeme;
-         sprintf "                   | %s" import_lexeme';
+         sprintf "                                             | %S -> %s" import_lexeme alias_lexeme;
+         sprintf "                                             | %S" import_lexeme';
          sprintf "import";
-         sprintf "      | %s -> %s" import_lexeme alias_lexeme;
-         sprintf "      | %s" import_lexeme';
+         sprintf "      | %S -> %s" import_lexeme alias_lexeme;
+         sprintf "      | %S" import_lexeme';
        ]
 
 let test_pp_file_tops ctxt =
@@ -161,11 +164,11 @@ let test_pp_file_imports_tops ctxt =
          sprintf "package %s" pkg_lexeme;
          "";
          sprintf "from %s import" src_lexeme;
-         sprintf "                   | %s -> %s" import_lexeme alias_lexeme;
-         sprintf "                   | %s" import_lexeme';
+         sprintf "                                             | %S -> %s" import_lexeme alias_lexeme;
+         sprintf "                                             | %S" import_lexeme';
          sprintf "import";
-         sprintf "      | %s -> %s" import_lexeme alias_lexeme;
-         sprintf "      | %s" import_lexeme';
+         sprintf "      | %S -> %s" import_lexeme alias_lexeme;
+         sprintf "      | %S" import_lexeme';
          "";
          sprintf "let %s: %s = %b" let_lexeme let_ty let_value;
          "";

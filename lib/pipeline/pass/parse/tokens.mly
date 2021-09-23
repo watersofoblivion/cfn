@@ -4,6 +4,7 @@
 
 /* Non-Printable */
 %token EOF
+%token WHITESPACE
 
 /* Punctuation */
 %token LPAREN "("
@@ -15,6 +16,11 @@
 %token GROUND "_"
 %token SQUOTE "'"
 %token DQUOTE
+%token PROTO "://"
+%token DOT "."
+%token PATH_SEP
+%token AT "@"
+%token V "v"
 
 /* Operators */
 %token UN_NEG "-"
@@ -50,6 +56,9 @@
 %token LET "let"
 %token IN "in"
 %token VAL "val"
+
+/* Import Paths */
+%token <string> HOST PATH_SEG VERSION
 
 /* Literals */
 %token <bool> BOOL

@@ -2,14 +2,14 @@
   [@@@coverage exclude_file]
   open Common
 
-  let make_top_let (start_loc, end_loc) binding env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_top_let (start_pos, end_pos) binding env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     binding env (fun env binding ->
       Syntax.top_let loc binding
         |> kontinue env)
 
-  let make_top_val (start_loc, end_loc) binding env kontinue =
-    let loc = Loc.loc start_loc end_loc in
+  let make_top_val (start_pos, end_pos) binding env kontinue =
+    let loc = Loc.loc start_pos end_pos in
     binding env (fun env binding ->
       Syntax.top_val loc binding
         |> kontinue env)
