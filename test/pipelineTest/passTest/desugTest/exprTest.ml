@@ -127,16 +127,23 @@ let test_desug_expr_rune ctxt =
 
 let test_desug_expr_string ctxt =
   let env = EnvTest.fresh () in
-  let value = "foo bar" in
+  let expected = "foo \u{10abcd} bar\nbaz \u{101234} quux" in
   let syntax =
-    let value =
-      let loc = LocTest.gen () in
-      Syntax.str_lit loc value
-    in
     let loc = LocTest.gen () in
-    Syntax.expr_string loc [[value]]
+    Syntax.expr_string loc [
+      [
+        Syntax.str_lit (LocTest.gen ()) "foo ";
+        Syntax.str_escape (LocTest.gen ()) "\\u+10abcd";
+        Syntax.str_lit (LocTest.gen ()) " bar";
+      ];
+      [
+        Syntax.str_lit (LocTest.gen ()) "baz ";
+        Syntax.str_escape (LocTest.gen ()) "\\U101234";
+        Syntax.str_lit (LocTest.gen ()) " quux";
+      ]
+    ]
   in
-  let annot = Annot.expr_string value in
+  let annot = Annot.expr_string expected in
   Desug.desug_expr env syntax (fun ty expr ->
     AnnotTest.assert_ty_equal ~ctxt Annot.ty_string ty;
     AnnotTest.assert_expr_equal ~ctxt annot expr)
@@ -229,7 +236,7 @@ let test_desug_binding_value_binding_explicit ctxt =
 (* Test Suite *)
 
 let suite =
-  "Abstract Syntax" >::: [
+  "Expressions" >::: [
     "Expressions" >::: [
       "Booleans" >:: test_desug_expr_bool;
       "Integers" >::: [

@@ -1,5 +1,6 @@
 include Type
 include Op
 include Patt
-include Ast
+include Expr
+include Top
 include File

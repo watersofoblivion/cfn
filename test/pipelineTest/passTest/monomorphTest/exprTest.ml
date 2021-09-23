@@ -37,6 +37,6 @@ let test_convert_expr_atom ctxt =
 
 let suite =
   "Expressions" >::: [
-    "Built-in Function Application" >:: test_convert_expr_builtin;
+    (* "Built-in Function Application" >:: test_convert_expr_builtin; *)
     "Atomic Values"                 >:: test_convert_expr_atom;
   ]

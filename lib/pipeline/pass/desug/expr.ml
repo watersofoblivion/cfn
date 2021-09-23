@@ -1,4 +1,4 @@
-(* Abstract Syntax *)
+(* Expressions *)
 
 open Common
 
@@ -8,6 +8,7 @@ exception InvalidNumberFormat of Loc.t * string * Sym.t * string
 exception UnboundIdentifier of Loc.t * Sym.t
 exception MismatchedTypes of Annot.ty * Loc.t * Annot.ty
 exception UnsupportedBinOpPromotion of Loc.t * Syntax.bin * Loc.t * Annot.ty * Loc.t * Annot.ty
+exception InvalidCodepoint of Loc.t * string * int
 
 let invalid_number_format loc lexeme constr msg =
   InvalidNumberFormat (loc, lexeme, constr, msg)
@@ -23,13 +24,45 @@ let mismatched_types inferred loc annotated =
 
 (* Runes *)
 
-let desug_rune env r kontinue = match r with
-  | _ -> let _ = env in let _ = kontinue in failwith "TODO"
+let escape_prefix = Str.regexp "^\\\\[Uu]\\+?"
+let escape_to_uchar loc seq =
+  let codepoint =
+    seq
+      |> Str.replace_first escape_prefix "0x"
+      |> int_of_string
+  in
+  if Uchar.is_valid codepoint
+  then Uchar.of_int codepoint
+  else
+    InvalidCodepoint (loc, seq, codepoint)
+      |> raise
+
+let desug_rune _ r kontinue = match r with
+  | Syntax.RuneLit rune -> kontinue rune.value
+  | Syntax.RuneEscape rune ->
+    rune.lexeme
+      |> escape_to_uchar rune.loc
+      |> kontinue
 
 (* Strings *)
 
-let desug_str env s kontinue = match s with
-  | _ -> let _ = env in let _ = kontinue in failwith "TODO"
+let desug_str _ lines kontinue =
+  let each_line line =
+    let buf = Buffer.create 10 in
+    let each_seg = function
+      | Syntax.StringLit str -> Buffer.add_string buf str.lexeme
+      | Syntax.StringEscape str ->
+        str.lexeme
+          |> escape_to_uchar str.loc
+          |> Buffer.add_utf_8_uchar buf
+    in
+    List.iter each_seg line;
+    Buffer.contents buf
+  in
+  lines
+    |> List.map each_line
+    |> String.concat "\n"
+    |> kontinue
 
 (* Expressions *)
 
@@ -166,19 +199,3 @@ and desug_binding env binding kontinue = match binding with
           Patt.desug_patt env binding.patt inferred (fun env patt ->
             Annot.binding patt inferred value
               |> kontinue env))
-
-(* Top-Level Expressions *)
-
-let rec desug_top env top kontinue = match top with
-  | Syntax.TopLet top -> desug_top_let env top.binding kontinue
-  | Syntax.TopVal top -> desug_top_val env top.binding kontinue
-
-and desug_top_let env binding kontinue =
-  desug_binding env binding (fun env binding ->
-    Annot.top_let binding
-      |> kontinue env)
-
-and desug_top_val env binding kontinue =
-  desug_binding env binding (fun env binding ->
-    Annot.top_let binding
-      |> kontinue env)

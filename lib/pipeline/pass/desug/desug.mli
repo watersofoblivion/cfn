@@ -41,11 +41,11 @@ val desug_bin : Annot.ty Env.t -> Syntax.bin -> Annot.ty -> Annot.ty -> (Annot.t
     built-in function.  The desugared builtin and its result type passed to the
     continuation [kontinue]. *)
 
-val desug_rune : Annot.ty Env.t -> Syntax.rune -> (Annot.expr -> 'a) -> 'a
+val desug_rune : Annot.ty Env.t -> Syntax.rune -> (Uchar.t -> 'a) -> 'a
 (** [desug_rune env r kontinue] desugars the syntax rune [r] in the environment
     [env].  The desugared rune is passed to the continuation [kontinue]. *)
 
-val desug_str : Annot.ty Env.t -> Syntax.str list -> (Annot.expr -> 'a) -> 'a
+val desug_str : Annot.ty Env.t -> Syntax.str list list -> (string -> 'a) -> 'a
 (** [desug_str env str kontinue] desugars the syntax string segment [str] in the
     environment [env].  The desugared string segment is passed to the
     continuation [kontinue]. *)

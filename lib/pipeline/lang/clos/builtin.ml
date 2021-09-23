@@ -111,7 +111,7 @@ let builtin_log_not = BuiltinLogNot
 let builtin_promote sub sup = match (sub, sup) with
   | Type.TyInt, Type.TyLong
   | Type.TyInt, Type.TyDouble
-  | Type.TyFloat, Type.TyFloat -> BuiltinPromote { sub; sup }
+  | Type.TyFloat, Type.TyDouble -> BuiltinPromote { sub; sup }
   | _ -> unsupported_promotion sub sup
 
 let builtin_concat ty = match ty with
