@@ -1,9 +1,9 @@
-(* Templates *)
+(* Optimizer *)
 
 open OUnit2
 
 (* Test Suite *)
 
 let suite =
-  "Templates" >::: [
-  ]
+  "Optimizer" >::: [
+  ];

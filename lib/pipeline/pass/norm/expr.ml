@@ -1,18 +1,5 @@
 open Common
 
-(* Exceptions *)
-
-exception UnboundIdentifier of Sym.t
-exception MismatchedTypes of Ir.ty * Ir.ty
-
-let unbound_identifier id =
-  UnboundIdentifier id
-    |> raise
-
-let mismatched_types inferred annotated =
-  MismatchedTypes (inferred, annotated)
-    |> raise
-
 (* Helpers *)
 
 let to_expr = function
@@ -48,7 +35,7 @@ and norm_expr_ident env id kontinue =
       |> Ir.expr_atom
       |> Ir.term_expr
       |> kontinue ty
-  with Not_found -> unbound_identifier id
+  with Not_found -> Check.unbound_identifier id
 
 and norm_expr_builtin env fn args kontinue =
   Builtin.norm_builtin env fn (fun fn ->
@@ -75,12 +62,4 @@ and norm_binding env binding kontinue = match binding with
               |> to_expr
               |> Ir.binding patt inferred
               |> kontinue env)
-        else mismatched_types inferred annotated))
-
-(* Top-Level Expressions *)
-
-let norm_top env top kontinue = match top with
-  | Annot.TopLet top ->
-    norm_binding env top.binding (fun env binding ->
-      Ir.top_let binding
-        |> kontinue env)
+        else Check.mismatched_types inferred annotated))

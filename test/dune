@@ -14,19 +14,7 @@
     extTest
     awsSpecTest
     cfnSpecTest
-    syntaxTest
-    annotTest
-    irTest
     optTest
-    monoTest
-    closTest
-    parseTest
-    desugTest
-    normTest
-    monomorphTest
-    convTest
-    codegenTest
+    pipelineTest
     runtimeTest
-    sourceTest
-    systemTest
-    cliTest))
+    toolchainTest))

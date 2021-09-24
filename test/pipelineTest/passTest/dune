@@ -1,0 +1,12 @@
+(library
+ (name passTest)
+ (modes native)
+ (libraries
+    ounit2
+    commonTest
+    parseTest
+    desugTest
+    normTest
+    monomorphTest
+    convTest
+    codegenTest))

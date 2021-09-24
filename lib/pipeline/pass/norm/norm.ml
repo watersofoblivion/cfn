@@ -1,4 +1,6 @@
 include Type
+include Check
 include Builtin
 include Patt
-include Ast
+include Expr
+include Top

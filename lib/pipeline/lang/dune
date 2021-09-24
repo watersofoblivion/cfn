@@ -1,0 +1,10 @@
+(library
+  (name lang)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  (libraries
+    syntax
+    annot
+    ir
+    mono
+    clos))

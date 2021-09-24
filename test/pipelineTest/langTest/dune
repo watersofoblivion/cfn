@@ -1,0 +1,11 @@
+(library
+ (name langTest)
+ (modes native)
+ (libraries
+    ounit2
+    commonTest
+    syntaxTest
+    annotTest
+    irTest
+    monoTest
+    closTest))

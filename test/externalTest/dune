@@ -3,4 +3,6 @@
  (modes native)
  (libraries
     ounit2
-    ext))
+    ext
+    awsSpecTest
+    cfnSpecTest))

@@ -1,9 +1,9 @@
-(* Templates *)
+(* Atomic Values *)
 
 open OUnit2
 
 (* Test Suite *)
 
 let suite =
-  "Templates" >::: [
+  "Atomic Values" >::: [
   ]

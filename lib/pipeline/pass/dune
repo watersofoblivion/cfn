@@ -1,0 +1,11 @@
+(library
+  (name pass)
+  (modes native)
+  (instrumentation (backend bisect_ppx))
+  (libraries
+    parse
+    desug
+    norm
+    monomorph
+    conv
+    codegen))

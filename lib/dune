@@ -1,24 +1,13 @@
 (library
  (name cfnpp)
+ (modes native)
  (instrumentation (backend bisect_ppx))
  (libraries
    common
    ext
    awsSpec
    cfnSpec
-   syntax
-   annot
-   ir
    opt
-   mono
-   clos
-   parse
-   desug
-   norm
-   monomorph
-   conv
-   codegen
+   pipeline
    runtime
-   source
-   system
-   cli))
+   toolchain))
