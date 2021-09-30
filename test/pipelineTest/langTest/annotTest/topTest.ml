@@ -43,7 +43,7 @@ let test_pp_top_let ctxt =
   let binding = ExprTest.fresh_binding () in
   fresh_top_let ~binding ()
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Annot.pp_binding binding
+         fprintf str_formatter "@[<hv>let %a@]" Annot.pp_binding binding
            |> flush_str_formatter
        ]
 

@@ -109,8 +109,8 @@ let rec pp_expr fmt = function
   | ExprRune expr -> fprintf fmt "'%a'" pp_rune expr.value
   | ExprString expr -> pp_expr_string fmt expr.value
   | ExprIdent expr -> Sym.pp_id fmt expr.id
-  | ExprUnOp expr -> fprintf fmt "%a%a" Op.pp_un expr.op pp_expr expr.operand
-  | ExprBinOp expr -> fprintf fmt "%a %a %a" pp_expr expr.lhs Op.pp_bin expr.op pp_expr expr.rhs
+  | ExprUnOp expr -> pp_expr_un_op fmt expr.op expr.operand
+  | ExprBinOp expr -> pp_expr_bin_op fmt expr.lhs expr.op expr.rhs
   | ExprLet expr -> pp_expr_let fmt expr.binding expr.scope
 
 and pp_expr_string fmt lines =
@@ -121,12 +121,18 @@ and pp_expr_string fmt lines =
   let pp_sep fmt _ = fprintf fmt "\\@ " in
   fprintf fmt "\"@[<v>%a@]\"" (pp_print_list ~pp_sep pp_line) lines
 
+and pp_expr_un_op fmt op operand =
+  fprintf fmt "@[<hov 2>%a@,%a@]" Op.pp_un op pp_expr operand
+
+and pp_expr_bin_op fmt lhs op rhs =
+  fprintf fmt "@[<hov 2>%a@ %a@ %a@]" pp_expr lhs Op.pp_bin op pp_expr rhs
+
 and pp_expr_let fmt binding scope =
-  fprintf fmt "let %a in %a" pp_binding binding pp_expr scope
+  fprintf fmt "@[<hv>@[<b 2>let %a@]@ @]in@ %a" pp_binding binding pp_expr scope
 
 (* Bindings *)
 
 and pp_binding fmt = function
   | ValueBinding binding ->
     let pp_ty = pp_print_option (fun fmt t -> fprintf fmt ": %a" Type.pp_ty t) in
-    fprintf fmt "%a%a = %a" Patt.pp_patt binding.patt pp_ty binding.ty pp_expr binding.value
+    fprintf fmt "%a%a =@ @[<hv>%a@]" Patt.pp_patt binding.patt pp_ty binding.ty pp_expr binding.value

@@ -103,6 +103,6 @@
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries
-    ext
+    external
     atdgen
     yojson))

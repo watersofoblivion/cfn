@@ -1,8 +1,8 @@
 (library
- (name extTest)
+ (name externalTest)
  (modes native)
  (libraries
     ounit2
-    ext
+    external
     awsSpecTest
     cfnSpecTest))

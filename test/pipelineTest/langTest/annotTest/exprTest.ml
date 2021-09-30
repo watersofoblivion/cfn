@@ -249,10 +249,9 @@ let test_pp_expr_builtin ctxt =
     fresh_expr_int ~value:1l ();
     fresh_expr_int ~value:2l ()
   ] in
-  let pp_sep fmt _ = fprintf fmt " " in
   fresh_expr_builtin ~fn ~args ()
     |> assert_pp_expr ~ctxt [
-         fprintf str_formatter "%a %a" Annot.pp_builtin fn (pp_print_list ~pp_sep Annot.pp_expr) args
+         fprintf str_formatter "@[<hov 2>%a@ %a@]" Annot.pp_builtin fn (pp_print_list ~pp_sep:pp_print_space Annot.pp_expr) args
            |> flush_str_formatter
        ]
 
@@ -262,7 +261,7 @@ let test_pp_expr_let ctxt =
   let scope = fresh_expr_ident ~id () in
   fresh_expr_let ~binding ~scope ()
     |> assert_pp_expr ~ctxt [
-         fprintf str_formatter "let %a in %a" Annot.pp_binding binding Sym.pp id
+         fprintf str_formatter "@[<hv>@[<b 2>let %a@]@ @]in@ %a" Annot.pp_binding binding Sym.pp id
            |> flush_str_formatter
        ]
 
@@ -274,7 +273,7 @@ let test_pp_binding ctxt =
   let value = fresh_expr_int ~value:v () in
   fresh_binding ~patt ~ty ~value ()
     |> assert_pp_binding ~ctxt [
-         fprintf str_formatter "%a: %s = %ld" Sym.pp id Prim.id_int v
+         fprintf str_formatter "%a: %s =@ @[<hv>%ld@]" Sym.pp id Prim.id_int v
            |> flush_str_formatter
        ]
 

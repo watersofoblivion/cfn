@@ -43,7 +43,7 @@ let test_pp_top_let ctxt =
   let binding = TermTest.fresh_binding () in
   Ir.top_let binding
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Ir.pp_binding binding |> flush_str_formatter
+         fprintf str_formatter "@[<hv>let %a@]" Ir.pp_binding binding |> flush_str_formatter
        ]
 
 let test_pp =

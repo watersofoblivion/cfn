@@ -15,7 +15,7 @@ let top_let binding = TopLet { binding }
 
 let pp_top fmt = function
   | TopLet top ->
-    fprintf fmt "let %a" Term.pp_binding top.binding
+    fprintf fmt "@[<hv>let %a@]" Term.pp_binding top.binding
 
 (* Type Checking *)
 

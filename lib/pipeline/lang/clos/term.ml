@@ -24,7 +24,7 @@ let term_expr expr = TermExpr { expr }
 
 let pp_binding fmt = function
   | Binding binding ->
-    fprintf fmt "%a: %a = %a"
+    fprintf fmt "%a: %a =@ @[<hv>%a@]"
       Patt.pp_patt binding.patt
         Type.pp_ty binding.ty
         Expr.pp_expr binding.value
@@ -36,7 +36,7 @@ let rec pp_term fmt = function
   | TermExpr term -> Expr.pp_expr fmt term.expr
 
 and pp_term_let fmt binding scope =
-  fprintf fmt "let %a in %a" pp_binding binding pp_term scope
+  fprintf fmt "@[<hv>@[<b 2>let %a@]@ @]in@ %a" pp_binding binding pp_term scope
 
 (* Type Checking *)
 

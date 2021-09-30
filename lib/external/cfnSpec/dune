@@ -25,6 +25,6 @@
   (instrumentation (backend bisect_ppx))
   (libraries
     system
-    ext
+    external
     atdgen
     yojson))

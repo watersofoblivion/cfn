@@ -64,10 +64,9 @@ let test_pp_expr_builtin ctxt =
     AtomTest.fresh_atom_bool ();
     AtomTest.fresh_atom_int ();
   ] in
-  let pp_sep fmt _ = fprintf fmt " " in
   fresh_expr_builtin ~fn ~args ()
     |> assert_pp_expr ~ctxt [
-         fprintf str_formatter "%a %a" Ir.pp_builtin fn (pp_print_list ~pp_sep Ir.pp_atom) args
+         fprintf str_formatter "@[<hov 2>%a@ %a@]" Ir.pp_builtin fn (pp_print_list ~pp_sep:pp_print_space Ir.pp_atom) args
            |> flush_str_formatter;
        ]
 

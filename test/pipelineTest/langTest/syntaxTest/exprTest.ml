@@ -540,14 +540,18 @@ let test_pp_expr_un_op ctxt =
   let op = OpTest.fresh_un_log_not () in
   let operand = fresh_expr_bool ~value:true () in
   fresh_expr_un_op ~op ~operand ()
-    |> assert_pp_expr ~ctxt ["!true"]
+    |> assert_pp_expr ~ctxt [
+         sprintf "@[<hov 2>!@,true@]";
+       ]
 
 let test_pp_expr_bin_op ctxt =
   let op = OpTest.fresh_bin_add () in
   let lhs = fresh_expr_int ~value:1l () in
   let rhs = fresh_expr_int ~value:2l () in
   fresh_expr_bin_op ~op ~lhs ~rhs ()
-    |> assert_pp_expr ~ctxt ["1 + 2"]
+    |> assert_pp_expr ~ctxt [
+         sprintf "@[<hov 2>1@ +@ 2@]";
+       ]
 
 let test_pp_expr_let ctxt =
   let id = "testId" in
@@ -567,7 +571,7 @@ let test_pp_expr_let ctxt =
   let scope = fresh_expr_ident ~id () in
   fresh_expr_let ~binding ~scope ()
     |> assert_pp_expr ~ctxt [
-         sprintf "let %s: %s = %ld in %s" id Prim.id_int value id
+         sprintf "@[<hv>@[<b 2>let %s: %s = %ld@]@ @]in@ %s" id Prim.id_int value id;
        ]
 
 let test_pp_binding_value_binding ctxt =
@@ -585,11 +589,11 @@ let test_pp_binding_value_binding ctxt =
 
   fresh_value_binding ~patt ~explicit:true ~ty ~value ()
     |> assert_pp_binding ~ctxt [
-         sprintf "%s: %s = %B" id Prim.id_bool true
+         sprintf "%s: %s =@ @[<hv>%B@]" id Prim.id_bool true;
        ];
   fresh_value_binding ~patt ~value ()
     |> assert_pp_binding ~ctxt [
-         sprintf "%s = %B" id true
+         sprintf "%s =@ @[<hv>%B@]" id true;
        ]
 
 let test_pp =

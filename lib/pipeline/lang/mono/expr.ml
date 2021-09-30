@@ -20,8 +20,7 @@ let rec pp_expr fmt = function
   | ExprAtom expr -> Atom.pp_atom fmt expr.atom
 
 and pp_expr_builtin fmt fn args =
-  let pp_sep fmt _ = fprintf fmt " " in
-  fprintf fmt "%a %a" Builtin.pp_builtin fn (pp_print_list ~pp_sep Atom.pp_atom) args
+  fprintf fmt "@[<hov 2>%a@ %a@]" Builtin.pp_builtin fn (pp_print_list ~pp_sep:pp_print_space Atom.pp_atom) args
 
 (* Type Checking *)
 

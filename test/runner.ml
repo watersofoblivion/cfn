@@ -21,7 +21,12 @@ let test_codegen =
 let suite =
   "CFN++" >::: [
     ExternalTest.suite;
-    CommonTest.suite;
+    "Common" >::: [
+      CommonTest.LocTest.suite;
+      CommonTest.SymTest.suite;
+      CommonTest.PrettyTest.suite;
+      CommonTest.EnvTest.suite;
+    ];
     PipelineTest.suite;
     OptTest.suite;
     test_codegen;

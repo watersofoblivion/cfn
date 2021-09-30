@@ -9,7 +9,7 @@ type t = {
 
 let of_dir dir =
   let of_file parser fname =
-    fname |> Filename.concat dir |> Ext.Parse.json_file parser
+    fname |> Filename.concat dir |> External.Parse.json_file parser
   in
 
   { api        = of_file Api_j.read_t "api-2.json";

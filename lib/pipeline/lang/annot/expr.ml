@@ -63,17 +63,16 @@ and pp_expr_rune fmt r =
       |> fprintf fmt "'%s'"
 
 and pp_expr_builtin fmt fn args =
-  let pp_sep fmt _ = fprintf fmt " " in
-  fprintf fmt "%a %a" Builtin.pp_builtin fn (pp_print_list ~pp_sep pp_expr) args
+  fprintf fmt "@[<hov 2>%a@ %a@]" Builtin.pp_builtin fn (pp_print_list ~pp_sep:pp_print_space pp_expr) args
 
 and pp_expr_let fmt binding scope =
-  fprintf fmt "let %a in %a" pp_binding binding pp_expr scope
+  fprintf fmt "@[<hv>@[<b 2>let %a@]@ @]in@ %a" pp_binding binding pp_expr scope
 
 (* Bindings *)
 
 and pp_binding fmt = function
   | Binding binding ->
-    fprintf fmt "%a: %a = %a" Patt.pp_patt binding.patt Type.pp_ty binding.ty pp_expr binding.value
+    fprintf fmt "%a: %a =@ @[<hv>%a@]" Patt.pp_patt binding.patt Type.pp_ty binding.ty pp_expr binding.value
 
 (* Type Checking *)
 

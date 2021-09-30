@@ -98,7 +98,7 @@ let test_pp_binding ctxt =
   in
   fresh_binding ~patt ~ty ~value ()
     |> assert_pp_binding ~ctxt [
-         fprintf str_formatter "%a: %a = %a" Mono.pp_patt patt Mono.pp_ty ty Mono.pp_expr value
+         fprintf str_formatter "%a: %a =@ @[<hv>%a@]" Mono.pp_patt patt Mono.pp_ty ty Mono.pp_expr value
            |> flush_str_formatter
        ]
 
@@ -109,7 +109,7 @@ let test_pp_term_let ctxt =
   let scope = fresh_term_expr () in
   fresh_term_let ~binding ~scope ()
     |> assert_pp_term ~ctxt [
-         fprintf str_formatter "let %a in %a" Mono.pp_binding binding Mono.pp_term scope
+         fprintf str_formatter "@[<hv>@[<b 2>let %a@]@ @]in@ %a" Mono.pp_binding binding Mono.pp_term scope
            |> flush_str_formatter
        ]
 

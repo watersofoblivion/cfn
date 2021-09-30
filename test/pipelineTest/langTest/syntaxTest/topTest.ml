@@ -100,7 +100,7 @@ let test_pp_top_let ctxt =
 
   fresh_top_let ~binding ()
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "let %a" Syntax.pp_binding binding |> flush_str_formatter
+         fprintf str_formatter "@[<hv>let %a@]" Syntax.pp_binding binding |> flush_str_formatter
        ]
 
 let test_pp_top_val ctxt =
@@ -115,7 +115,7 @@ let test_pp_top_val ctxt =
 
   fresh_top_val ~binding ()
     |> assert_pp_top ~ctxt [
-         fprintf str_formatter "val %a" Syntax.pp_binding binding |> flush_str_formatter
+         fprintf str_formatter "@[<hv>val %a@]" Syntax.pp_binding binding |> flush_str_formatter
        ]
 
 let test_pp =
