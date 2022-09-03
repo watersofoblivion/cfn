@@ -14,7 +14,11 @@ type ty = private
   | TyDouble (** Double *)
   | TyRune   (** Rune *)
   | TyString (** String *)
-(** Types *)
+(**
+  Types
+
+  @since 1.0
+*)
 
 type arity =
   | ArityFixed of {
@@ -26,7 +30,11 @@ type arity =
       args: ty; (** Argument type *)
       res:  ty  (** Result type *)
     } (** Variable Arity *)
-(* Builtin Arity *)
+(**
+  Built-in function arity
+
+  @since 1.0
+*)
 
 type builtin = private
   | BuiltinStructEq of {
@@ -106,14 +114,22 @@ type builtin = private
   | BuiltinConcat of {
       ty: ty (** Operand type *)
     } (** Concatenation *)
-(** Builtin Functions *)
+(**
+  Built-in functions
+
+  @since 1.0
+*)
 
 type patt = private
   | PattGround (** Ground *)
   | PattVar of {
       id: Sym.t (** Identifier *)
     } (** Variable *)
-(** Patterns *)
+(**
+  Patterns
+
+  @since 1.0
+*)
 
 type atom = private
   | AtomBool of {
@@ -141,7 +157,11 @@ type atom = private
   | AtomIdent of {
       id: Sym.t (** Identifier *)
     } (** Identifier *)
-(** Atomic Values *)
+(**
+  Atomic values
+
+  @since 1.0
+*)
 
 type expr = private
   | ExprBuiltin of {
@@ -151,7 +171,11 @@ type expr = private
   | ExprAtom of {
       atom: atom (** Atomic Value *)
     } (** Atomic Expression *)
-(** Expressions *)
+(**
+  Expressions
+
+  @since 1.0
+*)
 
 type binding = private
   | Binding of {
@@ -159,7 +183,11 @@ type binding = private
       ty:    ty;   (** Type annotation *)
       value: expr  (** Value expression *)
     } (** Binding *)
-(** Bindings *)
+(**
+  Bindings
+
+  @since 1.0
+*)
 
 type term = private
   | TermLet of {
@@ -169,364 +197,828 @@ type term = private
   | TermExpr of {
       expr: expr (** Expression *)
     } (** Expression Term *)
-(** Term Values *)
+(**
+  Term values
+
+  @since 1.0
+*)
 
 type top = private
   | TopLet of {
       binding: binding (** Binding *)
     } (** Let Binding *)
-(** Top-Level Bindings *)
+(**
+  Top-Level bindings
+
+  @since 1.0
+*)
 
 (** {2 Constructors} *)
 
 (** {3 Types} *)
 
 val ty_bool : ty
-(** [ty_bool] constructs a boolean type. *)
+(**
+  The [Bool] type.
+
+  @since 1.0
+*)
 
 val ty_int : ty
-(** [ty_int] constructs an integer type. *)
+(**
+  The [Int] type.
+
+  @since 1.0
+*)
 
 val ty_long : ty
-(** [ty_long] constructs a long type. *)
+(**
+  The [Long] type.
+
+  @since 1.0
+*)
 
 val ty_float : ty
-(** [ty_float] constructs a float type. *)
+(**
+  The [Float] type.
+
+  @since 1.0
+*)
 
 val ty_double : ty
-(** [ty_double] constructs a double type. *)
+(**
+  The [Double] type.
+
+  @since 1.0
+*)
 
 val ty_rune : ty
-(** [ty_rune] constructs a rune type. *)
+(**
+  The [Rune] type.
+
+  @since 1.0
+*)
 
 val ty_string : ty
-(** [ty_string] constructs a string type. *)
+(**
+  The [String] type.
+
+  @since 1.0
+*)
 
 (** {3 Built-In Functions} *)
 
 (** {4 Arities} *)
 
 val arity_fixed : ty list -> ty -> arity
-(** [arity_fixed args res] constructs a fixed arity with arguments of types
-    [args] and result of type [res]. *)
+(**
+  Construct a fixed arity for a built-in function.
+
+  @param args The types of the arguments, in order
+  @param res The type of the result
+  @return A fixed arity
+  @since 1.0
+*)
 
 val arity_var : ty -> ty -> arity
-(** [arity_var args res] constructs a variable arity with arguments of type
-    [args] and a result of type [res]. *)
+(**
+  Construct a variable arity for a built-in function.
+
+  @param args The type of all arguments
+  @param res The type of the result
+  @return A variable arity
+  @since 1.0
+*)
 
 (** {4 Exceptions} *)
 
-exception NotIntegral of ty
-(** [NotIntegral ty] is raised when the type [ty] is not an integral type as
-    determined by {!Type.ty_is_numeric}. *)
+exception NotIntegral of {
+  ty: ty; (** The non-integral type *)
+}
+(**
+  Raised when a type is not an integral type.
 
-exception NotFloatingPoint of ty
-(** [NotFloatingPoint ty] is raised when the type [ty] is not a floating-point
-    type as determined by {!Type.ty_is_floating_point}. *)
+  @since 1.0
+*)
 
-exception NotNumeric of ty
-(** [NotNumeric ty] is raised when the type [ty] is not a numeric type as
-    determined by {!Type.ty_is_numeric}. *)
+exception NotFloatingPoint of {
+  ty: ty; (** The non-floating-point type *)
+}
+(**
+  Raised when a type is not a floating-point type.
 
-exception UnsupportedPromotion of ty * ty
-(** [UnsupportedPromotion (sub, sup)] is raised when the promotion from the
-    subtype [sub] to the supertype [sup] cannot be performed. *)
+  @since 1.0
+*)
 
-exception UnsupportedConcatType of ty
-(** [UnsupportedConcatType ty] is raised when the type of a {!Concat} call is
-    not one of the supported types. *)
+exception NotNumeric of {
+  ty: ty; (** The non-numeric type *)
+}
+(**
+  Raised when a type is not a numeric type.
+
+  @since 1.0
+*)
+
+exception UnsupportedPromotion of {
+  sub: ty; (** The unpromotable subtype *)
+  sup: ty; (** The target supertype *)
+}
+(**
+  Raised when the promotion from a subtype to a supertype cannot be performed.
+
+  @since 1.0
+*)
+
+exception UnsupportedConcatType of {
+  ty: ty; (** The type of values that cannot be concatenated. *)
+}
+(**
+  Raised when the arguments to a {!Concat} built-in function are not of one of
+  the supported types.
+
+  @since 1.0
+*)
 
 (** {4 Constructors} *)
 
 val builtin_struct_eq : ty -> builtin
-(** [builtin_struct_eq ty] constructs a structural equality builtin operating on
-    values of type [ty]. *)
+(**
+  Construct a structural equality built-in function.
+
+  @param ty The type of the operands
+  @return A structural equality built-in function
+  @since 1.0
+*)
 
 val builtin_struct_neq : ty -> builtin
-(** [builtin_struct_neq ty] constructs a structural inequality builtin operating
-    on values of type [ty]. *)
+(**
+  Construct a structural inequality built-in function.
+
+  @param ty The type of the operands
+  @return A structural inequality built-in function
+  @since 1.0
+*)
 
 val builtin_phys_eq : ty -> builtin
-(** [builtin_phys_eq ty] constructs a physical equality builtin operating on
-    values of type [ty]. *)
+(**
+  Construct a physical equality built-in function.
+
+  @param ty The type of the operands
+  @return A physical equality built-in function
+  @since 1.0
+*)
 
 val builtin_phys_neq : ty -> builtin
-(** [builtin_phys_neq ty] constructs a physical inequality builtin operating
-    on values of type [ty]. *)
+(**
+  Construct a physical inequality built-in function.
+
+  @param ty The type of the operands
+  @return A physical inequality built-in function
+  @since 1.0
+*)
 
 val builtin_lt : ty -> builtin
-(** [builtin_lt ty] constructs a less than builtin operating on values of type
-    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
-    {!Type.ty_is_numeric}. *)
+(**
+  Construct a less than built-in function.
+
+  @param ty The type of the operands
+  @return A less than built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_lte : ty -> builtin
-(** [builtin_lte ty] constructs a less than or equal builtin operating on values
-    of type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as
-    determined by {!Type.ty_is_numeric}. *)
+(**
+  Construct a less than or equal built-in function.
+
+  @param ty The type of the operands
+  @return A less than or equal built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_gt : ty -> builtin
-(** [builtin_gt ty] constructs a greater than builtin operating on values of
-    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
-    by {!Type.ty_is_numeric}. *)
+(**
+  Construct a greater than built-in function.
+
+  @param ty The type of the operands
+  @return A greater than built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_gte : ty -> builtin
-(** [builtin_gte ty] constructs a greater than or equal builtin operating on
-    values of type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as
-    determined by {!Type.ty_is_numeric}. *)
+(**
+  Construct a greater than or equal built-in function.
+
+  @param ty The type of the operands
+  @return A greater than or equal built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_lsl : ty -> builtin
-(** [builtin_lsl ty] constructs a logical shift left builtin operating on values
-    of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type as
-    determined by {!Type.ty_is_integral}. *)
+(**
+  Construct a logical shift left built-in function.
+
+  @param ty The type of the operands
+  @return A logical shift left built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_lsr : ty -> builtin
-(** [builtin_lsr ty] constructs a logical shift right builtin operating on
-    values of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type
-    as determined by {!Type.ty_is_integral}. *)
+(**
+  Construct a logical shift right built-in function.
+
+  @param ty The type of the operands
+  @return A logical shift right built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_asl : ty -> builtin
-(** [builtin_asl ty] constructs a arithmetic shift left builtin operating on
-    values of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type
-    as determined by {!Type.ty_is_integral}. *)
+(**
+  Construct an arithmetic shift left built-in function.
+
+  @param ty The type of the operands
+  @return A arithmetic shift left built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_asr : ty -> builtin
-(** [builtin_asr ty] constructs a arithmetic shift right builtin operating on
-    values of type [ty].  Raises {!NotIntegral} if [ty] is not an integral type
-    as determined by {!Type.ty_is_integral}. *)
+(**
+  Construct an arithmetic shift right built-in function.
+
+  @param ty The type of the operands
+  @return A arithmetic shift right built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_add : ty -> builtin
-(** [builtin_add ty] constructs an addition builtin operating on values of type
-    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
-    {!Type.ty_is_numeric}. *)
+(**
+  Construct an addition built-in function.
+
+  @param ty The type of the operands
+  @return An addition built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_sub : ty -> builtin
-(** [builtin_sub ty] constructs a subtration builtin operating on values of type
-    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
-    {!Type.ty_is_numeric}. *)
+(**
+  Construct a subtraction built-in function.
+
+  @param ty The type of the operands
+  @return A subtraction built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_mul : ty -> builtin
-(** [builtin_mul ty] constructs a multiplication builtin operating on values of
-    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
-    by {!Type.ty_is_numeric}. *)
+(**
+  Construct a multiplication built-in function.
+
+  @param ty The type of the operands
+  @return A multiplication built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_div : ty -> builtin
-(** [builtin_div ty] constructs a division builtin operating on values of type
-    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
-    {!Type.ty_is_numeric}. *)
+(**
+  Construct a division built-in function.
+
+  @param ty The type of the operands
+  @return A division built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_mod : ty -> builtin
-(** [builtin_mod ty] constructs a modulus builtin operating on values of type
-    [ty].  Raises {!NotIntegral} if [ty] is not an integral type as determined
-    by {!Type.ty_is_integral}. *)
+(**
+  Construct a modulus built-in function.
+
+  @param ty The type of the operands
+  @return A modulus built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_exp : ty -> builtin
-(** [builtin_exp ty] constructs an exponentiation builtin operating on values of
-    type [ty].  Raises {!NotFloatingPoint} if [ty] is not a floating-point type
-    as determined by {!Type.ty_is_floating_point}. *)
+(**
+  Construct an exponentiation built-in function.
+
+  @param ty The type of the operands
+  @return An exponentiation built-in function
+  @raise NotFloatingPoint Raised if the type is not a floating-point type as
+    determined by {!Type.ty_is_floating_point}
+  @since 1.0
+*)
 
 val builtin_neg : ty -> builtin
-(** [builtin_neg ty] constructs a negation builtin operating on values of type
-    [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined by
-    {!Type.ty_is_numeric}. *)
+(**
+  Construct a negation built-in function.
+
+  @param ty The type of the operands
+  @return A negation built-in function
+  @raise NotNumeric Raised if the type is not a numeric type as determined by
+    {!Type.ty_is_numeric}
+  @since 1.0
+*)
 
 val builtin_bit_and : ty -> builtin
-(** [builtin_bit_and ty] constructs a bitwise AND builtin operating on values of
-    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
-    by {!Type.ty_is_numeric}. *)
+(**
+  Construct a bitwise AND built-in function.
+
+  @param ty The type of the operands
+  @return A bitwise AND built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_bit_or : ty -> builtin
-(** [builtin_bit_or ty] constructs a bitwise OR builtin operating on values of
-    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
-    by {!Type.ty_is_numeric}. *)
+(**
+  Construct a bitwise OR built-in function.
+
+  @param ty The type of the operands
+  @return A bitwise OR built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_bit_not : ty -> builtin
-(** [builtin_bit_not ty] constructs a bitwise NOT builtin operating on values of
-    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
-    by {!Type.ty_is_numeric}. *)
+(**
+  Construct a bitwise NOT built-in function.
+
+  @param ty The type of the operands
+  @return A bitwise NOT built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_bit_xor : ty -> builtin
-(** [builtin_bit_xor ty] constructs a bitwise XOR builtin operating on values of
-    type [ty].  Raises {!NotNumeric} if [ty] is not a numeric type as determined
-    by {!Type.ty_is_numeric}. *)
+(**
+  Construct a bitwise XOR built-in function.
+
+  @param ty The type of the operands
+  @return A bitwise XOR built-in function
+  @raise NotIntegral Raised if the type is not an integral type as determined by
+    {!Type.ty_is_integral}
+  @since 1.0
+*)
 
 val builtin_log_not : builtin
-(** [builtin_log_not] constructs a logical NOT builtin. *)
+(**
+  The logical NOT built-in function.
+
+  @since 1.0
+*)
 
 val builtin_promote : ty -> ty -> builtin
-(** [builtin_promote sub sup] constructs a promotion builtin promoting values of
-    the subtype [sub] to values of the supertype [sup].  Raises
-    {!UnsupportedPromotion} if promoting from [sub] to [sup] is not supported. *)
+(**
+  Construct a type promotion built-in function.
+
+  @param sub The promotable subtype
+  @param sup The target supertype
+  @return A type promotion built-in function
+  @raise UnsupportedPromotion Raised if the subtype cannot be promoted to the
+    supertype
+  @since 1.0
+*)
 
 val builtin_concat : ty -> builtin
-(** [builtin_concat ty] constructs a concatenation builtin operating on values
-    of type [ty].  Raises {!UnsupportedConcatType} if [ty] is not one of the
-    allowed types for concatenation. *)
+(**
+  Construct a concatenation built-in function.
+
+  @param ty The type of values to concatenate
+  @return A concatenation built-in function
+  @raise UnsupportedConcatType Raised if the type is not an allowed type for
+    concatenation.
+  @since 1.0
+*)
 
 (** {3 Patterns} *)
 
 val patt_ground : patt
-(** [patt_ground] constructs a ground pattern. *)
+(**
+  The ground ([_]) pattern.
+
+  @since 1.0
+*)
 
 val patt_var : Sym.t -> patt
-(** [patt_var id] constructs a variable pattern binding [id]. *)
+(**
+  Construct a variable pattern binding an identifier.
+
+  @param id The identifier to bind
+  @return A variable pattern binding the identifier
+  @since 1.0
+*)
 
 (** {3 Atoms} *)
 
 val atom_bool : bool -> atom
-(** [atom_bool value] constructs a boolean literal atom with value [value]. *)
+(**
+  Construct a boolean literal atom from a value.
+
+  @param value The boolean value
+  @return A boolean literal atom
+  @since 1.0
+*)
 
 val atom_int : int32 -> atom
-(** [atom_int value] constructs an integer literal atom with value [value]. *)
+(**
+  Construct an integer literal atom from a value.
+
+  @param value The 32-bit integer value
+  @return An integer literal atom
+  @since 1.0
+*)
 
 val atom_long : int64 -> atom
-(** [atom_long value] constructs a long literal atom with value [value]. *)
+(**
+  Construct a long literal atom from a value.
+
+  @param value The 64-integer value
+  @return An long literal atom
+  @since 1.0
+*)
 
 val atom_float : float -> atom
-(** [atom_float value] constructs a float literal atom with value [value]. *)
+(**
+  Construct a float literal atom from a value.
+
+  @param value The floating-point value
+  @return A float literal atom
+  @since 1.0
+*)
 
 val atom_double : float -> atom
-(** [atom_double value] constructs a double literal atom with value [value]. *)
+(**
+  Construct a double literal atom from a value.
+
+  @param value The floating-point value
+  @return A double literal
+  @since 1.0
+*)
 
 val atom_rune : Uchar.t -> atom
-(** [atom_rune value] constructs a rune literal atom with value [value]. *)
+(**
+  Construct a rune literal atom from a value.
+
+  @param value The UTF-8 character value
+  @return A rune literal atom
+  @since 1.0
+*)
 
 val atom_string : string -> atom
-(** [atom_string value] constructs a string literal atom with value [value].
-    The value is normalized and the length is computed. *)
+(**
+  Construct a string literal atom from a value.  The value is normalized and the
+  length is computed.
+
+  @param value The UTF-8 string value
+  @return A string literal atom
+  @since 1.0
+*)
 
 val atom_ident : Sym.t -> atom
-(** [atom_ident id] constructs an identifier atom with identifier [id]. *)
+(**
+  Construct an identifier atom from an identifier.
+
+  @param id The identifier's symbol
+  @return An identifier atom
+  @since 1.0
+*)
 
 (** {3 Expressions} *)
 
 val expr_builtin : builtin -> atom list -> expr
-(** [expr_builtin fn args] constructs an application of the built-in function
-    [fn] to the atomic arguments [args]. *)
+(**
+  Construct an application of a built-in function to atomic arguments.
+
+  @param fn The built-in function to apply
+  @param args The atomic arguments to apply the function to
+  @return A built-in function application
+  @since 1.0
+*)
 
 val expr_atom : atom -> expr
-(** [expr_atom atom] constructs an atomic value expression of the atom [atom]. *)
+(**
+  Construct an atomic value expression.
+
+  @param atom The atomic value
+  @return An atomic value expression
+  @since 1.0
+*)
 
 (** {3 Bindings} *)
 
 val binding : patt -> ty -> expr -> binding
-(** [binding patt ty value] constructs a binding that binds the value [value] of
-    type [ty] to the pattern [patt]. *)
+(**
+  Construct a binding that binds an expression of a type to a pattern.
+
+  @param patt The pattern to bind to
+  @param ty The type of the binding
+  @param expr The value to bind
+  @return A value binding
+  @since 1.0
+*)
 
 (** {3 Terms} *)
 
 val term_let : binding -> term -> term
-(** [term_let binding scope] constructs a [let] binding which binds [binding]
-    in [scope]. *)
+(**
+  Construct a let binding a term in a scope.
+
+  @param binding The let binding
+  @param scope The scope of the binding
+  @return A let binding
+  @since 1.0
+*)
 
 val term_expr : expr -> term
-(** [term_expr expr] constructs an expression term of the expression [expr]. *)
+(**
+  Construct an expression value term.
+
+  @param expr The expression value
+  @return An expression value term
+  @since 1.0
+*)
 
 (** {3 Top-Level Bindings} *)
 
 val top_let : binding -> top
-(** [top_let binding] constructs a top-level value binding of the binding
-    [binding]. *)
+(**
+  Construct a top-level value binding.
+
+  @param binding The binding
+  @return A top-level value binding
+  @since 1.0
+*)
 
 (** {2 Operations} *)
 
 (** {3 Types} *)
 
 val ty_equal : ty -> ty -> bool
-(** [ty_equal ty ty'] tests if type [ty] is equal to type [ty']. *)
+(**
+  Test if two types are equal.
+
+  @param ty The first type
+  @param ty' The second type
+  @return [true] if the types are equal, [false] otherwise
+  @since 1.0
+*)
 
 val ty_is_integral : ty -> bool
-(** [ty_is_integral ty] tests if type [ty] is an integral ([Int] or [Long])
-    type. *)
+(**
+  Test if a type is integral (either [Int] or [Long]).
+
+  @param ty The type
+  @return [true] if the type is integral, [false] otherwise
+  @since 1.0
+*)
 
 val ty_is_floating_point : ty -> bool
-(** [ty_is_floating_point ty] tests if type [ty] is a floating-point ([Float] or
-    [Double]) type. *)
+(**
+  Test if a type is floating-point (either [Float] or [Double]).
+
+  @param ty The type
+  @return [true] if the type is floating-point, [false] otherwise
+  @since 1.0
+*)
 
 val ty_is_numeric : ty -> bool
-(** [ty_is_numeric ty] tests if type [ty] is a numeric (integral or
-    floating-point) type. *)
+(**
+  Test if a type is a numeric (either integral or floating-point).
+
+  @param ty The type
+  @param [true] if the type is numeric, [false] otherwise
+  @since 1.0
+*)
 
 val ty_is_logical : ty -> bool
-(** [ty_is_logical ty] tests if type [ty] is a logical (boolean) type. *)
+(**
+  Test if a type is logical (a [Bool]).
+
+  @param ty The type
+  @return [true] if the type is logical, [false] otherwise
+  @since 1.0
+*)
 
 (** {3 Pretty Printing} *)
 
 val pp_ty : formatter -> ty -> unit
-(** [pp_ty fmt ty] pretty-prints the type [ty] to the formatter [fmt]. *)
+(**
+  Pretty-print a type to a formatter.
+
+  @param fmt The formatter to print to
+  @param ty The type to print
+  @since 1.0
+*)
 
 val pp_arity : formatter -> arity -> unit
-(** [pp_arity fmt arity] pretty-prints the arity [arity] to the formatter [fmt]. *)
+(**
+  Pretty-print an arity to a formatter.
+
+  @param fmt The formatter to print to
+  @param arity The arity to print
+  @since 1.0
+*)
 
 val pp_builtin : formatter -> builtin -> unit
-(** [pp_builtin fmt builtin] pretty-prints the application of the built-in
-    function [builtin] to the formatter [fmt]. *)
+(**
+  Pretty-print a built-in function to a formatter.
+
+  @param fmt The formatter to print to
+  @param builtin The built-in function to print
+  @since 1.0
+*)
 
 val pp_atom : formatter -> atom -> unit
-(** [pp_atom fmt atom] pretty-prints the atomic value [atom] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print an atom to a formatter.
+
+  @param fmt The formatter to print to
+  @param atom The atom to print
+  @since 1.0
+*)
 
 val pp_expr : formatter -> expr -> unit
-(** [pp_expr fmt expr] pretty-prints the expression [expr] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print an expression to a formatter.
+
+  @param fmt The formatter to print to
+  @param expr The expression to print
+  @since 1.0
+*)
 
 val pp_term : formatter -> term -> unit
-(** [pp_term fmt term] pretty-prints the term [term] to the formatter [fmt]. *)
+(**
+  Pretty-print a term to a formatter.
+
+  @param fmt The formatter to print to
+  @param term The term to print
+  @since 1.0
+*)
 
 val pp_patt : formatter -> patt -> unit
-(** [pp_patt fmt patt] pretty-prints the pattern [patt] to the formatter [fmt]. *)
+(**
+  Pretty-print a pattern to a formatter.
+
+  @param fmt The formatter to print to
+  @param patt The pattern to print
+  @since 1.0
+*)
 
 val pp_binding : formatter -> binding -> unit
-(** [pp_binding fmt binding] pretty-prints the binding [binding] to the
-    formatter [fmt]. *)
+(**
+  Pretty-print a value binding to a formatter.
+
+  @param fmt The formatter to print to
+  @param binding The binding to print
+  @since 1.0
+*)
 
 val pp_top : formatter -> top -> unit
-(** [pp_top fmt top] pretty-prints the top-level expression [top] to the
-    formatter [fmt]. *)
+(**
+  Pretty-print a top-level let binding to a formatter.
+
+  @param fmt The formatter to print to
+  @param top The top-level let binding to print
+  @since 1.0
+*)
 
 (** {3 Type Checking} *)
 
-exception UnboundIdentifier of Sym.t
-(** [UnboundIdentifier id] is raised when the identifier [id] is unbound. *)
+exception UnboundIdentifier of {
+  id: Sym.t; (** The unbound identifier *)
+}
+(**
+  Raised when an identifier is unbound.
 
-exception MismatchedTypes of ty * ty
-(** [MismatchedTypes (inferred, annotated)] is raised when the [inferred] type
-    and the [annotated] type disagree. *)
+  @since 1.0
+*)
 
-exception InvalidArity of int * int
-(** [InvalidArity (expected, actual)] is raised when a built-in function of
-    arity [expected] is applied to [actual] arguments. *)
+exception MismatchedTypes of {
+  inferred:  ty; (** The inferred type *)
+  annotated: ty; (** The annotated type *)
+}
+(**
+  Raised when the inferred type of an expression disagrees with the type
+  annotation.
+
+  @since 1.0
+*)
+
+exception InvalidArity of {
+  expected: int; (** The expected arity *)
+  actual:   int; (** The actual arity *)
+}
+(**
+  Raised when a built-in function is applied to the incorrect number of
+  arguments.
+
+  @since 1.0
+*)
 
 val check_builtin : ty Env.t -> builtin -> (arity -> 'a) -> 'a
-(** [check_builtin env builtin kontinue] gets the type of the built-in function
-    [builtin] in the environment [env].  The arity the function is passed to the
-    continuation [kontinue]. *)
+(**
+  Determine the arity of a built-in function.
+
+  @param env The type checking environment
+  @param builtin The builtin
+  @param kontinue The continuation the arity is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val check_atom : ty Env.t -> atom -> (ty -> 'a) -> 'a
-(** [check_atom env atom kontinue] type-checks the atomic value [atom] in the
-    environment [env].  The type of the atom is passed to the continuation
-    [kontinue]. *)
+(**
+  Infer the type of an atomic value.
+
+  @param env The type checking environment
+  @param atom The atomic value
+  @param kontinue The continuation the type is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val check_expr : ty Env.t -> expr -> (ty -> 'a) -> 'a
-(** [check_expr env expr kontinue] type-checks the expression [expr] in the
-    environment [env].  The type of the expression is passed to the continuation
-    [kontinue]. *)
+(**
+  Check that an expression is well-typed.
+
+  @param env The type checking environment
+  @param expr The expression
+  @param kontinue The continuation the type of the expression is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val check_term : ty Env.t -> term -> (ty Env.t -> ty -> 'a) -> 'a
-(** [check_term env term kontinue] type-checks the term [term] in the
-    environment [env].  The type of the term and a (possibly updated)
-    environment are passed to the continuation [kontinue]. *)
+(**
+  Check that a term is well-typed and bind any values.
+
+  @param env The type checking environment
+  @param expr The term
+  @param kontinue The continuation the type of the term and a (possibly updated)
+    environment is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val check_patt : ty Env.t -> patt -> ty -> (ty Env.t -> 'a) -> 'a
-(** [check_patt env patt ty kontinue] type-checks the pattern [patt] against the
-    type [ty] in the environment [env].  A (possibly updated) environment is
-    passed to the continuation [kontinue]. *)
+(**
+  Check that a pattern matches against values of a particular type.
+
+  @param env The type checking environment
+  @param patt The pattern
+  @param ty The type to match against
+  @param kontinue The continuation the (possibly updated) environment is passed
+    to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val check_binding : ty Env.t -> binding -> (ty Env.t -> 'a) -> 'a
-(** [check_binding env binding kontinue] type-checks the binding [binding] in
-    the environment [env].  A (possibly updated) environment is passed to the
-    continuation [kontinue]. *)
+(**
+  Check that a value binding is well typed and bind the value in the
+  environment.
+
+  @param env The type checking environment
+  @param binding The binding
+  @param kontinue The continuation to pass the (possibly updated) environment to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val check_top : ty Env.t -> top -> (ty Env.t -> 'a) -> 'a
-(** [check_top env top kontinue] type-checks the top-level expression [top] in
-    the environment [env].  A (possibly updated) environment is passed to the
-    continuation [kontinue]. *)
+(**
+  Check that a top-level binding is well typed and bind the value in the
+  environment.
+
+  @param env The type checking environment
+  @param top The top-level binding
+  @param kontinue The continuation to pass the (possibly updated) environment to
+  @return The result of the continuation
+  @since 1.0
+*)

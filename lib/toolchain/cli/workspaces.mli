@@ -5,3 +5,8 @@ open Cmdliner
  *)
 
 val cmd : unit Term.t * Term.info
+(**
+  The workspaces tutorial.
+
+  @since 1.0
+*)

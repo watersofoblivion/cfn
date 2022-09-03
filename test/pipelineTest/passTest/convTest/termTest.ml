@@ -42,6 +42,26 @@ let test_convert_binding ctxt =
     EnvTest.assert_bound ~ctxt ClosTest.assert_ty_equal id env ty;
     ClosTest.assert_binding_equal ~ctxt clos binding)
 
+let test_convert_binding_mismatched_types _ =
+  let env = EnvTest.fresh () in
+  let mono =
+    let patt =
+      ()
+        |> Sym.seq
+        |> Sym.gen
+        |> Mono.patt_var
+    in
+    let ty = Mono.ty_bool in
+    42l
+      |> Mono.atom_int
+      |> Mono.expr_atom
+      |> Mono.binding patt ty
+  in
+  let exn = Conv.MismatchedTypes (Clos.ty_int, Clos.ty_bool) in
+  assert_raises exn (fun _ ->
+    Conv.convert_binding env mono (fun _ _ ->
+      assert_failure "Expected exception"))
+
 (* Terms *)
 
 let test_convert_term_let ctxt =
@@ -93,7 +113,10 @@ let test_convert_term_expr ctxt =
 
 let suite =
   "Terms" >::: [
-    "Binding" >:: test_convert_binding;
+    "Binding" >::: [
+      "Valid"            >:: test_convert_binding;
+      "Mismatched Types" >:: test_convert_binding_mismatched_types;
+    ];
     "Terms" >::: [
       "Let Bindings" >:: test_convert_term_let;
       "Expressions"  >:: test_convert_term_expr;

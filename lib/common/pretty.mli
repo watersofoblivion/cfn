@@ -5,10 +5,27 @@ open Format
  *)
 
 val ground : formatter -> unit
-(** [ground fmt] pretty-print ground ([_]) to the formatter [fmt]. *)
+(**
+  Pretty-print ground ([_]) to a formatter.
+
+  @param fmt The formatter to print to
+  @since 1.0
+*)
 
 val bool : formatter -> bool -> unit
-(** [bool fmt b] pretty-prints the boolean value [b] to the formatter [fmt]. *)
+(**
+  Pretty-print a boolean value to a formatter.
+
+  @param fmt The formatter to print to
+  @param b The value to print
+  @since 1.0
+*)
 
 val int : formatter -> int -> unit
-(** [int fmt i] pretty-prints the integer value [i] to the formatter [fmt]. *)
+(**
+  Pretty-print an integer value to a formatter.
+
+  @param fmt The formatter to print to
+  @param i The value to print
+  @since 1.0
+*)

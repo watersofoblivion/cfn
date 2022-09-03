@@ -3,22 +3,50 @@
 (** {2 Names} *)
 
 val id_bool : string
-(** [id_bool] is the type constructor for boolean types. *)
+(**
+  The type constructor for boolean types.
+
+  @since 1.0
+*)
 
 val id_int : string
-(** [id_int] is the type constructor for integer types. *)
+(**
+  The type constructor for integer types.
+
+  @since 1.0
+*)
 
 val id_long : string
-(** [id_long] is the type constructor for long types. *)
+(**
+  The type constructor for long types.
+
+  @since 1.0
+*)
 
 val id_float : string
-(** [id_float] is the type constructor for float types. *)
+(**
+  The type constructor for float types.
+
+  @since 1.0
+*)
 
 val id_double : string
-(** [id_double] is the type constructor for double types. *)
+(**
+  The type constructor for double types.
+
+  @since 1.0
+*)
 
 val id_rune : string
-(** [id_rune] is the type constructor for rune types. *)
+(**
+  Type constructor for rune types.
+
+  @since 1.0
+*)
 
 val id_string : string
-(** [id_string] is the type constructor for string types. *)
+(**
+  Type constructor for string types.
+
+  @since 1.0
+*)

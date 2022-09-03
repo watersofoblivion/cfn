@@ -5,11 +5,18 @@ open Cmdliner
  *)
 
 val impl : bool -> bool -> string list -> unit
-(** [impl update pre_release project_paths] fetches all dependencies of the
-    projects listed in [project_paths], or all dependencies of the current
-    project if [project_paths] is empty.  Updates the dependencies to the
-    latest released version if [update] is [true], and updates to the latest
-    pre-release version if both [update] and [pre_release] are [true]. *)
+(**
+  Fetch all dependencies of a set of projects or of the current project.
+
+  @param update Update the dependencies to the latest released version
+  @param pre_release Allow updates to pre-release versions
+  @param project_paths The projects to update
+  @since 1.0
+*)
 
 val cmd : unit Term.t * Term.info
-(** [cmd] is the {!Cmdliner} [get] command. *)
+(**
+  The [get] command.
+
+  @since 1.0
+*)

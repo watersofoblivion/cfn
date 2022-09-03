@@ -1,6 +1,6 @@
 (* Types *)
 
-let convert_ty _ ty kontinue = match ty with
+let mono_ty _ ty kontinue = match ty with
   | Ir.TyBool -> kontinue Mono.ty_bool
   | Ir.TyInt -> kontinue Mono.ty_int
   | Ir.TyLong -> kontinue Mono.ty_long

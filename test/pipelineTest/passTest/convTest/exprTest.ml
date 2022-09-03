@@ -6,24 +6,71 @@ open CommonTest
 
 (* Tests *)
 
-let test_convert_expr_builtin ctxt =
+let test_convert_expr_builtin_fixed_arity ctxt =
   let env = EnvTest.fresh () in
   let values = [1l; 2l] in
   let mono =
-    let builtin = Mono.builtin_add Mono.ty_int in
+    let builtin = Mono.builtin_struct_eq Mono.ty_int in
     values
       |> List.map Mono.atom_int
       |> Mono.expr_builtin builtin
   in
   let clos =
-    let builtin = Clos.builtin_add Clos.ty_int in
+    let builtin = Clos.builtin_struct_eq Clos.ty_int in
     values
       |> List.map Clos.atom_int
       |> Clos.expr_builtin builtin
   in
   Conv.convert_expr env mono (fun ty expr ->
-    ClosTest.assert_ty_equal ~ctxt Clos.ty_int ty;
+    ClosTest.assert_ty_equal ~ctxt Clos.ty_bool ty;
     ClosTest.assert_expr_equal ~ctxt clos expr)
+
+let test_convert_expr_builtin_var_arity ctxt =
+  let env = EnvTest.fresh () in
+  let values = ["foo"; "bar"; "baz"] in
+  let mono =
+    let builtin = Mono.builtin_concat Mono.ty_string in
+    values
+      |> List.map Mono.atom_string
+      |> Mono.expr_builtin builtin
+  in
+  let clos =
+    let builtin = Clos.builtin_concat Clos.ty_string in
+    values
+      |> List.map Clos.atom_string
+      |> Clos.expr_builtin builtin
+  in
+  Conv.convert_expr env mono (fun ty expr ->
+    ClosTest.assert_ty_equal ~ctxt Clos.ty_string ty;
+    ClosTest.assert_expr_equal ~ctxt clos expr)
+
+let test_convert_expr_builtin_invalid_arity _ =
+  let env = EnvTest.fresh () in
+  let values = [1l; 2l; 3l] in
+  let mono =
+    let builtin = Mono.builtin_struct_eq Mono.ty_int in
+    values
+      |> List.map Mono.atom_int
+      |> Mono.expr_builtin builtin
+  in
+  let exn = Conv.InvalidArity (2, 3) in
+  assert_raises exn (fun _ ->
+    Conv.convert_expr env mono (fun _ _ ->
+      assert_failure "Expected exception"))
+
+let test_convert_expr_builtin_mismatched_types _ =
+  let env = EnvTest.fresh () in
+  let values = [1L; 2L] in
+  let mono =
+    let builtin = Mono.builtin_struct_eq Mono.ty_int in
+    values
+      |> List.map Mono.atom_long
+      |> Mono.expr_builtin builtin
+  in
+  let exn = Conv.MismatchedTypes (Clos.ty_long, Clos.ty_int) in
+  assert_raises exn (fun _ ->
+    Conv.convert_expr env mono (fun _ _ ->
+      assert_failure "Expected exception"))
 
 let test_convert_expr_atom ctxt =
   let env = EnvTest.fresh () in
@@ -37,6 +84,11 @@ let test_convert_expr_atom ctxt =
 
 let suite =
   "Expressions" >::: [
-    (* "Built-in Function Application" >:: test_convert_expr_builtin; *)
+    "Built-in Function Application" >::: [
+      "Fixed Arity"      >:: test_convert_expr_builtin_fixed_arity;
+      "Variable Arity"   >:: test_convert_expr_builtin_var_arity;
+      "Invalid Arity"    >:: test_convert_expr_builtin_invalid_arity;
+      "Mismatched Types" >:: test_convert_expr_builtin_mismatched_types;
+    ];
     "Atomic Values"                 >:: test_convert_expr_atom;
   ]

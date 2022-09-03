@@ -4,51 +4,130 @@ open Common
 
 (** {2 Exceptions} *)
 
-exception UnboundIdentifier of Sym.t
-(** [UnboundIdentifier id] is raised when the identifier [id] is unbound. *)
+exception UnboundIdentifier of {
+  id: Sym.t; (** The unbound identifier *)
+}
+(**
+  Raised when an identifier is unbound.
 
-exception MismatchedTypes of Mono.ty * Mono.ty
-(** [MismatchedTypes (inferred, annotated)] is raised when the [inferred] type
-    and the [annotated] types disagree. *)
+  @since 1.0
+*)
+
+exception MismatchedTypes of {
+  inferred:  Mono.ty; (** The inferred type *)
+  annotated: Mono.ty; (** The annotated type *)
+}
+(**
+  Raised when an inferred type disagrees with a type annotation.
+
+  @since 1.0
+*)
+
+exception InvalidArity of {
+  expected: int;
+  actual:   int;
+}
+(**
+  Raised when a built-in function is applied to an incorrect number of
+  arguments.
+
+  @since 1.0
+*)
 
 (** {2 Monomorhpization} *)
 
-val convert_ty : Mono.ty Env.t -> Ir.ty -> (Mono.ty -> 'a) -> 'a
-(** [convert_ty env ty kontinue] monomorphizes the ANF type [ty] in the
-    environment [env].  The monomorphic type is passed to the continuation
-    [kontinue]. *)
+val mono_ty : Mono.ty Env.t -> Ir.ty -> (Mono.ty -> 'a) -> 'a
+(**
+  Monomorphize a type.
 
-val convert_builtin : Mono.ty Env.t -> Ir.builtin -> (Mono.builtin -> 'a) -> 'a
-(** [convert_builtin env builtin kontinue] monomorphizes the ANF builtin
-    function [builtin] in the environment [env].  The monomorphic builtin
-    function is passed to the continuation [kontinue]. *)
+  @param env The type environment
+  @param ty The type to monomorphize
+  @param kontinue The continuation the monomorphized type is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
-val convert_atom : Mono.ty Env.t -> Ir.atom -> (Mono.ty -> Mono.atom -> 'a) -> 'a
-(** [convert_atom env atom kontinue] monomorphizes the ANF atomic value [atom]
-    in the environment [env].  The monomorphic atomic value and its type are
-    passed to the continuation [kontinue]. *)
+val mono_builtin : Mono.ty Env.t -> Ir.builtin -> (Mono.arity -> Mono.builtin -> 'a) -> 'a
+(**
+  Monomorphize a built-in function.
 
-val convert_expr : Mono.ty Env.t -> Ir.expr -> (Mono.ty -> Mono.expr -> 'a) -> 'a
-(** [convert_expr env expr kontinue] monomorphizes the ANF exprression [expr] in
-    the environment [env].  The monomorphic expression and its type are passed
-    to the continuation [kontinue]. *)
+  @param env The type environment
+  @param builtin The built-in function to monomorphize
+  @param kontinue The continuation the monomorphized built-in function and its
+    arity are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
-val convert_term : Mono.ty Env.t -> Ir.term -> (Mono.ty -> Mono.term -> 'a) -> 'a
-(** [convert_term env term kontinue] monomorphizes the ANF term [term] in
-    the environment [env].  The monomorphic term and its type are passed to the
-    continuation [kontinue]. *)
+val mono_atom : Mono.ty Env.t -> Ir.atom -> (Mono.ty -> Mono.atom -> 'a) -> 'a
+(**
+  Monomorphize an atomic value.
 
-val convert_patt : Mono.ty Env.t -> Ir.patt -> Mono.ty -> (Mono.ty Env.t -> Mono.patt -> 'a) -> 'a
-(** [convert_patt env patt ty kontinue] monomorphizes the ANF pattern [patt] in
-    the environment [env] against the type [ty].  The monomorphic pattern and a
-    (possibly updated) environment are passed to the continuation [kontinue]. *)
+  @param env The type environment
+  @param atom The atomic value to monomorphize
+  @param kontinue The contination the monomorphized atom and its type are passed
+    to
+  @return The result of the continuation
+  @since 1.0
+*)
 
-val convert_binding : Mono.ty Env.t -> Ir.binding -> (Mono.ty Env.t -> Mono.binding -> 'a) -> 'a
-(** [convert_binding env binding kontinue] monomorphizes the ANF binding
-    [binding] in the environment [env].  The monomorphic binding and a (possibly
-    updated) environment are passed to the continuation [kontinue]. *)
+val mono_expr : Mono.ty Env.t -> Ir.expr -> (Mono.ty -> Mono.expr -> 'a) -> 'a
+(**
+  Monomorphize an expression.
 
-val convert_top : Mono.ty Env.t -> Ir.top -> (Mono.ty Env.t -> Mono.top -> 'a) -> 'a
-(** [convert_top env top kontinue] monomorphizes the ANF top-level expression
-    [top] in the environment [env].  The monomorphic top-level expression and a
-    (possibly updated) environment are passed to the continuation [kontinue]. *)
+  @param env The type environment
+  @param expr The expression to monomorphize
+  @param kontinue The continuation the monomorphized expression and its type are
+    passed to
+  @return The result of the continuation
+  @since 1.0
+*)
+
+val mono_term : Mono.ty Env.t -> Ir.term -> (Mono.ty -> Mono.term -> 'a) -> 'a
+(**
+  Monomorphize a term.
+
+  @param env The type envionment
+  @param term The term to monomorphize
+  @param kontinue The continuation the monomorphized term and its type are
+    passed to
+  @return The result of the continuation
+  @since 1.0
+*)
+
+val mono_patt : Mono.ty Env.t -> Ir.patt -> Mono.ty -> (Mono.ty Env.t -> Mono.patt -> 'a) -> 'a
+(**
+  Monomorphize a pattern.
+
+  @param env The type environment
+  @param patt The pattern to monomorphize
+  @param ty The type of values the pattern must match
+  @param kontinue The continuation that the monomorphized pattern and a (possibly
+    updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
+
+val mono_binding : Mono.ty Env.t -> Ir.binding -> (Mono.ty Env.t -> Mono.binding -> 'a) -> 'a
+(**
+  Monomorphize a value binding.
+
+  @param env The type environment
+  @param binding The binding to monomorphize
+  @param kontinue The contination the monomorphized binding and a (possibly
+    updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
+
+val mono_top : Mono.ty Env.t -> Ir.top -> (Mono.ty Env.t -> Mono.top -> 'a) -> 'a
+(**
+  Monomorphize a top-level binding.
+
+  @param env The type environment
+  @param binding The binding to monomorphize
+  @param kontinue The continuation the monomorphized binding and a (possibly
+    updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)

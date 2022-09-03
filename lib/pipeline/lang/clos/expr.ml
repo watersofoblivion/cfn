@@ -47,6 +47,7 @@ and check_expr_builtin_fixed_args env tys res args kontinue = match (tys, args) 
       then check_expr_builtin_fixed_args env tys res args kontinue
       else Check.mismatched_types inferred ty)
   | _ ->
+    (* Checked in check_expr_builtin_fixed *)
     Invalid_argument "Cannot happen"
       |> raise
 

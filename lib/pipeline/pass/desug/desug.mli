@@ -4,73 +4,183 @@ open Common
 
 (** {2 Exceptions} *)
 
-exception InvalidNumberFormat of Loc.t * string * Sym.t * string
-(** [InvalidNumberFormat (loc, lexeme, constr, msg)] is raised when the lexeme
-    [lexeme] at location [loc] is in a valid format for the type [constr].  The
-    [msg] is the error message returned by the conversion function. *)
+exception InvalidNumberFormat of {
+  loc:    Loc.t;  (** Location of the lexeme *)
+  lexeme: string; (** Lexeme *)
+  constr: Sym.t;  (** Type constructor *)
+  msg:    string  (** Conversion error *)
+}
+(**
+  Raised when a lexeme cannot be parsed as a valid number for a given type
+  constructor.
 
-exception UnboundConstructor of Loc.t * Sym.t
-(** [UnboundConstructor (loc, id)] is raised when the type constructor [id] at
-    location [loc] is unbound. *)
+  @since 1.0
+*)
 
-exception UnboundIdentifier of Loc.t * Sym.t
-(** [UnboundIdentifier (loc, id)] is raised when the identifier [id] at location
-    [loc] is unbound. *)
+exception UnboundConstructor of {
+  loc: Loc.t; (** Location of the constructor *)
+  id:  Sym.t; (** Unknown constructor *)
+}
+(**
+  Raised when a type constructor is unbound.
 
-exception MismatchedTypes of Annot.ty * Loc.t * Annot.ty
-(** [MismatchedTypes (inferred, loc, annotated)] is raised when the [inferred]
-    type and the [annotated] type at [loc] disagree. *)
+  @since 1.0
+*)
 
-exception UnsupportedBinOpPromotion of Loc.t * Syntax.bin * Loc.t * Annot.ty * Loc.t * Annot.ty
+exception UnboundIdentifier of {
+  loc: Loc.t;
+  id:  Sym.t;
+}
+(**
+  Raised when an identifier is unbound.
+
+  @since 1.0
+*)
+
+exception MismatchedTypes of {
+  loc:       Loc.t;    (** Location of the expression *)
+  inferred:  Annot.ty; (** Inferred type *)
+  annotated: Annot.ty; (** Annotated type *)
+}
+(**
+  Raised when an inferred disagrees with a type annotation.
+
+  @since 1.0
+*)
+
+exception UnsupportedBinOpPromotion of {
+  loc: Loc.t;      (** Location of the promotion *)
+  op:  Syntax.bin; (** The binary operator *)
+  sub: Annot.ty;   (** The unpromotable subtype *)
+  sup: Annot.ty;   (** The target supertype *)
+}
+(**
+  Raised when a primitive type must but cannot be automatically promoted to a
+  supertype.
+
+  @since 1.0
+*)
 
 (** {2 Desugaring} *)
 
 val desug_ty : Annot.ty Env.t -> Syntax.ty -> (Annot.ty -> 'a) -> 'a
-(** [desug_ty env ty kontinue] desugars the syntax type [ty] in the environment
-    [env].  The desugared type is passed to the continuation [kontinue]. *)
+(**
+  Desugar a type.
+
+  @param env The type environment
+  @param ty The type to desugar
+  @param kontinue The continuation the desugared type is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_un : Annot.ty Env.t -> Syntax.un -> Annot.ty -> (Annot.ty -> Annot.builtin -> 'a) -> 'a
-(** [desug_un env op operand kontinue] desugars the unary operator [op]
-    operating on a value of type [operand] in the environment [env] into a
-    built-in function.  The desugared builtin and its result type passed to the
-    continuation [kontinue]. *)
+(**
+  Desugar a unary operator into a built-in function.
+
+  @param env The type environment
+  @param op The operator to desugar
+  @param operand The type of the operand
+  @param kontinue The continuation the result type and the built-in function are
+    passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_bin : Annot.ty Env.t -> Syntax.bin -> Annot.ty -> Annot.ty -> (Annot.ty -> Annot.builtin -> 'a) -> 'a
-(** [desug_bin env op lhs rhs kontinue] desugars the binary operator [op]
-    operating on values of type [lhs] and [rhs] in the environment [env] into a
-    built-in function.  The desugared builtin and its result type passed to the
-    continuation [kontinue]. *)
+(**
+  Desugar a binary operator into a built-in function.
+
+  @param env The type environment
+  @param op The operator to desugar
+  @param lhs The type of the left operand
+  @param rhs The type of the second operand
+  @param kontinue The continuation the result type and the desugared built-in
+    function are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_rune : Annot.ty Env.t -> Syntax.rune -> (Uchar.t -> 'a) -> 'a
-(** [desug_rune env r kontinue] desugars the syntax rune [r] in the environment
-    [env].  The desugared rune is passed to the continuation [kontinue]. *)
+(**
+  Desugar a rune literal.
+
+  @param env The type environment
+  @param r The rune literal
+  @param kontinue The continuation the desugared rune is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_str : Annot.ty Env.t -> Syntax.str list list -> (string -> 'a) -> 'a
-(** [desug_str env str kontinue] desugars the syntax string segment [str] in the
-    environment [env].  The desugared string segment is passed to the
-    continuation [kontinue]. *)
+(**
+  Desugar a string.  A string is given as a list of lines, each of which is
+  given as a list of segments.
+
+  @param env The type environment
+  @param str The string segments
+  @param kontinue The continuation the desugared string is passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_expr : Annot.ty Env.t -> Syntax.expr -> (Annot.ty -> Annot.expr -> 'a) -> 'a
-(** [desug_expr env expr kontinue] desugars the syntax expression [expr] in the
-    environment [env].  The desugared expression and its type are passed to the
-    continuation [kontinue]. *)
+(**
+  Desugar an expression.
+
+  @param env The type environment
+  @param expr The expression to desugar
+  @param kontinue The continuation the desugared expression and its type are
+    passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_patt : Annot.ty Env.t -> Syntax.patt -> Annot.ty -> (Annot.ty Env.t -> Annot.patt -> 'a) -> 'a
-(** [desug_patt env patt ty kontinue] desugars the syntax pattern [patt] in the
-    environment [env] against the type [ty].  The desugared pattern and a
-    (possibly updated) environment are passed to the continuation [kontinue]. *)
+(**
+  Desugar a pattern.
+
+  @param env The type environment
+  @param patt The pattern to desugar
+  @param ty The type of values the pattern must match
+  @param kontinue The continuation the desugared pattern and the (possibly
+    updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_binding : Annot.ty Env.t -> Syntax.binding -> (Annot.ty Env.t -> Annot.binding -> 'a) -> 'a
-(** [desug_binding env binding kontinue] desugars the syntax binding [binding]
-    in the environment [env].  The desugared binding and a (possibly updated)
-    environment are passed to the continuation [kontinue]. *)
+(**
+  Desugar a value binding.
+
+  @param env The type environment
+  @param binding The binding to desugar
+  @param kontinue The continuation the desugared binding and a (possibly
+    updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_top : Annot.ty Env.t -> Syntax.top -> (Annot.ty Env.t -> Annot.top -> 'a) -> 'a
-(** [desug_top env top kontinue] desugars the top-level syntax expression [top]
-    in the environment [env].  The desugared top-level expression and a
-    (possibly updated) environment are passed to the continuation [kontinue]. *)
+(**
+  Desugar a top-level binding.
+
+  @param env The type environment
+  @param top The top-level binding to desugar
+  @param kontinue The continuation the desugared top-level binding and a
+    (possibly updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val desug_file : Annot.ty Env.t -> Syntax.file -> (Annot.ty Env.t -> Annot.top list -> 'a) -> 'a
-(** [desug_file env file kontinue] desugars the syntax file [file] in the
-    environment [env].  The desugared top-level expressions and a (possibly
-    updated) environment are passed to the continuation [kontinue]. *)
+(**
+  Desugar a file.
+
+  @param env The type environment
+  @param file The file to desugar
+  @param kontinue The continuation the desugred top-level bindings and a
+    (possibly updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)

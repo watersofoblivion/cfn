@@ -8,100 +8,228 @@
 
 type vcs =
  | Git
+(**
+  Supported version control systems
+
+  @since 1.0
+*)
 
 val vcs_of_ext : string -> vcs option
-(** [vcs_of_ext ext] returns a the version control system indicated by [ext], or
-    [None] if the extension is not a recognized version control system. *)
+(**
+  Detect a version control system based on a file extension.
+
+  @param ext The extension
+  @return The recognized version control system, or [None] if the extension is
+    not a recognized version control system
+  @since 1.0
+*)
 
 val vcs_ext : vcs -> string
-(** [vcs_ext vcs] returns the extension matching [vcs]. *)
+(**
+  Get the extension for a version control system.
+
+  @param vcs The version control system
+  @return The extension for the system
+  @since 1.0
+*)
 
 (**
  {2 Names}
  *)
 
 type id
-(** A project name *)
+(**
+  A project name
+
+  @since 1.0
+*)
 
 val id : string -> id
-(** [id str] parses [str] into a bare project name, suitable for initializing a
-    project.  Raises {!Invalid_argument} if [str] is not a valid project
-    name. *)
+(**
+  Parse a string into a bare project name, suitable for initializing a project.
+
+  @param str The string to parse
+  @return A project name
+  @raise Invalid_argument Raised if the string is not a valid project name
+  @since 1.0
+*)
 
 val name : id -> string
-(** [name id] returns [id] as a string. *)
+(**
+  Get a project name as a string.
+
+  @param id The project name
+  @return The name as a string
+  @since 1.0
+*)
 
 (**
  {2 Projects}
  *)
 
 type project
-(** A project path. *)
+(**
+  A project path.
+
+  @since 1.0
+*)
 
 exception InternalProject
-(** Raised when an unsupported operation is performed on an internal project. *)
+(**
+  Raised when an unsupported operation is performed on an internal project.
+
+  @since 1.0
+*)
 
 val project : string -> project
-(** [project str] parses [str] into a project path.  Raises
-    {!InvalidProjectPath} if [str] is not a valid project path. *)
+(**
+  Parse a string into a project path.
+
+  @param str The path string
+  @return A project path
+  @raise InvalidProjectPath Raised if the string is not a valid project path
+  @since 1.0
+*)
 
 val current : project -> bool
-(** [current prj] returns [true] if [prj] points to the current project, or
-    [false] otherwise. *)
+(**
+  Test if a project path points to the current project.
+
+  @param prj The project path
+  @return [true] if the path points to the current project, [false] otherwise
+  @since 1.0
+*)
 
 val source : project -> string
-(** [source prj] returns the source for the project.  Raises {!InternalProject}
-    if [prj] points to the current project. *)
+(**
+  Get the source for the project.
+
+  @param prj The project path
+  @return The source for the project
+  @raise InternalProject Raised if the project points to the current project
+  @since 1.0
+*)
 
 val vcs : project -> vcs
-(** [vcs prj] returns the version control system used by [prj].  Raises
-    {!InternalProject} if [prj] points to the current project. *)
+(**
+  Get the version control system used by a project.
+
+  @param prj The project path
+  @return The version control system used by the project
+  @raise InternalProject Raised if the project points to the current project
+  @since 1.0
+*)
 
 val major : project -> int
-(** [major prj] returns the major version of the project.  Raises
-    {!InternalProject} if [prj] points to the current project. *)
+(**
+  Get the major version of a project.
+
+  @param prj The project path
+  @return The major version of the project
+  @raise InternalProject Raised if the project points to the current project
+  @since 1.0
+*)
 
 val compare_project : project -> project -> int
-(** [compare_project prj prj'] compares [prj] and [prj'] and returns [-1] if
-    [prj] is less than [prj'], [1] if [prj] is greater than [prj'], or [0]
-    otherwise. *)
+(**
+  Compare two projects.  The ordering is arbitry and used to fulfill interface
+  requiremnts for constructing sets and maps of projects.
+
+  @param prj The first project
+  @param prj' The second project
+  @return A negative value if the first project is less than the second, a
+    positive value if the first project is greater than the second, or [0] if
+    the two projects are equal
+  @since 1.0
+*)
 
 (**
  {2 Packages}
  *)
 
 type package
-(** A package path *)
+(**
+  A package path
+
+  @since 1.0
+*)
 
 val package : string -> package
-(** [package str] parses [str] into a package path.  Raises {!Invalid_argument}
-    if [str] is not a valid package path. *)
+(**
+  Parse a string into a package path.
+
+  @param str The string to parse
+  @return A package path
+  @raise Invalid_argument Raised if the string is not a valid package path
+  @since 1.0
+*)
 
 val path : package -> string
-(** [path pkg] returns the path of [pkg].  Can be blank. *)
+(**
+  Get the path of a package.  Can return a blank path.
+
+  @param pkg The package
+  @return The path of the package
+  @since 1.0
+*)
 
 val compare_package : package -> package -> int
-(** [compare_package pkg pkg'] compares [pkg] and [pkg'] and returns a negative
-    number if [pkg] is less than [pkg'], a positive number if [pkg] is greater
-    than [pkg'], or [0] otherwise. *)
+(**
+  Compare two packages.  The ordering is arbitry and used to fulfill interface
+  requiremnts for constructing sets and maps of packages.
+
+  @param pkg The first package
+  @param pkg' The second package
+  @return A negative value if the first package is less than the second, a
+    positive value if the first package is greater than the second, or [0] if
+    the two packages are equal
+  @since 1.0
+*)
 
 (**
  {2 Import}
  *)
 
 type import
-(** An import path *)
+(**
+  An import path
+
+  @since 1.0
+*)
 
 val import : string -> import
-(** [import str] parses [str] into an import path.  Raises {!Invalid_argument}
-    if [str] is not a valid import path. *)
+(**
+  Parse a string into an import path.
+
+  @param str The string to parse
+  @return An import path
+  @raise Invalid_argument Raised if the string is not a valid import path
+  @since 1.0
+*)
 
 val prj : import -> project
-(** [prj impt] returns the project path portion of [impt]. *)
+(**
+  Get the project path of an import path.
+
+  @param impt The import path
+  @return The project path
+  @since 1.0
+*)
 
 val pkg : import -> package
-(** [pkg impt] returns the package path portion of [impt]. *)
+(**
+  Get the package path of an import path.
+
+  @param impt The import path
+  @return The package path
+  @since 1.0
+*)
 
 val recursive : import -> bool
-(** [recursive impt] returns [true] if [impt] is recursive, or [false]
-    otherwise. *)
+(**
+  Test if an import path is recursive.
+
+  @param impt The import path
+  @return [true] if the path is recursive, [false] otherwise
+  @since 1.0
+*)

@@ -61,7 +61,7 @@ let fresh_builtin_div ?ty:(ty = Annot.ty_int) _ =
 let fresh_builtin_mod ?ty:(ty = Annot.ty_int) _ =
   Annot.builtin_mod ty
 
-let fresh_builtin_exp ?ty:(ty = Annot.ty_int) _ =
+let fresh_builtin_exp ?ty:(ty = Annot.ty_float) _ =
   Annot.builtin_exp ty
 
 let fresh_builtin_neg ?ty:(ty = Annot.ty_int) _ =

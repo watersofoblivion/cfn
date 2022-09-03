@@ -1,6 +1,6 @@
 let json_file parser path =
   match Sys.file_exists path with
-    | false -> None
+    | false -> raise Not_found
     | true ->
       let ic = open_in path in
       let finally _ = close_in ic in
@@ -13,4 +13,4 @@ let json_file parser path =
       in
 
       let json = Fun.protect ~finally parse in
-      Some json
+      json

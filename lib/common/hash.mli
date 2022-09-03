@@ -6,31 +6,94 @@
  *)
 
 type block
-(** A hash block *)
+(**
+  A hash block.
+
+  @since 1.0
+*)
 
 val block : block
-(** [block] is the empty hash block. *)
+(**
+  The empty hash block.
+
+  @since 1.0
+*)
 
 val bool : bool -> block -> block
-(** [bool b blk] hashes [b] into [blk]. *)
+(**
+  Hash a boolean value into a block.
+
+  @param b The value to hash
+  @param blk The block to hash the value into
+  @return An updated hash block
+  @since 1.0
+*)
 
 val char : char -> block -> block
-(** [char c blk] hashes [c] into [blk]. *)
+(**
+  Hash a character value into a block.
+
+  @param c The value to hash
+  @param blk The block to hash the value into
+  @return An updated hash block
+  @since 1.0
+*)
 
 val int : int -> block -> block
-(** [int i blk] hashes [i] into [blk]. *)
+(**
+  Hash an integer value into a block.
+
+  @param i The value to hash
+  @param blk The block to hash the value into
+  @return An updated hash block
+  @since 1.0
+*)
 
 val int32 : int32 -> block -> block
-(** [int32 i blk] hashes [i] into [blk]. *)
+(**
+  Hash a 32-bit integer value into a block.
+
+  @param i The value to hash
+  @param blk The block to hash the value into
+  @return An updated hash block
+  @since 1.0
+*)
 
 val int64 : int64 -> block -> block
-(** [int64 i blk] hashes [i] into [blk]. *)
+(**
+  Hash a 64-bit integer value into a block.
+
+  @param i The value to hash
+  @param blk The block to hash the value into
+  @return An updated hash block
+  @since 1.0
+*)
 
 val float : float -> block -> block
-(** [float f blk] hashes [f] into [blk]. *)
+(**
+  Hash a floating-point value into a block.
+
+  @param f The value to hash
+  @param blk The block to hash the value into
+  @return An updated hash block
+  @since 1.0
+*)
 
 val string : string -> block -> block
-(** [string s blk] hashes [s] into [blk]. *)
+(**
+  Hash a string value into a block.
+
+  @param s The value to hash
+  @param blk The block to hash the value into
+  @return An updated hash block
+  @since 1.0
+*)
 
 val code : block -> int
-(** [code blk] finalizes [blk] and returns the hash code. *)
+(**
+  Finalize a hash block and returns the hash code.
+
+  @param blk The block to finalize
+  @return The hash code of the finalized block
+  @since 1.0
+*)

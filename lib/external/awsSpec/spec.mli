@@ -1,4 +1,10 @@
 type t = private Service.t list
 
 val of_dir : string -> t
-(** [of_dir dir] parses all of the services in a directory. *)
+(**
+  Parse all of the services in a directory.
+
+  @param dir The directory containing the services
+  @return The services in the directory
+  @since 1.0
+*)

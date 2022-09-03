@@ -7,42 +7,112 @@ open Format
  *)
 
 type t
-(** A semantic version *)
+(**
+  A semantic version
+
+  @since 1.0
+*)
 
 val semver : int -> int -> int -> string list -> string list -> t
-(** [semver major minor patch pre_release build_info] constructs a new semantic
-    version.  Returns {!Invalid_argument} if the given values do not constitute
-    a valid semantic version. *)
+(**
+  Construct a new semantic version.
+
+  @param major The major version
+  @param minor The minor version
+  @param patch The patch version
+  @param pre_release The pre-release segments
+  @param build_info The build information segments
+  @return A semantic version
+  @raise Invalid_argument Raised if the given values do not constitute a valid
+    semantic version.
+  @since 1.0
+*)
 
 val major : t -> int
-(** [major semver] returns the major version of [semver]. *)
+(**
+  Get the major version of a semantic version.
+
+  @param semver The semantic version
+  @return The major version
+  @since 1.0
+*)
 
 val minor : t -> int
-(** [minor semver] returns the minor version of [semver]. *)
+(**
+  Get the minor version of a semantic version.
+
+  @param semver The semantic version
+  @return The minor version
+  @since 1.0
+*)
 
 val patch : t -> int
-(** [patch semver] returns the patch version of [semver]. *)
+(**
+  Get the patch version of a semantic version.
+
+  @param semver The semantic version
+  @return The patch version
+  @since 1.0
+*)
 
 val prerelease : t -> string list
-(** [prerelease semver] returns the pre-release segments of [semver]. *)
+(**
+  Get the pre-release segments of a semantic version.
+
+  @param semver The semantic version
+  @return The pre-release segments
+  @since 1.0
+*)
 
 val build_info : t -> string list
-(** [build_info semver] returns the build information segments of [semver]. *)
+(**
+  Get the build information segments of a semantic version.
+
+  @param semver The semantic version
+  @return The build information segments
+  @since 1.0
+*)
 
 val of_string : string -> t
-(** [of_string str] parses [str] as a semantic version.  Raises
-    {!Invalid_argument} if [str] is not a valid semver string. *)
+(**
+  Parse a semantic version from a string.
+
+  @param str The semantic version string
+  @return A semantic version
+  @raise Invalid_argument Raised if the string is not a valid semantic version
+  @since 1.0
+*)
 
 val compare : t -> t -> int
-(** [compare semver semver'] compares two semantic versions.  Returns a negative
-    value if [semver < semver'], a positive value if [semver > semver'], or [0]
-    if [semver = semver']. *)
+(**
+  Compare two semantic versions, following the rules given in the semantic
+  version specification.
+
+  @param semver The first semantic version
+  @param semver' The second semantic version
+  @return A negative value if the first version is less than the second, a
+    positive value if the first version is greater than the second, or [0] if
+    the two versions are equal
+  @since 1.0
+*)
 
 val format : formatter -> t -> unit
-(** [format fmt semver] prints [semver] to [fmt]. *)
+(**
+  Pretty-print a semantic version to a formatter.
+
+  @param fmt The formatter to print to
+  @param semver The version to print
+  @since 1.0
+*)
 
 val to_string : t -> string
-(** [to_string semver] returns a string representation of [semver]. *)
+(**
+  Format a semantic version as a string.
+
+  @param semver The version to format
+  @return The version as a string
+  @since 1.0
+*)
 
 (**
  {2 Compatibility Groups}
@@ -52,25 +122,63 @@ val to_string : t -> string
  *)
 
 type 'a cg
-(** A group of compatible versions *)
+(**
+  A group of compatible versions
+
+  @since 1.0
+*)
 
 val empty : 'a cg
-(** [empty] returns an empty compatibility group. *)
+(**
+  The empty compatibility group.
+
+  @since 1.0
+*)
 
 val add : t -> 'a -> 'a cg -> 'a cg
-(** [add semver v grp] adds the version [semver] to the compatibility group
-    [cg] and associates [v] with it.  Duplicate versions are ignored. *)
+(**
+  Add a sematic version to a group non-destructively and associates a value with
+  it.  Duplicate versions are ignored.
+
+  @param semver The version to add to the group
+  @param v The value to associate with the version
+  @param grp The group to add the version to
+  @return The group extended with the version
+  @since 1.0
+*)
 
 val find : t -> 'a cg -> 'a
-(** [find semver grp] finds the value associated with [semver] in [grp].  Raises
-    {!Not_found} if no value is associated with [semver] in [grp]. *)
+(**
+  Find the value associated with a sematic version in a group.
+
+  @param semver The version to find
+  @param grp The group to search
+  @return The value associated with the version
+  @raise Not_found Raised if the version is not bound in the group
+  @since 1.0
+*)
 
 val latest : int -> 'a cg -> t
-(** [latest major grp] returns the latest released version in [grp] with major
-    version [major].  Raises {!Not_found} if [grp] contains no released version
-    with major version [major]. *)
+(**
+  Get the latest released version in a group that is compatible with a major
+  version.
+
+  @param major The major version
+  @param grp The group to search in
+  @return The latest released version compatible with the major version
+  @raise Not_found Raised if the group does not contain a compatible released
+    version
+  @since 1.0
+*)
 
 val latest_prerelease : int -> 'a cg -> t
-(** [latest_prerelease int grp] returns the latest version in [grp] with major
-    version [major], including pre-releases.  Raises {!Not_found} if [grp]
-    contains no version with major version [major]. *)
+(**
+  Get the latest version in a group that is compatible with a major version,
+  including pre-relase versions.
+
+  @param major The major version
+  @param grp The group to search in
+  @return The latest version compatible with the major version
+  @raise Not_found Raised if the group does not contain a compatible version
+  @since 1.0
+*)

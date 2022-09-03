@@ -7,13 +7,31 @@ open OUnit2
  *)
 
 val not_equal : ctxt:test_ctxt -> string -> (formatter -> 'a -> unit) -> 'a -> 'a -> unit
-(** [not_equal ~ctxt msg pp expected actual] fails a test because [expected] was
-    not equal to [actual].  [msg] is the type of objects that are not equal and
-    should be a plural form (i.e., "Expressions").  [pp] is used to pretty-print
-    the two values. *)
+(**
+  Forces a test to fail because two values are not equal.
+
+  @param ctxt The testing context
+  @param msg The name of the type in the error message
+  @param pp A pretty-printer for the values
+  @param expected The expected value
+  @param actual The actual value
+  @raise Failure Always
+  @since 1.0
+*)
 
 val assert_optional_equal : ctxt:test_ctxt -> string -> (ctxt:test_ctxt -> 'a -> 'a -> unit) -> 'a option -> 'a option -> unit
-(** [assert_optional_equal ~ctxt id assert_equal expected actual] asserts that
-    the values [expected] and [actual] are either both [Some] and are equal
-    using [assert_equal], or both [None].  If they are mismatched, an error
-    is created using [id] and passed to {!OUnit2.assert_failure}. *)
+(**
+  Assert two optional values are equal.
+
+  The values are considered equal if either both are [Some] and the provided
+  assertion passes when applied to their values or if both values are [None].
+  Otherwise, the assertion fails.
+
+  @param ctxt The testing context
+  @param id A name to be used in error message
+  @param assert_equal An assertion on the equality of values
+  @param expected The expected value
+  @param actual The actual value
+  @raise Failure If the values are not equal
+  @since 1.0
+*)

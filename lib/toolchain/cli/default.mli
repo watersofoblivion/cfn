@@ -5,3 +5,8 @@ open Cmdliner
  *)
 
 val cmd : unit Term.t * Term.info
+(**
+  The default command.
+
+  @since 1.0
+*)

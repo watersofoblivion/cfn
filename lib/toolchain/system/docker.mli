@@ -10,63 +10,150 @@
  *)
 
 val docker : string list -> (bytes -> 'a) -> 'a
-(** [docker args handler] runs the "docker" command with command-line arguments
-    [args].  On success, returns the result of passing standard output to
-    [handler].  On failure (non-zero exit status), raises {!Os.NonZero}. *)
+(**
+  Run the [docker] commad.
+
+  @param args The command-line arguments
+  @param handler Called with the standard output on success
+  @return The result of the handler
+  @raise Os.NonZero Raised if the command exits with a non-zero exit code
+  @since 1.0
+*)
 
 (**
  * {2 Images}
  *)
 
 type i
-(** A docker image *)
+(**
+  A docker image
+
+  @since 1.0
+*)
 
 val image : string -> string -> i
-(** [image name tag] constructs a reference to an image with id [name:tag].
-    Does not build the image with Docker. *)
+(**
+  Construct a reference to an image with the id [<name>:<tag>].  Does not build
+  the image with Docker, only creates a reference to it.
+
+  @param name The image name
+  @param tag The image tag
+  @return An image reference
+  @since 1.0
+*)
 
 val build : string -> string -> string -> i
-(** [build dir name tag] builds the image in [dir] and names it [name:tag]. *)
+(**
+  Build an image from the contents of a directory.
+
+  @param dir The directory containing the image content
+  @param name The image name
+  @param tag The image tag
+  @return An image reference
+  @since 1.0
+*)
 
 val img_id : i -> string
-(** [img_id img] returns the [name:tag] pair of [img]. *)
+(**
+  Get the identifer of an image, formatted as [<name>:<tag>].
+
+  @param img A reference to the image
+  @return The image identifier
+  @since 1.0
+*)
 
 val img_name : i -> string
-(** [img_name img] returns the name of [img]. *)
+(**
+  Get the name of an image.
+
+  @param img A reference to the image
+  @return The image name
+  @since 1.0
+*)
 
 val img_tag : i -> string
-(** [img_tag img] returns the tag of [img]. *)
+(**
+  Get the tag of an image.
+
+  @param img A reference to the image
+  @return The image tag
+  @since 1.0
+*)
 
 (**
  * {2 Operations}
  *)
 
 type mount
-(** A mount point for a container *)
+(**
+  A mount point for a container
+
+  @since 1.0
+*)
 
 val local_dir : mount -> string
-(** [local_dir m] returns the local directory of [m]. *)
+(**
+  Get the local directory of a mount point.
+
+  @param m The mount point
+  @return The local directory of the mount point
+  @since 1.0
+*)
 
 val container_dir : mount -> string
-(** [container_dir m] returns the container directory of [m]. *)
+(**
+  Get the container directory of a mount point.
+
+  @param m The mount point
+  @return The container directory of the mount point
+  @since 1.0
+*)
 
 val dir_mount : string -> string -> mount
-(** [dir_mount local_dir container_dir] creates a mount from [local_dir] on the
-    local machine to [container_dir] on the container.  Raises
-    {!Invalid_argument} if either [local_dir] or [container_dir] are not
-    absolute paths. *)
+(**
+  Create a mount point from a local directory into a container.
+
+  @param local_dir The local directory on the machine
+  @param container_dir The directory in the container
+  @return A mount point
+  @raise Invalid_argument Raised if either directory is not an absolute path
+  @since 1.0
+*)
 
 type mounts
-(** A set of mounts in a container *)
+(**
+  A set of mounts in a container
+
+  @since 1.0
+*)
 
 val mounts : mounts
-(** [mounts] is an empty set of mounts. *)
+(**
+  The empty set of mounts.
+
+  @since 1.0
+*)
 
 val add_mount : mount -> mounts -> mounts
-(** [add_mount mount mounts] adds a mount to the set [mounts]. *)
+(**
+  Add a mount to a set of mounts.
+
+  @param mount The mount to add
+  @param mounts The set to add the mount to
+  @return The set of mounts extended with the added mount
+  @since 1.0
+*)
 
 val run_in : string -> string list -> ?mounts:mounts -> i -> (bytes -> 'a) -> 'a
-(** [run_in cmd args ?mounts img handler] runs a [cmd] with arguments [args] in
-    a Docker container using the image [img] with [mounts] attached.  On
-    success, passes the standard output of the command to [handler].  Otherwise,
-    raises {!Os.NonZero}. *)
+(**
+  Run a command in a new Docker container instance.
+
+  @param cmd The command to run
+  @param args The command-line arguments
+  @param mounts The mounts to attach to the container
+  @param img The image of the container
+  @param handler Called with the standard output on success
+  @return The result of the handler
+  @raise Os.NonZero Raised when the command exits with a non-zero exit code
+  @since 1.0
+*)

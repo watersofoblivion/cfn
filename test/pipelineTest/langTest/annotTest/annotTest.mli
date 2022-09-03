@@ -7,155 +7,375 @@ open Common
 (** {2 Test Suite} *)
 
 val suite : test
-(** [suite] is the unit test suite. *)
+(**
+  The unit test suite.
+
+  @since 1.0
+*)
 
 (** {2 Fixtures} *)
 
 val fresh_builtin_struct_eq : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_struct_eq ?ty ()] constructs a fresh built-in structural
-    equality function operating on values of type [ty]. *)
+(**
+  Construct a fresh structural equality built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_bool}.
+  @return A fresh structural equality built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_struct_neq : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_struct_neq ?ty ()] constructs a fresh built-in structural
-    inequality function operating on values of type [ty]. *)
+(**
+  Construct a fresh structural inequality built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_bool}.
+  @return A fresh structural inequality built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_phys_eq : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_phys_eq ?ty ()] constructs a fresh built-in physical equality
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh physical equality built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_bool}.
+  @return A fresh physical equality built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_phys_neq : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_phys_neq ?ty ()] constructs a fresh built-in physical
-    inequality function operating on values of type [ty]. *)
+(**
+  Construct a fresh physical inequality built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_bool}.
+  @return A fresh physical inequality built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_lt : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_lt ?ty ()] constructs a fresh built-in less than function
-    operating on values of type [ty]. *)
+(**
+  Construct a fresh less than built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh less than built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_lte : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_lte ?ty ()] constructs a fresh built-in less than or equal
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh less than or equal built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh less than or equal built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_gt : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_gt ?ty ()] constructs a fresh built-in greater than function
-    operating on values of type [ty]. *)
+(**
+  Construct a fresh greater than built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh greater than built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_gte : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_gte ?ty ()] constructs a fresh built-in greater than or equal
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh greater than or equal built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh greater than or equal built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_lsl : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_lsl ?ty ()] constructs a fresh built-in logical shift left
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh logical shift left built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh logical shift left built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_lsr : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_lsr ?ty ()] constructs a fresh built-in logical shift right
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh logical shift right built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh logical shift right built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_asl : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_asl ?ty ()] constructs a fresh built-in Arithmetic shift left
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh arithmetic shift left built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh arithmetic shift left built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_asr : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_asr ?ty ()] constructs a fresh built-in Arithmetic shift
-    right function operating on values of type [ty]. *)
+(**
+  Construct a fresh arithmetic shift right built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh arithmetic shift right built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_add : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_add ?ty ()] constructs a fresh built-in addition function
-    operating on values of type [ty]. *)
+(**
+  Construct a fresh addition built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh addition built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_sub : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_sub ?ty ()] constructs a fresh built-in subtraction function
-    operating on values of type [ty]. *)
+(**
+  Construct a fresh subtraction built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh subtraction built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_mul : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_mul ?ty ()] constructs a fresh built-in multiplication
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh multiplication built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh multiplication built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_div : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_div ?ty ()] constructs a fresh built-in division function
-    operating on values of type [ty]. *)
+(**
+  Construct a fresh division built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh division built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_mod : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_mod ?ty ()] constructs a fresh built-in modulus function
-    operating on values of type [ty]. *)
+(**
+  Construct a fresh modulus built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh modulus built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_exp : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_exp ?ty ()] constructs a fresh built-in exponentiation
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh exponentiation built-in function.
+
+  @param ty The type of the operands.  Defaults to [Float].
+  @return A fresh exponentiation built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_neg : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_neg ?ty ()] constructs a fresh built-in negation function
-    operating on values of type [ty]. *)
+(**
+  Construct a fresh negation built-in function.
+
+  @param ty The type of the operand.  Defaults to {!Annot.ty_int}.
+  @return A fresh negation built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_bit_and : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_bit_and ?ty ()] constructs a fresh built-in bitwise AND
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh bitwise AND built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh bitwise AND built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_bit_or : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_bit_or ?ty ()] constructs a fresh built-in bitwise OR
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh bitwise OR built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh bitwise OR built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_bit_not : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_bit_not ?ty ()] constructs a fresh built-in bitwise NOT
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh bitwise NOT built-in function.
+
+  @param ty The type of the operand.  Defaults to {!Annot.ty_int}.
+  @return A fresh bitwise NOT built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_bit_xor : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_bit_xor ?ty ()] constructs a fresh built-in bitwise XOR
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh bitwise XOR built-in function.
+
+  @param ty The type of the operands.  Defaults to {!Annot.ty_int}.
+  @return A fresh bitwise XOR built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_log_not : unit -> Annot.builtin
-(** [fresh_builtin_log_not ?ty ()] constructs a fresh built-in logical NOT
-    function operating on values of type [ty]. *)
+(**
+  Construct a fresh logical NOT built-in function.
+
+  @param ty The type of the operand.  Defaults to {!Annot.ty_int}.
+  @return A fresh logical NOT built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_promote : ?sub:Annot.ty -> ?sup:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_promote ?sub ?sup ()] constructs a fresh built-in type
-    promotion function promoting values of type [sup] to values of type [sup]. *)
+(**
+  Construct a fresh type promotion built-in function.
+
+  @param sub The subtype to promote.  Defaults to {!Annot.ty_int}.
+  @param sup The supertype to promote to.  Defaults to {!Annot.ty_long}.
+  @return A fresh type promotion built-in function
+  @since 1.0
+*)
 
 val fresh_builtin_concat : ?ty:Annot.ty -> unit -> Annot.builtin
 (** [fresh_builtin_concat ?ty ()] constructs a fresh built-in concatenation
-    function operating on values of type [ty]. *)
+    function operating on values of type [ty].
+  Construct a fresh concatenation built-in function.
+
+  @param ty The type of the arguments.  Defaults to {!Annot.ty_string}.
+  @return A fresh concatenation built-in function
+  @since 1.0
+*)
 
 val fresh_patt_ground : unit -> Annot.patt
-(** [fresh_patt_ground ()] constructs a fresh ground pattern. *)
+(**
+  Construct a fresh ground pattern.
+
+  @return A fresh ground pattern
+  @since 1.0
+*)
 
 val fresh_patt_var : ?id:Sym.t -> unit -> Annot.patt
-(** [fresh_patt_var ?seq ?id ()] constructs a fresh variable pattern. *)
+(** [fresh_patt_var ?id ()] constructs a fresh variable pattern. *)
+(**
+  Construct a fresh variable pattern.
+
+  @param id The symbol to use for the identifier.  Defaults to
+    {!SymTest.fresh_sym}
+  @return A fresh variable pattern
+  @since 1.0
+*)
 
 (** {2 Assertions} *)
 
 (**
  * {3 Equality}
  *
- * All equality assertions include location equality.  To normalize location
- * information, use the [deloc_...] family of functions.
- *
  * The test context passed in is passed down to all internal assertions.
  *)
 
 val assert_ty_equal : ctxt:test_ctxt -> Annot.ty -> Annot.ty -> unit
-(** [assert_ty_equal ~ctxt expected actual] asserts that the type [actual] is
-    equal to the type [expected]. *)
+(**
+  Assert that two types are equal.
+
+  To be considered equal, the types must match on constructors, types of fields
+  for complex types, and types of parameters for polymorphic types.
+
+  @param ctxt The testing context
+  @param expected The expected type
+  @param actual The actual type
+  @raise Failure Raised when the types disagree on constructor, field types, or
+    parameter types
+  @since 1.0
+*)
 
 val assert_arity_equal : ctxt:test_ctxt -> Annot.arity -> Annot.arity -> unit
-(** [assert_arity_equal ~ctxt expected actual] asserts that the built-in
-    function arity [actual] is equal to the built-in function arity [expected]. *)
+(**
+  Assert that two built-in function arities are equal.
+
+  The values are considered equal if they match on the arity kind (fixed vs.
+  variable), argument type, and result type.  For fixed arities, argument types
+  must match pairwise.
+
+  @param ctxt The testing context
+  @param expected The expected arity
+  @param actual The actual arity
+  @raise Failure Raised when the arities disagree on arity kind, argument
+    type(s), or result type
+  @since 1.0
+*)
 
 val assert_builtin_equal : ctxt:test_ctxt -> Annot.builtin -> Annot.builtin -> unit
-(** [assert_builtin_equal ~ctxt expected actual] asserts that the built-in
-    function [actual] is equal to the built-in function [expected]. *)
+(**
+  Assert that two built-in functions are equal.
+
+  The values are considered equal if the function names match and any type
+  parameters of the functions match pairwise.
+
+  @param ctxt The testing context
+  @param expected The expected built-in function
+  @param actual The actual built-in function
+  @raise Failure Raised when the functions disagree on name or type
+  @since 1.0
+*)
 
 val assert_patt_equal : ctxt:test_ctxt -> Annot.patt -> Annot.patt -> unit
-(** [assert_patt_equal ~ctxt expected actual] asserts that the pattern [actual]
-    is equal to the pattern [expected]. *)
+(**
+  Assert that two patterns are equal.
+
+  The values are considered equal if their kinds (ground, variable, etc.) match
+  and all subcomponents match, for example the symbols of variable patterns.
+
+  @param ctxt The testing context
+  @param expected The expected pattern
+  @param actual The actual pattern
+  @raise Failure Raised when the patterns disagree on kind or components
+  @since 1.0
+*)
 
 val assert_expr_equal : ctxt:test_ctxt -> Annot.expr -> Annot.expr -> unit
-(** [assert_expr_equal ~ctxt expected actual] asserts that the expression
-    [actual] is equal to the expression [expected]. *)
+(**
+  Assert that two expressions are equal.
+
+  The values are considered equal if their kinds (integer primitive, built-in
+  function application, etc.) match and all their subcomponents match, for
+  example the arguments to built-in function applications matching pairwise.
+
+  @param ctxt The testing context
+  @param expected The expected expression
+  @param actual The actual expression
+  @raise Failure Raise when the expressions disagree on kind or components
+  @since 1.0
+*)
 
 val assert_binding_equal : ctxt:test_ctxt -> Annot.binding -> Annot.binding -> unit
-(** [assert_binding_equal ~ctxt expected actual] asserts that the binding
-    [actual] is equal to the binding [expected]. *)
+(**
+  Assert that two value bindings are equal.
+
+  The values are considered equal if their patterns match, their types match,
+  and their expressions match.
+
+  @param ctxt The testing context
+  @param expected The expected binding
+  @param actual The actual binding
+  @raise Failure Raised when the bindings disagree on patterns, types, or
+    expressions.
+  @since 1.0
+*)
 
 val assert_top_equal : ctxt:test_ctxt -> Annot.top -> Annot.top -> unit
-(** [assert_top_equal ~ctxt expected actual] asserts that the top-level
-    expression [actual] is equal to the top-level expression [expected]. *)
+(**
+  Assert that two top-level bindings are equal.
+
+  The values are considered equal if their bindings match.
+
+  @param ctxt The testing context
+  @param expected The expected binding
+  @param actual The actual binding
+  @raise Failure Raised when the bindings disagree
+  @since 1.0
+*)

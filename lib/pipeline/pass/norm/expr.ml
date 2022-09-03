@@ -39,12 +39,14 @@ and norm_expr_ident env id kontinue =
 
 and norm_expr_builtin env fn args kontinue =
   Builtin.norm_builtin env fn (fun fn ->
-    let _ = failwith "TODO" in
+    
+    )
+    (* let _ = failwith "TODO" in
     let _ = args in
     []
       |> Ir.expr_builtin fn
       |> Ir.term_expr
-      |> kontinue Ir.ty_bool)
+      |> kontinue Ir.ty_bool) *)
 
 and norm_expr_let _ _ _ _ =
   failwith "TODO"

@@ -7,4 +7,8 @@
 open OUnit2
 
 val suite : test
-(** [suite] is the suite testing the integration with the Docker CLI. *)
+(**
+  The unit test suite.
+
+  @since 1.0
+*)

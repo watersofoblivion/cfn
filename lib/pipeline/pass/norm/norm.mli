@@ -4,41 +4,94 @@ open Common
 
 (** {2 Exceptions} *)
 
-exception UnboundIdentifier of Sym.t
-(** [UnboundIdentifier id] is raised when the identifier [id] is unbound. *)
+exception UnboundIdentifier of {
+  id: Sym.t; (* The unbound identifier *)
+}
+(**
+  Raised when an identifier is unbound.
 
-exception MismatchedTypes of Ir.ty * Ir.ty
-(** [MismatchedTypes (inferred, annotated)] is raised when the [inferred] type
-    and the [annotated] types disagree. *)
+  @since 1.0
+*)
+
+exception MismatchedTypes of {
+  inferred:  Ir.ty; (** The inferred type *)
+  annotated: Ir.ty; (** The annotated type *)
+}
+(**
+  Raised when an inferred type disagrees with a type annotation.
+
+  @since 1.0
+*)
 
 (** {2 Normalization} *)
 
 val norm_ty : Ir.ty Env.t -> Annot.ty -> (Ir.ty -> 'a) -> 'a
-(** [norm_ty env ty kontinue] normalizes the annotated type [ty] in the
-    environment [env].  The normalized type is passed to the continutation
-    [kontinue]. *)
+(**
+  Normalize a type.
 
-val norm_builtin : Ir.ty Env.t -> Annot.builtin -> (Ir.builtin -> 'a) -> 'a
-(** [norm_builtin env builtin kontinue] normalizes the annotated builtin
-    function [builtin] in the environment [env].  The normalized builtin
-    function is passed to the continuation [kontinue]. *)
+  @param env The type environment
+  @param ty The type to normalize
+  @param kontinue The continuation that is passed the normalized type
+  @return The result of the continuation
+  @since 1.0
+*)
+
+val norm_builtin : Ir.ty Env.t -> Annot.builtin -> (Ir.arity -> Ir.builtin -> 'a) -> 'a
+(**
+  Normalize a built-in function.
+
+  @param env The type environment
+  @param builtin The built-in function to normalize
+  @param kontinue The continuation that the normalized built-in function and its
+    arity are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val norm_expr : Ir.ty Env.t -> Annot.expr -> (Ir.ty -> Ir.term -> 'a) -> 'a
-(** [norm_expr env expr kontinue] normalizes the annotated expression [expr] in
-    the environment [env].  The normalized term and its type are passed to the
-    continuation [kontinue]. *)
+(**
+  Noramlize an expression into a term.
+
+  @param env The type environment
+  @param expr The expression to normalize
+  @param kontinue The continuation the normalized term and its type are passed
+    to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val norm_patt : Ir.ty Env.t -> Annot.patt -> Ir.ty -> (Ir.ty Env.t -> Ir.patt -> 'a) -> 'a
-(** [norm_patt env patt ty kontinue] normalizes the annotated pattern [patt] in
-    the environment [env] against the type [ty].  The normalized pattern and a
-    (possibly updated) environment are passed to the continuation [kontinue]. *)
+(**
+  Normalize a pattern.
+
+  @param env The type environment
+  @param patt The pattern to normalize
+  @param ty The type of values the pattern must match
+  @param kontinue The continuation that the normalized pattern and a (possibly
+    updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val norm_binding : Ir.ty Env.t -> Annot.binding -> (Ir.ty Env.t -> Ir.binding -> 'a) -> 'a
-(** [norm_binding env binding kontinue] normalizes the binding [binding] in the
-    environment [env].  The normalized binding and a (possibly updated)
-    environment are passed to the continuation [kontinue]. *)
+(**
+  Normalize a value binding.
+
+  @param env The type environment
+  @param binding The binding to normalize
+  @param kontinue The continuation the normalized binding and a (possibly
+    updated) type environment are passed to
+  @return The result of the continuation
+  @since 1.0
+*)
 
 val norm_top : Ir.ty Env.t -> Annot.top -> (Ir.ty Env.t -> Ir.top -> 'a) -> 'a
-(** [norm_top env top kontinue] normalizes the top-level expression [top] in the
-    environment [env].  The normalized top-level expression and a (possibly
-    updated) environment are passed to the continuation [kontinue]. *)
+(**
+  Normalize a top-level binding.
+
+  @param env The type environment
+  @param top The top-level binding to normalize
+  @param kontinue The continuation the normalized top-level binding and a
+    (possibly updated) type envionment are passed to
+  @since 1.0
+*)

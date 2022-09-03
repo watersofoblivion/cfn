@@ -11,7 +11,11 @@ type ty = private
       loc: Loc.t; (** Location *)
       id:  Sym.t  (** Constructor *)
     } (** Type Constructor *)
-(** Types *)
+(**
+  Types
+
+  @since 1.0
+*)
 
 type un =
   | UnNeg of {
@@ -23,7 +27,11 @@ type un =
   | UnBitNot of {
       loc: Loc.t (** Location *)
     } (** Bitwise NOT *)
-(** Unary Operators *)
+(**
+  Unary operators
+
+  @since 1.0
+*)
 
 type bin =
   | BinStructEq of {
@@ -95,7 +103,11 @@ type bin =
   | BinBitXor of {
       loc: Loc.t (** Location *)
     } (** Bitwise XOR *)
-(** Binary Operators *)
+(**
+  Binary operators
+
+  @since 1.0
+*)
 
 type patt = private
   | PattGround of {
@@ -105,7 +117,11 @@ type patt = private
       loc: Loc.t; (** Location *)
       id:  Sym.t  (** Identifier *)
     } (** Variable *)
-(** Patterns *)
+(**
+  Patterns
+
+  @since 1.0
+*)
 
 type rune =
   | RuneLit of {
@@ -116,7 +132,11 @@ type rune =
       loc: Loc.t;    (** Location *)
       lexeme: string (** Lexeme *)
     } (** A unicode escape sequence *)
-(** Runes *)
+(**
+  Runes
+
+  @since 1.0
+*)
 
 type str =
   | StringLit of {
@@ -127,7 +147,11 @@ type str =
       loc:    Loc.t; (** Location *)
       lexeme: string (** Lexeme *)
     } (** A unicode escape sequence. *)
-(** Strings *)
+(**
+  Strings
+
+  @since 1.0
+*)
 
 type expr = private
   | ExprBool of {
@@ -178,7 +202,11 @@ type expr = private
       binding: binding; (** Binding *)
       scope:   expr     (** Scope *)
     } (** Let Binding *)
-(** Expressions *)
+(**
+  Expressions
+
+  @since 1.0
+*)
 
 and binding = private
   | ValueBinding of {
@@ -187,7 +215,11 @@ and binding = private
       ty:    ty option; (** Optional type annotation *)
       value: expr       (** Value expression *)
     } (** Value Binding *)
-(** Bindings *)
+(**
+  Bindings
+
+  @since 1.0
+*)
 
 type top = private
   | TopLet of {
@@ -198,42 +230,66 @@ type top = private
       loc:     Loc.t;  (** Location *)
       binding: binding (** Binding *)
     } (** Value Binding *)
-(** Top-Level Bindings *)
+(**
+  Top-level bindings
+
+  @since 1.0
+*)
 
 type name = private
   | Name of {
       loc: Loc.t; (** Location *)
       id:  Sym.t  (** Identifier *)
     } (** A name *)
-(** Import Names *)
+(**
+  Import names
+
+  @since 1.0
+*)
 
 type proto = private
   | Proto of {
       loc:   Loc.t; (** Location *)
       proto: string (** Protocol *)
     } (** Protocol *)
-(** Protocols *)
+(**
+  Protocols
+
+  @since 1.0
+*)
 
 type host = private
   | Host of {
       loc:  Loc.t; (** Location *)
       host: string (** Hostname *)
     } (** Host *)
-(** Hosts *)
+(**
+  Hosts
+
+  @since 1.0
+*)
 
 type hostpath = private
   | HostPath of {
       loc:  Loc.t;      (** Location *)
       segs: string list (** Segments *)
     } (** Host Path *)
-(** Host Paths *)
+(**
+  Host paths
+
+  @since 1.0
+*)
 
 type version = private
   | Version of {
       loc:     Loc.t; (** Location *)
       version: string (** Version *)
     } (** Version *)
-(** Versions *)
+(**
+  Versions
+
+  @since 1.0
+*)
 
 type src = private
   | Current of {
@@ -246,21 +302,33 @@ type src = private
       path:    hostpath option; (** Path *)
       version: version;         (** Major version *)
     } (** External package *)
-(** Import Sources *)
+(**
+  Import sources
+
+  @since 1.0
+*)
 
 type from = private
   | From of {
       loc: Loc.t; (** Location *)
       src: src   (** Source to import from *)
     } (** From clause *)
-(** From Clauses *)
+(**
+  From clauses
+
+  @since 1.0
+*)
 
 type pkgpath = private
   | PkgPath of {
       loc:  Loc.t;   (** Location *)
       path: str list (** Path *)
     } (** Package Path *)
-(** Package Paths *)
+(**
+  Package paths
+
+  @since 1.0
+*)
 
 type alias = private
   | Alias of {
@@ -268,14 +336,22 @@ type alias = private
       pkg:   pkgpath;    (** Package to import *)
       alias: name option (** Optional local name *)
     } (** A package alias *)
-(** Package Aliases *)
+(**
+  Package aliases
+
+  @since 1.0
+*)
 
 type pkgs = private
   | Packages of {
       loc:  Loc.t;     (** Location *)
       pkgs: alias list (** The packages to import *)
     } (** A package list *)
-(** Package List *)
+(**
+  Package lists
+
+  @since 1.0
+*)
 
 type import = private
   | Import of {
@@ -283,14 +359,22 @@ type import = private
       from: from option; (** Optional import source *)
       pkgs: pkgs         (** The packages to import *)
     } (** An import statement *)
-(** Import Statements *)
+(**
+  Import statements
+
+  @since 1.0
+*)
 
 type pkg = private
   | Package of {
       loc: Loc.t; (** Location *)
       id:  name   (** Name of the package *)
     } (** A package statement *)
-(** Package Statements *)
+(**
+  Package statements
+
+  @since 1.0
+*)
 
 type file = private
   | File of {
@@ -298,417 +382,1035 @@ type file = private
       imports: import list; (** Import statements *)
       tops:    top list     (** Top-level expressions *)
     } (** A source file *)
-(** Source Files *)
+(**
+  Source files
+
+  @since 1.0
+*)
 
 (** {2 Constructors} *)
 
 (** {3 Types} *)
 
 val ty_constr : Loc.t -> Sym.t -> ty
-(** [ty_constr loc id] constructs a type constructor at location [loc] for the
-    type [id]. *)
+(**
+  Construct a type constructor for a named type.
+
+  @param loc The location of the type constructor
+  @param id The type of the type constructor
+  @return A type constructor
+  @since 1.0
+*)
 
 (** {3 Operators} *)
 
 (** {4 Unary} *)
 
 val un_neg : Loc.t -> un
-(** [un_neg loc] constructs a unary negation operator at location [loc]. *)
+(**
+  Construct a unary negation operator.
+
+  @param loc The location of the operator
+  @return A unary negation operator
+  @since 1.0
+*)
 
 val un_log_not : Loc.t -> un
-(** [un_log_not loc] constructs a unary logical NOT operator at location [loc]. *)
+(**
+  Construct a unary logical NOT operator.
+
+  @param loc The location of the operator
+  @return A unary logical NOT operator
+  @since 1.0
+*)
 
 val un_bit_not : Loc.t -> un
-(** [un_bit_not loc] constructs a unary bitwise NOT operator at location [loc]. *)
+(**
+  Construct a unary bitwise NOT operator.
+
+  @param loc The location of the operator
+  @return A unary bitwise NOT operator
+  @since 1.0
+*)
 
 (** {4 Binary} *)
 
 val bin_struct_eq : Loc.t -> bin
-(** [bin_struct_eq loc] constructs a binary structural equality operator at
-    location [loc]. *)
+(**
+  Construct a binary structural equality operator.
+
+  @param loc The location of the operator
+  @return A binary structural equality operator
+  @since 1.0
+*)
 
 val bin_struct_neq : Loc.t -> bin
-(** [bin_struct_neq loc] constructs a binary structural inequality operator at
-    location [loc]. *)
+(**
+  Construct a binary structural inequality operator.
+
+  @param loc The location of the operator
+  @return A binary structural inequality operator
+  @since 1.0
+*)
 
 val bin_phys_eq : Loc.t -> bin
-(** [bin_phys_eq loc] constructs a binary physical equality operator at location
-    [loc]. *)
+(**
+  Construct a binary physical equality operator.
+
+  @param loc The location of the operator
+  @return A binary physical equality operator
+  @since 1.0
+*)
 
 val bin_phys_neq : Loc.t -> bin
-(** [bin_phys_neq loc] constructs a binary physical inequality operator at
-    location [loc]. *)
+(**
+  Construct a binary physical inequality operator.
+
+  @param loc The location of the operator
+  @return A binary physical inequality operator
+  @since 1.0
+*)
 
 val bin_lt : Loc.t -> bin
-(** [bin_lt loc] constructs a binary less than operator at location [loc]. *)
+(**
+  Construct a binary less than operator.
+
+  @param loc The location of the operator
+  @return A binary less than operator
+  @since 1.0
+*)
 
 val bin_lte : Loc.t -> bin
-(** [bin_lte loc] constructs a binary less than or equal operator at location
-    [loc]. *)
+(**
+  Construct a binary less or equal than operator.
+
+  @param loc The location of the operator
+  @return A binary less or equal than operator
+  @since 1.0
+*)
 
 val bin_gt : Loc.t -> bin
-(** [bin_gt loc] constructs a binary greater than operator at location [loc]. *)
+(**
+  Construct a binary greater than operator.
+
+  @param loc The location of the operator
+  @return A binary greater than operator
+  @since 1.0
+*)
 
 val bin_gte : Loc.t -> bin
-(** [bin_gte loc] constructs a binary greater than or equal operator at location
-    [loc]. *)
+(**
+  Construct a binary greater than or equal operator.
+
+  @param loc The location of the operator
+  @return A binary greater than or equal operator
+  @since 1.0
+*)
 
 val bin_lsl : Loc.t -> bin
-(** [bin_lsl loc] constructs a binary logical shift left operator at location
-    [loc]. *)
+(**
+  Construct a binary logical shift left operator.
+
+  @param loc The location of the operator
+  @return A binary logical shift left operator
+  @since 1.0
+*)
 
 val bin_asr : Loc.t -> bin
-(** [bin_asr loc] constructs a binary arithmetic shift right operator at
-    location [loc]. *)
+(**
+  Construct a binary logical shift right operator.
+
+  @param loc The location of the operator
+  @return A binary logical shift right operator
+  @since 1.0
+*)
 
 val bin_asl : Loc.t -> bin
-(** [bin_asl loc] constructs a binary arithmetic shift left operator at location
-    [loc]. *)
+(**
+  Construct a binary arithmetic shift left operator.
+
+  @param loc The location of the operator
+  @return A binary arithmetic shift left operator
+  @since 1.0
+*)
 
 val bin_lsr : Loc.t -> bin
-(** [bin_lsr loc] constructs a binary logical shift right operator at location
-    [loc]. *)
+(**
+  Construct a binary arithmetic shift right operator.
+
+  @param loc The location of the operator
+  @return A binary arithmetic shift right operator
+  @since 1.0
+*)
 
 val bin_add : Loc.t -> bin
-(** [bin_add loc] constructs a binary addition operator at location [loc]. *)
+(**
+  Construct a binary addition operator.
+
+  @param loc The location of the operator
+  @return A binary addition operator
+  @since 1.0
+*)
 
 val bin_sub : Loc.t -> bin
-(** [bin_sub loc] constructs a binary subtraction operator at location [loc]. *)
+(**
+  Construct a binary subtraction operator.
+
+  @param loc The location of the operator
+  @return A binary subtraction operator
+  @since 1.0
+*)
 
 val bin_mul : Loc.t -> bin
-(** [bin_mul loc] constructs a binary multiplication operator at location [loc]. *)
+(**
+  Construct a binary multiplication operator.
+
+  @param loc The location of the operator
+  @return A binary multiplication operator
+  @since 1.0
+*)
 
 val bin_div : Loc.t -> bin
-(** [bin_div loc] constructs a binary division operator at location [loc]. *)
+(**
+  Construct a binary division operator.
+
+  @param loc The location of the operator
+  @return A binary division operator
+  @since 1.0
+*)
 
 val bin_mod : Loc.t -> bin
-(** [bin_mod loc] constructs a binary modulus operator at location [loc]. *)
+(**
+  Construct a binary modulus operator.
+
+  @param loc The location of the operator
+  @return A binary modulus operator
+  @since 1.0
+*)
 
 val bin_exp : Loc.t -> bin
-(** [bin_exp loc] constructs a binary exponentiation operator at location [loc]. *)
+(**
+  Construct a binary exponentiation operator.
+
+  @param loc The location of the operator
+  @return A binary exponentiation operator
+  @since 1.0
+*)
 
 val bin_log_and : Loc.t -> bin
-(** [bin_log_and loc] constructs a binary logical AND operator at location
-    [loc]. *)
+(**
+  Construct a binary logical AND operator.
+
+  @param loc The location of the operator
+  @return A binary logical AND operator
+  @since 1.0
+*)
 
 val bin_log_or : Loc.t -> bin
-(** [bin_log_or loc] constructs a binary logical OR operator at location [loc]. *)
+(**
+  Construct a binary logical OR operator.
+
+  @param loc The location of the operator
+  @return A binary logical OR operator
+  @since 1.0
+*)
 
 val bin_bit_and : Loc.t -> bin
-(** [bin_bit_and loc] constructs a binary bitwise AND operator at location
-    [loc]. *)
+(**
+  Construct a binary bitwise AND operator.
+
+  @param loc The location of the operator
+  @return A binary bitwise AND operator
+  @since 1.0
+*)
 
 val bin_bit_or : Loc.t -> bin
-(** [bin_bit_or loc] constructs a binary bitwise OR operator at location [loc]. *)
+(**
+  Construct a binary bitwise OR operator.
+
+  @param loc The location of the operator
+  @return A binary bitwise OR operator
+  @since 1.0
+*)
 
 val bin_bit_xor : Loc.t -> bin
-(** [bin_bit_xor loc] constructs a binary bitwise XOR operator at location
-    [loc]. *)
+(**
+  Construct a binary bitwise XOR operator.
+
+  @param loc The location of the operator
+  @return A binary bitwise XOR operator
+  @since 1.0
+*)
 
 (** {3 Patterns} *)
 
 val patt_ground : Loc.t -> patt
-(** [patt_ground loc] constructs a ground pattern at location [loc]. *)
+(**
+  Construct a ground ([_]) pattern.
+
+  @param loc The location of the pattern
+  @return A ground pattern
+  @since 1.0
+*)
 
 val patt_var : Loc.t -> Sym.t -> patt
-(** [patt_var loc id] constructs a variable pattern at location [loc] binding
-    the identifier [id]. *)
+(**
+  Construct a variable pattern binding an identifier.
+
+  @param loc The location of the pattern
+  @param id The identifier to bind
+  @return A variable pattern binding the identifier
+  @since 1.0
+*)
 
 (** {3 Runes} *)
 
 val rune_lit : Loc.t -> Uchar.t -> rune
-(** [rune_lit loc value] constructs a unicode rune at location [loc] with the
-    value [value]. *)
+(**
+  Construct a rune literal from a value.
+
+  @param loc The location of the literal
+  @param value The UTF-8 character value
+  @return A rune literal
+  @since 1.0
+*)
 
 val rune_escape : Loc.t -> string -> rune
-(** [rune_escape loc lexeme] constructs a unicode escape sequence rune at
-    location [loc] with lexeme [lexeme]. *)
+(**
+  Construct a Unicode escape sequence rune from a lexeme.
+
+  @param loc The location of the escape sequence
+  @param lexeme The value lexeme
+  @return An escaped rune literal
+*)
 
 (** {3 Strings} *)
 
 val str_lit : Loc.t -> string -> str
-(** [str_lit loc lexeme] constructs a string literal string segment at location
-    [loc] with lexeme [lexeme]. *)
+(**
+  Construct a string literal string segment from a lexeme.
+
+  @param loc The location of the literal
+  @param lexeme The value lexeme
+  @return A string literal string segment
+  @since 1.0
+*)
 
 val str_escape : Loc.t -> string -> str
-(** [str_escape loc lexeme] constructs a unicode escape sequence string segment
-    at location [loc] with lexeme [lexeme]. *)
+(**
+  Construct a Unicode escape sequence string segment.
+
+  @param loc The location of the literal
+  @param lexeme The value lexeme
+  @return A Unicode escape sequence string segment
+  @since 1.0
+*)
 
 (** {3 Expressions} *)
 
 val expr_bool : Loc.t -> bool -> expr
-(** [expr_bool loc value] constructs a boolean literal at location [loc] with
-    value [value]. *)
+(**
+  Construct a boolean literal from a value.
+
+  @param loc The location of the literal
+  @param value The boolean value
+  @return A boolean literal
+  @since 1.0
+*)
 
 val expr_int : Loc.t -> string -> expr
-(** [expr_int loc lexeme] constructs an integer literal at location [loc] with
-    lexeme [lexeme]. *)
+(**
+  Construct an integer literal from a lexeme.
+
+  @param loc The location of the literal
+  @param lexeme The value lexeme
+  @return An integer literal
+  @since 1.0
+*)
 
 val expr_long : Loc.t -> string -> expr
-(** [expr_long loc lexeme] constructs a long literal at location [loc] with
-    lexeme [lexeme]. *)
+(**
+  Construct a long literal from a lexeme.
+
+  @param loc The location of the literal
+  @param lexeme The value lexeme
+  @return A long literal
+  @since 1.0
+*)
 
 val expr_float : Loc.t -> string -> expr
-(** [expr_float loc lexeme] constructs a float literal at location [loc] with
-    lexeme [lexeme]. *)
+(**
+  Construct a float literal from a lexeme.
+
+  @param loc The location of the literal
+  @param lexeme The value lexeme
+  @return A float literal
+  @since 1.0
+*)
 
 val expr_double : Loc.t -> string -> expr
-(** [expr_double loc lexeme] constructs a double literal at location [loc] with
-    lexeme [lexeme]. *)
+(**
+  Construct a double literal from a lexeme.
+
+  @param loc The location of the literal
+  @param lexeme The value lexeme
+  @return A double literal
+  @since 1.0
+*)
 
 val expr_rune : Loc.t -> rune -> expr
-(** [expr_rune loc value] constructs a rune literal at location [loc] with value
-    [value]. *)
+(**
+  Construct a rune literal from a value.
+
+  @param loc The location of the literal
+  @param value The rune value
+  @return A rune literal
+  @since 1.0
+*)
 
 val expr_string : Loc.t -> str list list -> expr
-(** [expr_string loc value] constructs a string literal at location [loc] with
-    value [value]. *)
+(**
+  Construct a string literal from string segments.  The segments are organized
+  as a list of lines, each of which is a list of segments.
+
+  @param loc The location of the literal
+  @param value The string segments
+  @return A string literal
+  @since 1.0
+*)
 
 val expr_ident : Loc.t -> Sym.t -> expr
-(** [expr_ident loc id] constructs an identifier at location [loc] with
-    identifier [id]. *)
+(**
+  Construct a rune literal from an identifier.
+
+  @param loc The location of the literal
+  @param id The identifier's symbol
+  @return An identifier
+  @since 1.0
+*)
 
 val expr_un_op : Loc.t -> un -> expr -> expr
-(** [expr_un_op loc op operand] constructs a unary operation at location [loc]
-    applying the unary operator [op] to the operand [operand]. *)
+(**
+  Construct unary operation applying an operator to an operand.
+
+  @param loc The location of the expression
+  @param op The unary oerator
+  @param operand The operand
+  @return A unary operation expression
+  @since 1.0
+*)
 
 val expr_bin_op : Loc.t -> bin -> expr -> expr -> expr
-(** [expr_bin_op loc op lhs rhs] constructs a binary operation at location [loc]
-    applying the binary operator [op] to the operands [lhs] and [rhs]. *)
+(**
+  Construct unary operation applying an operator to a pair of operands.
+
+  @param loc The location of the expression
+  @param op The binary oerator
+  @param lhs The left operand
+  @param rhs The right operand
+  @return A binary operation expression
+  @since 1.0
+*)
 
 val expr_let : Loc.t -> binding -> expr -> expr
-(** [expr_let loc binding scope] constructs a local let binding at location
-    [loc] that binds [binding] in the scope of [scope]. *)
+(**
+  Construct a let binding in a scope.
+
+  @param loc The location of the expression
+  @param binding The let binding
+  @param scope The scope of the binding
+  @return A let binding
+  @since 1.0
+*)
 
 (** {3 Bindings} *)
 
 val value_binding : Loc.t -> patt -> ty option -> expr -> binding
-(** [value_binding loc patt ty value] constructs a value binding at location
-    [loc] binding the [value] of type [ty] to the pattern [pattern]. *)
+(**
+  Construct a binding that binds a value of a type to a pattern.
+
+  @param loc The location of the binding
+  @param patt The pattern to bind to
+  @param ty The type of the binding
+  @param expr The value to bind
+  @return A value binding
+  @since 1.0
+*)
 
 (** {3 Top-Level Bindings} *)
 
 val top_let : Loc.t -> binding -> top
-(** [top_let loc binding] constructs a top-level let binding at location [loc]
-    with binding [binding]. *)
+(**
+  Construct a top-level let binding.
+
+  @param loc The location of the top-level binding
+  @param binding The binding
+  @return A top-level let binding
+  @since 1.0
+*)
 
 val top_val : Loc.t -> binding -> top
-(** [top_val loc binding] constructs a top-level value binding at location [loc]
-    with binding [binding]. *)
+(**
+  Construct a top-level value binding.
+
+  @param loc The location of the top-level binding
+  @param binding The binding
+  @return A top-level value binding
+  @since 1.0
+*)
 
 (** {3 Imports} *)
 
 val name : Loc.t -> Sym.t -> name
-(** [name loc id] constructs a name at location [loc] of the identifier [id]. *)
+(**
+  Construct a name of an identifier.
+
+  @param loc The location of the name
+  @param id The name's identifier symbol
+  @return A name
+  @since 1.0
+*)
 
 val proto : Loc.t -> string -> proto
-(** [proto loc proto] constructs a protocol specifier at location [loc] with the
-    value [proto]. *)
+(**
+  Construct a protocol specifier.
+
+  @param loc The location of the protocol
+  @param proto The protocol name
+  @return A protocol specifier
+  @since 1.0
+*)
 
 val host : Loc.t -> string -> host
-(** [host loc host] constructs a host identifier at location [loc] with the host
-    [host]. *)
+(**
+  Construct a host identifier.
+
+  @param loc The location of the host
+  @param host The host identifier
+  @return A host identifier
+  @since 1.0
+*)
 
 val hostpath : Loc.t -> string list -> hostpath
-(** [hostpath loc segs] constructs a host path at location [loc] of the path
-    segments [segs]. *)
+(**
+  Construct a host path from a list of segments.
+
+  @param loc The location of the path
+  @param segs The list of segments
+  @return A host path
+  @since 1.0
+*)
 
 val version : Loc.t -> string -> version
-(** [version loc version] constructs a major version at location [loc] of the
-    version [version]. *)
+(**
+  Construct a major version.
+
+  @param loc The location of the major version
+  @param version The major version number
+  @return A major version
+  @since 1.0
+*)
 
 val src_current : Loc.t -> src
-(** [src_current loc] constructs a current source reference at location [loc]. *)
+(**
+  Construct a reference to the current source.
+
+  @param loc The location of the source reference
+  @return The reference to the current source
+  @since 1.0
+*)
 
 val src_external : Loc.t -> proto option -> host -> hostpath option -> version -> src
-(** [src_external loc proto host path version] constructs an external source
-    reference at location [loc] with the protocol [proto], the host [host], the
-    path [path], and the version [version]. *)
+(**
+  Construct a reference to an external source.
+
+  @param loc The location of the source reference
+  @param proto The protocol specifier
+  @param host The host identifier
+  @param path The host path
+  @param version The major version
+  @return An external source reference
+  @since 1.0
+*)
 
 val from : Loc.t -> src -> from
-(** [from_clause loc src] constructs a [from] clause at location [loc] importing
-    from the source [src]. *)
+(**
+  Construct a [from] clause.
+
+  @param loc The location of the from clause
+  @param src The source to import from
+  @return A from clause
+*)
 
 val pkgpath : Loc.t -> str list -> pkgpath
-(** [pkgpath loc path] constructs a package path at location [loc] with package
-    path [path]. *)
+(**
+  Construct a package path.
+
+  @param loc The location of the package path
+  @param path The path segments
+  @return A package path
+  @since 1.0
+*)
 
 val alias : Loc.t -> pkgpath -> name option -> alias
-(** [alias loc pkg alias] constructs a package alias at location [loc] importing
-    the package [pkg] with the optional local alias [alias]. *)
+(**
+  Construct a package alias.
+
+  @param loc The location of the alias
+  @param pkg The package path
+  @param alias The local alias of the package
+  @return A package alias
+  @since 1.0
+*)
 
 val pkgs : Loc.t -> alias list -> pkgs
-(** [pkgs loc pkgs] constructs a list of package aliases as location [loc]. *)
+(**
+  Construct a list of package aliases.
+
+  @param loc The location of the alias list
+  @param pkgs The package aliases
+  @return A list of package aliases
+  @since 1.0
+*)
 
 val import : Loc.t -> from option -> pkgs -> import
-(** [import loc from pkgs] constructs an import statement at location [loc]
-    importing the packages [pkgs] from the optional source [from]. *)
+(**
+  Construct an [import] statement.
+
+  @param loc The location of the import statement
+  @param from The from clause containing the source reference
+  @param pkgs The list of packages to import
+  @return An import clause
+  @since 1.0
+*)
 
 (** {3 Package Statement} *)
 
 val pkg : Loc.t -> name -> pkg
-(** [pkg loc id] constructs a package statement at location [loc] with the name
-    [id]. *)
+(**
+  Construct a [package] statement.
+
+  @param loc The location of the package statement
+  @param id The name of the package
+  @return A package statement
+  @since 1.0
+*)
 
 (** {3 Source Files} *)
 
 val file : pkg -> import list -> top list -> file
-(** [file pkg imports tops] constructs a source file where [pkg] is the package
-    statement, [imports] is the list of import statements, and [tops] is the
-    list of top-level statements. *)
+(**
+  Construct a source file.
+
+  @param pkg The package statement
+  @param imports The import statements
+  @param tops The top-level bindings
+  @return A source file
+  @since 1.0
+*)
 
 (** {2 Operations} *)
 
 (** {3 Locations} *)
 
 val loc_ty : ty -> Loc.t
-(** [loc_ty ty] returns the location of the type [ty]. *)
+(**
+  Get the location of a type.
+
+  @param ty The type to get the location of
+  @return The location of the type
+  @since 1.0
+*)
 
 val loc_un : un -> Loc.t
-(** [loc_un op] returns the location of the unary operator [op]. *)
+(**
+  Get the location of a unary operator.
+
+  @param op The operator to get the location of
+  @return The location of the operator
+  @since 1.0
+*)
 
 val loc_bin : bin -> Loc.t
-(** [loc_bin op] returns the location of the binary operator [op]. *)
+(**
+  Get the location of a binary operator.
+
+  @param op The operator to get the location of
+  @return The location of the operator
+  @since 1.0
+*)
 
 val loc_rune : rune -> Loc.t
-(** [loc_rune rune] returns the location of the rune [rune]. *)
+(**
+  Get the location of a rune literal.
+
+  @param rune The literal to get the location of
+  @return The location of the literal
+  @since 1.0
+*)
 
 val loc_str : str -> Loc.t
-(** [loc_str str] returns the location of the string segment [str]. *)
+(**
+  Get the location of a string segment.
+
+  @param string The segment to get the location of
+  @return The location of the segment
+  @since 1.0
+*)
 
 val loc_expr : expr -> Loc.t
-(** [loc_expr expr] returns the location of the expression [expr]. *)
+(**
+  Get the location of an expression.
+
+  @param expr The expression to get the location of
+  @return The location of the expression
+  @since 1.0
+*)
 
 val loc_patt : patt -> Loc.t
-(** [loc_patt patt] returns the location of the pattern [patt]. *)
+(**
+  Get the location of a pattern.
+
+  @param patt The pattern to get the location of
+  @return The location of the pattern
+  @since 1.0
+*)
 
 val loc_binding : binding -> Loc.t
-(** [loc_binding binding] returns the location of the binding [binding]. *)
+(**
+  Get the location of a value binding.
+
+  @param binding The binding to get the location of
+  @return The location of the binding
+  @since 1.0
+*)
 
 val loc_top : top -> Loc.t
-(** [loc_top top] returns the location of the top-level expression [top]. *)
+(**
+  Get the location of a top-level binding.
+
+  @param top The binding to get the location of
+  @return The location of the binding
+  @since 1.0
+*)
 
 val loc_name : name -> Loc.t
-(** [loc_name name] returns the location of the import name [name]. *)
+(**
+  Get the location of an import name.
+
+  @param name The name to get the location of
+  @return The location of the name
+  @since 1.0
+*)
 
 val loc_proto : proto -> Loc.t
-(** [loc_proto proto] returns the location of the protocol specifier [proto]. *)
+(**
+  Get the location of a protocol specifier.
+
+  @param proto The protocol to get the location of
+  @return The location of the protocol
+  @since 1.0
+*)
 
 val loc_host : host -> Loc.t
-(** [loc_host host] returns the location of the host [host]. *)
+(**
+  Get the location of a host identifier.
+
+  @param host The host to get the location of
+  @return The location of the host
+  @since 1.0
+*)
 
 val loc_hostpath : hostpath -> Loc.t
-(** [loc_hostpath path] returns the location of the path [path]. *)
+(**
+  Get the location of a host path.
+
+  @param path The host path to get the location of
+  @return The location of the host path
+  @since 1.0
+*)
 
 val loc_version : version -> Loc.t
-(** [loc_version version] returns the location of the major version [version]. *)
+(**
+  Get the location of a major version.
+
+  @param version The version to get the location of
+  @return The location of the version
+  @since 1.0
+*)
 
 val loc_src : src -> Loc.t
-(** [loc_src src] returns the location of the import source [src]. *)
+(**
+  Get the location of an import source reference.
+
+  @param src The source reference to get the location of
+  @return The location of the source reference
+  @since 1.0
+*)
 
 val loc_from : from -> Loc.t
-(** [loc_from from] returns the location of the from clause [from]. *)
+(**
+  Get the location of a [from] clause.
+
+  @param from The from clause to get the location of
+  @return The location of the from clause
+  @since 1.0
+*)
 
 val loc_pkgpath : pkgpath -> Loc.t
-(** [loc_pkgpath path] returns the location of the package path [path]. *)
+(**
+  Get the location of a package path.
+
+  @param path The path to get the location of
+  @return The location of the path
+  @since 1.0
+*)
 
 val loc_alias : alias -> Loc.t
-(** [loc_alias alias] returns the location of the alias clause [alias]. *)
+(**
+  Get the location of an alias clause.
+
+  @param alias The alias clause to get the location of
+  @return The location of the alias clause
+  @since 1.0
+*)
 
 val loc_pkgs : pkgs -> Loc.t
-(** [loc_pkgs pkgs] returns the location of the alias list [pkgs]. *)
+(**
+  Get the location of a alias list.
+
+  @param pkgs The list to get the location of
+  @return The location of the list
+  @since 1.0
+*)
 
 val loc_import : import -> Loc.t
-(** [loc_import import] returns the location of the import statement [import]. *)
+(**
+  Get the location of an [import] statement.
+
+  @param import The import statement to get the location of
+  @return The location of the import statement
+  @since 1.0
+*)
 
 val loc_pkg : pkg -> Loc.t
-(** [loc_pkg pkg] returns the location of the package statement [pkg]. *)
+(**
+  Get the location of a [package] statement.
+
+  @param pkg The package statement to get the location of
+  @return The location of the package statement
+  @since 1.0
+*)
 
 (** {3 Type Equality} *)
 
 val ty_equal : ty -> ty -> bool
-(** [ty_equal ty ty'] tests if the type [ty] is equal to the type [ty']. *)
+(**
+  Test if two types are equal.  This is not a "deep equal" as it does not
+  resolve type aliases.
+
+  @param ty The first type
+  @param ty' The second type
+  @return [true] if the types are equal, [false] otherwise
+  @since 1.0
+*)
 
 (** {3 Pretty Printing} *)
 
 val pp_ty : formatter -> ty -> unit
-(** [pp_ty fmt ty] pretty-prints the type [ty] to the formatter [fmt]. *)
+(**
+  Pretty-print a type to a formatter.
+
+  @param fmt The formatter to print to
+  @param ty The type to print
+  @since 1.0
+*)
 
 val pp_un : formatter -> un -> unit
-(** [pp_un fmt op] pretty-prints the unary operator [op] to the formatter [fmt]. *)
+(**
+  Pretty-print a unary operator to a formatter.
+
+  @param fmt The formatter to print to
+  @param op The operator to print
+  @since 1.0
+*)
 
 val pp_bin : formatter -> bin -> unit
-(** [pp_bin fmt op] pretty-prints the binary operator [op] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print a binary operator to a formatter.
+
+  @param fmt The formatter to print to
+  @param op The operator to print
+  @since 1.0
+*)
 
 val pp_rune : formatter -> rune -> unit
-(** [pp_rune fmt r] pretty-prints the rune [r] to the formatter [fmt]. *)
+(**
+  Pretty-print a rune literal to a formatter.
+
+  @param fmt The formatter to print to
+  @param rune The literal to print
+  @since 1.0
+*)
 
 val pp_str : formatter -> str -> unit
-(** [pp_str fmt str] pretty-prints the string segment [str] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print a string segment to a formatter.
+
+  @param fmt The formatter to print to
+  @param str The segment to print
+  @since 1.0
+*)
 
 val pp_expr : formatter -> expr -> unit
-(** [pp_expr fmt expr] pretty-prints the expression [expr] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print an expression to a formatter.
+
+  @param fmt The formatter to print to
+  @param expr The expression to print
+  @since 1.0
+*)
 
 val pp_patt : formatter -> patt -> unit
-(** [pp_patt fmt patt] pretty-prints the pattern [patt] to the formatter [fmt]. *)
+(**
+  Pretty-print a pattern to a formatter.
+
+  @param fmt The formatter to print to
+  @param patt The pattern to print
+  @since 1.0
+*)
 
 val pp_binding : formatter -> binding -> unit
-(** [pp_binding fmt binding] pretty-prints the binding [binding] to the
-    formatter [fmt]. *)
+(**
+  Pretty-print a value binding to a formatter.
+
+  @param fmt The formatter to print to
+  @param binding The binding to print
+  @since 1.0
+*)
 
 val pp_top : formatter -> top -> unit
-(** [pp_top fmt top] pretty-prints the top-level expression [top] to the
-    formatter [fmt]. *)
+(**
+  Pretty-print a top-level binding to a formatter.
+
+  @param fmt The formatter to print to
+  @param top The binding to print
+  @since 1.0
+*)
 
 val pp_name : formatter -> name -> unit
-(** [pp_name fmt name] pretty-prints the import name [name] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print an import name to a formatter.
+
+  @param fmt The formatter to print to
+  @param name The name to print
+  @since 1.0
+*)
 
 val pp_proto : formatter -> proto -> unit
-(** [pp_proto fmt proto] pretty-prints the protocol specifier [proto] to the
-    formatter [fmt]. *)
+(**
+  Pretty-print a protocol specifier to a formatter.
+
+  @param fmt The formatter to print to
+  @param proto The protocol to print
+  @since 1.0
+*)
 
 val pp_host : formatter -> host -> unit
-(** [pp_host fmt host] pretty-prints the host [host] to the formatter [fmt]. *)
+(**
+  Pretty-print a host identifier to a formatter.
+
+  @param fmt The formatter to print to
+  @param host The host to print
+  @since 1.0
+*)
 
 val pp_hostpath : formatter -> hostpath -> unit
-(** [pp_hostpath fmt path] pretty-prints the host path [path] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print a host path to a formatter.
+
+  @param fmt The formatter to print to
+  @param path The path to print
+  @since 1.0
+*)
 
 val pp_version : formatter -> version -> unit
-(** [pp_version fmt version] pretty-prints the major version [version] to the
-    formatter [fmt]. *)
+(**
+  Pretty-print a major version to a formatter.
+
+  @param fmt The formatter to print to
+  @param version The version to print
+  @since 1.0
+*)
 
 val pp_src : formatter -> src -> unit
-(** [pp_src fmt src] pretty-prints the import source [src] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print an input source reference to a formatter.
+
+  @param fmt The formatter to print to
+  @param src The input source to print
+  @since 1.0
+*)
 
 val pp_from : formatter -> from -> unit
-(** [pp_from fmt from] pretty-prints the from clause [from] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print a [from] clause to a formatter.
+
+  @param fmt The formatter to print to
+  @param from The from clause to print
+  @since 1.0
+*)
 
 val pp_pkgpath : formatter -> pkgpath -> unit
-(** [pp_pkgpath fmt path] pretty-prints the package path [path] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print a package path to a formatter.
+
+  @param fmt The formatter to print to
+  @param path The path to print
+  @since 1.0
+*)
 
 val pp_alias : formatter -> alias -> unit
-(** [pp_alias fmt alias] pretty-prints the import alias [alias] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print an import alias to a formatter.
+
+  @param fmt The formatter to print to
+  @param alias The alias to print
+  @since 1.0
+*)
 
 val pp_pkgs : formatter -> pkgs -> unit
-(** [pp_pkgs fmt pkgs] pretty-prints the package list [pkgs] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print a package alias list to a formatter.
+
+  @param fmt The formatter to print to
+  @param pkg The package list to print
+  @since 1.0
+*)
 
 val pp_import : formatter -> import -> unit
-(** [pp_import fmt import] pretty-prints the import statement [import] to the
-    formatter [fmt]. *)
+(**
+  Pretty-print an [import] statement to a formatter.
+
+  @param fmt The formatter to print to
+  @param import The import statement to print
+  @since 1.0
+*)
 
 val pp_pkg : formatter -> pkg -> unit
-(** [pp_pkg fmt pkg] pretty-prints the pkg statement [pkg] to the formatter
-    [fmt]. *)
+(**
+  Pretty-print a [package] statement to a formatter.
+
+  @param fmt The formatter to print to
+  @param pkg The package statement to print
+  @since 1.0
+*)
 
 val pp_file : formatter -> file -> unit
-(** [pp_file fmt f] pretty-prints the file [f] to the formatter [fmt]. *)
+(**
+  Pretty-print a file to a formatter.
+
+  @param fmt The formatter to print to
+  @param f The file to print
+  @since 1.0
+*)

@@ -8,4 +8,10 @@ type t = private {
 }
 
 val of_dir : string -> t
-(** [of_dir dir] parses all of the versions of a service from a directory. *)
+(**
+  Parse all of the versions of a service from a directory.
+
+  @param dir The directory containing the version of a service
+  @return The versions of a service
+  @since 1.0
+*)

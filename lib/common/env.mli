@@ -3,15 +3,24 @@
  *)
 
 type 'a t
-(** An environment *)
+(**
+  An environment containing bindings.
+
+  @since 1.0
+*)
 
 (**
  * {2 Constructors}
  *)
 
 val env : Sym.seq -> 'a t
-(** [env seq] constructs an empty environment which generates symbols from the
-    sequence [seq]. *)
+(**
+  Construct an empty environment.
+
+  @param seq The sequence fresh symbols are generated from
+  @return An empty environment
+  @since 1.0
+*)
 
 (**
  * {2 Operations}
@@ -22,30 +31,64 @@ val env : Sym.seq -> 'a t
  *)
 
 val rename : string -> 'a t -> ('a t -> Sym.t -> 'b) -> 'b
-(** [rename id env kontinue] binds a fresh symbol for the identifier [id] and
-    binds it in the environment [env].  The symbol and the updated environment
-    are passed to the continuation [kontinue]. *)
+(**
+  Bind a fresh symbol for an identifier.
+
+  @param id The identifier to bind
+  @param env The environment to bind the symbol in
+  @param kontinue The continuation to call with the symbol and (possibly
+    updated) environment
+  @return The result of calling the continuation
+  @since 1.0
+*)
 
 val symbol_of : string -> 'a t -> Sym.t
-(** [symbol_of id env] looks up the symbol for the identifier [id] in the
-    environment [env].  If no symbol is bound to that identifier, a fresh
-    unbound symbol is returned. *)
+(**
+  Look up the symbol bound to an identifier.
+
+  @param id The identifier to look up
+  @param env The environment to look the symbol up in
+  @return The symbol bound to the identifier or a fresh, unbound symbol if the
+    identifier is not bound
+  @since 1.0
+*)
 
 val constr_of : string -> 'a t -> ('a t -> Sym.t -> 'b) -> 'b
-(** [constr_of id env kontinue] looks up the symbol for the type constructor
-    [id] in the environment [env].  If no symbol is bound to the constructor, a
-    fresh symbol is bound.  The symbol and the (possibly updated) environment
-    are passed to the continuation [kontinue]. *)
+(**
+  Look up the symbol bound to a type constructor.  If no symbol is bound to the
+  type constructor, a fresh symbol is bound.
+
+  @param id The type constructor to look up
+  @param env The environment to look the type constructor up in
+  @param kontinue The continuation to call with the symbol and (possibly
+    updated) environment
+  @return The result of calling the continuation
+  @since 1.0
+*)
 
 (**
  * {3 Type Binding}
  *)
 
 val bind : Sym.t -> 'a -> 'a t -> ('a t -> 'b) -> 'b
-(** [bind sym value env kontinue] binds the symbol [sym] to the value [value] in
-    the environment [env].  The updated environment is passed to the
-    continuation [kontinue]. *)
+(**
+  Bind a symbol to a value in an environment.
+
+  @param sym The symbol to bind the value to
+  @param value The value to bind to the symbol
+  @param env The environment to bind the symbol in
+  @param kontinue The continuation to call with the updated environment
+  @return The result of calling the continuation
+  @since 1.0
+*)
 
 val lookup : Sym.t -> 'a t -> 'a
-(** [lookup sym env] looks up the value bound to the symbol [sym] in the
-    environment [env].  Raises {!Not_found} is the symbol is not bound. *)
+(**
+  Look up the value bound to a symbol in an environment.
+
+  @param sym The symbol to look up
+  @param env The environment to look the symbol up in
+  @return The value the symbol is bound to
+  @raise Not_found Raised if the symbol is unbound in the environment
+  @since 1.0
+*)
