@@ -38,10 +38,8 @@ let test_desug_expr_int_invalid _ =
     let loc = LocTest.gen () in
     let lexeme = "not a valid number" in
     let syntax = Syntax.expr_int loc lexeme in
-    let exn = Desug.InvalidNumberFormat (loc, lexeme, sym, "Int32.of_string") in
-    assert_raises exn (fun _ ->
-      Desug.desug_expr env syntax (fun _ _ ->
-        assert_failure "Expected exception")))
+    Desug.desug_expr env syntax
+      |> CheckTest.assert_raises_invalid_number_format loc lexeme sym "Int32.of_string")
 
 let test_desug_expr_long ctxt =
   let env = EnvTest.fresh () in
@@ -60,10 +58,8 @@ let test_desug_expr_long_invalid _ =
     let loc = LocTest.gen () in
     let lexeme = "not a valid number" in
     let syntax = Syntax.expr_long loc lexeme in
-    let exn = Desug.InvalidNumberFormat (loc, lexeme, sym, "Int64.of_string") in
-    assert_raises exn (fun _ ->
-      Desug.desug_expr env syntax (fun _ _ ->
-        assert_failure "Expected exception")))
+    Desug.desug_expr env syntax
+      |> CheckTest.assert_raises_invalid_number_format loc lexeme sym "Int64.of_string")
 
 let test_desug_expr_float ctxt =
   let env = EnvTest.fresh () in
@@ -82,10 +78,8 @@ let test_desug_expr_float_invalid _ =
     let loc = LocTest.gen () in
     let lexeme = "not a valid number" in
     let syntax = Syntax.expr_float loc lexeme in
-    let exn = Desug.InvalidNumberFormat (loc, lexeme, sym, "float_of_string") in
-    assert_raises exn (fun _ ->
-      Desug.desug_expr env syntax (fun _ _ ->
-        assert_failure "Expected exception")))
+    Desug.desug_expr env syntax
+      |> CheckTest.assert_raises_invalid_number_format loc lexeme sym "float_of_string")
 
 let test_desug_expr_double ctxt =
   let env = EnvTest.fresh () in
@@ -104,10 +98,8 @@ let test_desug_expr_double_invalid _ =
     let loc = LocTest.gen () in
     let lexeme = "not a valid number" in
     let syntax = Syntax.expr_double loc lexeme in
-    let exn = Desug.InvalidNumberFormat (loc, lexeme, sym, "float_of_string") in
-    assert_raises exn (fun _ ->
-      Desug.desug_expr env syntax (fun _ _ ->
-        assert_failure "Expected exception")))
+    Desug.desug_expr env syntax
+      |> CheckTest.assert_raises_invalid_number_format loc lexeme sym "float_of_string")
 
 let test_desug_expr_rune ctxt =
   let env = EnvTest.fresh () in
@@ -167,10 +159,8 @@ let test_desug_expr_ident_unbound _ =
   let loc = LocTest.gen () in
   let id = () |> Sym.seq |> Sym.gen in
   let syntax = Syntax.expr_ident loc id in
-  let exn = Desug.UnboundIdentifier (loc, id) in
-  assert_raises exn (fun _ ->
-    Desug.desug_expr env syntax (fun _ _ ->
-      assert_failure "Expected exception"))
+  Desug.desug_expr env syntax
+    |> CheckTest.assert_raises_unbound_identifier loc id
 
 (* Bindings *)
 

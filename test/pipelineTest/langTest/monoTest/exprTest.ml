@@ -103,7 +103,7 @@ let test_check_expr_builtin_invalid_arity _ =
   let env = EnvTest.fresh () in
   let fn = BuiltinTest.fresh_builtin_add ~ty:Mono.ty_int () in
   let expr = fresh_expr_builtin ~fn ~args:[] () in
-  let exn = Mono.InvalidArity (2, 0) in
+  let exn = Mono.InvalidArity { expected = 2; actual = 0 } in
   assert_raises exn (fun _ ->
     Mono.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))
@@ -113,7 +113,7 @@ let test_check_expr_builtin_fixed_mismatched_types _ =
   let fn = BuiltinTest.fresh_builtin_add ~ty:Mono.ty_int () in
   let args = [AtomTest.fresh_atom_int (); AtomTest.fresh_atom_bool ()] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Mono.MismatchedTypes (Mono.ty_bool, Mono.ty_int) in
+  let exn = Mono.MismatchedTypes { inferred = Mono.ty_bool; annotated = Mono.ty_int } in
   assert_raises exn (fun _ ->
     Mono.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))
@@ -123,7 +123,7 @@ let test_check_expr_builtin_var_mismatched_types _ =
   let fn = BuiltinTest.fresh_builtin_concat ~ty:Mono.ty_string () in
   let args = [AtomTest.fresh_atom_string (); AtomTest.fresh_atom_int (); AtomTest.fresh_atom_string ()] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Mono.MismatchedTypes (Mono.ty_int, Mono.ty_string) in
+  let exn = Mono.MismatchedTypes { inferred = Mono.ty_int; annotated = Mono.ty_string } in
   assert_raises exn (fun _ ->
     Mono.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))

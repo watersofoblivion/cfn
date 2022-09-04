@@ -69,10 +69,8 @@ let test_desug_type_unknown _ =
   let loc = LocTest.gen () in
   let id = () |> Sym.seq |> Sym.gen ~id:"UnknownConstructor" in
   let syntax = SyntaxTest.fresh_ty_constr ~loc ~id () in
-  let exn = Desug.UnboundConstructor (loc, id) in
-  assert_raises exn (fun _ ->
-    Desug.desug_ty env syntax (fun _ ->
-      assert_failure "Expected exception"))
+  Desug.desug_ty env syntax
+    |> CheckTest.assert_raises_unbound_constructor loc id
 
 (* Test Suite *)
 

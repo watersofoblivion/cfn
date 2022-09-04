@@ -175,10 +175,10 @@ let assert_limited : (Mono.ty -> bool) -> (Mono.ty -> 'a) -> (Mono.ty -> Mono.bu
   in
   List.iter assert_invalid invalid
 
-let assert_numeric = assert_limited Mono.ty_is_numeric (fun ty -> Mono.NotNumeric ty)
-let assert_integral = assert_limited Mono.ty_is_integral (fun ty -> Mono.NotIntegral ty)
-let assert_floating_point = assert_limited Mono.ty_is_floating_point (fun ty -> Mono.NotFloatingPoint ty)
-let assert_string = assert_limited (function Mono.TyString -> true | _ -> false) (fun ty -> Mono.UnsupportedConcatType ty)
+let assert_numeric = assert_limited Mono.ty_is_numeric (fun ty -> Mono.NotNumeric { ty })
+let assert_integral = assert_limited Mono.ty_is_integral (fun ty -> Mono.NotIntegral { ty })
+let assert_floating_point = assert_limited Mono.ty_is_floating_point (fun ty -> Mono.NotFloatingPoint { ty })
+let assert_string = assert_limited (function Mono.TyString -> true | _ -> false) (fun ty -> Mono.UnsupportedConcatType { ty })
 
 (* Tests *)
 
@@ -389,7 +389,7 @@ let test_builtin_promote ctxt =
             TypeTest.assert_ty_equal ~ctxt sup actual.sup;
           | actual -> builtin_not_equal ~ctxt expected actual
       else
-        let exn = Mono.UnsupportedPromotion (sub, sup) in
+        let exn = Mono.UnsupportedPromotion { sub; sup } in
         assert_raises exn (fun _ ->
           Mono.builtin_promote sub sup)
     ) MonoUtils.types

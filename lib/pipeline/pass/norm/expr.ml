@@ -37,10 +37,11 @@ and norm_expr_ident env id kontinue =
       |> kontinue ty
   with Not_found -> Check.unbound_identifier id
 
-and norm_expr_builtin env fn args kontinue =
-  Builtin.norm_builtin env fn (fun fn ->
-    
-    )
+and norm_expr_builtin _ _ _ _ =
+  failwith "TODO"
+  (* Builtin.norm_builtin env fn (fun fn ->
+
+    ) *)
     (* let _ = failwith "TODO" in
     let _ = args in
     []

@@ -4,22 +4,30 @@ open Common
 
 (* Exceptions *)
 
-exception InvalidNumberFormat of Loc.t * string * Sym.t * string
-exception UnboundIdentifier of Loc.t * Sym.t
-exception MismatchedTypes of Annot.ty * Loc.t * Annot.ty
-exception UnsupportedBinOpPromotion of Loc.t * Syntax.bin * Loc.t * Annot.ty * Loc.t * Annot.ty
-exception InvalidCodepoint of Loc.t * string * int
+exception InvalidNumberFormat of { loc: Loc.t; lexeme: string; constr: Sym.t; msg: string }
+exception UnboundIdentifier of { loc: Loc.t; id: Sym.t }
+exception MismatchedTypes of { loc: Loc.t; inferred: Annot.ty; annotated: Annot.ty }
+exception UnsupportedBinOpPromotion of { loc: Loc.t; op: Syntax.bin; sub: Annot.ty; sup: Annot.ty }
+exception InvalidCodepoint of { loc: Loc.t; lexeme: string; codepoint: int }
 
 let invalid_number_format loc lexeme constr msg =
-  InvalidNumberFormat (loc, lexeme, constr, msg)
+  InvalidNumberFormat { loc; lexeme; constr; msg }
     |> raise
 
 let unbound_identifier loc id =
-  UnboundIdentifier (loc, id)
+  UnboundIdentifier { loc; id }
     |> raise
 
 let mismatched_types inferred loc annotated =
-  MismatchedTypes (inferred, loc, annotated)
+  MismatchedTypes { loc; inferred; annotated }
+    |> raise
+
+let unsupported_bin_op_promotion loc op sub sup =
+  UnsupportedBinOpPromotion { loc; op; sub; sup }
+    |> raise
+
+let invalid_codepoint loc lexeme codepoint =
+  InvalidCodepoint { loc; lexeme; codepoint }
     |> raise
 
 (* Runes *)
@@ -33,9 +41,7 @@ let escape_to_uchar loc seq =
   in
   if Uchar.is_valid codepoint
   then Uchar.of_int codepoint
-  else
-    InvalidCodepoint (loc, seq, codepoint)
-      |> raise
+  else invalid_codepoint loc seq codepoint
 
 let desug_rune _ r kontinue = match r with
   | Syntax.RuneLit rune -> kontinue rune.value

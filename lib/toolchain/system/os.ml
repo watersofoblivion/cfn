@@ -164,7 +164,7 @@ type output =
 let of_stdout bs = Out bs
 let of_stderr bs = Err bs
 
-exception NonZero of int * output list
+exception NonZero of { status: int; output: output list }
 
 let output_stream filter output =
   output
@@ -296,7 +296,7 @@ let run cmd args handler =
         |> Bytes.concat joiner
         |> handler
     | (_, Unix.WEXITED exit_status) ->
-      let exn = NonZero(exit_status, output) in
+      let exn = NonZero { status = exit_status; output } in
       raise exn
     | (_, Unix.WSIGNALED signum) ->
       let msg = sprintf "child %d received unexpected signal %d" pid signum in

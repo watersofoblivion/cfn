@@ -4,10 +4,10 @@ open Common
 
 (* Exceptions *)
 
-exception UnboundConstructor of Loc.t * Sym.t
+exception UnboundConstructor of { loc: Loc.t; id: Sym.t }
 
 let unbound_constructor loc id =
-  UnboundConstructor (loc, id)
+  UnboundConstructor { loc; id }
     |> raise
 
 (* Pass *)

@@ -65,6 +65,6 @@ let cmd =
   in
 
   let term = Term.(const impl $ update $ prerelease $ project_paths) in
-  let info = Term.info "get" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man in
+  let info = Cmd.info "get" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man in
 
   (term, info)

@@ -61,6 +61,17 @@ exception UnsupportedBinOpPromotion of {
   @since 1.0
 *)
 
+exception InvalidCodepoint of {
+  loc:       Loc.t;  (** Location of the codepoint *)
+  lexeme:    string; (** The lexeme representing the codepoint *)
+  codepoint: int;    (** The invalid codepoint *)
+}
+(**
+  Raised when a Unicode code point is not in the valid rage.
+
+  @since 1.0
+*)
+
 (** {2 Desugaring} *)
 
 val desug_ty : Annot.ty Env.t -> Syntax.ty -> (Annot.ty -> 'a) -> 'a

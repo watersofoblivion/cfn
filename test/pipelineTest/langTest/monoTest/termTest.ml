@@ -162,7 +162,7 @@ let test_check_binding_mismatched_types _ =
     in
     Mono.binding patt annotated value
   in
-  let exn = Mono.MismatchedTypes (inferred, annotated) in
+  let exn = Mono.MismatchedTypes { inferred; annotated } in
   assert_raises exn (fun _ ->
     Mono.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))

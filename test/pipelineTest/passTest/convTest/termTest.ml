@@ -57,10 +57,8 @@ let test_convert_binding_mismatched_types _ =
       |> Mono.expr_atom
       |> Mono.binding patt ty
   in
-  let exn = Conv.MismatchedTypes (Clos.ty_int, Clos.ty_bool) in
-  assert_raises exn (fun _ ->
-    Conv.convert_binding env mono (fun _ _ ->
-      assert_failure "Expected exception"))
+  Conv.convert_binding env mono
+    |> CheckTest.assert_raises_mismatched_types Clos.ty_int Clos.ty_bool
 
 (* Terms *)
 

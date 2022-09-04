@@ -103,7 +103,7 @@ let test_check_expr_builtin_invalid_arity _ =
   let env = EnvTest.fresh () in
   let fn = BuiltinTest.fresh_builtin_add ~ty:Clos.ty_int () in
   let expr = fresh_expr_builtin ~fn ~args:[] () in
-  let exn = Clos.InvalidArity (2, 0) in
+  let exn = Clos.InvalidArity { expected = 2; actual = 0 } in
   assert_raises exn (fun _ ->
     Clos.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))
@@ -113,7 +113,7 @@ let test_check_expr_builtin_fixed_mismatched_types _ =
   let fn = BuiltinTest.fresh_builtin_add ~ty:Clos.ty_int () in
   let args = [AtomTest.fresh_atom_int (); AtomTest.fresh_atom_bool ()] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Clos.MismatchedTypes (Clos.ty_bool, Clos.ty_int) in
+  let exn = Clos.MismatchedTypes { inferred = Clos.ty_bool; annotated = Clos.ty_int } in
   assert_raises exn (fun _ ->
     Clos.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))
@@ -123,7 +123,7 @@ let test_check_expr_builtin_var_mismatched_types _ =
   let fn = BuiltinTest.fresh_builtin_concat ~ty:Clos.ty_string () in
   let args = [AtomTest.fresh_atom_string (); AtomTest.fresh_atom_int (); AtomTest.fresh_atom_string ()] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Clos.MismatchedTypes (Clos.ty_int, Clos.ty_string) in
+  let exn = Clos.MismatchedTypes { inferred = Clos.ty_int; annotated = Clos.ty_string } in
   assert_raises exn (fun _ ->
     Clos.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))

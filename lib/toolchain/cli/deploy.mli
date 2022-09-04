@@ -4,7 +4,7 @@ open Cmdliner
  {1 Deploy Command}
  *)
 
-val cmd : unit Term.t * Term.info
+val cmd : unit Term.t * Cmd.info
 (**
   The [deploy] command.
 

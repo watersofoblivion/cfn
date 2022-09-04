@@ -16,6 +16,7 @@ exception UnboundIdentifier of {
 exception MismatchedTypes of {
   inferred:  Clos.ty; (** The inferred type *)
   annotated: Clos.ty; (** The annotated type *)
+}
 (**
   Raised when an inferred type and a type annotation disagree.
 

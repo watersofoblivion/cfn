@@ -81,10 +81,8 @@ let test_convert_atom_ident_unbound _ =
   let value = () |> Sym.seq |> Sym.gen in
   let env = EnvTest.fresh () in
   let mono = Mono.atom_ident value in
-  let exn = Conv.UnboundIdentifier value in
-  assert_raises exn (fun _ ->
-    Conv.convert_atom env mono (fun _ _ ->
-      assert_failure "Expected exception"))
+  Conv.convert_atom env mono
+    |> CheckTest.assert_raises_unbound_identifier value
 
 (* Test Suite *)
 

@@ -175,10 +175,10 @@ let assert_limited : (Ir.ty -> bool) -> (Ir.ty -> 'a) -> (Ir.ty -> Ir.builtin) -
   in
   List.iter assert_invalid invalid
 
-let assert_numeric = assert_limited Ir.ty_is_numeric (fun ty -> Ir.NotNumeric ty)
-let assert_integral = assert_limited Ir.ty_is_integral (fun ty -> Ir.NotIntegral ty)
-let assert_floating_point = assert_limited Ir.ty_is_floating_point (fun ty -> Ir.NotFloatingPoint ty)
-let assert_string = assert_limited (function Ir.TyString -> true | _ -> false) (fun ty -> Ir.UnsupportedConcatType ty)
+let assert_numeric = assert_limited Ir.ty_is_numeric (fun ty -> Ir.NotNumeric { ty })
+let assert_integral = assert_limited Ir.ty_is_integral (fun ty -> Ir.NotIntegral { ty })
+let assert_floating_point = assert_limited Ir.ty_is_floating_point (fun ty -> Ir.NotFloatingPoint { ty })
+let assert_string = assert_limited (function Ir.TyString -> true | _ -> false) (fun ty -> Ir.UnsupportedConcatType { ty })
 
 (* Tests *)
 
@@ -388,7 +388,7 @@ let test_builtin_promote ctxt =
             TypeTest.assert_ty_equal ~ctxt sup actual.sup;
           | actual -> builtin_not_equal ~ctxt expected actual
       else
-        let exn = Ir.UnsupportedPromotion (sub, sup) in
+        let exn = Ir.UnsupportedPromotion { sub; sup } in
         assert_raises exn (fun _ ->
           Ir.builtin_promote sub sup)
     ) IrUtils.types

@@ -8,7 +8,7 @@ open Cmdliner
  {2 Common Options}
  *)
 
-val exits : Term.exit_info list
+val exits : Cmd.Exit.info list
 (**
   The set of exit statuses.
 
@@ -26,7 +26,7 @@ val verbose : bool Term.t
  {2 Help Topics}
  *)
 
-val help : string -> string -> Cmdliner.Manpage.block list -> unit Term.t * Term.info
+val help : string -> string -> Cmdliner.Manpage.block list -> unit Term.t * Cmd.info
 (**
   The [help] command.
 

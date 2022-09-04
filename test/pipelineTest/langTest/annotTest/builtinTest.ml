@@ -175,10 +175,10 @@ let assert_limited : (Annot.ty -> bool) -> (Annot.ty -> 'a) -> (Annot.ty -> Anno
   in
   List.iter assert_invalid invalid
 
-let assert_numeric = assert_limited Annot.ty_is_numeric (fun ty -> Annot.NotNumeric ty)
-let assert_integral = assert_limited Annot.ty_is_integral (fun ty -> Annot.NotIntegral ty)
-let assert_floating_point = assert_limited Annot.ty_is_floating_point (fun ty -> Annot.NotFloatingPoint ty)
-let assert_string = assert_limited (function Annot.TyString -> true | _ -> false) (fun ty -> Annot.UnsupportedConcatType ty)
+let assert_numeric = assert_limited Annot.ty_is_numeric (fun ty -> Annot.NotNumeric { ty })
+let assert_integral = assert_limited Annot.ty_is_integral (fun ty -> Annot.NotIntegral { ty })
+let assert_floating_point = assert_limited Annot.ty_is_floating_point (fun ty -> Annot.NotFloatingPoint { ty })
+let assert_string = assert_limited (function Annot.TyString -> true | _ -> false) (fun ty -> Annot.UnsupportedConcatType { ty })
 
 (* Tests *)
 
@@ -388,7 +388,7 @@ let test_builtin_promote ctxt =
             TypeTest.assert_ty_equal ~ctxt sup actual.sup;
           | actual -> builtin_not_equal ~ctxt expected actual
       else
-        let exn = Annot.UnsupportedPromotion (sub, sup) in
+        let exn = Annot.UnsupportedPromotion { sub; sup } in
         assert_raises exn (fun _ ->
           Annot.builtin_promote sub sup)
     ) AnnotUtils.types

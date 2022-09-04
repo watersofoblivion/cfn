@@ -8,7 +8,7 @@ open CommonTest
 
 (* Tests *)
 
-let test_convert_top_let ctxt =
+let test_mono_top_let ctxt =
   let env = EnvTest.fresh () in
   let ir =
     let patt =
@@ -38,7 +38,7 @@ let test_convert_top_let ctxt =
       |> Mono.binding patt ty
       |> Mono.top_let
   in
-  Monomorph.convert_top env ir (fun env top ->
+  Monomorph.mono_top env ir (fun env top ->
     EnvTest.assert_bound ~ctxt MonoTest.assert_ty_equal id env ty;
     MonoTest.assert_top_equal ~ctxt mono top)
 
@@ -46,5 +46,5 @@ let test_convert_top_let ctxt =
 
 let suite =
   "Top-Level Expressions" >::: [
-    "Let Bindings" >:: test_convert_top_let;
+    "Let Bindings" >:: test_mono_top_let;
   ]

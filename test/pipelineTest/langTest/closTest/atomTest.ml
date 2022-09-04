@@ -254,7 +254,7 @@ let test_check_atom_ident_unbound _ =
   let env = EnvTest.fresh () in
   let id = SymTest.fresh_sym () in
   let atom = fresh_atom_ident ~id () in
-  let exn = Clos.UnboundIdentifier id in
+  let exn = Clos.UnboundIdentifier { id } in
   assert_raises exn (fun _ ->
     Clos.check_atom env atom (fun _ ->
       assert_failure "Expected exception"))

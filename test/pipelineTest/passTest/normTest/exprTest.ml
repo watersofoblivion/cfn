@@ -121,10 +121,8 @@ let test_norm_expr_ident_unbound _ =
   let env = EnvTest.fresh () in
   let id = () |> Sym.seq |> Sym.gen in
   let annot = Annot.expr_ident id in
-  let exn = Norm.UnboundIdentifier id in
-  assert_raises exn (fun _ ->
-    Norm.norm_expr env annot (fun _ _ ->
-      assert_failure "Expected exception"))
+  Norm.norm_expr env annot
+    |> CheckTest.assert_raises_unbound_identifier id
 
 (* Bindings *)
 

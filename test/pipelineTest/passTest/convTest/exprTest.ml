@@ -53,10 +53,8 @@ let test_convert_expr_builtin_invalid_arity _ =
       |> List.map Mono.atom_int
       |> Mono.expr_builtin builtin
   in
-  let exn = Conv.InvalidArity (2, 3) in
-  assert_raises exn (fun _ ->
-    Conv.convert_expr env mono (fun _ _ ->
-      assert_failure "Expected exception"))
+  Conv.convert_expr env mono
+    |> CheckTest.assert_raises_invalid_arity 2 3
 
 let test_convert_expr_builtin_mismatched_types _ =
   let env = EnvTest.fresh () in
@@ -67,10 +65,8 @@ let test_convert_expr_builtin_mismatched_types _ =
       |> List.map Mono.atom_long
       |> Mono.expr_builtin builtin
   in
-  let exn = Conv.MismatchedTypes (Clos.ty_long, Clos.ty_int) in
-  assert_raises exn (fun _ ->
-    Conv.convert_expr env mono (fun _ _ ->
-      assert_failure "Expected exception"))
+  Conv.convert_expr env mono
+    |> CheckTest.assert_raises_mismatched_types Clos.ty_long Clos.ty_int
 
 let test_convert_expr_atom ctxt =
   let env = EnvTest.fresh () in

@@ -35,6 +35,6 @@ let cmd =
   in
 
   let term = Term.(const impl $ id $ dir) in
-  let info = Term.info "init" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man in
+  let info = Cmd.info "init" ~doc ~sdocs:Manpage.s_common_options ~exits:Common.exits ~man in
 
   (term, info)

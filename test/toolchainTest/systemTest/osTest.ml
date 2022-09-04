@@ -19,16 +19,16 @@ let assert_non_zero ~ctxt ?stdout:(stdout = None) ?stderr:(stderr = None) status
     fn ();
     assert_failure "expected Os.NonZero to be raised"
   with
-    | Os.NonZero(actual, output) ->
+    | Os.NonZero ex ->
       let _ = match stdout with
-        | Some stdout -> assert_stdout ~ctxt output stdout
+        | Some stdout -> assert_stdout ~ctxt ex.output stdout
         | None -> ""
       in
       let _ = match stderr with
-        | Some stderr -> assert_stderr ~ctxt output stderr
+        | Some stderr -> assert_stderr ~ctxt ex.output stderr
         | None -> ""
       in
-      assert_equal ~ctxt ~msg:"Exit Status" status actual
+      assert_equal ~ctxt ~msg:"Exit Status" status ex.status
     | exn -> raise exn
 
 (* Helpers *)
@@ -867,8 +867,8 @@ let test_process =
           let msg = "expected exception" in
           assert_failure msg
         with
-          | Os.NonZero(actual, _) ->
-            assert_equal ~ctxt expected actual
+          | Os.NonZero ex ->
+            assert_equal ~ctxt expected ex.status
           | _ ->
             let msg = "expected Os.NonZero" in
             assert_failure msg
@@ -879,19 +879,23 @@ let test_process =
           let msg = "expected exception" in
           assert_failure msg
         with
-          | Os.NonZero(_, []) ->
-            let msg = "expected output" in
-            assert_failure msg
-          | Os.NonZero(_, output) ->
-            let stdout = Os.stdout output in
-            let stderr = Os.stderr output in
-            let combined = Os.combined output in
+          | Os.NonZero ex ->
+            begin
+              match ex.output with
+                | [] ->
+                  let msg = "expected output" in
+                  assert_failure msg
+                | output ->
+                  let stdout = Os.stdout output in
+                  let stderr = Os.stderr output in
+                  let combined = Os.combined output in
 
-            let not_eq x y = not (x = y) in
+                  let not_eq x y = not (x = y) in
 
-            assert_equal ~ctxt 0 (Bytes.length stdout);
-            assert_equal ~ctxt ~cmp:not_eq 0 (Bytes.length stderr);
-            assert_equal ~ctxt ~cmp:Bytes.equal stderr combined;
+                  assert_equal ~ctxt 0 (Bytes.length stdout);
+                  assert_equal ~ctxt ~cmp:not_eq 0 (Bytes.length stderr);
+                  assert_equal ~ctxt ~cmp:Bytes.equal stderr combined;
+            end
           | _ ->
             let msg = "expected Os.NonZero" in
             assert_failure msg

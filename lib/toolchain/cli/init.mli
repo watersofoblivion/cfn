@@ -13,7 +13,7 @@ val impl : string -> string -> unit
   @since 1.0
 *)
 
-val cmd : unit Term.t * Term.info
+val cmd : unit Term.t * Cmd.info
 (**
   The [init] command.
 

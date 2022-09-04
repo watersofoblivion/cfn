@@ -162,7 +162,7 @@ let test_check_binding_mismatched_types _ =
     in
     Ir.binding patt annotated value
   in
-  let exn = Ir.MismatchedTypes (inferred, annotated) in
+  let exn = Ir.MismatchedTypes { inferred; annotated } in
   assert_raises exn (fun _ ->
     Ir.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))

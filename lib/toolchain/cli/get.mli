@@ -14,7 +14,7 @@ val impl : bool -> bool -> string list -> unit
   @since 1.0
 *)
 
-val cmd : unit Term.t * Term.info
+val cmd : unit Term.t * Cmd.info
 (**
   The [get] command.
 

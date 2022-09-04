@@ -175,10 +175,10 @@ let assert_limited : (Clos.ty -> bool) -> (Clos.ty -> 'a) -> (Clos.ty -> Clos.bu
   in
   List.iter assert_invalid invalid
 
-let assert_numeric = assert_limited Clos.ty_is_numeric (fun ty -> Clos.NotNumeric ty)
-let assert_integral = assert_limited Clos.ty_is_integral (fun ty -> Clos.NotIntegral ty)
-let assert_floating_point = assert_limited Clos.ty_is_floating_point (fun ty -> Clos.NotFloatingPoint ty)
-let assert_string = assert_limited (function Clos.TyString -> true | _ -> false) (fun ty -> Clos.UnsupportedConcatType ty)
+let assert_numeric = assert_limited Clos.ty_is_numeric (fun ty -> Clos.NotNumeric { ty })
+let assert_integral = assert_limited Clos.ty_is_integral (fun ty -> Clos.NotIntegral { ty })
+let assert_floating_point = assert_limited Clos.ty_is_floating_point (fun ty -> Clos.NotFloatingPoint { ty })
+let assert_string = assert_limited (function Clos.TyString -> true | _ -> false) (fun ty -> Clos.UnsupportedConcatType { ty })
 
 (* Tests *)
 
@@ -388,7 +388,7 @@ let test_builtin_promote ctxt =
             TypeTest.assert_ty_equal ~ctxt sup actual.sup;
           | actual -> builtin_not_equal ~ctxt expected actual
       else
-        let exn = Clos.UnsupportedPromotion (sub, sup) in
+        let exn = Clos.UnsupportedPromotion { sub; sup } in
         assert_raises exn (fun _ ->
           Clos.builtin_promote sub sup)
     ) ClosUtils.types

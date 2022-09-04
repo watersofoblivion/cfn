@@ -323,7 +323,7 @@ let test_check_expr_ident_unbound _ =
   let env = EnvTest.fresh () in
   let id = SymTest.fresh_sym () in
   let ident = fresh_expr_ident ~id () in
-  let exn = Annot.UnboundIdentifier id in
+  let exn = Annot.UnboundIdentifier { id } in
   assert_raises exn (fun _ ->
     Annot.check_expr env ident (fun _ ->
       assert_failure "Expected exception"))
@@ -353,7 +353,7 @@ let test_check_expr_builtin_var ctxt =
 let test_check_expr_builtin_invalid_arity _ =
   let env = EnvTest.fresh () in
   let fn = BuiltinTest.fresh_builtin_add ~ty:Annot.ty_int () in
-  let exn = Annot.InvalidArity (2, 0) in
+  let exn = Annot.InvalidArity { expected = 2; actual = 0 } in
   let expr = fresh_expr_builtin ~fn ~args:[] () in
   assert_raises exn (fun _ ->
     Annot.check_expr env expr (fun _ ->
@@ -368,7 +368,7 @@ let test_check_expr_builtin_fixed_mismatched_types _ =
     fresh_expr_long ();
   ] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Annot.MismatchedTypes (bad, Annot.ty_long, Annot.ty_int) in
+  let exn = Annot.MismatchedTypes { expr = bad; inferred = Annot.ty_long; annotated = Annot.ty_int } in
   assert_raises exn (fun _ ->
     Annot.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))
@@ -383,7 +383,7 @@ let test_check_expr_builtin_var_mismatched_types _ =
     fresh_expr_string ();
   ] in
   let expr = fresh_expr_builtin ~fn ~args () in
-  let exn = Annot.MismatchedTypes (bad, Annot.ty_long, Annot.ty_string) in
+  let exn = Annot.MismatchedTypes { expr = bad; inferred = Annot.ty_long; annotated = Annot.ty_string } in
   assert_raises exn (fun _ ->
     Annot.check_expr env expr (fun _ ->
       assert_failure "Expected exception"))
@@ -424,7 +424,7 @@ let test_check_binding_mismatched_types _ =
     let patt = PattTest.fresh_patt_var ~id () in
     Annot.binding patt annotated value
   in
-  let exn = Annot.MismatchedTypes (value, inferred, annotated) in
+  let exn = Annot.MismatchedTypes { expr = value; inferred; annotated } in
   assert_raises exn (fun _ ->
     Annot.check_binding env binding (fun _ ->
       assert_failure "Expected exception"))

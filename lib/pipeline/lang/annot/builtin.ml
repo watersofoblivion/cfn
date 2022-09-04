@@ -38,30 +38,30 @@ type builtin =
 
 (* Exceptions *)
 
-exception UnsupportedConcatType of Type.ty
-exception NotIntegral of Type.ty
-exception NotFloatingPoint of Type.ty
-exception NotNumeric of Type.ty
-exception UnsupportedPromotion of Type.ty * Type.ty
+exception UnsupportedConcatType of { ty: Type.ty }
+exception NotIntegral of { ty: Type.ty }
+exception NotFloatingPoint of { ty: Type.ty }
+exception NotNumeric of { ty: Type.ty }
+exception UnsupportedPromotion of { sub: Type.ty; sup: Type.ty }
 
 let unsupported_concat_type ty =
-  UnsupportedConcatType ty
+  UnsupportedConcatType { ty }
     |> raise
 
 let not_integral ty =
-  NotIntegral ty
+  NotIntegral { ty }
     |> raise
 
 let not_floating_point ty =
-  NotFloatingPoint ty
+  NotFloatingPoint { ty }
     |> raise
 
 let not_numeric ty =
-  NotNumeric ty
+  NotNumeric { ty }
     |> raise
 
 let unsupported_promotion sub sup =
-  UnsupportedPromotion (sub, sup)
+  UnsupportedPromotion { sub; sup }
     |> raise
 
 (* Constructors *)

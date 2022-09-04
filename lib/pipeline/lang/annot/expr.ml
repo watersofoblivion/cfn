@@ -78,21 +78,21 @@ and pp_binding fmt = function
 
 (* Exceptions *)
 
-exception UnboundIdentifier of Sym.t
-exception MismatchedTypes of expr * Type.ty * Type.ty
-exception InvalidArity of int * int
+exception UnboundIdentifier of { id: Sym.t }
+exception MismatchedTypes of { expr: expr; inferred: Type.ty; annotated: Type.ty }
+exception InvalidArity of { expected: int; actual: int }
 
 let unbound_identifier id =
-  UnboundIdentifier id
+  UnboundIdentifier { id }
     |> raise
 
 let mismatched_types expr inferred annotated =
-  MismatchedTypes (expr, inferred, annotated)
+  MismatchedTypes { expr; inferred; annotated }
     |> raise
 
 let invalid_arity expected lst =
   let actual = List.length lst in
-  InvalidArity (expected, actual)
+  InvalidArity { expected; actual }
     |> raise
 
 (* Expressions *)

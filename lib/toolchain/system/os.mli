@@ -228,6 +228,7 @@ val dump : out_channel -> out_channel -> output list -> unit
 exception NonZero of {
   status: int;         (** The process's exit status *)
   output: output list; (** The process's output *)
+}
 (**
   Raised when a process exits with a non-zero status code.
 

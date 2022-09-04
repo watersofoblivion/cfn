@@ -242,8 +242,7 @@ val fresh_builtin_promote : ?sub:Annot.ty -> ?sup:Annot.ty -> unit -> Annot.buil
 *)
 
 val fresh_builtin_concat : ?ty:Annot.ty -> unit -> Annot.builtin
-(** [fresh_builtin_concat ?ty ()] constructs a fresh built-in concatenation
-    function operating on values of type [ty].
+(**
   Construct a fresh concatenation built-in function.
 
   @param ty The type of the arguments.  Defaults to {!Annot.ty_string}.
@@ -260,7 +259,6 @@ val fresh_patt_ground : unit -> Annot.patt
 *)
 
 val fresh_patt_var : ?id:Sym.t -> unit -> Annot.patt
-(** [fresh_patt_var ?id ()] constructs a fresh variable pattern. *)
 (**
   Construct a fresh variable pattern.
 
