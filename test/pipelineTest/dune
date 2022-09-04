@@ -1,8 +1,21 @@
 (library
  (name pipelineTest)
  (modes native)
+ (modules
+  (:standard \ runner))
  (libraries
-    ounit2
-    commonTest
-    langTest
-    passTest))
+    ounit2))
+
+(test
+ (name runner)
+ (modes native)
+ (modules runner)
+ (action
+   (run %{test}
+     -testdata-dir %{workspace_root}/../../test
+     -ci true
+     -shards 8
+     -display false
+     -chooser failfirst))
+ (libraries
+    pipelineTest))

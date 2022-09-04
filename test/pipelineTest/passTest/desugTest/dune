@@ -1,9 +1,29 @@
 (library
  (name desugTest)
  (modes native)
+ (modules
+  (:standard \ runner))
  (libraries
+    str
     ounit2
+    common
+    syntax
+    annot
     desug
     commonTest
     syntaxTest
     annotTest))
+
+(test
+ (name runner)
+ (modes native)
+ (modules runner)
+ (action
+   (run %{test}
+     -testdata-dir %{workspace_root}/../../test
+     -ci true
+     -shards 8
+     -display false
+     -chooser failfirst))
+ (libraries
+   desugTest))

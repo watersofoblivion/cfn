@@ -2,7 +2,11 @@
 
 open OUnit2
 
-(** {2 Test Suite} *)
+(** {2 Unit Test Suite} *)
 
 val suite : test
-(** [suite] is the unit test suite. *)
+(**
+  The unit test suite.
+
+  @since 1.0
+*)

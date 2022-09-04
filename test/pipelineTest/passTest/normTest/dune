@@ -1,8 +1,28 @@
 (library
  (name normTest)
  (modes native)
+ (modules
+  (:standard \ runner))
  (libraries
     ounit2
+    common
+    annot
+    ir
     norm
     commonTest
+    annotTest
     irTest))
+
+(test
+ (name runner)
+ (modes native)
+ (modules runner)
+ (action
+   (run %{test}
+     -testdata-dir %{workspace_root}/../../test
+     -ci true
+     -shards 8
+     -display false
+     -chooser failfirst))
+ (libraries
+  normTest))

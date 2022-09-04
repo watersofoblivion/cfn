@@ -4,7 +4,7 @@ open OUnit2
 
 open Common
 
-(** {2 Test Suite} *)
+(** {2 Unit Test Suite} *)
 
 val suite : test
 (**

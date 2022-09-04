@@ -1,8 +1,8 @@
-(** {1 Lexer} *)
+(** {1 Parsing Tests} *)
 
 open OUnit2
 
-(** {2 Test Suite} *)
+(** {2 Unit Test Suite} *)
 
 val suite : test
 (**

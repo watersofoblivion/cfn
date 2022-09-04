@@ -1,8 +1,8 @@
 (** {1 Intermediate Representation Tests} *)
 
- open OUnit2
+open OUnit2
 
-(** {2 Test Suite} *)
+(** {2 Unit Test Suite} *)
 
 val suite : test
 (**

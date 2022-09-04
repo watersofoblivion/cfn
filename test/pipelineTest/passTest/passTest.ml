@@ -6,10 +6,4 @@ open OUnit2
 
 let suite =
   "Passes" >::: [
-    ParseTest.suite;
-    DesugTest.suite;
-    NormTest.suite;
-    MonomorphTest.suite;
-    ConvTest.suite;
-    CodegenTest.suite;
   ];

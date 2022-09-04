@@ -6,9 +6,4 @@ open OUnit2
 
 let suite =
   "Languages" >::: [
-    SyntaxTest.suite;
-    AnnotTest.suite;
-    IrTest.suite;
-    MonoTest.suite;
-    ClosTest.suite;
   ];

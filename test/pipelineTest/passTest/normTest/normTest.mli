@@ -1,8 +1,8 @@
-(** {1 A-Normalization Test} *)
+(** {1 A-Normalization Tests} *)
 
 open OUnit2
 
-(** {2 Test Suite} *)
+(** {2 Unit Test Suite} *)
 
 val suite : test
 (**

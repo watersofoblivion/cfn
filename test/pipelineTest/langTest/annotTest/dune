@@ -1,7 +1,23 @@
 (library
  (name annotTest)
  (modes native)
+ (modules
+  (:standard \ runner))
  (libraries
     ounit2
     annot
     commonTest))
+
+(test
+ (name runner)
+ (modes native)
+ (modules runner)
+ (action
+   (run %{test}
+     -testdata-dir %{workspace_root}/../../test
+     -ci true
+     -shards 8
+     -display false
+     -chooser failfirst))
+ (libraries
+    annotTest))

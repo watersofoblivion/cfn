@@ -7,6 +7,4 @@ open OUnit2
 let suite =
   "External Specifications" >::: [
     ParseTest.suite;
-    AwsSpecTest.suite;
-    CfnSpecTest.suite;
   ];

@@ -6,7 +6,4 @@ open OUnit2
 
 let suite =
   "Toolchain" >::: [
-    SourceTest.suite;
-    SystemTest.suite;
-    CliTest.suite;
   ];
