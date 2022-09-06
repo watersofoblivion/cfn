@@ -12,7 +12,7 @@ bug-reports: "https://github.com/watersofoblivion/cfn/issues"
 depends: [
   "ocaml"
   "dune" {>= "3.1"}
-  "menhir"
+  "menhir" {= 20211125}
   "odoc"
   "atdgen"
   "yojson"
