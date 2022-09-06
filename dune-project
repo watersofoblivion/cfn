@@ -23,7 +23,7 @@
  (depends
    ocaml
    dune
-   menhir
+   (menhir (= :20211125))
    odoc
    atdgen
    yojson

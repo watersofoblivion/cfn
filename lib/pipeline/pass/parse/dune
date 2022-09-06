@@ -1,5 +1,14 @@
 (menhir
-  (modules common tokens type op patt expr top import file)
+  (modules
+    common
+    tokens
+    type
+    op
+    patt
+    expr
+    top
+    import
+    file)
   (merge_into parser)
   (flags
     --strict
@@ -13,10 +22,10 @@
 (library
   (name parse)
   (modes native)
-  (instrumentation (backend bisect_ppx))
   (preprocess
     (pps sedlex.ppx))
   (libraries
+    str
     sedlex
     menhirLib
     syntax
