@@ -1,5 +1,6 @@
 (library
  (name convTest)
+ (public_name cfn++.pipelineTest.passTest.convTest)
  (modes native)
  (modules
   (:standard \ runner))

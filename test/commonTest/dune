@@ -1,5 +1,6 @@
 (library
  (name commonTest)
+ (public_name cfn++.commonTest)
  (modes native)
  (modules
   (:standard \ runner))

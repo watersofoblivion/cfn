@@ -2,7 +2,6 @@ open OUnit2
 
 let suite =
   "CFN++" >::: [
-    ExternalTest.suite;
   ]
 
 let _ =

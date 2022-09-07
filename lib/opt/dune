@@ -1,5 +1,6 @@
 (library
   (name opt)
+  (public_name cfn++.opt)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

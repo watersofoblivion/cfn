@@ -1,9 +1,9 @@
 (**
- {1 Git}
- *)
+ Git
+*)
 
 (**
- {2 Repositories}
+ {1 Repositories}
  *)
 
 type r
@@ -43,7 +43,7 @@ val default_branch : r -> string
 *)
 
 (**
- {2 Command}
+ {1 Command}
  *)
 
 val git : r -> string list -> (bytes -> 'a) -> 'a
@@ -59,7 +59,7 @@ val git : r -> string list -> (bytes -> 'a) -> 'a
 *)
 
 (**
- {2 Operations}
+ {1 Operations}
  *)
 
 val clone : Uri.t -> string -> r

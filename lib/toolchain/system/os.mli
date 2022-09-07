@@ -1,9 +1,9 @@
 (**
- {1 Operating System Helpers}
+ Operating System Helpers
  *)
 
 (**
- {2 Directory Handling}
+ {1 Directory Handling}
  *)
 
 val mkdir : string -> unit
@@ -89,7 +89,7 @@ val in_temp_dir : ('a -> 'b) -> 'a -> 'b
 *)
 
 (**
- {2 Atomic File Operations}
+ {1 Atomic File Operations}
  *)
 
 val read : (in_channel -> 'a) -> string -> 'a
@@ -133,7 +133,7 @@ val overwrite : (out_channel -> unit) -> int -> string -> unit
 *)
 
 (**
- {2 Filesystem Searching}
+ {1 Filesystem Searching}
  *)
 
 val which : string -> string
@@ -159,7 +159,7 @@ val find_in_path : string -> string -> string
 *)
 
 (**
- {2 Process Control}
+ {1 Process Control}
  *)
 
 type output

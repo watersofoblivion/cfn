@@ -4,7 +4,7 @@ open Format
 
 (* Syntax *)
 
-type file = File of { pkg: Import.pkg; imports: Import.import list; tops: Top.top list }
+type file = File of { pkg: Pkg.pkg; imports: Import.import list; tops: Top.top list }
 
 (* Constructors *)
 
@@ -25,7 +25,7 @@ let pp_tops = pp_list Top.pp_top "@ @ "
 
 let pp_file fmt = function
   | File file ->
-    fprintf fmt "@[<v>%a" Import.pp_pkg file.pkg;
+    fprintf fmt "@[<v>%a" Pkg.pp_pkg file.pkg;
     pp_imports fmt file.imports;
     pp_tops fmt file.tops;
     fprintf fmt "@]"

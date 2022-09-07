@@ -1,10 +1,14 @@
-(** {1 Abstract Syntax Tests} *)
+(**
+  Abstract Syntax Tests
+*)
 
 open OUnit2
 
 open Common
 
-(** {2 Unit Test Suite} *)
+(**
+  {1 Unit Test Suite}
+*)
 
 val suite : test
 (**
@@ -14,16 +18,18 @@ val suite : test
 *)
 
 (**
- * {2 Fixtures}
- *
- * Generate fresh, unique values for testing.  All fixtures use
- * {!CommonTest.LocTest.gen} to generate any locations and take a symbol
- * sequence to use for generating fresh names.  If the symbol sequence is not
- * given, the default sequence is used.  The sequence is also passed down to any
- * lower-level fixtures generated as part of a higher-level fixture.
- *)
+  {1 Fixtures}
 
-(** {3 Types} *)
+  Generate fresh, unique values for testing.  All fixtures use
+  {!CommonTest.LocTest.gen} to generate any locations and take a symbol
+  sequence to use for generating fresh names.  If the symbol sequence is not
+  given, the default sequence is used.  The sequence is also passed down to any
+  lower-level fixtures generated as part of a higher-level fixture.
+*)
+
+(**
+  {2 Types}
+*)
 
 val fresh_ty_constr : ?loc:Loc.t -> ?id:Sym.t -> unit -> Syntax.ty
 (**
@@ -35,9 +41,13 @@ val fresh_ty_constr : ?loc:Loc.t -> ?id:Sym.t -> unit -> Syntax.ty
   @since 1.0
 *)
 
-(** {3 Operators} *)
+(**
+  {2 Operators}
+*)
 
-(** {4 Unary} *)
+(**
+  {2 Unary}
+*)
 
 val fresh_un_neg : ?loc:Loc.t -> unit -> Syntax.un
 (**
@@ -66,7 +76,9 @@ val fresh_un_bit_not : ?loc:Loc.t -> unit -> Syntax.un
   @since 1.0
 *)
 
-(** {4 Binary} *)
+(**
+  {2 Binary}
+*)
 
 val fresh_bin_struct_eq : ?loc:Loc.t -> unit -> Syntax.bin
 (**
@@ -275,7 +287,9 @@ val fresh_bin_bit_xor : ?loc:Loc.t -> unit -> Syntax.bin
   @since 1.0
 *)
 
-(** {3 Patterns} *)
+(**
+  {2 Patterns}
+*)
 
 val fresh_patt_ground : ?loc:Loc.t -> unit -> Syntax.patt
 (**
@@ -296,7 +310,9 @@ val fresh_patt_var : ?loc:Loc.t -> ?id:Sym.t -> unit -> Syntax.patt
   @since 1.0
 *)
 
-(** {3 Runes} *)
+(**
+  {2 Runes}
+*)
 
 val fresh_rune_lit : ?loc:Loc.t -> ?value:char -> unit -> Syntax.rune
 (**
@@ -318,7 +334,9 @@ val fresh_rune_escape : ?loc:Loc.t -> ?value:int -> unit -> Syntax.rune
   @since 1.0
 *)
 
-(** {3 Strings} *)
+(**
+  {2 Strings}
+*)
 
 val fresh_str_lit : ?loc:Loc.t -> ?value:string -> unit -> Syntax.str
 (**
@@ -340,7 +358,9 @@ val fresh_str_escape : ?loc:Loc.t -> ?value:int -> unit -> Syntax.str
   @since 1.0
 *)
 
-(** {3 Expressions} *)
+(**
+  {2 Expressions}
+*)
 
 val fresh_expr_bool : ?loc:Loc.t -> ?value:bool -> unit -> Syntax.expr
 (**
@@ -457,7 +477,9 @@ val fresh_expr_let : ?loc:Loc.t -> ?binding:Syntax.binding -> ?scope:Syntax.expr
   @since 1.0
 *)
 
-(** {3 Bindings} *)
+(**
+  {2 Bindings}
+*)
 
 val fresh_value_binding : ?loc:Loc.t -> ?patt:Syntax.patt -> ?explicit:bool -> ?ty:Syntax.ty -> ?value:Syntax.expr -> unit -> Syntax.binding
 (**
@@ -472,7 +494,9 @@ val fresh_value_binding : ?loc:Loc.t -> ?patt:Syntax.patt -> ?explicit:bool -> ?
   @since 1.0
 *)
 
-(** {3 Top-Level Expressions} *)
+(**
+  {2 Top-Level Expressions}
+*)
 
 val fresh_top_let : ?loc:Loc.t -> ?binding:Syntax.binding -> unit -> Syntax.top
 (**
@@ -494,7 +518,9 @@ val fresh_top_val : ?loc:Loc.t -> ?binding:Syntax.binding -> unit -> Syntax.top
   @since 1.0
 *)
 
-(** {3 Imports} *)
+(**
+  {2 Imports}
+*)
 
 val fresh_name : ?loc:Loc.t -> ?seq:Sym.seq -> ?id:string -> unit -> Syntax.name
 (**
@@ -636,13 +662,15 @@ val fresh_pkg : ?loc:Loc.t -> ?id:Syntax.name -> unit -> Syntax.pkg
   @since 1.0
 *)
 
-(** {2 Utilities} *)
+(**
+  {1 Utilities}
+*)
 
 (**
- * {3 Location Stripping}
- *
- * Replaces all location information with {!CommonTest.LocTest.dummy}.  Useful
- * for normalizing parsed syntax with hand-constructed syntax in tests.
+  {2 Location Stripping}
+
+  Replaces all location information with {!CommonTest.LocTest.dummy}.  Useful
+  for normalizing parsed syntax with hand-constructed syntax in tests.
  *)
 
 val deloc_ty : Syntax.ty -> Syntax.ty
@@ -825,15 +853,17 @@ val deloc_file : Syntax.file -> Syntax.file
   @since 1.0
 *)
 
-(** {2 Assertions} *)
+(**
+  {1 Assertions}
+*)
 
 (**
- * {3 Equality}
- *
- * All equality assertions include location equality.  To normalize location
- * information, use the [deloc_...] family of functions.
- *
- * The test context passed in is passed down to all internal assertions.
+  {2 Equality}
+
+  All equality assertions include location equality.  To normalize location
+  information, use the [deloc_...] family of functions.
+
+  The test context passed in is passed down to all internal assertions.
  *)
 
 val assert_ty_equal : ctxt:test_ctxt -> Syntax.ty -> Syntax.ty -> unit

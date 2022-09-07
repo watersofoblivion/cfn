@@ -1,5 +1,6 @@
 (library
  (name normTest)
+ (public_name cfn++.pipelineTest.passTest.normTest)
  (modes native)
  (modules
   (:standard \ runner))

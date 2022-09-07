@@ -21,6 +21,7 @@
 
 (library
   (name cfnSpec)
+  (public_name cfn++.external.cfnSpec)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

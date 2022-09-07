@@ -1,5 +1,6 @@
 (library
   (name syntax)
+  (public_name cfn++.pipeline.lang.syntax)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

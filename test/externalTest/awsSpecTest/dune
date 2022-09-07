@@ -1,5 +1,6 @@
 (library
  (name awsSpecTest)
+ (public_name cfn++.externalTest.awsSpecTest)
  (modes native)
  (modules
   (:standard \ runner))

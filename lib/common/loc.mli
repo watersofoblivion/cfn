@@ -1,6 +1,6 @@
 (**
- * {1 Location Tracking}
- *)
+  Location Tracking
+*)
 
 type pos = private {
   line: int; (** Line *)

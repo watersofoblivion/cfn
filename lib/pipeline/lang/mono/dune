@@ -1,5 +1,6 @@
 (library
   (name mono)
+  (public_name cfn++.pipeline.lang.mono)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

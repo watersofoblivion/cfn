@@ -8,6 +8,7 @@
     expr
     top
     import
+    pkg
     file)
   (merge_into parser)
   (flags
@@ -21,6 +22,7 @@
 
 (library
   (name parse)
+  (public_name cfn++.pipeline.pass.parse)
   (modes native)
   (preprocess
     (pps sedlex.ppx))

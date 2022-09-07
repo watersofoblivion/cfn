@@ -6,3 +6,6 @@ include Atom
 include Expr
 include Term
 include Top
+include Import
+include Pkg
+include File

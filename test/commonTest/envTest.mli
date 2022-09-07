@@ -1,10 +1,14 @@
+(**
+  Environment
+*)
+
 open Common
 
 open OUnit2
 
 (**
- * {1 Environment}
- *)
+  {1 Test Suite}
+*)
 
 val suite : test
 (**
@@ -14,8 +18,8 @@ val suite : test
 *)
 
 (**
- * {2 Helpers}
- *)
+  {1 Helpers}
+*)
 
 val fresh : ?seq:Sym.seq -> unit -> 'a Env.t
 (**
@@ -28,8 +32,8 @@ val fresh : ?seq:Sym.seq -> unit -> 'a Env.t
 *)
 
 (**
- * {2 Assertions}
- *)
+  {1 Assertions}
+*)
 
 val assert_symbol_of : ctxt:test_ctxt -> string -> 'a Env.t -> Sym.t -> unit
 (**

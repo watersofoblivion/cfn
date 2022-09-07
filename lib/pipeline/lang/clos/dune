@@ -1,5 +1,6 @@
 (library
   (name clos)
+  (public_name cfn++.pipeline.lang.clos)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

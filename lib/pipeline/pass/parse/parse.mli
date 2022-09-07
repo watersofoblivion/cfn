@@ -1,10 +1,12 @@
-(** {1 Parser} *)
+(**
+  {1 Parser}
+*)
 
 open Common
 
 (**
- * {2 Lexers}
- *)
+  {1 Lexers}
+*)
 
 val lexbuf_from_string : string -> Sedlexing.lexbuf
 (** [lexbuf_from_string src] constructs a lexing buffer from the string [src]. *)
@@ -14,12 +16,12 @@ val lexbuf_from_file : string -> Sedlexing.lexbuf
     [path]. *)
 
 (**
- * {2 Entry Points}
- *
- * Each takes a path to a source file [path] and parses the file in the
- * environment [env].  The parsed value and a (possibly updated) environment are
- * passed to the continuation [kontinue].
- *)
+  {1 Entry Points}
+
+  Each takes a path to a source file [path] and parses the file in the
+  environment [env].  The parsed value and a (possibly updated) environment are
+  passed to the continuation [kontinue].
+*)
 
 val parse_package_only : string -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.file -> 'a) -> 'a
 (** [parse_package_only path env kontinue] parses the source file through the
@@ -33,17 +35,19 @@ val parse_file : string -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.file ->
 (** [parse_file path env kontinue] parses the source file. *)
 
 (**
- * {2 Test Parsers}
- *
- * These parsers are exposed purely for unit testing and should not be used
- * externally.
- *
- * Each takes a lexing buffer [lexbuf] and parses it in the environment [env].
- * The parsed value and a (possibly updated) environment are passed to the
- * continuation [kontinue].
- *)
+  {1 Test Parsers}
 
-(** {3 Types} *)
+  These parsers are exposed purely for unit testing and should not be used
+  externally.
+
+  Each takes a lexing buffer [lexbuf] and parses it in the environment [env].
+  The parsed value and a (possibly updated) environment are passed to the
+  continuation [kontinue].
+*)
+
+(**
+  {2 Types}
+*)
 
 val parse_annot : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.ty -> 'a) -> 'a
 (** [parse_annot lexbuf env kontinue] parses a type annotation. *)
@@ -51,7 +55,9 @@ val parse_annot : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syn
 val parse_ty : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.ty -> 'a) -> 'a
 (** [parse_ty lexbuf env kontinue] parses a type constructor. *)
 
-(** {3 Operators} *)
+(**
+  {2 Operators}
+*)
 
 val parse_un : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.un -> 'a) -> 'a
 (** [parse_un lexbuf env kontinue] parses a unary operator. *)
@@ -59,12 +65,16 @@ val parse_un : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax
 val parse_bin : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.bin -> 'a) -> 'a
 (** [parse_bin lexbuf env kontinue] parses a binary operator. *)
 
-(** {3 Patterns} *)
+(**
+  {2 Patterns}
+*)
 
 val parse_patt : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.patt -> 'a) -> 'a
 (** [parse_patt lexbuf env kontinue] parses a pattern. *)
 
-(** {3 Expressions} *)
+(**
+  {2 Expressions}
+*)
 
 val parse_rune : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.rune -> 'a) -> 'a
 (** [parse_rune lexbuf env kontinue] parses a rune literal value. *)
@@ -90,12 +100,16 @@ val parse_term : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Synt
 val parse_binding : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.binding -> 'a) -> 'a
 (** [parse_binding lexbuf env kontinue] parses a binding. *)
 
-(** {3 Top-Level Expressions} *)
+(**
+  {2 Top-Level Expressions}
+*)
 
 val parse_top : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.top -> 'a) -> 'a
 (** [parse_top lexbuf env kontinue] parses a top-level expression. *)
 
-(** {3 Imports} *)
+(**
+  {2 Imports}
+*)
 
 val parse_name : Sedlexing.lexbuf -> Syntax.ty Env.t -> (Syntax.ty Env.t -> Syntax.name -> 'a) -> 'a
 (** [parse_name lexbuf env kontinue] parses an import name. *)

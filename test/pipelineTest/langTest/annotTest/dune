@@ -1,5 +1,6 @@
 (library
  (name annotTest)
+ (public_name cfn++.pipelineTest.langTest.annotTest)
  (modes native)
  (modules
   (:standard \ runner))

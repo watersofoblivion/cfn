@@ -6,8 +6,6 @@ open Common
 
 (* Syntax *)
 
-type name = Name of { loc: Loc.t; id: Sym.t }
-
 type proto = Proto of { loc: Loc.t; proto: string }
 type host = Host of { loc: Loc.t; host: string }
 type hostpath = HostPath of { loc: Loc.t; segs: string list }
@@ -17,15 +15,11 @@ type src =
   | External of { loc: Loc.t; proto: proto option; host: host; path: hostpath option; version: version }
 type from = From of { loc: Loc.t; src: src }
 type pkgpath = PkgPath of { loc: Loc.t; path: Expr.str list }
-type alias = Alias of { loc: Loc.t; pkg: pkgpath; alias: name option }
+type alias = Alias of { loc: Loc.t; pkg: pkgpath; alias: Name.name option }
 type pkgs = Packages of { loc: Loc.t; pkgs: alias list }
 type import = Import of { loc: Loc.t; from: from option; pkgs: pkgs }
 
-type pkg = Package of { loc: Loc.t; id: name }
-
 (* Constructors *)
-
-let name loc id = Name { loc; id }
 
 let proto loc proto = Proto { loc; proto }
 let host loc host = Host { loc; host }
@@ -39,12 +33,7 @@ let alias loc pkg alias = Alias { loc; pkg; alias }
 let pkgs loc pkgs = Packages { loc; pkgs }
 let import loc from pkgs = Import { loc; from; pkgs }
 
-let pkg loc id = Package { loc; id }
-
 (* Location *)
-
-let loc_name = function
-  | Name name -> name.loc
 
 let loc_proto = function
   | Proto proto -> proto.loc
@@ -77,13 +66,7 @@ let loc_pkgs = function
 let loc_import = function
   | Import import -> import.loc
 
-let loc_pkg = function
-  | Package pkg -> pkg.loc
-
 (* Pretty Printing *)
-
-let pp_name fmt = function
-  | Name name -> fprintf fmt "%a" Sym.pp_id name.id
 
 let pp_proto fmt = function
   | Proto proto -> fprintf fmt "%s" proto.proto
@@ -121,7 +104,7 @@ let pp_pkgpath fmt = function
 
 let pp_alias fmt = function
   | Alias alias ->
-    let pp_alias = pp_print_option (fun fmt alias -> fprintf fmt "@[@ ->@ %a@]" pp_name alias) in
+    let pp_alias = pp_print_option (fun fmt alias -> fprintf fmt "@[@ ->@ %a@]" Name.pp_name alias) in
     fprintf fmt "@[%a%a@]" pp_pkgpath alias.pkg pp_alias alias.alias
 
 let pp_pkgs fmt = function
@@ -139,8 +122,3 @@ let pp_import fmt = function
     fprintf fmt "%aimport" pp_from import.from;
     pp_pkgs fmt import.pkgs;
     fprintf fmt "@]"
-
-(* Package Statment *)
-
-let pp_pkg fmt = function
-  | Package pkg -> fprintf fmt "package %a" pp_name pkg.id

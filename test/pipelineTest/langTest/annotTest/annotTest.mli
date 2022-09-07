@@ -1,10 +1,14 @@
-(** {1 Annotated Syntax Tests} *)
+(**
+  Annotated Syntax Tests
+*)
 
 open OUnit2
 
 open Common
 
-(** {2 Unit Test Suite} *)
+(**
+  {1 Unit Test Suite}
+*)
 
 val suite : test
 (**
@@ -13,7 +17,9 @@ val suite : test
   @since 1.0
 *)
 
-(** {2 Fixtures} *)
+(**
+  {1 Fixtures}
+*)
 
 val fresh_builtin_struct_eq : ?ty:Annot.ty -> unit -> Annot.builtin
 (**
@@ -268,13 +274,15 @@ val fresh_patt_var : ?id:Sym.t -> unit -> Annot.patt
   @since 1.0
 *)
 
-(** {2 Assertions} *)
+(**
+  {1 Assertions}
+*)
 
 (**
- * {3 Equality}
- *
- * The test context passed in is passed down to all internal assertions.
- *)
+  {2 Equality}
+
+  The test context passed in is passed down to all internal assertions.
+*)
 
 val assert_ty_equal : ctxt:test_ctxt -> Annot.ty -> Annot.ty -> unit
 (**

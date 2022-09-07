@@ -1,5 +1,6 @@
 (library
  (name cfnSpecTest)
+ (public_name cfn++.externalTest.cfnSpecTest)
  (modes native)
  (modules
   (:standard \ runner))

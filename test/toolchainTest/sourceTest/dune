@@ -1,5 +1,6 @@
 (library
  (name sourceTest)
+ (public_name cfn++.toolchainTest.sourceTest)
  (modes native)
  (modules
   (:standard \ runner))

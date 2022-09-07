@@ -1,5 +1,6 @@
 (library
  (name optTest)
+ (public_name cfn++.optTest)
  (modes native)
  (modules
   (:standard \ runner))

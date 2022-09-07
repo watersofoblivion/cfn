@@ -89,21 +89,12 @@
       make_optional from env (fun env from ->
         Syntax.import loc from pkgs
           |> kontinue env))
-
-  let make_pkg (start_pos, end_pos) id env kontinue =
-    let loc = Loc.loc start_pos end_pos in
-    id env (fun env id ->
-      Syntax.pkg loc id
-        |> kontinue env)
 %}
 
 /* Testing Entry Points */
 
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.name -> 'a) -> 'a> name_test
 %start name_test
-
-%type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.pkg -> 'a) -> 'a> pkg_test
-%start pkg_test
 
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.import -> 'a) -> 'a>  import_test
 %type <Syntax.ty Common.Env.t -> (Syntax.ty Common.Env.t -> Syntax.from -> 'a) -> 'a>    from_test
@@ -135,9 +126,6 @@
 
 name_test:
 | name = name; EOF { name }
-
-pkg_test:
-| pkg = pkg; EOF { pkg }
 
 import_test:
 | import = import; EOF { import }
@@ -176,11 +164,6 @@ local_test:
 
 %public name:
 | id = LIDENT { make_name $sloc id }
-
-/* Package Statement */
-
-%public pkg:
-| "package"; id = name { make_pkg $sloc id }
 
 /* Imports */
 

@@ -1,5 +1,6 @@
 (library
   (name pass)
+  (public_name cfn++.pipeline.pass)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

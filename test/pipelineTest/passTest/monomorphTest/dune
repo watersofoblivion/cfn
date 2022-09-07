@@ -1,5 +1,6 @@
 (library
  (name monomorphTest)
+ (public_name cfn++.pipelineTest.passTest.monomorphTest)
  (modes native)
  (modules
   (:standard \ runner))

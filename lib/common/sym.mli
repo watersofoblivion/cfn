@@ -1,12 +1,12 @@
+(**
+  Symbolization
+*)
+
 open Format
 
 (**
- * {1 Symbolization}
- *)
-
-(**
- * {2 Symbols}
- *)
+  {1 Symbols}
+*)
 
 type t
 (**
@@ -17,8 +17,8 @@ type t
 *)
 
 (**
- * {3 Operations}
- *)
+  {2 Operations}
+*)
 
 val sym : t -> int
 (**
@@ -40,8 +40,8 @@ val id : t -> string option
 *)
 
 (**
- * {2 Sequences}
- *)
+  {1 Sequences}
+*)
 
 type seq
 (**
@@ -51,8 +51,8 @@ type seq
 *)
 
 (**
- * {3 Constructors}
- *)
+  {2 Constructors}
+*)
 
 val seq : unit -> seq
 (**
@@ -63,8 +63,8 @@ val seq : unit -> seq
 *)
 
 (**
- * {3 Operations}
- *)
+  {2 Operations}
+*)
 
 val gen : ?id:string -> seq -> t
 (**
@@ -78,12 +78,12 @@ val gen : ?id:string -> seq -> t
 *)
 
 (**
- * {2 Operations}
- *)
+  {1 Operations}
+*)
 
 (**
- * {3 Equality}
- *)
+  {2 Equality}
+*)
 
 val equal : t -> t -> bool
 (**
@@ -96,8 +96,8 @@ val equal : t -> t -> bool
 *)
 
 (**
- * {3 Pretty-Printing}
- *)
+  {2 Pretty-Printing}
+*)
 
 val pp : formatter -> t -> unit
 (**
@@ -124,8 +124,8 @@ val pp_id : formatter -> t -> unit
 *)
 
 (**
- * {2 Symbol Tables}
- *)
+  {1 Symbol Tables}
+*)
 
 type 'a tbl
 (**
@@ -135,8 +135,8 @@ type 'a tbl
 *)
 
 (**
- * {3 Constructors}
- *)
+  {2 Constructors}
+*)
 
 val tbl : 'a tbl
 (**
@@ -146,8 +146,8 @@ val tbl : 'a tbl
 *)
 
 (**
- * {3 Operations}
- *)
+  {2 Operations}
+*)
 
 val bind : t -> 'a -> 'a tbl -> ('a tbl -> 'b) -> 'b
 (**

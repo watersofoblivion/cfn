@@ -1,5 +1,6 @@
 (library
  (name codegenTest)
+ (public_name cfn++.pipelineTest.passTest.codegenTest)
  (modes native)
  (modules
   (:standard \ runner))

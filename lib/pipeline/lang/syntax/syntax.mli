@@ -1,10 +1,14 @@
-(** {1 Abstract Syntax} *)
+(**
+  Abstract Syntax
+*)
 
 open Format
 
 open Common
 
-(** {2 Syntax} *)
+(**
+  {1 Syntax}
+*)
 
 type ty = private
   | TyConstr of {
@@ -388,9 +392,13 @@ type file = private
   @since 1.0
 *)
 
-(** {2 Constructors} *)
+(**
+  {1 Constructors}
+*)
 
-(** {3 Types} *)
+(**
+  {2 Types}
+*)
 
 val ty_constr : Loc.t -> Sym.t -> ty
 (**
@@ -402,9 +410,13 @@ val ty_constr : Loc.t -> Sym.t -> ty
   @since 1.0
 *)
 
-(** {3 Operators} *)
+(**
+  {2 Operators}
+*)
 
-(** {4 Unary} *)
+(**
+  {3 Unary}
+*)
 
 val un_neg : Loc.t -> un
 (**
@@ -433,7 +445,9 @@ val un_bit_not : Loc.t -> un
   @since 1.0
 *)
 
-(** {4 Binary} *)
+(**
+  {3 Binary}
+*)
 
 val bin_struct_eq : Loc.t -> bin
 (**
@@ -642,7 +656,9 @@ val bin_bit_xor : Loc.t -> bin
   @since 1.0
 *)
 
-(** {3 Patterns} *)
+(**
+  {2 Patterns}
+*)
 
 val patt_ground : Loc.t -> patt
 (**
@@ -663,7 +679,9 @@ val patt_var : Loc.t -> Sym.t -> patt
   @since 1.0
 *)
 
-(** {3 Runes} *)
+(**
+  {2 Runes}
+*)
 
 val rune_lit : Loc.t -> Uchar.t -> rune
 (**
@@ -684,7 +702,9 @@ val rune_escape : Loc.t -> string -> rune
   @return An escaped rune literal
 *)
 
-(** {3 Strings} *)
+(**
+  {2 Strings}
+*)
 
 val str_lit : Loc.t -> string -> str
 (**
@@ -706,7 +726,9 @@ val str_escape : Loc.t -> string -> str
   @since 1.0
 *)
 
-(** {3 Expressions} *)
+(**
+  {2 Expressions}
+*)
 
 val expr_bool : Loc.t -> bool -> expr
 (**
@@ -823,7 +845,9 @@ val expr_let : Loc.t -> binding -> expr -> expr
   @since 1.0
 *)
 
-(** {3 Bindings} *)
+(**
+  {2 Bindings}
+*)
 
 val value_binding : Loc.t -> patt -> ty option -> expr -> binding
 (**
@@ -837,7 +861,9 @@ val value_binding : Loc.t -> patt -> ty option -> expr -> binding
   @since 1.0
 *)
 
-(** {3 Top-Level Bindings} *)
+(**
+  {2 Top-Level Bindings}
+*)
 
 val top_let : Loc.t -> binding -> top
 (**
@@ -859,7 +885,9 @@ val top_val : Loc.t -> binding -> top
   @since 1.0
 *)
 
-(** {3 Imports} *)
+(**
+  {2 Imports}
+*)
 
 val name : Loc.t -> Sym.t -> name
 (**
@@ -984,7 +1012,9 @@ val import : Loc.t -> from option -> pkgs -> import
   @since 1.0
 *)
 
-(** {3 Package Statement} *)
+(**
+  {2 Package Statement}
+*)
 
 val pkg : Loc.t -> name -> pkg
 (**
@@ -996,7 +1026,9 @@ val pkg : Loc.t -> name -> pkg
   @since 1.0
 *)
 
-(** {3 Source Files} *)
+(**
+  {2 Source Files}
+*)
 
 val file : pkg -> import list -> top list -> file
 (**
@@ -1009,9 +1041,13 @@ val file : pkg -> import list -> top list -> file
   @since 1.0
 *)
 
-(** {2 Operations} *)
+(**
+  {1 Operations}
+*)
 
-(** {3 Locations} *)
+(**
+  {2 Locations}
+*)
 
 val loc_ty : ty -> Loc.t
 (**
@@ -1202,7 +1238,9 @@ val loc_pkg : pkg -> Loc.t
   @since 1.0
 *)
 
-(** {3 Type Equality} *)
+(**
+  {2 Type Equality}
+*)
 
 val ty_equal : ty -> ty -> bool
 (**
@@ -1215,7 +1253,9 @@ val ty_equal : ty -> ty -> bool
   @since 1.0
 *)
 
-(** {3 Pretty Printing} *)
+(**
+  {2 Pretty Printing}
+*)
 
 val pp_ty : formatter -> ty -> unit
 (**

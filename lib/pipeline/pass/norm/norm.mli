@@ -1,8 +1,12 @@
-(** {1 A-Normalization} *)
+(**
+  A-Normalization
+*)
 
 open Common
 
-(** {2 Exceptions} *)
+(**
+  {1 Exceptions}
+*)
 
 exception UnboundIdentifier of {
   id: Sym.t; (* The unbound identifier *)
@@ -23,7 +27,9 @@ exception MismatchedTypes of {
   @since 1.0
 *)
 
-(** {2 Normalization} *)
+(**
+  {1 Normalization}
+*)
 
 val norm_ty : Ir.ty Env.t -> Annot.ty -> (Ir.ty -> 'a) -> 'a
 (**

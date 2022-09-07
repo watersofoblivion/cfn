@@ -1,5 +1,6 @@
 (library
  (name externalTest)
+ (public_name cfn++.externalTest)
  (modes native)
  (modules
   (:standard \ runner))

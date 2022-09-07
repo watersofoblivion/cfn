@@ -1,10 +1,8 @@
-open Format
-
 (**
- {1 Semantic Versions}
-
  A helper library for handling {{: https://semver.org/} semantic versions}.
  *)
+
+open Format
 
 type t
 (**

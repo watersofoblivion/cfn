@@ -1,6 +1,6 @@
 (**
- * {1 Environment}
- *)
+  Environment
+*)
 
 type 'a t
 (**
@@ -10,8 +10,8 @@ type 'a t
 *)
 
 (**
- * {2 Constructors}
- *)
+  {1 Constructors}
+*)
 
 val env : Sym.seq -> 'a t
 (**
@@ -23,12 +23,12 @@ val env : Sym.seq -> 'a t
 *)
 
 (**
- * {2 Operations}
- *)
+  {1 Operations}
+*)
 
 (**
- * {3 Alpha-Renaming}
- *)
+  {2 Alpha-Renaming}
+*)
 
 val rename : string -> 'a t -> ('a t -> Sym.t -> 'b) -> 'b
 (**
@@ -67,8 +67,8 @@ val constr_of : string -> 'a t -> ('a t -> Sym.t -> 'b) -> 'b
 *)
 
 (**
- * {3 Type Binding}
- *)
+  {2 Type Binding}
+*)
 
 val bind : Sym.t -> 'a -> 'a t -> ('a t -> 'b) -> 'b
 (**

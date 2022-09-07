@@ -1,8 +1,12 @@
-(** {1 Closure Converted Syntax Tests} *)
+(**
+  Closure Converted Syntax Tests
+*)
 
 open OUnit2
 
-(** {2 Unit Test Suite} *)
+(**
+  {1 Unit Test Suite}
+*)
 
 val suite : test
 (**
@@ -11,13 +15,15 @@ val suite : test
   @since 1.0
 *)
 
-(** {2 Assertions} *)
+(**
+  {1 Assertions}
+*)
 
 (**
- * {3 Equality}
- *
- * The test context passed in is passed down to all internal assertions.
- *)
+  {2 Equality}
+
+  The test context passed in is passed down to all internal assertions.
+*)
 
 val assert_ty_equal : ctxt:test_ctxt -> Clos.ty -> Clos.ty -> unit
 (**

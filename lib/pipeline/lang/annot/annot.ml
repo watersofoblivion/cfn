@@ -4,3 +4,5 @@ include Patt
 include Expr
 include Top
 include Import
+include Pkg
+include File

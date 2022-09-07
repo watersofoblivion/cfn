@@ -29,7 +29,7 @@ module type Asm = sig
     val compress : llvalue
     (** [compress] is a function which compresses a block of data into the hash.
         The generated function takes a pointer to an initialized value of type
-        {!state_t} and a byte array of size {!block_len} and returns void. *)
+        {!state_t} and a byte array of size [block_len] and returns void. *)
 
     val finalize : llvalue
     (** [finalize] is a function which finalizes a hash and computes the digest.

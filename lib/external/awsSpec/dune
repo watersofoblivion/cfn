@@ -100,6 +100,7 @@
 
 (library
   (name awsSpec)
+  (public_name cfn++.external.awsSpec)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

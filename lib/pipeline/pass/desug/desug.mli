@@ -1,8 +1,12 @@
-(** {1 Desugaring} *)
+(**
+  Desugaring
+*)
 
 open Common
 
-(** {2 Exceptions} *)
+(**
+  {1 Exceptions}
+*)
 
 exception InvalidNumberFormat of {
   loc:    Loc.t;  (** Location of the lexeme *)
@@ -72,7 +76,9 @@ exception InvalidCodepoint of {
   @since 1.0
 *)
 
-(** {2 Desugaring} *)
+(**
+  {1 Desugaring}
+*)
 
 val desug_ty : Annot.ty Env.t -> Syntax.ty -> (Annot.ty -> 'a) -> 'a
 (**

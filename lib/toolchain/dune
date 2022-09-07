@@ -1,5 +1,6 @@
 (library
   (name toolchain)
+  (public_name cfn++.toolchain)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

@@ -1,10 +1,14 @@
+(**
+  Pretty Printing
+*)
+
 open Format
 
 open OUnit2
 
 (**
- * {1 Pretty Printing}
- *)
+  {1 Test Suite}
+*)
 
 val suite : test
 (**
@@ -14,8 +18,8 @@ val suite : test
 *)
 
 (**
- * {2 Assertions}
- *)
+  {1 Assertions}
+*)
 
 val assert_pp : ctxt:test_ctxt -> (formatter -> 'a -> unit) -> string list -> 'a -> unit
 (**

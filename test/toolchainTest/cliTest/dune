@@ -1,5 +1,6 @@
 (library
  (name cliTest)
+ (public_name cfn++.toolchainTest.cliTest)
  (modes native)
  (modules
   (:standard \ runner))

@@ -1,5 +1,6 @@
 (library
  (name desugTest)
+ (public_name cfn++.pipelineTest.passTest.desugTest)
  (modes native)
  (modules
   (:standard \ runner))

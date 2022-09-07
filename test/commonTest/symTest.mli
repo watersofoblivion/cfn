@@ -1,10 +1,14 @@
+(**
+  Symbolization
+*)
+
 open OUnit2
 
 open Common
 
 (**
- * {1 Symbolization}
- *)
+  {1 Test Suite}
+*)
 
 val suite : test
 (**
@@ -14,8 +18,8 @@ val suite : test
 *)
 
 (**
- * {2 Helpers}
- *)
+  {1 Helpers}
+*)
 
 val fresh_sym : ?id:string -> unit -> Sym.t
 (**
@@ -27,8 +31,8 @@ val fresh_sym : ?id:string -> unit -> Sym.t
 *)
 
 (**
- * {2 Assertions}
- *)
+  {1 Assertions}
+*)
 
 val assert_sym_equal : ctxt:test_ctxt -> Sym.t -> Sym.t -> unit
 (**

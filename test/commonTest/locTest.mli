@@ -1,10 +1,14 @@
+(**
+  Location Tracking
+*)
+
 open OUnit2
 
 open Common
 
 (**
- * {1 Location Tracking}
- *)
+  {1 Test Suite}
+*)
 
 val suite : test
 (**
@@ -14,8 +18,8 @@ val suite : test
 *)
 
 (**
- * {2 Utilities}
- *)
+  {1 Utilities}
+*)
 
 val dummy : Loc.t
 (**
@@ -102,8 +106,8 @@ val shift : (int * int * int) -> Loc.t -> Loc.t
 *)
 
 (**
- * {2 Assertions}
- *)
+  {1 Assertions}
+*)
 
 val assert_loc_equal : ctxt:test_ctxt -> Loc.t -> Loc.t -> unit
 (**

@@ -1,5 +1,6 @@
 (library
  (name irTest)
+ (public_name cfn++.pipelineTest.langTest.irTest)
  (modes native)
  (modules
   (:standard \ runner))

@@ -1,6 +1,10 @@
-(** {1 UTF-8 Runes and Strings} *)
+(**
+  UTF-8 Runes and Strings
+*)
 
-(** {2 Runes} *)
+(**
+  {1 Runes}
+*)
 
 val single_quote : Uchar.t
 (**
@@ -18,7 +22,9 @@ val to_string : Uchar.t -> string
   @since 1.0
 *)
 
-(** {2 Strings} *)
+(**
+  {1 Strings}
+*)
 
 val length : string -> int
 (**

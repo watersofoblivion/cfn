@@ -1,13 +1,11 @@
 (**
- * {1 Docker}
- *
- * A wrapper around the Docker CLI.  This is used when building binaries for
- * deployment to AWS, since the output executables must run on Amazon Linux 2.
- *)
+  A wrapper around the Docker CLI.  This is used when building binaries for
+  deployment to AWS, since the output executables must run on Amazon Linux 2.
+*)
 
 (**
- * {2 Command}
- *)
+  {1 Command}
+*)
 
 val docker : string list -> (bytes -> 'a) -> 'a
 (**
@@ -21,8 +19,8 @@ val docker : string list -> (bytes -> 'a) -> 'a
 *)
 
 (**
- * {2 Images}
- *)
+  {1 Images}
+*)
 
 type i
 (**
@@ -81,8 +79,8 @@ val img_tag : i -> string
 *)
 
 (**
- * {2 Operations}
- *)
+  {1 Operations}
+*)
 
 type mount
 (**

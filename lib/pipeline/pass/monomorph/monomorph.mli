@@ -1,8 +1,12 @@
-(** {1 Monomorhpization} *)
+(**
+  Monomorhpization
+*)
 
 open Common
 
-(** {2 Exceptions} *)
+(**
+  {1 Exceptions}
+*)
 
 exception UnboundIdentifier of {
   id: Sym.t; (** The unbound identifier *)
@@ -34,7 +38,9 @@ exception InvalidArity of {
   @since 1.0
 *)
 
-(** {2 Monomorhpization} *)
+(**
+  {1 Monomorhpization}
+*)
 
 val mono_ty : Mono.ty Env.t -> Ir.ty -> (Mono.ty -> 'a) -> 'a
 (**

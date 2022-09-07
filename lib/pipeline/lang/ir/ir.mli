@@ -1,10 +1,14 @@
-(** {1 Administrative Normal Form Intermediate Representation} *)
+(**
+  Administrative Normal Form Intermediate Representation
+*)
 
 open Format
 
 open Common
 
-(** {2 Syntax} *)
+(**
+  {1 Syntax}
+*)
 
 type ty = private
   | TyBool   (** Boolean *)
@@ -213,9 +217,13 @@ type top = private
   @since 1.0
 *)
 
-(** {2 Constructors} *)
+(**
+  {1 Constructors}
+*)
 
-(** {3 Types} *)
+(**
+  {2 Types}
+*)
 
 val ty_bool : ty
 (**
@@ -266,9 +274,13 @@ val ty_string : ty
   @since 1.0
 *)
 
-(** {3 Built-In Functions} *)
+(**
+  {2 Built-In Functions}
+*)
 
-(** {4 Arities} *)
+(**
+  {3 Arities}
+*)
 
 val arity_fixed : ty list -> ty -> arity
 (**
@@ -290,7 +302,9 @@ val arity_var : ty -> ty -> arity
   @since 1.0
 *)
 
-(** {4 Exceptions} *)
+(**
+  {3 Exceptions}
+*)
 
 exception NotIntegral of  {
   ty: ty; (** The non-integral type *)
@@ -333,13 +347,15 @@ exception UnsupportedConcatType of {
   ty: ty; (** The type of values that cannot be concatenated. *)
 }
 (**
-  Raised when the arguments to a {!Concat} built-in function are not of one of
-  the supported types.
+  Raised when the arguments to a {!BuiltinConcat} built-in function are not of
+  one of the supported types.
 
   @since 1.0
 *)
 
-(** {4 Constructors} *)
+(**
+  {3 Constructors}
+*)
 
 val builtin_struct_eq : ty -> builtin
 (**
@@ -616,7 +632,9 @@ val builtin_concat : ty -> builtin
   @since 1.0
 *)
 
-(** {3 Patterns} *)
+(**
+  {2 Patterns}
+*)
 
 val patt_ground : patt
 (**
@@ -634,7 +652,9 @@ val patt_var : Sym.t -> patt
   @since 1.0
 *)
 
-(** {3 Atoms} *)
+(**
+  {2 Atoms}
+*)
 
 val atom_bool : bool -> atom
 (**
@@ -709,7 +729,9 @@ val atom_ident : Sym.t -> atom
   @since 1.0
 *)
 
-(** {3 Expressions} *)
+(**
+  {2 Expressions}
+*)
 
 val expr_builtin : builtin -> atom list -> expr
 (**
@@ -730,7 +752,9 @@ val expr_atom : atom -> expr
   @since 1.0
 *)
 
-(** {3 Bindings} *)
+(**
+  {2 Bindings}
+*)
 
 val binding : patt -> ty -> expr -> binding
 (**
@@ -743,7 +767,9 @@ val binding : patt -> ty -> expr -> binding
   @since 1.0
 *)
 
-(** {3 Terms} *)
+(**
+  {2 Terms}
+*)
 
 val term_let : binding -> term -> term
 (**
@@ -764,7 +790,9 @@ val term_expr : expr -> term
   @since 1.0
 *)
 
-(** {3 Top-Level Bindings} *)
+(**
+  {2 Top-Level Bindings}
+*)
 
 val top_let : binding -> top
 (**
@@ -775,9 +803,13 @@ val top_let : binding -> top
   @since 1.0
 *)
 
-(** {2 Operations} *)
+(**
+  {1 Operations}
+*)
 
-(** {3 Types} *)
+(**
+  {2 Types}
+*)
 
 val ty_equal : ty -> ty -> bool
 (**
@@ -825,7 +857,9 @@ val ty_is_logical : ty -> bool
   @since 1.0
 *)
 
-(** {3 Pretty Printing} *)
+(**
+  {2 Pretty Printing}
+*)
 
 val pp_ty : formatter -> ty -> unit
 (**
@@ -908,7 +942,9 @@ val pp_top : formatter -> top -> unit
   @since 1.0
 *)
 
-(** {3 Type Checking} *)
+(**
+  {2 Type Checking}
+*)
 
 exception UnboundIdentifier of {
   id: Sym.t; (** The unbound identifier *)

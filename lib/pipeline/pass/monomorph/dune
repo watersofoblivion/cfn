@@ -1,5 +1,6 @@
 (library
   (name monomorph)
+  (public_name cfn++.pipeline.pass.monomorph)
   (modes native)
   (instrumentation (backend bisect_ppx))
   (libraries

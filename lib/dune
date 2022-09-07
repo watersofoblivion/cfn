@@ -1,5 +1,6 @@
 (library
  (name cfnpp)
+ (public_name cfn++)
  (modes native)
  (instrumentation (backend bisect_ppx))
  (libraries

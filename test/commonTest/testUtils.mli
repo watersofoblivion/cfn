@@ -1,10 +1,11 @@
+(**
+  Testing Utilities
+*)
+
 open Format
 
 open OUnit2
 
-(**
- * {1 Testing Utilities}
- *)
 
 val not_equal : ctxt:test_ctxt -> string -> (formatter -> 'a -> unit) -> 'a -> 'a -> unit
 (**

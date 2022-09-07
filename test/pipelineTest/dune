@@ -1,5 +1,6 @@
 (library
  (name pipelineTest)
+ (public_name cfn++.pipelineTest)
  (modes native)
  (modules
   (:standard \ runner))

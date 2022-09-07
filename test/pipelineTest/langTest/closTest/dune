@@ -1,5 +1,6 @@
 (library
  (name closTest)
+ (public_name cfn++.pipelineTest.langTest.closTest)
  (modes native)
  (modules
   (:standard \ runner))

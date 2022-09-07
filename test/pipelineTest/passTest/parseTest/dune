@@ -1,5 +1,6 @@
 (library
  (name parseTest)
+ (public_name cfn++.pipelineTest.passTest.parseTest)
  (modes native)
  (modules
   (:standard \ runner))

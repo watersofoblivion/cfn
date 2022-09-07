@@ -1,8 +1,12 @@
-(** {1 Closure Conversion} *)
+(**
+  Closure Conversion
+*)
 
 open Common
 
-(** {2 Exceptions} *)
+(**
+  {1 Exceptions}
+*)
 
 exception UnboundIdentifier of {
   id: Sym.t; (** The unbound identifier *)
@@ -34,7 +38,9 @@ exception InvalidArity of {
   @since 1.0
 *)
 
-(** {2 Closure Conversion} *)
+(**
+  {1 Closure Conversion}
+*)
 
 val convert_ty : Clos.ty Env.t -> Mono.ty -> (Clos.ty -> 'a) -> 'a
 (**

@@ -1,8 +1,9 @@
+(**
+  Pretty-Printing Helpers
+*)
+
 open Format
 
-(**
- * {1 Pretty-Printing Helpers}
- *)
 
 val ground : formatter -> unit
 (**

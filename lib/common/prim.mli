@@ -1,6 +1,10 @@
-(** {1 Primitives} *)
+(**
+  Primitives
+*)
 
-(** {2 Names} *)
+(**
+  {1 Names}
+*)
 
 val id_bool : string
 (**
