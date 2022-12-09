@@ -19,12 +19,14 @@ First, install the core dependencies needed to build the compiler itself: the [O
 
 ```bash
 brew install ocaml opam
+sudo apt install ocaml opam
 ```
 
 CFN++ generates code with [LLVM](https://llvm.org).  This needs to be installed after OCaml so that the OCaml language bindings are generated correctly.
 
 ```bash
 brew install llvm
+sudo apt install llvm
 ```
 
 Next, initialize Opam and bring it up to date.
